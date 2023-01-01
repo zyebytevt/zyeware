@@ -1,0 +1,40 @@
+// ZyeWare default 3D unshaded shader.
+
+opengl:vertex `
+#version 420 core
+
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec2 aUV;
+layout(location = 3) in vec4 aColor;
+
+out vec2 vUV;
+out vec4 vColor;
+
+layout(std140, binding = 0, shared, row_major) uniform Matrices
+{
+    mat4 viewProjection;
+    mat4 model;
+} iMatrices;
+
+
+void main()
+{
+    vUV = aUV;
+    vColor = aColor;
+    gl_Position = iMatrices.viewProjection * iMatrices.model * vec4(aPosition, 1.0);
+}
+`
+
+opengl:fragment `
+#version 420 core
+			
+layout(location = 0) out vec4 oColor;
+
+in vec2 vUV;
+in vec4 vColor;
+
+void main()
+{
+    oColor = vColor;
+}
+`

@@ -1,0 +1,6 @@
+// ZyeWare - Default material
+
+shader "core://shaders/3d/default.shd"
+
+parameter:shineDamper type="float" value="1"
+parameter:reflectivity type="float" value="0"

@@ -1,0 +1,46 @@
+// ZyeWare - Default Skybox shader
+// Very similar to the unshaded shader, but only using the
+// view-projection matrix and a samplerCube.
+
+opengl:vertex `
+#version 420 core
+
+// ===== ATTRIBUTES =====
+layout(location = 0) in vec3 aPosition;
+
+// ===== INPUTS =====
+layout(std140, binding = 0, shared, row_major) uniform Matrices
+{
+    mat4 mvp;
+} iMatrices;
+
+// ===== VARIANTS =====
+out vec3 vUV;
+
+// ===== FUNCTIONS =====
+void main()
+{
+    vUV = aPosition;
+    vec4 pos = iMatrices.mvp * vec4(aPosition, 1.0);
+    gl_Position = pos.xyzz;
+}
+`
+
+opengl:fragment `
+#version 420 core
+
+// ===== OUTPUTS =====
+layout(location = 0) out vec4 oColor;
+
+// ===== INPUTS =====
+layout(binding = 0) uniform samplerCube iTexture;
+
+// ===== VARIANTS =====
+in vec3 vUV;
+
+// ===== FUNCTIONS =====
+void main()
+{
+    oColor = texture(iTexture, vUV);
+}
+`
