@@ -4,8 +4,7 @@ import core.stdc.stdio : SEEK_CUR, SEEK_SET, SEEK_END;
 import std.exception : enforce;
 import std.string : format;
 
-import riverd.sndfile.types;
-import riverd.sndfile.statfun;
+import audioformats;
 
 import zyeware.common;
 
@@ -14,12 +13,8 @@ import zyeware.common;
 struct AudioDecoder
 {
 protected:
-    static SF_VIRTUAL_IO sVFSIO;
-
     VFSFile mFile;
-
-    SF_INFO mAudioInfo;
-    SNDFILE* mAudioFile;
+    AudioStream stream;
 
 public:
     @disable this();
@@ -30,27 +25,27 @@ public:
     /// Throws: `AudioException` if the file could not be opened for decoding.
     this(VFSFile file)
     {
-        if (!sVFSIO.get_filelen)
-        {
-            sVFSIO.get_filelen = &sfvioGetFilelen;
-            sVFSIO.seek = &sfvioSeek;
-            sVFSIO.read = &sfvioRead;
-            sVFSIO.write = &sfvioWrite;
-            sVFSIO.tell = &sfvioTell;
-        }
-
         mFile = file;
 
         //assert(sf_format_check(&mAudioInfo), "SF_INFO struct is invalid.");
+        try {
+            stream.openFromMemory(mFile.readAll!(ubyte[])());
+        } catch (AudioFormatsException ex) {
 
-        mAudioFile = sf_open_virtual(&sVFSIO, SFM_READ, &mAudioInfo, cast(void*) mFile);
-        enforce!AudioException(mAudioFile, format!"Failed to open '%s' for audio decoding."(file.fullname));
+            // Copy manually managed memory to GC memory and rethrow exception.
+            string errMsg = ex.msg.dup;
+            string errFile = ex.file.dup;
+            size_t errLine = ex.line;
+            destroyAudioFormatException(ex);
+
+            throw new Exception(errMsg, null, errFile, errLine);
+        }
     }
 
     ~this()
     {
-        if (mAudioFile)
-            sf_close(mAudioFile);
+        if (stream.isOpenForReading())
+            destroy!false(stream);
     }
 
     /// Tries to read samples into the supplied buffer.
@@ -58,17 +53,13 @@ public:
     /// Params:
     ///     buffer = The buffer to read into. It's length should be a multiple of the channel count.
     /// Returns: The amount of samples actually read.
-    size_t read(T)(ref T[] buffer) nothrow
-        in (buffer.length % mAudioInfo.channels == 0, "Buffer length is not a multiple of channel count.")
+    size_t read(T)(ref T[] buffer)
+        in (buffer.length % stream.getNumChannels() == 0, "Buffer length is not a multiple of channel count.")
     {
-        static if (is(T == short))
-            return sf_read_short(mAudioFile, buffer.ptr, buffer.length);
-        else static if (is(T == int))
-            return sf_read_int(mAudioFile, buffer.ptr, buffer.length);
-        else static if (is(T == float))
-            return sf_read_float(mAudioFile, buffer.ptr, buffer.length);
+        static if (is(T == float))
+            return stream.readSamplesFloat(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()));
         else static if (is(T == double))
-            return sf_read_double(mAudioFile, buffer.ptr, buffer.length);
+            return stream.readSamplesDouble(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()));
         else
             static assert(false, "'read' cannot process type " ~ T.stringof);
     }
@@ -78,72 +69,31 @@ public:
     /// Params:
     ///     samples = The amount of samples to read.
     /// Returns: A newly allocated buffer with the read samples.
-    T[] read(T)(size_t samples) nothrow
+    T[] read(T)(size_t samples)
     {
         auto buffer = new T[samples * mAudioInfo.channels];
-        sf_count_t sampleCount = read!T(buffer);
+        static if (is(T == float))
+            return stream.readSamplesFloat(buffer.ptr, buffer.length/stream.getNumChannels());
+        else static if (is(T == double))
+            return stream.readSamplesDouble(buffer.ptr, buffer.length/stream.getNumChannels());
+        else
+            static assert(false, "'read' cannot process type " ~ T.stringof);
 
         return buffer[0 .. sampleCount];
     }
 
-    size_t sampleCount() pure nothrow
+    size_t sampleCount() 
     {
-        return mAudioInfo.frames;
+        return stream.getLengthInFrames();
     }
 
-    size_t sampleRate() pure nothrow
+    size_t sampleRate() 
     {
-        return mAudioInfo.samplerate;
+        return cast(size_t)stream.getSamplerate();
     }
 
-    size_t channels() pure nothrow
+    size_t channels() 
     {
-        return mAudioInfo.channels;
+        return stream.getNumChannels();
     }
-}
-
-private extern(C):
-
-sf_count_t sfvioGetFilelen(void* userData) nothrow @trusted
-{
-    auto file = cast(VFSFile) userData;
-
-    return cast(sf_count_t) file.size;
-}
-
-sf_count_t sfvioSeek(sf_count_t offset, int whence, void* userData) @trusted
-{
-    auto file = cast(VFSFile) userData;
-
-    VFSFile.Seek vfsWhence;
-    final switch (whence)
-    {
-        case SEEK_CUR: vfsWhence = VFSFile.Seek.current; break;
-        case SEEK_SET: vfsWhence = VFSFile.Seek.set; break;
-        case SEEK_END: vfsWhence = VFSFile.Seek.end; break;
-    }
-
-    file.seek(offset, vfsWhence);
-    return cast(sf_count_t) file.tell();
-}
-
-sf_count_t sfvioRead(void* ptr, sf_count_t count, void* userData) @trusted
-{
-    auto file = cast(VFSFile) userData;
-
-    return cast(sf_count_t) file.read(ptr, ubyte.sizeof, count);
-}
-
-sf_count_t sfvioWrite(const void* ptr, sf_count_t count, void* userData) @trusted
-{
-    auto file = cast(VFSFile) userData;
-
-    return cast(sf_count_t) file.write(ptr, ubyte.sizeof, count);
-}
-
-sf_count_t sfvioTell(void* userData) nothrow @trusted
-{
-    auto file = cast(VFSFile) userData;
-
-    return cast(sf_count_t) file.tell();
 }
