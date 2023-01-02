@@ -17,58 +17,117 @@ struct RenderAPI
 private static:
     bool[RenderFlag] sFlagValues;
 
-    extern(C) static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-        const(char)* message, void* userParam) nothrow
+    version (Windows)
     {
-        glGetError();
-
-        string typeName;
-        LogLevel logLevel;
-
-        switch (type)
+        extern(Windows) static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+            const(char)* message, void* userParam) nothrow
         {
-            case GL_DEBUG_TYPE_ERROR:
-                typeName = "Error";
-                break;
-            
-            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-                typeName = "Deprecated Behavior";
-                break;
-            
-            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-                typeName = "Undefined Behavior";
-                break;
+            glGetError();
 
-            case GL_DEBUG_TYPE_PERFORMANCE:
-                typeName = "Performance";
-                break;
+            string typeName;
+            LogLevel logLevel;
 
-            case GL_DEBUG_TYPE_OTHER:
-            default:
-                return;
+            switch (type)
+            {
+                case GL_DEBUG_TYPE_ERROR:
+                    typeName = "Error";
+                    break;
+                
+                case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                    typeName = "Deprecated Behavior";
+                    break;
+                
+                case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                    typeName = "Undefined Behavior";
+                    break;
+
+                case GL_DEBUG_TYPE_PERFORMANCE:
+                    typeName = "Performance";
+                    break;
+
+                case GL_DEBUG_TYPE_OTHER:
+                default:
+                    return;
+            }
+
+            switch (severity)
+            {
+                case GL_DEBUG_SEVERITY_LOW:
+                    logLevel = LogLevel.info;
+                    break;
+
+                case GL_DEBUG_SEVERITY_MEDIUM:
+                    logLevel = LogLevel.warning;
+                    break;
+
+                case GL_DEBUG_SEVERITY_HIGH:
+                    logLevel = LogLevel.error;
+                    break;
+
+                default:
+                    logLevel = LogLevel.debug_;
+                    break;
+            }
+
+            Logger.core.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
         }
-
-        switch (severity)
-        {
-            case GL_DEBUG_SEVERITY_LOW:
-                logLevel = LogLevel.info;
-                break;
-
-            case GL_DEBUG_SEVERITY_MEDIUM:
-                logLevel = LogLevel.warning;
-                break;
-
-            case GL_DEBUG_SEVERITY_HIGH:
-                logLevel = LogLevel.error;
-                break;
-
-            default:
-                logLevel = LogLevel.debug_;
-                break;
-        }
-
-        Logger.core.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
     }
+    else
+    {
+        extern(C) static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+            const(char)* message, void* userParam) nothrow
+        {
+            glGetError();
+
+            string typeName;
+            LogLevel logLevel;
+
+            switch (type)
+            {
+                case GL_DEBUG_TYPE_ERROR:
+                    typeName = "Error";
+                    break;
+                
+                case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                    typeName = "Deprecated Behavior";
+                    break;
+                
+                case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                    typeName = "Undefined Behavior";
+                    break;
+
+                case GL_DEBUG_TYPE_PERFORMANCE:
+                    typeName = "Performance";
+                    break;
+
+                case GL_DEBUG_TYPE_OTHER:
+                default:
+                    return;
+            }
+
+            switch (severity)
+            {
+                case GL_DEBUG_SEVERITY_LOW:
+                    logLevel = LogLevel.info;
+                    break;
+
+                case GL_DEBUG_SEVERITY_MEDIUM:
+                    logLevel = LogLevel.warning;
+                    break;
+
+                case GL_DEBUG_SEVERITY_HIGH:
+                    logLevel = LogLevel.error;
+                    break;
+
+                default:
+                    logLevel = LogLevel.debug_;
+                    break;
+            }
+
+            Logger.core.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
+        }
+    }
+    
 
 package(zyeware) static:
     void initialize() nothrow

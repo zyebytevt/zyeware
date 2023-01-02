@@ -227,7 +227,7 @@ public:
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL vertex buffer!");
 
         glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        glNamedBufferStorage(mBufferID, size, null, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
+        glBufferStorage(GL_ARRAY_BUFFER, size, null, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
         
         mLayout = layout;
         mLength = size;
@@ -240,7 +240,7 @@ public:
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL vertex buffer!");
 
         glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        glNamedBufferStorage(mBufferID, data.length, data.ptr, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
+        glBufferStorage(GL_ARRAY_BUFFER, data.length, data.ptr, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLayout = layout;
         mLength = data.length;
@@ -261,7 +261,8 @@ public:
         in (data.length <= mLength, "Too much data for buffer size.")
         in (mDynamic, "Data buffer is not set as dynamic.")
     {   
-        glNamedBufferSubData(mBufferID, cast(GLintptr) 0, data.length, data.ptr);
+        glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
+        glBufferSubData(GL_ARRAY_BUFFER, cast(GLintptr) 0, data.length, data.ptr);
     }
 
     size_t length() const nothrow
@@ -296,7 +297,7 @@ public:
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL index buffer!");
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        glNamedBufferStorage(mBufferID, size, null, dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
+        glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, size, null, dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLength = size;
         mDynamic = dynamic;
@@ -308,7 +309,7 @@ public:
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL index buffer!");
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        glNamedBufferStorage(mBufferID, indices.length * uint.sizeof, indices.ptr,
+        glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, indices.ptr,
             dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLength = indices.length;
@@ -329,7 +330,8 @@ public:
         in (indices.length <= mLength, "Too much data for buffer size.")
         in (mDynamic, "Index buffer is not set as dynamic.")
     {   
-        glNamedBufferSubData(mBufferID, cast(GLintptr) 0, indices.length * uint.sizeof, indices.ptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, cast(GLintptr) 0, indices.length * uint.sizeof, indices.ptr);
     }
 
     size_t length() const nothrow
@@ -378,7 +380,7 @@ public:
         parseLayout(layout);
 
         glBindBuffer(GL_UNIFORM_BUFFER, mBufferID);
-        glNamedBufferData(mBufferID, mLength, null, GL_DYNAMIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, mLength, null, GL_DYNAMIC_DRAW);
     }
 
     ~this()
@@ -399,7 +401,8 @@ public:
     void setData(size_t offset, in void[] data) nothrow
         in (offset < mLength, "Offset beyond buffer length.")
     {
-        glNamedBufferSubData(mBufferID, offset, data.length, data.ptr);
+        glBindBuffer(GL_UNIFORM_BUFFER, mBufferID);
+        glBufferSubData(GL_UNIFORM_BUFFER, offset, data.length, data.ptr);
     }
 
     size_t length() const nothrow
