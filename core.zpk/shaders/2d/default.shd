@@ -39,7 +39,7 @@ opengl:fragment `
 layout(location = 0) out vec4 oColor;
 
 // ===== INPUTS =====
-layout(binding = 0) uniform sampler2D iTextures[32];
+layout(binding = 0) uniform sampler2D iTextures[8];
 
 // ===== VARIANTS =====
 in vec4 vColor;

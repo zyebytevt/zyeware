@@ -23,7 +23,7 @@ configuration "sdl-opengl" {
 	dependency "bindbc-openal" version="~>1.0.0"
 
 	sourcePaths "platform/opengl" "platform/openal"
-	versions "GL_41" "SDL_204" "GL_KHR_debug"
+	versions "GL_42" "SDL_204" "GL_KHR_debug"
 }
 
 configuration "unittest" {

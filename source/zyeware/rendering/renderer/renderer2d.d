@@ -65,7 +65,7 @@ package(zyeware) static:
     /// Initializes 2D rendering.
     void initialize()
     {
-        sBatchTextures = new Rebindable!(const Texture2D)[RenderAPI.getCapability(RenderCapability.maxTextureSlots)];
+        sBatchTextures = new Rebindable!(const Texture2D)[8];
 
         sMatrixData = new ConstantBuffer(BufferLayout([
             BufferElement("viewProjection", BufferElement.Type.mat4)
