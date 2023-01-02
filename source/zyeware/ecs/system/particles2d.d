@@ -18,7 +18,8 @@ protected:
         {
             immutable Vector2f position = transform.globalPosition + Vector2f(ZyeWare.random.getRange(emitter.region.min.x, emitter.region.max.x),
                 ZyeWare.random.getRange(emitter.region.min.y, emitter.region.max.y));
-            mParticles.create(emitter.typeId, position, emitter.number);
+            
+            mParticles.emit(emitter.typeId, position, emitter.number);
         }
 
         mParticles.tick(frameTime);

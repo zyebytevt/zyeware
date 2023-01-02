@@ -36,7 +36,7 @@ public:
         mParticles.remove(id);
     }
 
-    void create(ParticleRegistrationID id, Vector2f position, size_t amount)
+    void emit(ParticleRegistrationID id, Vector2f position, size_t amount)
     {
         ParticleContainer* particles = id in mParticles;
         enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(id));
@@ -93,7 +93,7 @@ public:
                 particles.freeIndices.insertBack(idx);
 
                 if (particles.type.typeOnDeath > ParticleRegistrationID.init)
-                    create(particles.type.typeOnDeath, particles.positions[idx], 1);
+                    emit(particles.type.typeOnDeath, particles.positions[idx], 1);
             }
         }
     }

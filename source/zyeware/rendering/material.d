@@ -5,7 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.material;
 
-import std.variant : Algebraic, visit;
+//import std.variant : Algebraic, visit;
+import std.sumtype : SumType, match;
 //import std.sumtype;
 import std.string : format, startsWith;
 import std.exception : enforce;
@@ -41,7 +42,7 @@ protected:
     Parameter[string] mParameters;
 
 public:
-    alias Parameter = Algebraic!(void[], int, int[], float, Vector2f, Vector3f, Vector4f, Matrix4f);
+    alias Parameter = SumType!(void[], int, int[], float, Vector2f, Vector3f, Vector4f, Matrix4f);
 
     this(Shader shader)
         in (shader, "Shader cannot be null.")
@@ -145,15 +146,15 @@ public:
 
                 immutable size_t offset = bindBuffer.getEntryOffset(entry);
 
-                (*parameter).visit!(
+                (*parameter).match!(
                     (void[] x) => bindBuffer.setData(offset, x),
                     (int x) => bindBuffer.setData(offset, [x]),
-                    (int[] x) => bindBuffer.setData(offset, x),
+                    //(int[] x) => bindBuffer.setData(offset, x),
                     (float x) => bindBuffer.setData(offset, [x]),
                     (Vector2f x) => bindBuffer.setData(offset, x.vector),
                     (Vector3f x) => bindBuffer.setData(offset, x.vector),
                     (Vector4f x) => bindBuffer.setData(offset, x.vector),
-                    (Matrix4f x) => bindBuffer.setData(offset, x.matrix),
+                    //(Matrix4f x) => bindBuffer.setData(offset, x.matrix),
                 );
             }
 
@@ -290,15 +291,15 @@ public:
             BufferElement[] bufferElements;
             foreach (string name; paramOrder)
             {
-                bufferElements ~= parsedParams[name].visit!(
+                bufferElements ~= parsedParams[name].match!(
                     (void[] x) => BufferElement(name, BufferElement.Type.none, cast(uint) x.length),
                     (int x) => BufferElement(name, BufferElement.Type.int_),
-                    (int[] x) => BufferElement(name, BufferElement.Type.int_, cast(uint) x.length),
+                    //(int[] x) => BufferElement(name, BufferElement.Type.int_, cast(uint) x.length),
                     (float x) => BufferElement(name, BufferElement.Type.float_),
                     (Vector2f x) => BufferElement(name, BufferElement.Type.vec2),
                     (Vector3f x) => BufferElement(name, BufferElement.Type.vec3),
                     (Vector4f x) => BufferElement(name, BufferElement.Type.vec4),
-                    (Matrix4f x) => BufferElement(name, BufferElement.Type.mat4),
+                    //(Matrix4f x) => BufferElement(name, BufferElement.Type.mat4),
                 );
             }
 

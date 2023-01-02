@@ -8,3 +8,4 @@ bin/
 *.lst
 *.a
 .vscode
+dub.selections.json

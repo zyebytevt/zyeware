@@ -8,6 +8,8 @@ module zyeware.core.application;
 import core.memory : GC;
 import std.exception : enforce, collectException;
 import std.algorithm : min;
+import std.typecons : Nullable;
+import std.uuid : UUID, sha1UUID;
 
 public import zyeware.core.gamestate;
 import zyeware.common;
@@ -217,6 +219,24 @@ public:
 
         mFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
         recalculateFramebufferArea();
+    }
+
+    UUID uuid() pure const nothrow
+    {
+        return sha1UUID(typeid(this).name);
+    }
+
+    Vector2f cursorPosition() const nothrow
+    {
+        Vector2f winCurPos = mWindow.cursorPosition;
+        
+        float fbActualWidth = mFramebufferArea.max.x - mFramebufferArea.min.x;
+        float fbActualHeight = mFramebufferArea.max.y - mFramebufferArea.min.y;
+
+        float x = ((winCurPos.x - mFramebufferArea.min.x) / fbActualWidth) * mFramebuffer.properties.size.x;
+        float y = ((winCurPos.y - mFramebufferArea.min.y) / fbActualHeight) * mFramebuffer.properties.size.y;
+
+        return Vector2f(x, y);
     }
 }
 

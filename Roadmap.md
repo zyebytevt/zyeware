@@ -31,9 +31,13 @@ A lot of stuff has already been done before this file has been started.
     This is important, we're facing memory leaks here!
     Use https://code.dlang.org/packages/dlib
 
-[ ] Finish Particles
-[ ] Work on UI
+[ ] Finish Particles (ECS?)
+[ ] Work on (G)UI
 [ ] Replace Algebraic with SumType
+[ ] Make buildable on Windows
+[ ] Take a look at inmath
+[ ] Localization improvements (i18n-d)?
+
 [ ] Implement texture atlases in 3D meshes
 [ ] Add CLI (like Angular)
 [ ] Update docstrings, add header to all source files

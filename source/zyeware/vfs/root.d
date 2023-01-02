@@ -12,7 +12,7 @@ import std.typecons : Tuple;
 import std.range : empty;
 import std.string : fromStringz, format;
 import std.file : mkdirRecurse;
-import std.path : dirSeparator;
+import std.path : buildNormalizedPath;
 
 import zyeware.common;
 import zyeware.vfs;
@@ -70,20 +70,19 @@ private static:
                     homedir = getpwuid(getuid()).pw_dir;
             }
 
-            string configDir = homedir.fromStringz.idup ~ "/.config/" ~ userDirName;
-            mkdirRecurse(configDir);
-
-            return new VFSDiskDirectory(userDirVFSPath, userDirVFSPath, configDir);
+            // TODO: Where are configuration files located on different Posix platforms?
+            string configDir = buildNormalizedPath(homedir.fromStringz.idup, ".local/share/zyeware/", userDirName);
         }
         else version (Windows)
         {
-            string configDir = getenv("APPDATA").fromStringz.idup ~ dirSeparator ~ userDirName;
-            mkdirRecurse(configDir);
-
-            return new VFSDiskDirectory(userDirVFSPath, userDirVFSPath, configDir);
+            string configDir = buildNormalizedPath(getenv("APPDATA").fromStringz.idup, "zyeware/", userDirName);            
         }
         else
             static assert(false, "VFS: Cannot compile for this operating system");
+
+        mkdirRecurse(configDir);
+
+        return new VFSDiskDirectory(userDirVFSPath, userDirVFSPath, configDir);
     }
 
 package(zyeware) static:
@@ -94,10 +93,7 @@ package(zyeware) static:
 
         sProtocols["core"] = loadPackage("core.zpk", "core://");
         sProtocols["res"] = new VFSCombinedDirectory("res://", "res://", []);
-
-        // TODO: Create user save directory again
-        //Logger.core.log(LogLevel.info, "%s", ZyeWare.application.classinfo.name);
-        // sProtocols["user"] = createUserDir(myName);
+        sProtocols["user"] = createUserDir(ZyeWare.application.uuid.toString());
     }
 
     void cleanup() nothrow

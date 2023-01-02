@@ -1,5 +1,5 @@
 name "zyeware"
-description "General purpose game engine."
+description "Simple, general purpose 2D and 3D game engine."
 authors "ZyeByte"
 copyright "Copyright © 2022, ZyeByte"
 license "proprietary"

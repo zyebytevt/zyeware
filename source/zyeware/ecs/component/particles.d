@@ -4,8 +4,7 @@ import zyeware.common;
 import zyeware.ecs;
 import zyeware.rendering;
 
-@component
-struct ParticleEmitter2DComponent
+@component struct ParticleEmitter2DComponent
 {
     ParticleRegistrationID typeId;
     Flag!"emitting" emitting;

@@ -41,6 +41,15 @@ enum LogLevel
     trace
 }
 
+private immutable dstring[] levelNames = [
+    "Fatal",
+    "Error",
+    "Warning",
+    "Info",
+    "Debug",
+    "Trace"
+];
+
 final class Logger
 {
 private:
@@ -152,6 +161,24 @@ public:
     abstract void flush() ;
 }
 
+class FileLogSink : LogSink
+{
+private:
+    File mFile;
+
+public:
+    this(File file)
+    {
+        mFile = file;
+    }
+
+    override void log(LogData data)
+    {
+        mFile.writeln(format!"[ %-8s | %-6s | %-7s ] %s"(data.time, data.loggerName,
+            levelNames[data.level - 1], data.message));
+    }
+}
+
 class TerminalLogSink : LogSink
 {
 private:
@@ -170,19 +197,10 @@ public:
             Color.gray
         ];
         
-        static immutable dstring[] levelNames = [
-            "Fatal",
-            "Error",
-            "Warning",
-            "Info",
-            "Debug",
-            "Trace"
-        ];
-
         Foreground(Color.white);
 
         mTerm.writeln(
-            Foreground(Color.white), format!"[ %-8s ] [ %-6s ] [ "(data.time, data.loggerName),
+            Foreground(Color.white), format!"[ %-8s | %-6s | "(data.time, data.loggerName),
             
             Foreground(levelColors[data.level - 1]), format!"%-7s"(levelNames[data.level - 1]),
             Foreground(Color.reset), " ] ", data.message
