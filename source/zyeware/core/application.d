@@ -175,6 +175,14 @@ public:
         }
     }
 
+    void resize(Vector2i size)
+    {
+        if (!mWindow.isMaximized && !mWindow.isMinimized)
+            mWindow.size = Vector2ui(size);
+        
+        framebufferSize = Vector2ui(size);
+    }
+
     /// The frame rate the application should target to hold. This is not a guarantee.
     uint targetFramerate() pure const nothrow
     {

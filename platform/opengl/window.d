@@ -9,7 +9,7 @@ import core.stdc.string : memcpy;
 
 import std.string : fromStringz, toStringz, format;
 import std.exception : enforce;
-import std.typecons : scoped;
+import std.typecons : scoped, Rebindable;
 import std.math : isClose;
 
 import bindbc.sdl;
@@ -27,6 +27,8 @@ protected:
     string mTitle;
     Vector2ui mSize;
     Vector2i mPosition;
+    Rebindable!(const Image) mIcon;
+    SDL_Surface* mIconSurface;
     bool mVSync;
     bool mIsCursorCaptured;
 
@@ -148,6 +150,9 @@ public:
             cast(int) properties.size.x, cast(int) properties.size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         enforce!GraphicsException(mHandle, format!"Failed to create SDL Window: %s!"(SDL_GetError().fromStringz));
 
+        if (properties.icon)
+            icon = properties.icon;
+
         // TODO: Possibly split context up into separate file.
         mGLContext = SDL_GL_CreateContext(mHandle);
         enforce!GraphicsException(mGLContext, format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
@@ -186,6 +191,9 @@ public:
     {
         SDL_DestroyWindow(mHandle);
         SDL_GL_DeleteContext(mGLContext);
+
+        if (mIconSurface)
+            SDL_FreeSurface(mIconSurface);
 
         if (--sWindowCount == 0)
             SDL_Quit();
@@ -468,5 +476,49 @@ public:
 
             Logger.core.log(LogLevel.warning, "Failed to release mouse: %s.", SDL_GetError().fromStringz);
         }
+    }
+
+    bool isMaximized() nothrow
+    {
+        return (SDL_GetWindowFlags(mHandle) & SDL_WINDOW_MAXIMIZED) != 0;
+    }
+
+    void isMaximized(bool value) nothrow
+    {
+        if (value)
+            SDL_MaximizeWindow(mHandle);
+        else if (isMaximized)
+            SDL_RestoreWindow(mHandle);
+    }
+
+    bool isMinimized() nothrow
+    {
+        return (SDL_GetWindowFlags(mHandle) & SDL_WINDOW_MINIMIZED) != 0;
+    }
+
+    void isMinimized(bool value) nothrow
+    {
+        if (value)
+            SDL_MinimizeWindow(mHandle);
+        else if (isMinimized)
+            SDL_RestoreWindow(mHandle);
+    }
+
+    const(Image) icon() const nothrow
+    {
+        return mIcon;
+    }
+
+    void icon(const Image value)
+    {
+        import platform.opengl.utils;
+
+        if (mIconSurface)
+            SDL_FreeSurface(mIconSurface);
+
+        mIconSurface = createSurfaceFromImage(value);
+        mIcon = value;
+
+        SDL_SetWindowIcon(mHandle, mIconSurface);
     }
 }

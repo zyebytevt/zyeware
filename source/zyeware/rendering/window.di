@@ -35,4 +35,13 @@ class Window
 
     bool isCursorCaptured() const nothrow;
     void isCursorCaptured(bool value) nothrow;
+
+    bool isMaximized() nothrow;
+    void isMaximized(bool value) nothrow;
+
+    bool isMinimized() nothrow;
+    void isMinimized(bool value) nothrow;
+
+    const(Image) icon() const nothrow;
+    void icon(const Image value);
 }

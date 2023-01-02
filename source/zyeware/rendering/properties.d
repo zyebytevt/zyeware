@@ -7,6 +7,7 @@ struct WindowProperties
 {
     string title = "ZyeWare Engine";
     Vector2ui size = Vector2ui(1280, 720);
+    Image icon;
 }
 
 struct FramebufferProperties

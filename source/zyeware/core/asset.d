@@ -38,14 +38,20 @@ struct AssetManager
     @disable this(this);
 
 private static:
+    struct AssetUID
+    {
+        string typeMangle;
+        string path;
+    }
+
     alias LoadFunction = Tuple!(Object function(string), "callback", bool, "cache");
 
     LoadFunction[string] sLoaders;
-    WeakReference!Object[string] sCache;
+    WeakReference!Object[AssetUID] sCache;
 
-    Object getFromCache(T)(string path) nothrow
+    Object getFromCache(AssetUID uid) nothrow
     {
-        auto weakref = sCache.get(T.mangleof ~ path, null).assumeWontThrow;
+        auto weakref = sCache.get(uid, null).assumeWontThrow;
         if (weakref && weakref.alive)
             return weakref.target;
         
@@ -93,8 +99,10 @@ public static:
         LoadFunction* loader = T.mangleof in sLoaders;
         enforce!CoreException(loader, format!"'%s' was not registered as an asset."(T.stringof));
 
+        auto uid = AssetUID(T.mangleof, path);
+
         // Check if we have it cached, and if so, if it's still alive
-        Object asset = getFromCache!T(path);
+        Object asset = getFromCache(uid);
         if (asset)
             return cast(T) asset;
 
@@ -103,7 +111,7 @@ public static:
         assert(asset, format!"Loader for '%s' returned null!"(T.stringof));
 
         if (loader.cache)
-            sCache[T.mangleof ~ path] = weakReference(asset);
+            sCache[uid] = weakReference(asset);
 
         return cast(T) asset;
     }
@@ -142,7 +150,7 @@ public static:
         if (isAsset!T)
         in (path, "Path cannot be null.")
     {
-        auto weakref = sCache.get(T.mangleof ~ path, null).assumeWontThrow;
+        auto weakref = sCache.get(AssetUID(T.mangleof, path), null).assumeWontThrow;
         return weakref && weakref.alive;
     }
 
@@ -161,12 +169,12 @@ public static:
     {
         size_t cleaned;
 
-        foreach (string key; sCache.keys)
+        foreach (AssetUID key; sCache.keys)
         {
             if (!sCache[key].alive)
             {
                 sCache.remove(key).assumeWontThrow;
-                Logger.core.log(LogLevel.trace, "Uncaching '%s'...", key);
+                Logger.core.log(LogLevel.trace, "Uncaching '%s'...", key.path);
                 ++cleaned;
             }
         }

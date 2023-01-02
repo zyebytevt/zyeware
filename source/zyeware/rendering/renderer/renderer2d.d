@@ -37,7 +37,8 @@ private static:
     bool sOldCullingValue;
 
     Shader sDefaultShader;
-    BufferGroup sBatchBuffer;
+    BufferGroup[] sBatchBuffers;
+    size_t sActiveBatchBufferIndex;
     ConstantBuffer sMatrixData;
 
     QuadVertex[maxVerticesPerBatch] sBatchVertices;
@@ -70,17 +71,22 @@ package(zyeware) static:
             BufferElement("viewProjection", BufferElement.Type.mat4)
         ]));
 
-        sBatchBuffer = new BufferGroup();
+        for (size_t i; i < 2; ++i)
+        {
+            auto batchBuffer = new BufferGroup();
 
-        sBatchBuffer.dataBuffer = new DataBuffer(maxVerticesPerBatch * QuadVertex.sizeof, BufferLayout([
-            BufferElement("aPosition", BufferElement.Type.vec4),
-            BufferElement("aColor", BufferElement.Type.vec4),
-            BufferElement("aUV", BufferElement.Type.vec2),
-            BufferElement("aTexIndex", BufferElement.Type.float_)
-        ]), Yes.dynamic);
+            batchBuffer.dataBuffer = new DataBuffer(maxVerticesPerBatch * QuadVertex.sizeof, BufferLayout([
+                BufferElement("aPosition", BufferElement.Type.vec4),
+                BufferElement("aColor", BufferElement.Type.vec4),
+                BufferElement("aUV", BufferElement.Type.vec2),
+                BufferElement("aTexIndex", BufferElement.Type.float_)
+            ]), Yes.dynamic);
 
-        sBatchBuffer.indexBuffer = new IndexBuffer(maxIndicesPerBatch * uint.sizeof, Yes.dynamic);
+            batchBuffer.indexBuffer = new IndexBuffer(maxIndicesPerBatch * uint.sizeof, Yes.dynamic);
 
+            sBatchBuffers ~= batchBuffer;
+        }
+        
         sDefaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
 
         static ubyte[3] pixels = [255, 255, 255];
@@ -93,7 +99,9 @@ package(zyeware) static:
         sDefaultShader.dispose();
         sBatchTextures[0].dispose();
         sBatchTextures.dispose();
-        sBatchBuffer.dispose();
+
+        foreach (BufferGroup buffer; sBatchBuffers)
+            buffer.dispose();
     }
 
 public static:
@@ -135,9 +143,12 @@ public static:
     {
         debug assert(currentRenderer == CurrentRenderer.renderer2D, "2D renderer is not active, cannot flush.");
 
-        sBatchBuffer.bind();
-        sBatchBuffer.dataBuffer.setData(sBatchVertices);
-        sBatchBuffer.indexBuffer.setData(sBatchIndices);
+        BufferGroup activeGroup = sBatchBuffers[sActiveBatchBufferIndex++];
+        sActiveBatchBufferIndex %= sBatchBuffers.length;
+
+        activeGroup.bind();
+        activeGroup.dataBuffer.setData(sBatchVertices);
+        activeGroup.indexBuffer.setData(sBatchIndices);
 
         sDefaultShader.bind();
 
