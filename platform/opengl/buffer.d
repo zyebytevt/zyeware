@@ -219,6 +219,7 @@ protected:
     bool mDynamic;
     BufferLayout mLayout;
     size_t mLength;
+    bool mInitialized;
 
 public:
     this(size_t size, BufferLayout layout, Flag!"dynamic" dynamic)
@@ -226,8 +227,8 @@ public:
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL vertex buffer!");
 
-        glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        glBufferStorage(GL_ARRAY_BUFFER, size, null, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
+        //glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
+        //glBufferStorage(GL_ARRAY_BUFFER, size, null, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
         
         mLayout = layout;
         mLength = size;
@@ -239,12 +240,14 @@ public:
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL vertex buffer!");
 
-        glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        glBufferStorage(GL_ARRAY_BUFFER, data.length, data.ptr, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
+        //glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
+        //glBufferStorage(GL_ARRAY_BUFFER, data.length, data.ptr, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLayout = layout;
         mLength = data.length;
         mDynamic = dynamic;
+
+        setData(data);
     }
 
     ~this()
@@ -259,10 +262,17 @@ public:
 
     void setData(const void[] data)
         in (data.length <= mLength, "Too much data for buffer size.")
-        in (mDynamic, "Data buffer is not set as dynamic.")
+        //in (mDynamic, "Data buffer is not set as dynamic.")
     {   
         glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        glBufferSubData(GL_ARRAY_BUFFER, cast(GLintptr) 0, data.length, data.ptr);
+
+        if (!mInitialized)
+        {
+            glBufferData(GL_ARRAY_BUFFER, cast(GLintptr) data.length, data.ptr, mDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+            mInitialized = true;
+        }
+        else
+            glBufferSubData(GL_ARRAY_BUFFER, cast(GLintptr) 0, data.length, data.ptr);
     }
 
     size_t length() const nothrow
@@ -289,6 +299,7 @@ protected:
     uint mBufferID;
     size_t mLength;
     bool mDynamic;
+    bool mInitialized;
 
 public:
     this(size_t size, Flag!"dynamic" dynamic)
@@ -296,8 +307,8 @@ public:
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL index buffer!");
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, size, null, dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
+        //glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, size, null, dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLength = size;
         mDynamic = dynamic;
@@ -308,12 +319,14 @@ public:
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL index buffer!");
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, indices.ptr,
-            dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
+        //glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, indices.ptr,
+        //    dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLength = indices.length;
         mDynamic = dynamic;
+
+        setData(indices);
     }
 
     ~this()
@@ -328,10 +341,18 @@ public:
 
     void setData(const uint[] indices)
         in (indices.length <= mLength, "Too much data for buffer size.")
-        in (mDynamic, "Index buffer is not set as dynamic.")
+        //in (mDynamic, "Index buffer is not set as dynamic.")
     {   
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, cast(GLintptr) 0, indices.length * uint.sizeof, indices.ptr);
+
+        if (!mInitialized)
+        {
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, cast(GLintptr) indices.length * uint.sizeof, indices.ptr,
+                mDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+            mInitialized = true;
+        }
+        else
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, cast(GLintptr) 0, indices.length * uint.sizeof, indices.ptr);
     }
 
     size_t length() const nothrow

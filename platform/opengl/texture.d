@@ -66,14 +66,16 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mID);
 
-        glTextureStorage2D(mID, 1, internalFormat, mSize.x, mSize.y);
-        glTextureSubImage2D(mID, 0, 0, 0, mSize.x, mSize.y, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
+        //glTextureStorage2D(mID, 1, internalFormat, mSize.x, mSize.y);
+        //glTextureSubImage2D(mID, 0, 0, 0, mSize.x, mSize.y, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
-        glTextureParameteri(mID, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
-        glTextureParameteri(mID, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mSize.x, mSize.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
-        glTextureParameteri(mID, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
-        glTextureParameteri(mID, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
 
         // TODO: Mipmaps?
 
@@ -112,7 +114,8 @@ public:
     void setPixels(in ubyte[] pixels)
         in (pixels.length <= mSize.x * mSize.y * mChannels, "Too much pixel data for texture size.")
     {
-        glTextureSubImage2D(mID, 0, 0, 0, mSize.x, mSize.y, mChannels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels.ptr);
+        glBindTexture(GL_TEXTURE_2D, mID);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mSize.x, mSize.y, mChannels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels.ptr);
     }
 
     const(TextureProperties) properties() const pure nothrow
