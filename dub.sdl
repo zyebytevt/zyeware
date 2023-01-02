@@ -9,7 +9,7 @@ dependency "imagefmt" version="~>2.1.1"
 dependency "sdlang-d" version="~>0.10.6"
 dependency "bmfont" version="~>0.2.0"
 dependency "riverd-loader" version="~>1.0.2"
-dependency "riverd-sndfile" version="~>1.0.1"
+dependency "audio-formats" version="~>2.0.1"
 targetType "library"
 targetPath "bin"
 
