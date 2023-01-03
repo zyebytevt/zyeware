@@ -2,8 +2,8 @@ name "zyeware"
 description "Simple, general purpose 2D and 3D game engine."
 authors "ZyeByte"
 copyright "Copyright © 2022, ZyeByte"
-license "proprietary"
-dependency "gl3n" version="~>1.4.1"
+license "LGPL-3.0"
+dependency "inmath" version="~>1.0.5"
 dependency "terminal" version="~>1.0.0"
 dependency "imagefmt" version="~>2.1.1"
 dependency "sdlang-d" version="~>0.10.6"
@@ -24,8 +24,4 @@ configuration "sdl-opengl" {
 
 	sourcePaths "platform/opengl" "platform/openal"
 	versions "GL_42" "SDL_204" "GL_KHR_debug"
-}
-
-configuration "unittest" {
-	dependency "silly" version=">=1.2.0-dev.1 <1.3.0-0"
 }

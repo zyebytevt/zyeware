@@ -1,6 +1,5 @@
 module zyeware.audio.decoder;
 
-import core.stdc.stdio : SEEK_CUR, SEEK_SET, SEEK_END;
 import std.exception : enforce;
 import std.string : format;
 
@@ -27,7 +26,6 @@ public:
     {
         mFile = file;
 
-        //assert(sf_format_check(&mAudioInfo), "SF_INFO struct is invalid.");
         try {
             stream.openFromMemory(mFile.readAll!(ubyte[])());
         } catch (AudioFormatsException ex) {

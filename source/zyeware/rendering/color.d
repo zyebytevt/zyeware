@@ -1,7 +1,7 @@
 module zyeware.rendering.color;
 
-import gl3n.linalg;
-import gl3n.ext.hsv : rgb2hsv, hsv2rgb;
+import inmath.linalg;
+import inmath.hsv : rgb2hsv, hsv2rgb;
 
 import zyeware.common;
 

@@ -56,7 +56,7 @@ interface Shape2D
 }
 
 /// Generates normals of a 2D shape on the fly.
-/// Thanks to https://github.com/WebFreak001/sat-gl3n/blob/master/source/sat.d !
+/// Thanks to https://github.com/WebFreak001/sat-inmath/blob/master/source/sat.d !
 struct Normals2D
 {
 private:
@@ -122,14 +122,14 @@ protected:
 
         collision.firstCollider = this;
         collision.secondCollider = other;
-        collision.isColliding = distance.magnitude_squared <= (radius + other.radius) ^^ 2;
+        collision.isColliding = distance.lengthSquared <= (radius + other.radius) ^^ 2;
 
         if (!collision.isColliding)
             return collision;
 
         collision.normal = distance.normalized;
         collision.point = transform.transformPoint(collision.normal * radius);
-        collision.penetrationDepth = radius + other.radius - distance.magnitude;
+        collision.penetrationDepth = radius + other.radius - distance.length;
 
         return collision;
     }

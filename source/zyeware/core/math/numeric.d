@@ -6,8 +6,8 @@ public import std.algorithm : clamp;
 import std.traits : isNumeric;
 import std.datetime : Duration;
 
-public import gl3n.math : degrees, radians;
-import gl3n.util : is_vector;
+public import inmath.math : degrees, radians;
+import inmath.util : isVector;
 
 /// Linearly interpolate between two numeric values.
 /// 
@@ -17,7 +17,7 @@ import gl3n.util : is_vector;
 ///     t = Factor to interpolate between a and b, must be between 0.0 and 1.0.
 /// 
 /// Returns: The interpolated value.
-T lerp(T)(T a, T b, float t) if (isNumeric!T || is_vector!T)
+T lerp(T)(T a, T b, float t) if (isNumeric!T || isVector!T)
 {
     return t * b + (1f - t) * a;
 }
@@ -30,7 +30,7 @@ T lerp(T)(T a, T b, float t) if (isNumeric!T || is_vector!T)
 ///     v = The value to inversly interpolate between `a` and `b`.
 /// 
 /// Returns: A value between 0.0 and 1.0.
-T invLerp(T)(T a, T b, float v) if (isNumeric!T || is_vector!T)
+T invLerp(T)(T a, T b, float v) if (isNumeric!T || isVector!T)
 {
     return (v - a) / (b - a);
 }

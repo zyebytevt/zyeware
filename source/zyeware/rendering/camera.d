@@ -16,7 +16,7 @@ public:
     pragma(inline, true)
     static final Matrix4f calculateViewMatrix(Vector3f position, quat rotation) pure nothrow
     {
-        return (Matrix4f.translation(position) * rotation.to_matrix!(4, 4)).inverse;
+        return (Matrix4f.translation(position) * rotation.toMatrix!(4, 4)).inverse;
     }
 }
 

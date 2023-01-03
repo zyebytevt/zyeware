@@ -13,7 +13,7 @@ import std.typecons : Tuple;
 import std.array : replaceInPlace;
 
 import bindbc.opengl;
-import gl3n.linalg;
+import inmath.linalg;
 import sdlang;
 
 import zyeware.common;

@@ -8,7 +8,7 @@ module zyeware.rendering.mesh;
 import std.string : format;
 import std.path : extension;
 
-import gl3n.linalg;
+import inmath.linalg;
 
 import zyeware.common;
 import zyeware.rendering;

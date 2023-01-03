@@ -9,7 +9,7 @@ public
 {
     import std.typecons : Flag, Yes, No;
 
-    import gl3n.linalg;
+    import inmath.linalg;
 
     import zyeware.core;
     import zyeware.ecs;

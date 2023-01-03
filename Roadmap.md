@@ -31,10 +31,11 @@ A lot of stuff has already been done before this file has been started.
     This is important, we're facing memory leaks here!
     Use https://code.dlang.org/packages/dlib
 
-[ ] Finish Particles (ECS?)
+[X] Finish Particles (ECS?)
 [ ] Work on (G)UI
-[ ] Replace Algebraic with SumType
+[X] Replace Algebraic with SumType
 [ ] Make buildable on Windows
+[ ] Get audio working
 [ ] Take a look at inmath
 [ ] Localization improvements (i18n-d)?
 

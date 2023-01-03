@@ -17,7 +17,7 @@ import std.algorithm : map, filter;
 import std.array : array;
 
 import sdlang;
-import gl3n.linalg;
+import inmath.linalg;
 
 import zyeware.common;
 import zyeware.rendering;

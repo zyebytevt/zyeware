@@ -2,7 +2,7 @@ module zyeware.core.math.rect;
 
 import std.traits : isNumeric;
 
-import gl3n.linalg;
+import inmath.linalg;
 
 import zyeware.common;
 

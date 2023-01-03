@@ -8,7 +8,7 @@ module zyeware.rendering.buffer;
 import std.exception : enforce, assumeWontThrow;
 import std.typecons : Rebindable;
 
-import gl3n.linalg;
+import inmath.linalg;
 import bindbc.opengl;
 
 import zyeware.common;

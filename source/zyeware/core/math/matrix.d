@@ -1,7 +1,7 @@
 module zyeware.core.math.matrix;
 
-import gl3n.math;
-import gl3n.linalg;
+import inmath.math;
+import inmath.linalg;
 
 import zyeware.common;
 

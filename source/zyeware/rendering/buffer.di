@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.buffer;
 
-import gl3n.linalg;
+import inmath.linalg;
 
 import zyeware.common;
 

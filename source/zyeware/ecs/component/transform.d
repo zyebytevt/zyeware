@@ -9,7 +9,7 @@ import std.algorithm : remove;
 import std.string : format;
 import std.exception : enforce;
 
-import gl3n.linalg;
+import inmath.linalg;
 
 import zyeware.common;
 
@@ -250,7 +250,7 @@ private:
     void recalculateLocalMatrix() pure
     {
         mLocalMatrix = Matrix4f.translation(position.x, position.y,
-                position.z) * rotation.to_matrix!(4,
+                position.z) * rotation.toMatrix!(4,
                 4) * Matrix4f.scaling(scale.x, scale.y, scale.z);
 
         recalculateGlobalMatrix();
@@ -395,7 +395,7 @@ public:
     /// ditto
     void eulerRotation(in Vector3f value) pure
     {
-        mRotation = quat.euler_rotation(value.x, value.y, value.z);
+        mRotation = quat.eulerRotation(value.x, value.y, value.z);
         recalculateLocalMatrix();
     }
 
