@@ -26,6 +26,7 @@ import zyeware.utils.format;
 /// Struct that holds information about how to start up the engine.
 struct ZyeWareProperties
 {
+    string[] cmdargs;
     Application application; /// The application to use.
     LogLevel coreLogLevel = LogLevel.trace; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.trace; /// The log level for the client logger.
@@ -172,9 +173,6 @@ package(zyeware.core) static:
 public static:
     /// The crash handler that is used when the engine crashes.
     CrashHandler crashHandler;
-    /// If the engine should be paused. The core engine does not enforce this, how
-    /// this is handled is implementation-specific.
-    bool paused; // TODO: Is this necessary?
 
     /// Stops the main loop and quits the engine.
     void quit() nothrow
@@ -248,19 +246,19 @@ public static:
     /// all `tick` methods use the `deltaTime` member of the given `FrameTime`.
     ///
     /// See_Also: FrameTime
-    float timeScale()  nothrow
+    float timeScale() nothrow
     {
         return sTimeScale;
     }
 
     /// ditto
-    void timeScale(float value)  nothrow
+    void timeScale(float value) nothrow
         in (value != float.nan, "Timescale value was nan.")
     {
         sTimeScale = value;
     }
 
-    RandomNumberGenerator random()  nothrow
+    RandomNumberGenerator random() nothrow
     {
         return sRandom;
     }

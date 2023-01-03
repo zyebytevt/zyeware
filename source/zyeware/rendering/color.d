@@ -183,7 +183,6 @@ public:
         return Color(rgb2hsv(v));
     }
 
-    // TODO: Replace with some more sophisticated algorithm at some point. (sRGB?)
     static Color lerp(Color a, Color b, float t) pure nothrow
     {
         immutable Vector4f result = zyeware.core.math.numeric.lerp(a.v, b.v, t);

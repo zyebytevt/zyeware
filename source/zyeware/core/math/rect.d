@@ -50,7 +50,7 @@ struct Rect(T)
     /// Check if any of the area bounded by this rectangle is bounded by another
     bool overlaps(Rect!T b) pure nothrow const
     {
-        // TODO check if this works
+        // TODO check if this works (unit test!)
         return min.x <= b.max.x
             && max.x >= b.min.x
             && min.y <= b.max.y && max.y >= b.min.y;

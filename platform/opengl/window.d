@@ -318,7 +318,6 @@ public:
                 break;
 
             default:
-            // TODO: Handle text input
             }
         }
     }

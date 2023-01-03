@@ -37,11 +37,13 @@ A lot of stuff has already been done before this file has been started.
 [X] Implement inmath
 [?] Rename all custom aliases to their inmath names (e.g. Vector2i -> vec2i)
 [X] Replace all vecs with uint to vec with int
-[ ] Work on TODOs
+[X] Work on TODOs
+[ ] Add splash screen
 [ ] Work on (G)UI
 [ ] Get audio working
-[ ] Fix profiler omg
 [ ] Add streaming audio
+[ ] Fix profiler omg
+[ ] Add unittests
 [ ] MMAP shenanigans for ZPK files
 [ ] Make buildable and executable on Windows
 [ ] Make executable on MacOS

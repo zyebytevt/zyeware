@@ -23,7 +23,8 @@ else
         {
             ZyeWareProperties props;
 
-            props.application = createZyeWareApplication(args);
+            props.cmdargs = args;
+            props.application = createZyeWareApplication(args.dup);
 
             ZyeWare.initialize(props);
             ZyeWare.start();

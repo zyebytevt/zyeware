@@ -11,8 +11,8 @@ import std.exception : enforce;
 import std.typecons : Tuple;
 import std.range : empty;
 import std.string : fromStringz, format;
-import std.file : mkdirRecurse;
-import std.path : buildNormalizedPath;
+import std.file : mkdirRecurse, thisExePath, exists;
+import std.path : buildNormalizedPath, dirName;
 
 import zyeware.common;
 import zyeware.vfs;
@@ -20,8 +20,12 @@ import zyeware.vfs;
 struct VFS
 {
 private static:
+    enum userDirVFSPath = "user://";
+    enum userDirPortableName = "ZyeWareData/";
+
     VFSDirectory[string] sProtocols;
     VFSLoader[] sLoaders;
+    bool sPortableMode;
 
     pragma(inline, true)
     VFSDirectory getProtocol(string protocol)
@@ -55,39 +59,49 @@ private static:
     VFSDirectory createUserDir(string userDirName)
         in (userDirName)
     {
-        enum userDirVFSPath = "user://";
+        string dataDir = buildNormalizedPath(thisExePath.dirName, userDirPortableName, userDirName);
 
-        version (Posix)
+        if (!sPortableMode)
         {
-            import core.sys.posix.unistd : getuid;
-            import core.sys.posix.pwd : getpwuid;
-
-            const(char)* homedir;
-
-            synchronized
+            version (Posix)
             {
-                if ((homedir = getenv("HOME")) is null)
-                    homedir = getpwuid(getuid()).pw_dir;
+                import core.sys.posix.unistd : getuid;
+                import core.sys.posix.pwd : getpwuid;
+
+                const(char)* homedir;
+
+                synchronized
+                {
+                    if ((homedir = getenv("HOME")) is null)
+                        homedir = getpwuid(getuid()).pw_dir;
+                }
+
+                version (linux)
+                    dataDir = buildNormalizedPath(homedir.fromStringz.idup, ".local/share/zyeware/", userDirName);
+                else version (OSX)
+                    dataDir = buildNormalizedPath(homedir.fromStringz.idup, "Library/Application Support/ZyeWare/", userDirName);
+                else
+                    dataDir = buildNormalizedPath(homedir.fromStringz.idup, ".zyeware/", userDirName);
             }
-
-            // TODO: Where are configuration files located on different Posix platforms?
-            string configDir = buildNormalizedPath(homedir.fromStringz.idup, ".local/share/zyeware/", userDirName);
+            else version (Windows)
+            {
+                dataDir = buildNormalizedPath(getenv("LocalAppData").fromStringz.idup, "ZyeWare/", userDirName);            
+            }
+            else
+                sPortableMode = true;
         }
-        else version (Windows)
-        {
-            string configDir = buildNormalizedPath(getenv("APPDATA").fromStringz.idup, "zyeware/", userDirName);            
-        }
-        else
-            static assert(false, "VFS: Cannot compile for this operating system");
 
-        mkdirRecurse(configDir);
+        mkdirRecurse(dataDir);
 
-        return new VFSDiskDirectory(userDirVFSPath, userDirVFSPath, configDir);
+        return new VFSDiskDirectory(userDirVFSPath, userDirVFSPath, dataDir);
     }
 
 package(zyeware) static:
     void initialize()
     {
+        if (exists(buildNormalizedPath(thisExePath.dirName, userDirPortableName, "_sc_")))
+            sPortableMode = true;
+
         VFS.addLoader(new VFSDirectoryLoader());
         VFS.addLoader(new VFSZPKLoader());
 
@@ -144,5 +158,10 @@ public static:
     {
         immutable splitResult = splitPath(name);
         return getProtocol(splitResult[0]).hasDirectory(splitResult[2]);
+    }
+
+    bool portableMode() nothrow
+    {
+        return sPortableMode;
     }
 }
