@@ -11,6 +11,7 @@ import std.string : fromStringz, toStringz, format;
 import std.exception : enforce;
 import std.typecons : scoped, Rebindable;
 import std.math : isClose;
+import std.utf : decode;
 
 import bindbc.sdl;
 import bindbc.opengl;
@@ -204,7 +205,7 @@ public:
         SDL_Event ev;
         while (SDL_PollEvent(&ev))
         {
-        outerSwitch:
+        typeSwitch:
             switch (ev.type)
             {
             case SDL_WINDOWEVENT:
@@ -235,11 +236,16 @@ public:
                         cast(KeyCode) ev.key.keysym.scancode, ev.key.state == SDL_PRESSED);
                 break;
 
+            case SDL_TEXTINPUT:
+                size_t idx = 0;
+                immutable dchar codepoint = decode(cast(string) ev.text.text.fromStringz, idx);
+                ZyeWare.emit!InputEventText(this, codepoint);
+                break;
+
             case SDL_MOUSEBUTTONUP:
             case SDL_MOUSEBUTTONDOWN:
-                // TODO: Support number of clicks, ev.button.clicks
                 ZyeWare.emit!InputEventMouseButton(this,
-                    cast(MouseCode) ev.button.button, ev.button.state == SDL_PRESSED);
+                    cast(MouseCode) ev.button.button, ev.button.state == SDL_PRESSED, cast(size_t) ev.button.clicks);
                 break;
 
             case SDL_MOUSEWHEEL:
@@ -277,7 +283,7 @@ public:
                 case SDL_CONTROLLER_BUTTON_DPAD_DOWN: button = GamepadButton.dpadDown; break;
                 case SDL_CONTROLLER_BUTTON_DPAD_LEFT: button = GamepadButton.dpadLeft; break;
                 default:
-                    break outerSwitch;
+                    break typeSwitch;
                 }
 
                 ZyeWare.emit!InputEventGamepadButton(getGamepadIndex(ev.cbutton.which), button,
@@ -296,7 +302,7 @@ public:
                 case SDL_CONTROLLER_AXIS_TRIGGERLEFT: axis = GamepadAxis.leftTrigger; break;
                 case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: axis = GamepadAxis.rightTrigger; break;
                 default:
-                    break outerSwitch;
+                    break typeSwitch;
                 }
 
                 ZyeWare.emit!InputEventGamepadAxisMotion(getGamepadIndex(ev.caxis.which), axis,
@@ -521,5 +527,15 @@ public:
         mIcon = value;
 
         SDL_SetWindowIcon(mHandle, mIconSurface);
+    }
+
+    string clipboard() nothrow
+    {
+        return SDL_GetClipboardText().fromStringz.idup;
+    }
+
+    void clipboard(string value) nothrow
+    {
+        SDL_SetClipboardText(value.toStringz);
     }
 }

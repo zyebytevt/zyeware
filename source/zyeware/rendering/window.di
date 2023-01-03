@@ -44,4 +44,7 @@ class Window
 
     const(Image) icon() const nothrow;
     void icon(const Image value);
+
+    string clipboard() nothrow;
+    void clipboard(string value) nothrow;
 }

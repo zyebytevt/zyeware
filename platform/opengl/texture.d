@@ -77,22 +77,11 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
 
-        // TODO: Mipmaps?
-
-        /*glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mSize.x, mSize.y, 0, srcFormat,
-            GL_UNSIGNED_BYTE, pixels.ptr);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
-
         if (properties.generateMipmaps)
         {
-            glEnable(GL_TEXTURE_2D); // To circumvent a bug in certain ATI drivers
+            // glEnable(GL_TEXTURE_2D); // To circumvent a bug in certain ATI drivers
             glGenerateMipmap(GL_TEXTURE_2D);
-        }*/
+        }
     }
 
     this(uint id)

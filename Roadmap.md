@@ -40,6 +40,7 @@ A lot of stuff has already been done before this file has been started.
 [ ] Work on TODOs
 [ ] Work on (G)UI
 [ ] Get audio working
+[ ] Fix profiler omg
 [ ] Add streaming audio
 [ ] MMAP shenanigans for ZPK files
 [ ] Make buildable and executable on Windows

@@ -170,13 +170,13 @@ public:
 class InputEventText : InputEventFromWindow
 {
 protected:
-    uint mCodepoint;
+    dchar mCodepoint;
 
 public:
     /// Params:
     ///     window = The window this event was sent from.
     ///     codepoint = The unicode code point of the sent character.
-    this(Window window, uint codepoint) pure nothrow
+    this(Window window, dchar codepoint) pure nothrow
     {
         super(window);
 
@@ -184,7 +184,7 @@ public:
     }
 
     /// The unicode code point of the sent character.
-    final uint codepoint() pure const nothrow
+    final dchar codepoint() pure const nothrow
     {
         return mCodepoint;
     }
@@ -208,18 +208,20 @@ class InputEventMouseButton : InputEventFromWindow
 protected:
     MouseCode mButton;
     bool mIsPressed;
+    size_t mClickCount;
 
 public:
     /// Params:
     ///     window = The window this event was sent from.
     ///     button = The mouse code of the button that was activated.
     ///     isPressed = Whether the button was pressed or not.
-    this(Window window, MouseCode button, bool isPressed) pure nothrow
+    this(Window window, MouseCode button, bool isPressed, size_t clickCount) pure nothrow
     {
         super(window);
 
         mButton = button;
         mIsPressed = isPressed;
+        mClickCount = clickCount;
     }
 
     /// This constructor is used for template instantiation.
@@ -227,7 +229,7 @@ public:
     ///     button = The mouse code of the button to match.
     this(MouseCode button) pure nothrow
     {
-        this(null, button, false);
+        this(null, button, false, 0);
     }
 
     /// The mouse code of the button that was activated.
@@ -240,6 +242,11 @@ public:
     final bool isPressed() const pure nothrow
     {
         return mIsPressed;
+    }
+
+    final size_t clickCount() const pure nothrow
+    {
+        return mClickCount;
     }
 
     override bool matchInputTemplate(in InputEvent ev, float deadzone, out bool pressed, out float strength) const nothrow
