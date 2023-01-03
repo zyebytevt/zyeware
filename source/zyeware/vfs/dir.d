@@ -172,11 +172,11 @@ public:
         
         if (modeToC.length == 0)
             modeToC= [
-                VFSFile.Mode.read: "r",
-                VFSFile.Mode.write: "w",
-                VFSFile.Mode.readWrite: "r+",
-                VFSFile.Mode.writeRead: "w+",
-                VFSFile.Mode.append: "a"
+                VFSFile.Mode.read: "rb",
+                VFSFile.Mode.write: "wb",
+                VFSFile.Mode.readWrite: "r+b",
+                VFSFile.Mode.writeRead: "w+b",
+                VFSFile.Mode.append: "ab"
             ];
 
         enforce!VFSException(!isRooted(name), "File name cannot be rooted.");

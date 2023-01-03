@@ -9,6 +9,7 @@ import core.stdc.stdio;
 import core.stdc.config : c_long;
 import std.bitmanip : Endian, littleEndianToNative, bigEndianToNative;
 import std.traits : isNumeric, isUnsigned;
+import std.exception : enforce;
 
 import zyeware.common;
 import zyeware.vfs;
@@ -53,7 +54,9 @@ public:
     {
         import std.range : ElementEncodingType;
 
-        auto buffer = new ElementEncodingType!T[cast(size_t) size];
+        alias Element = ElementEncodingType!T;
+
+        auto buffer = new Element[cast(size_t) size / Element.sizeof];
         read(cast(void[]) buffer);
         return cast(T) buffer;
     }
@@ -282,6 +285,8 @@ public:
         if (mCachedFileSize == FileSize.min)
         {
             immutable c_long pos = ftell(mCFile);
+            //enforce!VFSException(pos > -1L, "Failed to ftell");
+
             fseek(mCFile, 0, SEEK_END);
             mCachedFileSize = cast(FileSize) ftell(mCFile);
             fseek(mCFile, pos, SEEK_SET);
