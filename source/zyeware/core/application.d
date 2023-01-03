@@ -35,11 +35,6 @@ import zyeware.rendering;
 abstract class Application
 {
 protected:
-    Framebuffer mFramebuffer;
-    Matrix4f mFramebufferProjection;
-    Matrix4f mWindowProjection;
-    Rect2f mFramebufferArea;
-    ScaleMode mScaleMode;
     string[] mProgramArgs;
     
     this(string[] programArgs) pure nothrow
@@ -48,92 +43,7 @@ protected:
         mProgramArgs = programArgs;
     }
 
-    void recalculateFramebufferArea() nothrow
-    {
-        immutable Vector2i winSize = mWindow.size;
-        immutable Vector2i gameSize = mFramebuffer.properties.size;
-
-        Vector2f finalPos, finalSize;
-
-        final switch (mScaleMode) with (ScaleMode)
-        {
-        case center:
-            finalPos = Vector2f(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
-            finalSize = Vector2f(gameSize);
-            break;
-
-        case keepAspect:
-            immutable float scale = min(cast(float) winSize.x / gameSize.x, cast(float) winSize.y / gameSize.y);
-
-            finalSize = Vector2f(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
-            finalPos = Vector2f(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
-            break;
-
-        case fill:
-        case resize:
-            finalPos = Vector2f(0);
-            finalSize = Vector2f(winSize);
-            break;
-        }
-
-        mFramebufferArea = Rect2f(finalPos, finalPos + finalSize);
-    }
-
-package(zyeware.core):
-    Window mWindow;
-
-    final void drawFramebuffer(in FrameTime nextFrameTime)
-    {
-        mWindow.update();
-
-        // Prepare framebuffer and render application into it.
-        RenderAPI.setViewport(0, 0, mFramebuffer.properties.size.x, mFramebuffer.properties.size.y);
-        mFramebuffer.bind();
-        draw(nextFrameTime);
-
-        mFramebuffer.unbind();
-
-        immutable bool oldWireframe = RenderAPI.getFlag(RenderFlag.wireframe);
-        immutable bool oldCulling = RenderAPI.getFlag(RenderFlag.culling);
-
-        // Prepare window space to render framebuffer into.
-        RenderAPI.setFlag(RenderFlag.culling, false);
-        RenderAPI.setFlag(RenderFlag.wireframe, false);
-
-        RenderAPI.setViewport(0, 0, mWindow.size.x, mWindow.size.y);
-        RenderAPI.clear();
-        Renderer2D.begin(mWindowProjection, Matrix4f.identity);
-        Renderer2D.drawRect(mFramebufferArea, Matrix4f.identity, Color.white, mFramebuffer.colorAttachment);
-        Renderer2D.end();
-
-        RenderAPI.setFlag(RenderFlag.culling, oldCulling);
-        RenderAPI.setFlag(RenderFlag.wireframe, oldWireframe);
-
-        mWindow.swapBuffers();
-    }
-
-    final void createFramebuffer()
-    {
-        FramebufferProperties fbProps;
-        fbProps.size = mWindow.size;
-        mFramebuffer = new Framebuffer(fbProps);
-
-        mWindowProjection = Matrix4f.orthographic(0, mWindow.size.x, 0, mWindow.size.y, -1, 1);
-        mFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
-
-        recalculateFramebufferArea();
-    }
-
 public:
-    /// How the framebuffer should be scaled on resizing.
-    enum ScaleMode
-    {
-        center, /// Keep the original size at the center of the window.
-        keepAspect, /// Scale with window, but keep the aspect.
-        fill, /// Fill the window completly.
-        resize /// Resize the framebuffer itself.
-    }
-
     /// Override this method for application initialization.
     abstract void initialize();
 
@@ -147,10 +57,7 @@ public:
     abstract WindowProperties getWindowProperties();
 
     /// Destroys the application.
-    void cleanup()
-    {
-        mWindow.destroy();
-    }
+    void cleanup() {}
     
     /// Handles the specified event in whatever manners seem appropriate.
     ///
@@ -161,41 +68,12 @@ public:
     {
         if (cast(QuitEvent) ev)
             ZyeWare.quit();
-        else if (auto wev = cast(WindowResizedEvent) ev)
-        {
-            mWindowProjection = Matrix4f.orthographic(0, wev.size.x, 0, wev.size.y, -1, 1);
-            recalculateFramebufferArea();
-
-            if (mScaleMode == ScaleMode.resize)
-            {
-                FramebufferProperties fbProps = mFramebuffer.properties;
-                fbProps.size = wev.size;
-                mFramebuffer.properties = fbProps;
-
-                mFramebuffer.invalidate();
-            }
-        }
-    }
-
-    void resize(Vector2i size)
-        in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
-    {
-        if (!mWindow.isMaximized && !mWindow.isMinimized)
-            mWindow.size = Vector2i(size);
-        
-        framebufferSize = Vector2i(size);
     }
 
     /// The frame rate the application should target to hold. This is not a guarantee.
     uint targetFramerate() pure const nothrow
     {
         return 60;
-    }
-
-    /// The main window of the application.
-    inout(Window) window() pure inout nothrow
-    {
-        return mWindow;
     }
 
     /// The arguments this application was started with.
@@ -206,39 +84,9 @@ public:
         return mProgramArgs;
     }
 
-    Vector2i framebufferSize() pure const nothrow
-    {
-        return mFramebuffer.properties.size;
-    }
-
-    void framebufferSize(Vector2i newSize)
-        in (newSize.x > 0 && newSize.y > 0, "Size cannot be negative.")
-    {
-        FramebufferProperties fbProps = mFramebuffer.properties;
-        fbProps.size = newSize;
-        mFramebuffer.properties = fbProps;
-        mFramebuffer.invalidate();
-
-        mFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
-        recalculateFramebufferArea();
-    }
-
     UUID uuid() pure const nothrow
     {
         return sha1UUID(typeid(this).name);
-    }
-
-    Vector2f cursorPosition() const nothrow
-    {
-        Vector2f winCurPos = mWindow.cursorPosition;
-        
-        float fbActualWidth = mFramebufferArea.max.x - mFramebufferArea.min.x;
-        float fbActualHeight = mFramebufferArea.max.y - mFramebufferArea.min.y;
-
-        float x = ((winCurPos.x - mFramebufferArea.min.x) / fbActualWidth) * mFramebuffer.properties.size.x;
-        float y = ((winCurPos.y - mFramebufferArea.min.y) / fbActualHeight) * mFramebuffer.properties.size.y;
-
-        return Vector2f(x, y);
     }
 }
 

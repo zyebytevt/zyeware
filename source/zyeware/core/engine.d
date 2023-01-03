@@ -13,6 +13,7 @@ import std.exception : enforce, assumeWontThrow, collectException;
 import std.string : format, fromStringz, toStringz;
 import std.typecons : scoped;
 import std.datetime : Duration, dur;
+import std.algorithm : min;
 
 import zyeware.common;
 import zyeware.core.events;
@@ -22,6 +23,7 @@ import zyeware.rendering;
 import zyeware.audio;
 import zyeware.core.crash;
 import zyeware.utils.format;
+import zyeware.core.startupapp;
 
 /// Struct that holds information about how to start up the engine.
 struct ZyeWareProperties
@@ -47,11 +49,19 @@ struct ZyeWare
     @disable this(this);
 
 private static:
+    Window sMainWindow;
     Application sApplication;
     Duration sFrameTime;
     Duration sUpTime;
     Timer sCleanupTimer;
     RandomNumberGenerator sRandom;
+
+    Framebuffer sMainFramebuffer;
+    Matrix4f sFramebufferProjection;
+    Matrix4f sWindowProjection;
+    Rect2f sFramebufferArea;
+    ScaleMode sScaleMode;
+
     bool sRunning;
     float sTimeScale = 1f;
 
@@ -101,10 +111,83 @@ private static:
             InputManager.tick();
 
             immutable nextFrameTime = FrameTime(dur!"hnsecs"(cast(long) (lag.total!"hnsecs" * sTimeScale)), lag);
-            sApplication.drawFramebuffer(nextFrameTime);
+            drawFramebuffer(nextFrameTime);
         }
 
         version (Profiling) fpsCounterTimer.stop();
+    }
+
+    void createFramebuffer()
+    {
+        FramebufferProperties fbProps;
+        fbProps.size = sMainWindow.size;
+        sMainFramebuffer = new Framebuffer(fbProps);
+
+        sWindowProjection = Matrix4f.orthographic(0, sMainWindow.size.x, 0, sMainWindow.size.y, -1, 1);
+        sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
+
+        recalculateFramebufferArea();
+    }
+
+    void recalculateFramebufferArea() nothrow
+    {
+        immutable Vector2i winSize = sMainWindow.size;
+        immutable Vector2i gameSize = sMainFramebuffer.properties.size;
+
+        Vector2f finalPos, finalSize;
+
+        final switch (sScaleMode) with (ScaleMode)
+        {
+        case center:
+            finalPos = Vector2f(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
+            finalSize = Vector2f(gameSize);
+            break;
+
+        case keepAspect:
+            immutable float scale = min(cast(float) winSize.x / gameSize.x, cast(float) winSize.y / gameSize.y);
+
+            finalSize = Vector2f(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
+            finalPos = Vector2f(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
+            break;
+
+        case fill:
+        case resize:
+            finalPos = Vector2f(0);
+            finalSize = Vector2f(winSize);
+            break;
+        }
+
+        sFramebufferArea = Rect2f(finalPos, finalPos + finalSize);
+    }
+
+    void drawFramebuffer(in FrameTime nextFrameTime)
+    {
+        sMainWindow.update();
+
+        // Prepare framebuffer and render application into it.
+        RenderAPI.setViewport(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y);
+        sMainFramebuffer.bind();
+        sApplication.draw(nextFrameTime);
+
+        sMainFramebuffer.unbind();
+
+        immutable bool oldWireframe = RenderAPI.getFlag(RenderFlag.wireframe);
+        immutable bool oldCulling = RenderAPI.getFlag(RenderFlag.culling);
+
+        // Prepare window space to render framebuffer into.
+        RenderAPI.setFlag(RenderFlag.culling, false);
+        RenderAPI.setFlag(RenderFlag.wireframe, false);
+
+        RenderAPI.setViewport(0, 0, sMainWindow.size.x, sMainWindow.size.y);
+        RenderAPI.clear();
+        Renderer2D.begin(sWindowProjection, Matrix4f.identity);
+        Renderer2D.drawRect(sFramebufferArea, Matrix4f.identity, Color.white, sMainFramebuffer.colorAttachment);
+        Renderer2D.end();
+
+        RenderAPI.setFlag(RenderFlag.culling, oldCulling);
+        RenderAPI.setFlag(RenderFlag.wireframe, oldWireframe);
+
+        sMainWindow.swapBuffers();
     }
 
 package(zyeware.core) static:
@@ -113,6 +196,7 @@ package(zyeware.core) static:
         GC.disable();
         sRandom = new RandomNumberGenerator();
 
+        //sApplication = new StartupApplication(properties.cmdargs, properties.application);
         sApplication = properties.application;
         sFrameTime = dur!"msecs"(1000 / sApplication.targetFramerate);
 
@@ -131,9 +215,9 @@ package(zyeware.core) static:
         Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
         
         // Creates a new window and render context.
-        sApplication.mWindow = new Window(sApplication.getWindowProperties());
-        enforce!CoreException(sApplication.window, "Main window creation failed.");
-        sApplication.createFramebuffer();
+        sMainWindow = new Window(sApplication.getWindowProperties());
+        enforce!CoreException(sMainWindow, "Main window creation failed.");
+        createFramebuffer();
 
         // Initialize all other sub-systems.
         VFS.initialize();
@@ -150,6 +234,7 @@ package(zyeware.core) static:
     void cleanup()
     {
         sCleanupTimer.stop();
+        sMainWindow.destroy();
         sApplication.cleanup();
         Renderer3D.cleanup();
         Renderer2D.cleanup();
@@ -171,6 +256,15 @@ package(zyeware.core) static:
     }
 
 public static:
+    /// How the framebuffer should be scaled on resizing.
+    enum ScaleMode
+    {
+        center, /// Keep the original size at the center of the window.
+        keepAspect, /// Scale with window, but keep the aspect.
+        fill, /// Fill the window completly.
+        resize /// Resize the framebuffer itself.
+    }
+
     /// The crash handler that is used when the engine crashes.
     CrashHandler crashHandler;
 
@@ -197,6 +291,23 @@ public static:
     void emit(in Event ev) nothrow
         in (ev, "Event to emit cannot be null.")
     {
+        if (auto wev = cast(WindowResizedEvent) ev)
+        {
+            sWindowProjection = Matrix4f.orthographic(0, wev.size.x, 0, wev.size.y, -1, 1);
+            recalculateFramebufferArea();
+
+            // TODO: Move this to pre-frame with flag.
+            if (sScaleMode == ScaleMode.resize)
+            {
+                FramebufferProperties fbProps = sMainFramebuffer.properties;
+                fbProps.size = wev.size;
+                sMainFramebuffer.properties = fbProps;
+
+                import std.exception : assumeWontThrow;
+                sMainFramebuffer.invalidate().assumeWontThrow;
+            }
+        }
+        
         if (Exception ex = collectException(sApplication.receive(ev)))
             Logger.core.log(LogLevel.error, "Exception while emitting an event: %s", ex.msg);
 
@@ -261,5 +372,60 @@ public static:
     RandomNumberGenerator random() nothrow
     {
         return sRandom;
+    }
+
+    Window mainWindow() nothrow
+    {
+        return sMainWindow;
+    }
+
+    Vector2i framebufferSize() nothrow
+    {
+        return sMainFramebuffer.properties.size;
+    }
+
+    void framebufferSize(Vector2i newSize)
+        in (newSize.x > 0 && newSize.y > 0, "Framebuffer size cannot be negative.")
+    {
+        FramebufferProperties fbProps = sMainFramebuffer.properties;
+        fbProps.size = newSize;
+        sMainFramebuffer.properties = fbProps;
+        sMainFramebuffer.invalidate();
+
+        sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
+        recalculateFramebufferArea();
+    }
+
+    // TODO: Remove?
+    void resize(Vector2i size)
+        in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
+    {
+        if (!sMainWindow.isMaximized && !sMainWindow.isMinimized)
+            sMainWindow.size = Vector2i(size);
+        
+        framebufferSize = Vector2i(size);
+    }
+
+    Vector2f cursorPosition() nothrow
+    {
+        Vector2f winCurPos = sMainWindow.cursorPosition;
+        
+        float fbActualWidth = sFramebufferArea.max.x - sFramebufferArea.min.x;
+        float fbActualHeight = sFramebufferArea.max.y - sFramebufferArea.min.y;
+
+        float x = ((winCurPos.x - sFramebufferArea.min.x) / fbActualWidth) * sMainFramebuffer.properties.size.x;
+        float y = ((winCurPos.y - sFramebufferArea.min.y) / fbActualHeight) * sMainFramebuffer.properties.size.y;
+
+        return Vector2f(x, y);
+    }
+
+    ScaleMode scaleMode() nothrow
+    {
+        return sScaleMode;
+    }
+
+    void scaleMode(ScaleMode value) nothrow
+    {
+        sScaleMode = value;
     }
 }
