@@ -9,7 +9,6 @@ import core.memory : GC;
 import std.exception : enforce, collectException;
 import std.algorithm : min;
 import std.typecons : Nullable;
-import std.uuid : UUID, sha1UUID;
 
 public import zyeware.core.gamestate;
 import zyeware.common;
@@ -34,15 +33,6 @@ import zyeware.rendering;
 /// --------------------
 abstract class Application
 {
-protected:
-    string[] mProgramArgs;
-    
-    this(string[] programArgs) pure nothrow
-        in (programArgs, "Program arguments cannot be null.")
-    {
-        mProgramArgs = programArgs;
-    }
-
 public:
     /// Override this method for application initialization.
     abstract void initialize();
@@ -52,9 +42,6 @@ public:
 
     /// Override this method to perform rendering.
     abstract void draw(in FrameTime nextFrameTime);
-
-    /// Override this method to return the window properties of the main window.
-    abstract WindowProperties getWindowProperties();
 
     /// Destroys the application.
     void cleanup() {}
@@ -75,19 +62,6 @@ public:
     {
         return 60;
     }
-
-    /// The arguments this application was started with.
-    /// These are the same as the ones ZyeWare was started with, but stripped of
-    /// engine-specific arguments.
-    const(string[]) programArgs() pure const nothrow
-    {
-        return mProgramArgs;
-    }
-
-    UUID uuid() pure const nothrow
-    {
-        return sha1UUID(typeid(this).name);
-    }
 }
 
 /// A ZyeWare application that takes care of the game state logic.
@@ -96,11 +70,6 @@ class GameStateApplication : Application
 {
 protected:
     GrowableStack!GameState mStateStack;
-
-    this(string[] programArgs)
-    {
-        super(programArgs);
-    }
 
 public:
     override void receive(in Event ev)

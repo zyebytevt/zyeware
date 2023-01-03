@@ -25,14 +25,18 @@ import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.startupapp;
 
-/// Struct that holds information about how to start up the engine.
-struct ZyeWareProperties
+/// Struct that holds information about the project.
+struct ProjectProperties
 {
-    string[] cmdargs;
-    Application application; /// The application to use.
+    string authorName;
+    string projectName;
+
     LogLevel coreLogLevel = LogLevel.trace; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.trace; /// The log level for the client logger.
+
+    Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
+    WindowProperties mainWindowProperties; /// The properties of the main window.
 }
 
 /// Holds information about passed time since the last frame.
@@ -50,7 +54,11 @@ struct ZyeWare
 
 private static:
     Window sMainWindow;
+    
+    // Change this around too
     Application sApplication;
+    Application sApplicationToSwitchTo;
+
     Duration sFrameTime;
     Duration sUpTime;
     Timer sCleanupTimer;
@@ -61,6 +69,9 @@ private static:
     Matrix4f sWindowProjection;
     Rect2f sFramebufferArea;
     ScaleMode sScaleMode;
+
+    ProjectProperties sProjectProperties;
+    string[] sCmdArgs;
 
     bool sRunning;
     float sTimeScale = 1f;
@@ -112,6 +123,22 @@ private static:
 
             immutable nextFrameTime = FrameTime(dur!"hnsecs"(cast(long) (lag.total!"hnsecs" * sTimeScale)), lag);
             drawFramebuffer(nextFrameTime);
+
+            if (sApplicationToSwitchTo)
+            {
+                if (sApplication)
+                {
+                    sApplication.cleanup();
+                }
+
+                sApplication = sApplicationToSwitchTo;
+                sFrameTime = dur!"msecs"(1000 / sApplication.targetFramerate);
+                sApplication.initialize();
+
+                recalculateFramebufferArea();
+
+                sApplicationToSwitchTo = null;
+            }
         }
 
         version (Profiling) fpsCounterTimer.stop();
@@ -151,7 +178,7 @@ private static:
             break;
 
         case fill:
-        case resize:
+        case changeWindowSize:
             finalPos = Vector2f(0);
             finalSize = Vector2f(winSize);
             break;
@@ -191,14 +218,13 @@ private static:
     }
 
 package(zyeware.core) static:
-    void initialize(ZyeWareProperties properties)
+    void initialize(string[] args, ProjectProperties properties)
     {
+        sCmdArgs = args;
+        sProjectProperties = properties;
+
         GC.disable();
         sRandom = new RandomNumberGenerator();
-
-        //sApplication = new StartupApplication(properties.cmdargs, properties.application);
-        sApplication = properties.application;
-        sFrameTime = dur!"msecs"(1000 / sApplication.targetFramerate);
 
         if (properties.crashHandler)
             crashHandler = properties.crashHandler;
@@ -210,12 +236,15 @@ package(zyeware.core) static:
                 crashHandler = new DefaultCrashHandler();
         }
 
+        // redeemed by TheFrozenKnights
+        auto wareZye = new StartupApplication(properties.mainApplication);
+
         // Initialize profiler and logger before anything else.
         version (Profiling) Profiler.initialize();
         Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
         
         // Creates a new window and render context.
-        sMainWindow = new Window(sApplication.getWindowProperties());
+        sMainWindow = new Window(properties.mainWindowProperties);
         enforce!CoreException(sMainWindow, "Main window creation failed.");
         createFramebuffer();
 
@@ -227,7 +256,8 @@ package(zyeware.core) static:
         Renderer2D.initialize();
         Renderer3D.initialize();
 
-        // Initialize application.
+        sApplication = wareZye;
+        sFrameTime = dur!"msecs"(1000 / sApplication.targetFramerate);
         sApplication.initialize();
     }
 
@@ -262,7 +292,7 @@ public static:
         center, /// Keep the original size at the center of the window.
         keepAspect, /// Scale with window, but keep the aspect.
         fill, /// Fill the window completly.
-        resize /// Resize the framebuffer itself.
+        changeWindowSize /// Resize the framebuffer itself.
     }
 
     /// The crash handler that is used when the engine crashes.
@@ -297,7 +327,7 @@ public static:
             recalculateFramebufferArea();
 
             // TODO: Move this to pre-frame with flag.
-            if (sScaleMode == ScaleMode.resize)
+            if (sScaleMode == ScaleMode.changeWindowSize)
             {
                 FramebufferProperties fbProps = sMainFramebuffer.properties;
                 fbProps.size = wev.size;
@@ -335,10 +365,26 @@ public static:
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 
+    // TODO: Change name?
+    void changeWindowSize(Vector2i size)
+        in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
+    {
+        if (!sMainWindow.isMaximized && !sMainWindow.isMinimized)
+            sMainWindow.size = Vector2i(size);
+        
+        framebufferSize = Vector2i(size);
+    }
+
     /// The current application.
     Application application() nothrow
     {
         return sApplication;
+    }
+
+    /// Sets the current application. It will only be set active after the current frame.
+    void application(Application value) nothrow
+    {
+        sApplicationToSwitchTo = value;
     }
 
     /// The duration the engine is already running.
@@ -396,16 +442,6 @@ public static:
         recalculateFramebufferArea();
     }
 
-    // TODO: Remove?
-    void resize(Vector2i size)
-        in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
-    {
-        if (!sMainWindow.isMaximized && !sMainWindow.isMinimized)
-            sMainWindow.size = Vector2i(size);
-        
-        framebufferSize = Vector2i(size);
-    }
-
     Vector2f cursorPosition() nothrow
     {
         Vector2f winCurPos = sMainWindow.cursorPosition;
@@ -427,5 +463,18 @@ public static:
     void scaleMode(ScaleMode value) nothrow
     {
         sScaleMode = value;
+    }
+
+    /// The arguments this application was started with.
+    /// These are the same as the ones ZyeWare was started with, but stripped of
+    /// engine-specific arguments.
+    string[] cmdArgs() nothrow
+    {
+        return sCmdArgs;
+    }
+
+    const(ProjectProperties) projectProperties() nothrow
+    {
+        return sProjectProperties;
     }
 }

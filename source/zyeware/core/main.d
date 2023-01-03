@@ -9,7 +9,7 @@ import zyeware.common;
 import zyeware.core.application;
 
 /// Implement this function to return a valid ZyeWare application.
-extern(C) Application createZyeWareApplication(string[] args);
+extern(C) ProjectProperties getProjectProperties();
 
 version (unittest)
 {
@@ -21,12 +21,7 @@ else
     {
         try
         {
-            ZyeWareProperties props;
-
-            props.cmdargs = args;
-            props.application = createZyeWareApplication(args.dup);
-
-            ZyeWare.initialize(props);
+            ZyeWare.initialize(args, getProjectProperties());
             ZyeWare.start();
             ZyeWare.cleanup();
             return 0;

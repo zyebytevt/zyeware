@@ -159,6 +159,7 @@ public:
     enum whitesmoke = Color( 0.96, 0.96, 0.96, 1 ); /// White smoke color.
     enum yellow = Color( 1, 1, 0, 1 ); /// Yellow color.
     enum yellowgreen = Color( 0.6, 0.8, 0.2, 1 ); /// Yellow green color.
+    enum grape = Color(111/255.0, 45/255.0, 168/255.0); /// Grape color.
 
     Vector4f v;
     alias v this;

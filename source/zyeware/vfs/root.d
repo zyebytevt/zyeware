@@ -107,7 +107,7 @@ package(zyeware) static:
 
         sProtocols["core"] = loadPackage("core.zpk", "core://");
         sProtocols["res"] = new VFSCombinedDirectory("res://", "res://", []);
-        sProtocols["user"] = createUserDir(ZyeWare.application.uuid.toString());
+        sProtocols["user"] = createUserDir(ZyeWare.projectProperties.projectName);
     }
 
     void cleanup() nothrow
