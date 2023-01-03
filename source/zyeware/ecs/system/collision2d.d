@@ -134,12 +134,12 @@ version(none)
 class SpatialGridTechnique2D : BroadPhaseTechnique2D
 {
 protected:
-    Vector2ui mGridSize;
+    Vector2i mGridSize;
     uint mGridCellSize;
     Entity[][] mEntities;
 
 public:
-    this(Vector2ui gridSize, uint gridCellSize)
+    this(Vector2i gridSize, uint gridCellSize)
         in (gridSize.x >= 1 && gridSize.y >= 1, "Invalid grid size.")
     {  
         mGridSize = gridSize;

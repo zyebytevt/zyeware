@@ -90,7 +90,7 @@ package(zyeware) static:
         sDefaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
 
         static ubyte[3] pixels = [255, 255, 255];
-        sBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2ui(1)), TextureProperties.init);
+        sBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
     }
 
     /// Cleans up all used resources.

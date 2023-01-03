@@ -17,10 +17,11 @@ protected:
     const(ubyte[]) mPixels;
     ubyte mChannels;
     ubyte mBitsPerChannel;
-    Vector2ui mSize;
+    Vector2i mSize;
 
 public:
-    this(in ubyte[] pixels, ubyte channels, ubyte bitsPerChannel, Vector2ui size) pure nothrow
+    this(in ubyte[] pixels, ubyte channels, ubyte bitsPerChannel, Vector2i size) pure nothrow
+        in (size.x > 0 && size.y > 0, "Image must be at least 1x1.")
         in (pixels && pixels.length == size.x * size.y * channels, "Invalid amount of pixels.")
         in (channels > 0 && channels <= 4, "Invalid amount of channels.")
         in (bitsPerChannel > 0 && bitsPerChannel <= 8, "Invalid amount of bits per channel.")
@@ -31,9 +32,9 @@ public:
         mSize = size;
     }
 
-    Color getPixel(Vector2ui coords) pure const nothrow
+    Color getPixel(Vector2i coords) pure const nothrow
     {
-        if (coords.x >= mSize.x && coords.y >= mSize.y)
+        if (coords.x < 0 || coords.y < 0 || coords.x >= mSize.x || coords.y >= mSize.y)
             return Color.black;
         
         ubyte r = 0, g = 0, b = 0, a = 255;
@@ -79,7 +80,7 @@ public:
         return mBitsPerChannel;
     }
 
-    Vector2ui size() pure const nothrow
+    Vector2i size() pure const nothrow
     {
         return mSize;
     }
@@ -96,6 +97,6 @@ public:
         IFImage img = read_image(data);
         data.dispose();
 
-        return new Image(img.buf8, img.c, img.bpc, Vector2ui(img.w, img.h));
+        return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
     }
 }

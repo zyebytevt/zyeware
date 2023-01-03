@@ -50,8 +50,8 @@ protected:
 
     void recalculateFramebufferArea() nothrow
     {
-        immutable Vector2ui winSize = mWindow.size;
-        immutable Vector2ui gameSize = mFramebuffer.properties.size;
+        immutable Vector2i winSize = mWindow.size;
+        immutable Vector2i gameSize = mFramebuffer.properties.size;
 
         Vector2f finalPos, finalSize;
 
@@ -178,11 +178,12 @@ public:
     }
 
     void resize(Vector2i size)
+        in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
     {
         if (!mWindow.isMaximized && !mWindow.isMinimized)
-            mWindow.size = Vector2ui(size);
+            mWindow.size = Vector2i(size);
         
-        framebufferSize = Vector2ui(size);
+        framebufferSize = Vector2i(size);
     }
 
     /// The frame rate the application should target to hold. This is not a guarantee.
@@ -205,12 +206,13 @@ public:
         return mProgramArgs;
     }
 
-    Vector2ui framebufferSize() pure const nothrow
+    Vector2i framebufferSize() pure const nothrow
     {
         return mFramebuffer.properties.size;
     }
 
-    void framebufferSize(Vector2ui newSize)
+    void framebufferSize(Vector2i newSize)
+        in (newSize.x > 0 && newSize.y > 0, "Size cannot be negative.")
     {
         FramebufferProperties fbProps = mFramebuffer.properties;
         fbProps.size = newSize;

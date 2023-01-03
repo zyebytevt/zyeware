@@ -26,7 +26,7 @@ class Texture2D : Texture
 {
 protected:
     TextureProperties mProperties;
-    Vector2ui mSize;
+    Vector2i mSize;
     ubyte mChannels;
     uint mID;
 
@@ -128,7 +128,7 @@ public:
         return mID;
     }
 
-    Vector2ui size() pure const nothrow
+    Vector2i size() pure const nothrow
     {
         return mSize;
     }

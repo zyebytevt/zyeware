@@ -3,19 +3,18 @@ module zyeware.core.math.vector;
 import inmath.math;
 import inmath.linalg;
 
+public import inmath.linalg : dot, cross;
+
 import zyeware.common;
 
 alias Vector2f = Vector!(float, 2);
 alias Vector2i = Vector!(int, 2);
-alias Vector2ui = Vector!(uint, 2);
 
 alias Vector3f = Vector!(float, 3);
 alias Vector3i = Vector!(int, 3);
-alias Vector3ui = Vector!(uint, 3);
 
 alias Vector4f = Vector!(float, 4);
 alias Vector4i = Vector!(int, 4);
-alias Vector4ui = Vector!(uint, 4);
 
 /// Calculates the height on a specific point of a triangle using the barycentric algorithm.
 /// Params:

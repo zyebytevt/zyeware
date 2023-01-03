@@ -5,6 +5,8 @@ import inmath.linalg;
 
 import zyeware.common;
 
+alias Quaternionf = Quaternion!(float);
+
 alias Matrix4f = Matrix!(float, 4, 4);
 alias Matrix3f = Matrix!(float, 3, 3);
 

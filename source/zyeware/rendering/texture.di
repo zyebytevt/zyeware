@@ -28,7 +28,7 @@ class Texture2D : Texture
     const(TextureProperties) properties() pure const nothrow;
     uint id() pure const nothrow;
 
-    Vector2ui size() pure const nothrow;
+    Vector2i size() pure const nothrow;
     ubyte channels() pure const nothrow;
 
     static Texture2D load(string path);

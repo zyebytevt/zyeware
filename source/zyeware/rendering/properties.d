@@ -6,13 +6,13 @@ import zyeware.rendering;
 struct WindowProperties
 {
     string title = "ZyeWare Engine";
-    Vector2ui size = Vector2ui(1280, 720);
+    Vector2i size = Vector2i(1280, 720);
     Image icon;
 }
 
 struct FramebufferProperties
 {
-    Vector2ui size;
+    Vector2i size;
     ubyte channels;
     bool swapChainTarget;
 }
@@ -42,7 +42,7 @@ struct TextureProperties
 struct TerrainProperties
 {
     Vector2f size;
-    Vector2ui vertexCount;
+    Vector2i vertexCount;
     float[] heightData; // Row-major
     Texture2D[4] textures;
     Texture2D blendMap;

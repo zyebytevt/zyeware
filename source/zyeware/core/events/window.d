@@ -38,20 +38,20 @@ public:
 class WindowResizedEvent : WindowEvent
 {
 protected:
-    Vector2ui mSize;
+    Vector2i mSize;
 
 public:
     /// Params:
     ///     window = The window this event was sent from.
     ///     size = The size after resizing.
-    this(Window window, Vector2ui size) pure nothrow
+    this(Window window, Vector2i size) pure nothrow
     {
         super(window);
         mSize = size;
     }
 
     /// The size after resizing.
-    final Vector2ui size() const pure nothrow
+    final Vector2i size() const pure nothrow
     {
         return mSize;
     }

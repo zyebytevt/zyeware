@@ -29,22 +29,28 @@ A lot of stuff has already been done before this file has been started.
 
 [ ] Rewrite to not use Garbage Collector!!! (with dplug.core.nogc and stf.typecons.RefCounted)
     This is important, we're facing memory leaks here!
+    [not anymore but ok]
     Use https://code.dlang.org/packages/dlib
 
 [X] Finish Particles (ECS?)
-[ ] Work on (G)UI
 [X] Replace Algebraic with SumType
-[ ] Make buildable on Windows
+[X] Implement inmath
+[?] Rename all custom aliases to their inmath names (e.g. Vector2i -> vec2i)
+[X] Replace all vecs with uint to vec with int
+[ ] Work on TODOs
+[ ] Work on (G)UI
 [ ] Get audio working
-[ ] Take a look at inmath
+[ ] Add streaming audio
+[ ] MMAP shenanigans for ZPK files
+[ ] Make buildable and executable on Windows
+[ ] Make executable on MacOS
 [ ] Localization improvements (i18n-d)?
 
 [ ] Implement texture atlases in 3D meshes
-[ ] Add CLI (like Angular)
+[ ] Add CLI (like Angular) (maybe now even more important due to Github workflows?)
 [ ] Update docstrings, add header to all source files
 [ ] Possibly move all asset loaders to a package
 [ ] Add further mesh loading options (https://code.dlang.org/packages/gltf2loader)
-[ ] Add streaming audio
 [ ] Port to PS Vita
 [ ] Add unittests where appropriate
 [ ] Implement TTF font rendering (Improve font rendering as a whole?) (Use SDL_TTF!)

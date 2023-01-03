@@ -27,8 +27,8 @@ class Window
 
     inout(void*) nativeWindow() inout nothrow;
 
-    Vector2ui position() const nothrow;
-    void position(Vector2ui value) nothrow;
+    Vector2i position() const nothrow;
+    void position(Vector2i value) nothrow;
 
     Vector2i size() const nothrow;
     void size(Vector2i value) nothrow;

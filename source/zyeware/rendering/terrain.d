@@ -68,7 +68,7 @@ protected:
         for (uint y; y < heightMap.size.y; ++y)
             for (uint x; x < heightMap.size.x; ++x)
             {
-                immutable Color pixel = heightMap.getPixel(Vector2ui(x, y));
+                immutable Color pixel = heightMap.getPixel(Vector2i(x, y));
                 heightData[currentHeightIndex++] = (pixel.r - pixel.b) * heightScale;
             }
 
@@ -142,7 +142,7 @@ public:
         immutable Vector2f gridSize = Vector2f(mProperties.size.x / (mProperties.vertexCount.x - 1),
             mProperties.size.y / (mProperties.vertexCount.y - 1));
 
-        immutable Vector2ui grid = Vector2ui(cast(uint) (coords.x / gridSize.x), cast(uint) (coords.y / gridSize.y));
+        immutable Vector2i grid = Vector2i(cast(uint) (coords.x / gridSize.x), cast(uint) (coords.y / gridSize.y));
 
         immutable Vector2f unitGridCoords = Vector2f(fmod(coords.x, gridSize.x) / gridSize.x,
             fmod(coords.y, gridSize.y) / gridSize.y);

@@ -25,7 +25,7 @@ private:
 
 protected:
     string mTitle;
-    Vector2ui mSize;
+    Vector2i mSize;
     Vector2i mPosition;
     Rebindable!(const Image) mIcon;
     SDL_Surface* mIconSurface;
@@ -180,7 +180,7 @@ public:
             SDL_GetWindowSize(mHandle, &width, &height);
             SDL_GetWindowPosition(mHandle, &x, &y);
 
-            mSize = Vector2ui(width, height);
+            mSize = Vector2i(width, height);
             mPosition = Vector2i(x, y);
         }
 
@@ -211,7 +211,7 @@ public:
                 switch (ev.window.event)
                 {
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    mSize = Vector2ui(ev.window.data1, ev.window.data2);
+                    mSize = Vector2i(ev.window.data1, ev.window.data2);
                     ZyeWare.emit!WindowResizedEvent(this, mSize);
                     break;
 
@@ -437,12 +437,13 @@ public:
         SDL_SetWindowPosition(mHandle, value.x, value.y);
     }
 
-    Vector2ui size() const nothrow
+    Vector2i size() const nothrow
     {
         return mSize;
     }
 
-    void size(Vector2ui value) nothrow
+    void size(Vector2i value) nothrow
+        in (value.x > 0 && value.y > 0, "Window size cannot be negative.")
     {
         SDL_SetWindowSize(mHandle, value.x, value.y);
     }
