@@ -56,12 +56,6 @@ public:
         if (cast(QuitEvent) ev)
             ZyeWare.quit();
     }
-
-    /// The frame rate the application should target to hold. This is not a guarantee.
-    uint targetFramerate() pure const nothrow
-    {
-        return 60;
-    }
 }
 
 /// A ZyeWare application that takes care of the game state logic.

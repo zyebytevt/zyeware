@@ -228,24 +228,33 @@ protected:
 
     FILE* mCFile;
     Node* mRoot;
+    bool mFilePointerOwner;
 
 package:
-    this(string fullname, string name, FILE* file, Node* root) pure nothrow
+    this(string fullname, string name, FILE* file, Node* root, Flag!"filePointerOwner" filePointerOwner) pure nothrow
         in (file && root)
     {
         super(fullname, name);
         mCFile = file;
         mRoot = root;
+        mFilePointerOwner = filePointerOwner;
     }
 
 public:
+    ~this()
+    {
+        import core.stdc.stdio : fclose;
+        if (mFilePointerOwner)
+            fclose(mCFile);
+    }
+
     override VFSDirectory getDirectory(string name) pure
         in (name, "Name cannot be null.")
     {
         enforce!VFSException(!isRooted(name), "Subdirectory name cannot be rooted.");
 
         if (name == ".")
-            return new VFSZPKDirectory(fullname, name, mCFile, mRoot);
+            return new VFSZPKDirectory(fullname, name, mCFile, mRoot, No.filePointerOwner);
 
         Node* current = mRoot;
         foreach (part; name.split("/"))
@@ -256,7 +265,7 @@ public:
 
         // Check if it's a directory.
         enforce!VFSException(!current.fileInfo, format!"Subdirectory '%s' not found."(name));
-        return new VFSZPKDirectory(buildPath(fullname, name), name, mCFile, current);
+        return new VFSZPKDirectory(buildPath(fullname, name), name, mCFile, current, No.filePointerOwner);
     }
 
     override VFSFile getFile(string name, VFSFile.Mode mode = VFSFile.Mode.read) pure

@@ -5,7 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.vfs.loader;
 
-import zyeware.vfs.dir;
+import zyeware.common;
+import zyeware.vfs;
 
 /// Interface for all VFS loaders. They are responsible for checking and loading various
 /// types of files or directories into the VFS.
@@ -14,7 +15,7 @@ interface VFSLoader
 public:
     /// Loads the given entry.
     /// Returns: The loaded directory as VFSDirectory.
-    VFSDirectory load(string diskPath, string name) const;
+    LoadPackageResult load(string diskPath, string name) const;
 
     /// Returns `true` if the given entry is valid for loading by this loader, `false` otherwise.
     bool eligable(string diskPath) const;
@@ -24,12 +25,12 @@ public:
 class VFSDirectoryLoader : VFSLoader
 {
 public:
-    VFSDirectory load(string diskPath, string name) const
+    LoadPackageResult load(string diskPath, string name) const
         in (diskPath && name)
     {
         import std.path : baseName;
 
-        return new VFSDiskDirectory(name, name, diskPath);
+        return LoadPackageResult(new VFSDiskDirectory(name, name, diskPath), null);
     }
 
     bool eligable(string diskPath) const
@@ -85,11 +86,17 @@ package:
     }
 
 public:
-    VFSDirectory load(string diskPath, string name) const
+    LoadPackageResult load(string diskPath, string name) const
         in (diskPath && name)
     {
+        import std.file : read;
         import std.string : split, toStringz;
+        import std.digest.md;
 
+        // Calculate hash
+        ubyte[] hash = new MD5Digest().digest(read(diskPath));
+
+        // Open file and parse
         FILE* file = fopen(diskPath.toStringz, "rb");
 
         FileNode* root = new FileNode;
@@ -128,7 +135,7 @@ public:
             current.fileInfo = new FileNode.FileInfo(fullPath, fileOffset, fileSize);
         }
 
-        return new VFSZPKDirectory(name, name, file, root);
+        return LoadPackageResult(new VFSZPKDirectory(name, name, file, root, Yes.filePointerOwner), hash);
     }
 
     bool eligable(string diskPath) const

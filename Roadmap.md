@@ -38,7 +38,8 @@ A lot of stuff has already been done before this file has been started.
 [?] Rename all custom aliases to their inmath names (e.g. Vector2i -> vec2i)
 [X] Replace all vecs with uint to vec with int
 [X] Work on TODOs
-[ ] Add splash screen
+[X] Add splash screen
+[ ] Get hash for packages, check core.zpk
 [ ] Work on (G)UI
 [ ] Get audio working
 [ ] Add streaming audio

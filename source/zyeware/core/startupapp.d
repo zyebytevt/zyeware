@@ -3,6 +3,7 @@ module zyeware.core.startupapp;
 import zyeware.common;
 import zyeware.rendering;
 
+package(zyeware.core)
 final class StartupApplication : Application
 {
 protected:
@@ -65,8 +66,8 @@ public:
         RenderAPI.clear();
 
         immutable float scale = mScaleInterpolator.interpolate(seconds);
-        Vector2f min = Vector2f(-0.9, -0.4) * scale;
-        Vector2f max = Vector2f(0.9, 0.4) * scale;
+        Vector2f min = Vector2f(-0.9, -0.35) * scale;
+        Vector2f max = Vector2f(0.9, 0.35) * scale;
 
         Renderer2D.begin(mCamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawRect(Rect2f(min, max), Matrix4f.identity,

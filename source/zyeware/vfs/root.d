@@ -17,6 +17,8 @@ import std.path : buildNormalizedPath, dirName;
 import zyeware.common;
 import zyeware.vfs;
 
+package(zyeware.vfs) alias LoadPackageResult = Tuple!(VFSDirectory, "root", ubyte[], "hash");
+
 struct VFS
 {
 private static:
@@ -46,7 +48,7 @@ private static:
         return splitResult;
     }
 
-    VFSDirectory loadPackage(string path, string name)
+    LoadPackageResult loadPackage(string path, string name)
         in (path && name)
     {
         foreach (VFSLoader loader; sLoaders)
@@ -56,9 +58,10 @@ private static:
         throw new VFSException(format!"Failed to find eligable loader for package '%s'."(path));
     }
 
-    VFSDirectory createUserDir(string userDirName)
-        in (userDirName)
+    VFSDirectory createUserDir()
     {
+        immutable string userDirName = ZyeWare.projectProperties.authorName ~ "/" ~ ZyeWare.projectProperties.projectName;
+
         string dataDir = buildNormalizedPath(thisExePath.dirName, userDirPortableName, userDirName);
 
         if (!sPortableMode)
@@ -105,9 +108,18 @@ package(zyeware) static:
         VFS.addLoader(new VFSDirectoryLoader());
         VFS.addLoader(new VFSZPKLoader());
 
-        sProtocols["core"] = loadPackage("core.zpk", "core://");
+        // Load core package and check hash if in release mode
+        LoadPackageResult core = loadPackage("core.zpk", "core://");
+        debug {} else
+        {
+            static immutable ubyte[] expectedHash = [];
+            if (core.hash is null || core.hash != expectedHash)
+                throw new VFSException("Core package has been modified, cannot proceed.");
+        }
+        
+        sProtocols["core"] = core.root;
         sProtocols["res"] = new VFSCombinedDirectory("res://", "res://", []);
-        sProtocols["user"] = createUserDir(ZyeWare.projectProperties.projectName);
+        sProtocols["user"] = createUserDir();
     }
 
     void cleanup() nothrow
@@ -126,7 +138,7 @@ public static:
     VFSDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
-        auto zpk = loadPackage(path, "/");
+        auto zpk = loadPackage(path, "/").root;
         (cast(VFSCombinedDirectory) sProtocols["res"]).addDirectory(zpk);
         Logger.core.log(LogLevel.info, "Added package '%s'.", path);
         return zpk;

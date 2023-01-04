@@ -28,8 +28,8 @@ import zyeware.core.startupapp;
 /// Struct that holds information about the project.
 struct ProjectProperties
 {
-    string authorName;
-    string projectName;
+    string authorName = "Anonymous";
+    string projectName = "ZyeWare Project";
 
     LogLevel coreLogLevel = LogLevel.trace; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.trace; /// The log level for the client logger.
@@ -37,6 +37,8 @@ struct ProjectProperties
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
     WindowProperties mainWindowProperties; /// The properties of the main window.
+
+    uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
 }
 
 /// Holds information about passed time since the last frame.
@@ -124,15 +126,13 @@ private static:
             immutable nextFrameTime = FrameTime(dur!"hnsecs"(cast(long) (lag.total!"hnsecs" * sTimeScale)), lag);
             drawFramebuffer(nextFrameTime);
 
+            // If we have to switch to a new application, do it at the end of the frame.
             if (sApplicationToSwitchTo)
             {
                 if (sApplication)
-                {
                     sApplication.cleanup();
-                }
 
                 sApplication = sApplicationToSwitchTo;
-                sFrameTime = dur!"msecs"(1000 / sApplication.targetFramerate);
                 sApplication.initialize();
 
                 recalculateFramebufferArea();
@@ -218,12 +218,16 @@ private static:
     }
 
 package(zyeware.core) static:
+    CrashHandler crashHandler;
+
     void initialize(string[] args, ProjectProperties properties)
     {
+        GC.disable();
+
         sCmdArgs = args;
         sProjectProperties = properties;
 
-        GC.disable();
+        sFrameTime = dur!"msecs"(1000 / properties.targetFrameRate);
         sRandom = new RandomNumberGenerator();
 
         if (properties.crashHandler)
@@ -235,9 +239,6 @@ package(zyeware.core) static:
             else
                 crashHandler = new DefaultCrashHandler();
         }
-
-        // redeemed by TheFrozenKnights
-        auto wareZye = new StartupApplication(properties.mainApplication);
 
         // Initialize profiler and logger before anything else.
         version (Profiling) Profiler.initialize();
@@ -256,8 +257,7 @@ package(zyeware.core) static:
         Renderer2D.initialize();
         Renderer3D.initialize();
 
-        sApplication = wareZye;
-        sFrameTime = dur!"msecs"(1000 / sApplication.targetFramerate);
+        sApplication = new StartupApplication(properties.mainApplication);
         sApplication.initialize();
     }
 
@@ -294,9 +294,6 @@ public static:
         fill, /// Fill the window completly.
         changeWindowSize /// Resize the framebuffer itself.
     }
-
-    /// The crash handler that is used when the engine crashes.
-    CrashHandler crashHandler;
 
     /// Stops the main loop and quits the engine.
     void quit() nothrow
