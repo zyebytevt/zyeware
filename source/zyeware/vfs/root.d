@@ -112,6 +112,7 @@ package(zyeware) static:
         LoadPackageResult core = loadPackage("core.zpk", "core://");
         debug {} else
         {
+            // TODO: Add file hash
             static immutable ubyte[] expectedHash = [];
             if (core.hash is null || core.hash != expectedHash)
                 throw new VFSException("Core package has been modified, cannot proceed.");
