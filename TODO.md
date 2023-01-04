@@ -39,9 +39,10 @@ A lot of stuff has already been done before this file has been started.
 [X] Replace all vecs with uint to vec with int
 [X] Work on TODOs
 [X] Add splash screen
-[ ] Get hash for packages, check core.zpk
-[ ] Work on (G)UI
-[ ] Change cursor shape
+[X] Get hash for packages, check core.zpk
+[X] Work on (G)UI
+[X] Change cursor shape
+[ ] Explain building steps
 [ ] Markup for creating GUI
 [ ] Get audio working
 [ ] Add streaming audio
