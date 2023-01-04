@@ -139,7 +139,7 @@ public:
 
             scope VFSFile propsFile = VFS.getFile(path ~ ".props");
             Tag root = parseSource(propsFile.readAll!string);
-            propsFile.dispose();
+            propsFile.close();
 
             try
             {

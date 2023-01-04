@@ -99,4 +99,11 @@ public:
 
         return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
     }
+
+    static Image load(in ubyte[] data)
+    {
+        IFImage img = read_image(data);
+
+        return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
+    }
 }
