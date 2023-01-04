@@ -8,6 +8,7 @@ final class StartupApplication : Application
 {
 protected:
     Texture2D mEngineLogo;
+    version(ZyeByteStartup) Texture2D mZyeByte;
     Application mMainApplication;
     OrthographicCamera mCamera;
 
@@ -27,6 +28,10 @@ public:
         ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
         mEngineLogo = AssetManager.load!Texture2D("core://textures/engine-logo.png");
+
+        version(ZyeByteStartup)
+            mZyeByte = AssetManager.load!Texture2D("core://textures/zyebyte.png");
+
         mCamera = new OrthographicCamera(-1, 1, 1, -1);
 
         mBackgroundGradient.addPoint(0, Color.grape);
@@ -35,10 +40,11 @@ public:
 
         mBackgroundGradient.addPoint(1, Color.grape);
         mAlphaInterpolator.addPoint(1, 1f);
+        mScaleInterpolator.addPoint(1, 0.9f);
 
         mBackgroundGradient.addPoint(2, Color.black);
         mAlphaInterpolator.addPoint(2, 0f);
-        mScaleInterpolator.addPoint(2, 0.5f);
+        mScaleInterpolator.addPoint(2, 0.3f);
     }
 
     override void cleanup()
@@ -69,9 +75,16 @@ public:
         Vector2f min = Vector2f(-0.9, -0.35) * scale;
         Vector2f max = Vector2f(0.9, 0.35) * scale;
 
+        immutable float alpha = mAlphaInterpolator.interpolate(seconds);
+
         Renderer2D.begin(mCamera.projectionMatrix, Matrix4f.identity);
+
         Renderer2D.drawRect(Rect2f(min, max), Matrix4f.identity,
-            Color(1, 1, 1, mAlphaInterpolator.interpolate(seconds)), mEngineLogo);
+            Color(1, 1, 1, alpha), mEngineLogo);
+
+        version(ZyeByteStartup) Renderer2D.drawRect(Rect2f(0, 0.82, 1, 1), Matrix4f.identity,
+            Color(1, 1, 1, alpha), mZyeByte);
+        
         Renderer2D.end();
     }
 }

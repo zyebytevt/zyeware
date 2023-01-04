@@ -41,6 +41,7 @@ A lot of stuff has already been done before this file has been started.
 [X] Add splash screen
 [X] Get hash for packages, check core.zpk
 [X] Work on (G)UI
+[ ] Add more GUI widgets (TextInputBox, CheckBox, RadioButton, Slider)
 [X] Change cursor shape
 [ ] Explain building steps
 [ ] Markup for creating GUI

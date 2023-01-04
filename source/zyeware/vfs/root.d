@@ -17,7 +17,7 @@ import std.path : buildNormalizedPath, dirName;
 import zyeware.common;
 import zyeware.vfs;
 
-package(zyeware.vfs) alias LoadPackageResult = Tuple!(VFSDirectory, "root", ubyte[], "hash");
+package(zyeware.vfs) alias LoadPackageResult = Tuple!(VFSDirectory, "root", immutable(ubyte[]), "hash");
 
 struct VFS
 {
@@ -110,13 +110,13 @@ package(zyeware) static:
 
         // Load core package and check hash if in release mode
         LoadPackageResult core = loadPackage("core.zpk", "core://");
-        debug {} else
+        /*debug {} else
         {
-            // TODO: Add file hash
-            static immutable ubyte[] expectedHash = [];
-            if (core.hash is null || core.hash != expectedHash)
+            enum corePackageMD5 = digest!MD5("test");
+
+            if (core.hash is null || core.hash != corePackageMD5)
                 throw new VFSException("Core package has been modified, cannot proceed.");
-        }
+        }*/
         
         sProtocols["core"] = core.root;
         sProtocols["res"] = new VFSCombinedDirectory("res://", "res://", []);

@@ -94,7 +94,7 @@ public:
         import std.digest.md;
 
         // Calculate hash
-        ubyte[] hash = new MD5Digest().digest(read(diskPath));
+        immutable ubyte[] hash = md5Of(read(diskPath)).idup;
 
         // Open file and parse
         FILE* file = fopen(diskPath.toStringz, "rb");
