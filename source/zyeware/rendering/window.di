@@ -47,4 +47,7 @@ class Window
 
     string clipboard() nothrow;
     void clipboard(string value) nothrow;
+
+    void cursor(Cursor value) nothrow;
+    const(Cursor) cursor() const nothrow;
 }

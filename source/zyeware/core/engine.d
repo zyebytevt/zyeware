@@ -439,10 +439,8 @@ public static:
         recalculateFramebufferArea();
     }
 
-    Vector2f cursorPosition() nothrow
+    Vector2f convertWindowToFramebufferLocation(Vector2f winCurPos) nothrow
     {
-        Vector2f winCurPos = sMainWindow.cursorPosition;
-        
         float fbActualWidth = sFramebufferArea.max.x - sFramebufferArea.min.x;
         float fbActualHeight = sFramebufferArea.max.y - sFramebufferArea.min.y;
 

@@ -100,7 +100,7 @@ public:
         mStateStack.push(state);
         state.onAttach(!state.mWasAlreadyAttached);
         state.mWasAlreadyAttached = true;
-        GC.collect();
+        ZyeWare.collect();
     }
 
     /// Pushes the given state onto the stack, and switches to it.
@@ -116,7 +116,7 @@ public:
         mStateStack.push(state);
         state.onAttach(!state.mWasAlreadyAttached);
         state.mWasAlreadyAttached = true;
-        GC.collect();
+        ZyeWare.collect();
     }
 
     /// Pops the current state from the stack, restoring the previous state.
@@ -127,7 +127,7 @@ public:
         
         currentState.onAttach(!currentState.mWasAlreadyAttached);
         currentState.mWasAlreadyAttached = true;
-        GC.collect();
+        ZyeWare.collect();
     }
 
     pragma(inline, true)

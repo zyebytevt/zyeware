@@ -5,7 +5,7 @@ import bindbc.sdl;
 import zyeware.common;
 import zyeware.rendering;
 
-SDL_Surface* createSurfaceFromImage(const Image image)
+SDL_Surface* createSurfaceFromImage(const Image image) nothrow
 {
     uint rmask, gmask, bmask, amask;
     version (BigEndian)
@@ -21,7 +21,7 @@ SDL_Surface* createSurfaceFromImage(const Image image)
         rmask = 0x000000ff;
         gmask = 0x0000ff00;
         bmask = 0x00ff0000;
-        amask = (image.channels == 4) ? 0 : 0xff000000;
+        amask = (image.channels == 4) ? 0xff000000 : 0;
     }
 
     int depth = image.channels * 8;

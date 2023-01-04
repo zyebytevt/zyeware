@@ -19,6 +19,8 @@ import bindbc.opengl;
 import zyeware.common;
 import zyeware.rendering;
 
+import platform.opengl.utils;
+
 class Window
 {
 private:
@@ -29,9 +31,12 @@ protected:
     Vector2i mSize;
     Vector2i mPosition;
     Rebindable!(const Image) mIcon;
+    Rebindable!(const Cursor) mCursor;
     SDL_Surface* mIconSurface;
     bool mVSync;
     bool mIsCursorCaptured;
+
+    SDL_Cursor*[const Cursor] mSDLCursors;
 
     SDL_Window* mHandle;
     SDL_GLContext mGLContext;
@@ -195,6 +200,9 @@ public:
 
         if (mIconSurface)
             SDL_FreeSurface(mIconSurface);
+
+        foreach (SDL_Cursor* cursor; mSDLCursors.values)
+            SDL_FreeCursor(cursor);
 
         if (--sWindowCount == 0)
             SDL_Quit();
@@ -536,5 +544,28 @@ public:
     void clipboard(string value) nothrow
     {
         SDL_SetClipboardText(value.toStringz);
+    }
+
+    void cursor(Cursor value) nothrow
+    {
+        mCursor = value;
+
+        SDL_Cursor** sdlCursor = value in mSDLCursors;
+        if (!sdlCursor)
+        {
+            SDL_Surface* surface = createSurfaceFromImage(value.image);
+            SDL_Cursor* cursor = SDL_CreateColorCursor(surface, value.hotspot.x, value.hotspot.y);
+            SDL_FreeSurface(surface);
+
+            mSDLCursors[value] = cursor;
+            sdlCursor = value in mSDLCursors;
+        }
+
+        SDL_SetCursor(*sdlCursor);
+    }
+    
+    const(Cursor) cursor() const nothrow
+    {
+        return mCursor;
     }
 }

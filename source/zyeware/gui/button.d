@@ -19,29 +19,31 @@ protected:
         Renderer2D.drawRect(mArea, Matrix4f.identity, mColor);
     }
 
-    override void onCursorEnter(VirtualCursor cursor) nothrow
+    override void onCursorEnter() nothrow
     {
-        cursor.shape = VirtualCursor.Shape.pointingHand;
+        //cursor.shape = VirtualCursor.Shape.pointingHand;
+        mColor = Color.red;
     }
 
-    override void onCursorExit(VirtualCursor cursor) nothrow
+    override void onCursorExit() nothrow
     {
-        cursor.shape = VirtualCursor.Shape.arrow;
+        //cursor.shape = VirtualCursor.Shape.arrow;
+        mColor = Color.white;
     }
 
-    override void onCursorPressed(VirtualCursor cursor) nothrow
+    override void onCursorPressed(MouseCode button) nothrow
     {
-        ZyeWare.emit!GUIEventCursorButton(this, cursor, GUIEventCursorButton.Type.pressed, MouseCode.buttonLeft);
+        ZyeWare.emit!GUIEventButton(this, GUIEventButton.Type.pressed, button);
     }
 
-    override void onCursorReleased(VirtualCursor cursor) nothrow
+    override void onCursorReleased(MouseCode button) nothrow
     {
-        ZyeWare.emit!GUIEventCursorButton(this, cursor, GUIEventCursorButton.Type.released, MouseCode.buttonLeft);
+        ZyeWare.emit!GUIEventButton(this, GUIEventButton.Type.released, MouseCode.buttonLeft);
     }
 
-    override void onCursorClicked(VirtualCursor cursor) nothrow
+    override void onCursorClicked(MouseCode button) nothrow
     {
-        ZyeWare.emit!GUIEventCursorButton(this, cursor, GUIEventCursorButton.Type.clicked, MouseCode.buttonLeft);
+        ZyeWare.emit!GUIEventButton(this, GUIEventButton.Type.clicked, MouseCode.buttonLeft);
     }
 
 public:

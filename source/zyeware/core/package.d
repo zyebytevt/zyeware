@@ -13,7 +13,6 @@ public
     import zyeware.core.exception;
     import zyeware.core.interpolator;
     import zyeware.core.random;
-    import zyeware.core.cursor;
 
     import zyeware.core.events;
     import zyeware.core.math;

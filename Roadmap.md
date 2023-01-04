@@ -41,6 +41,8 @@ A lot of stuff has already been done before this file has been started.
 [X] Add splash screen
 [ ] Get hash for packages, check core.zpk
 [ ] Work on (G)UI
+[ ] Change cursor shape
+[ ] Markup for creating GUI
 [ ] Get audio working
 [ ] Add streaming audio
 [ ] Fix profiler omg

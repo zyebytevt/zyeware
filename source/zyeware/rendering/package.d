@@ -29,4 +29,5 @@ public
     import zyeware.rendering.spriteframes;
     import zyeware.rendering.color;
     import zyeware.rendering.particles2d;
+    import zyeware.rendering.cursor;
 }

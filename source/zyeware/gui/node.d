@@ -54,46 +54,49 @@ protected:
 
     final void checkForCursorEvent(in Event ev) nothrow
     {
-        if (auto cMotion = cast(VirtualCursorEventMotion) ev)
+        if (auto cMotion = cast(InputEventMouseMotion) ev)
         {
             if (!mIsPressedDown)
             {
-                immutable bool hovering = mArea.contains(cMotion.position);
+                Vector2f position = ZyeWare.convertWindowToFramebufferLocation(cMotion.position);
+                immutable bool hovering = mArea.contains(position);
 
                 if (hovering && !mIsCursorHovering)
                 {
                     mIsCursorHovering = true;
-                    onCursorEnter(cMotion.cursor);
+                    onCursorEnter();
                 }
                 else if (!hovering && mIsCursorHovering)
                 {
                     mIsCursorHovering = false;
-                    onCursorExit(cMotion.cursor);
+                    onCursorExit();
                 }
             }
         }
-        else if (auto cButton = cast(VirtualCursorEventButton) ev)
+        else if (auto cButton = cast(InputEventMouseButton) ev)
         {
+            // TODO: Why specifically buttonLeft?
             if (cButton.button == MouseCode.buttonLeft)
             {
-                immutable bool hovering = mArea.contains(cButton.position);
+                Vector2f position = ZyeWare.convertWindowToFramebufferLocation(ZyeWare.mainWindow.cursorPosition);
+                immutable bool hovering = mArea.contains(position);
 
                 if (cButton.isPressed() && hovering)
                 {
                     mIsPressedDown = true;
-                    onCursorPressed(cButton.cursor);
+                    onCursorPressed(cButton.button);
                 }
                 else if (!cButton.isPressed() && mIsPressedDown)
                 {
-                    onCursorReleased(cButton.cursor);
+                    onCursorReleased(cButton.button);
                     mIsPressedDown = false;
 
                     if (hovering)
-                        onCursorClicked(cButton.cursor);
+                        onCursorClicked(cButton.button);
                     else
                     {
                         mIsCursorHovering = false;
-                        onCursorExit(cButton.cursor);
+                        onCursorExit();
                     }
                 }
             }
@@ -113,8 +116,8 @@ protected:
         mArea = Rect2f(
             anchorPoints.min.x + mMargin.left,
             anchorPoints.min.y + mMargin.top,
-            anchorPoints.max.x + mMargin.right,
-            anchorPoints.max.y + mMargin.bottom
+            anchorPoints.max.x - mMargin.right,
+            anchorPoints.max.y - mMargin.bottom
         );
 
         arrangeChildren();
@@ -122,7 +125,7 @@ protected:
         mMustUpdate = false;
     }
 
-    bool customReceiveEvent(in Event ev) pure nothrow
+    bool customReceive(in Event ev) pure nothrow
     {
         return false;
     }
@@ -141,11 +144,11 @@ protected:
             node.updateArea(mArea);
     }
 
-    void onCursorEnter(VirtualCursor cursor) nothrow {}
-    void onCursorExit(VirtualCursor cursor) nothrow {}
-    void onCursorPressed(VirtualCursor cursor) nothrow {}
-    void onCursorReleased(VirtualCursor cursor) nothrow {}
-    void onCursorClicked(VirtualCursor cursor) nothrow {}
+    void onCursorEnter() nothrow {}
+    void onCursorExit() nothrow {}
+    void onCursorPressed(MouseCode button) nothrow {}
+    void onCursorReleased(MouseCode button) nothrow {}
+    void onCursorClicked(MouseCode button) nothrow {}
 
 public:
     bool visible = true;
@@ -184,17 +187,17 @@ public:
             node.draw(nextFrameTime);
     }
 
-    final bool receiveEvent(in Event ev) nothrow
+    final bool receive(in Event ev) nothrow
     {
         if (mCheckForCursor)
             checkForCursorEvent(ev);
         
-        if (customReceiveEvent(ev))
+        if (customReceive(ev))
             return true;
 
         foreach (node; mChildren)
         {
-            if (node.receiveEvent(ev))
+            if (node.receive(ev))
                 return true;
         }
 

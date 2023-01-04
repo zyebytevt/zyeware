@@ -10,6 +10,7 @@ import std.format : format;
 import zyeware.common;
 import zyeware.gui;
 
+/*
 abstract class VirtualCursorEvent : Event
 {
 protected:
@@ -98,6 +99,7 @@ public:
         return format!"VirtualCursorEventMotion(cursor: %s, position: %s)"(mCursor, mPosition);
     }
 }
+*/
 
 // ==============================================================
 
@@ -118,11 +120,10 @@ public:
     }
 }
 
-class GUIEventCursorButton : GUIEvent
+class GUIEventButton : GUIEvent
 {
 protected:
     Type mType;
-    VirtualCursor mCursor;
     MouseCode mButton;
 
 public:
@@ -133,23 +134,17 @@ public:
         clicked
     }
 
-    this(GUINode emitter, VirtualCursor cursor, Type type, MouseCode button)
+    this(GUINode emitter, Type type, MouseCode button)
     {
         super(emitter);
 
         mType = type;
-        mCursor = cursor;
         mButton = button;
     }
 
     Type type() @property pure const nothrow
     {
         return mType;
-    }
-
-    VirtualCursor cursor() @property pure nothrow
-    {
-        return mCursor;
     }
 
     MouseCode button() @property pure nothrow
