@@ -1,7 +1,7 @@
 // ZyeWare - Default 3D model shader
 
 opengl:vertex `
-#version 420 core
+#version 410 core
 
 // ===== ATTRIBUTES =====
 layout(location = 0) in vec3 aPosition;
@@ -33,7 +33,7 @@ void main()
 `
 
 opengl:fragment `
-#version 420 core
+#version 410 core
 
 // ===== OUTPUTS =====
 layout(location = 0) out vec4 oColor;
@@ -41,13 +41,13 @@ layout(location = 0) out vec4 oColor;
 // ===== INPUTS =====
 #include "core://shaders/include/glsl/uniforms3d.glsl"
 
-layout(std140, binding = 3) uniform ModelUniforms
+layout(std140) uniform ModelUniforms
 {
     float shineDamper;
     float reflectivity;
 } iModelUniforms;
 
-layout(binding = 0) uniform sampler2D iAlbedo;
+uniform sampler2D iAlbedo;
 
 // ===== VARIANTS =====
 in vec2 vUV;

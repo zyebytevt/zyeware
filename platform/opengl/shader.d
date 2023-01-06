@@ -48,10 +48,48 @@ protected:
 
             // If uniform is a sampler, count them.
             if (type >= GL_SAMPLER_1D && type <= GL_UNSIGNED_INT_SAMPLER_2D_RECT)
-                samplerID += size;
+            {
+                immutable int location = glGetUniformLocation(mProgramID, &name[0]);
+
+                if (size == 1)
+                {
+                    glUniform1i(location, samplerID++);
+                    Logger.core.log(LogLevel.debug_, "Assigning sampler uniform '%s' ID %d.",
+                        name[0..nameLength], samplerID - 1);
+                }
+                else
+                {
+                    int[] samplerIDs = new int[size];
+                    for (size_t j; j < size; ++j)
+                        samplerIDs[j] = samplerID++;
+
+                    glUniform1iv(location, size, samplerIDs.ptr);
+                    Logger.core.log(LogLevel.debug_, "Assigning sampler uniform array '%s' IDs %d through %d.",
+                        name[0..nameLength], samplerIDs[0], samplerIDs[$ - 1]);
+
+                    samplerIDs.destroy();
+                }
+            }
         }
 
         mTextureCount = samplerID;
+
+        // TODO: Improve this horribleness of code duplication
+        int blockIndex = glGetUniformBlockIndex(mProgramID, "Matrices");
+        if (blockIndex != -1)
+            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.matrices);
+
+        blockIndex = glGetUniformBlockIndex(mProgramID, "Environment");
+        if (blockIndex != -1)
+            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.environment);
+
+        blockIndex = glGetUniformBlockIndex(mProgramID, "Lights");
+        if (blockIndex != -1)
+            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.lights);
+
+        blockIndex = glGetUniformBlockIndex(mProgramID, "ModelUniforms");
+        if (blockIndex != -1)
+            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.modelVariables);
     }
 
 public:

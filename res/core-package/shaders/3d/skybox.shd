@@ -3,13 +3,13 @@
 // view-projection matrix and a samplerCube.
 
 opengl:vertex `
-#version 420 core
+#version 410 core
 
 // ===== ATTRIBUTES =====
 layout(location = 0) in vec3 aPosition;
 
 // ===== INPUTS =====
-layout(std140, binding = 0, shared, row_major) uniform Matrices
+layout(std140, shared, row_major) uniform Matrices
 {
     mat4 mvp;
 } iMatrices;
@@ -27,13 +27,13 @@ void main()
 `
 
 opengl:fragment `
-#version 420 core
+#version 410 core
 
 // ===== OUTPUTS =====
 layout(location = 0) out vec4 oColor;
 
 // ===== INPUTS =====
-layout(binding = 0) uniform samplerCube iTexture;
+uniform samplerCube iTexture;
 
 // ===== VARIANTS =====
 in vec3 vUV;

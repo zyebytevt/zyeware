@@ -2,7 +2,7 @@
 // Uses multitexturing.
 
 opengl:vertex `
-#version 420 core
+#version 410 core
 
 // ===== ATTRIBUTES =====
 layout(location = 0) in vec3 aPosition;
@@ -34,7 +34,7 @@ void main()
 `
 
 opengl:fragment `
-#version 420 core
+#version 410 core
 
 // ===== OUTPUTS =====
 layout(location = 0) out vec4 oColor;
@@ -42,13 +42,13 @@ layout(location = 0) out vec4 oColor;
 // ===== INPUTS =====
 #include "core://shaders/include/glsl/uniforms3d.glsl"
 
-layout(std140, binding = 3) uniform ModelUniforms
+layout(std140) uniform ModelUniforms
 {
     vec2 textureTiling;
 } iModelUniforms;
 
-layout(binding = 0) uniform sampler2D iTextures[4];
-layout(binding = 4) uniform sampler2D iBlendMap;
+uniform sampler2D iTextures[4];
+uniform sampler2D iBlendMap;
 
 // ===== VARIANTS =====
 in vec2 vUV;

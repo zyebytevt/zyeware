@@ -2,7 +2,7 @@
 // Used by the 2D batch renderer.
 
 opengl:vertex `
-#version 420 core
+#version 410 core
 
 // ===== ATTRIBUTES =====
 layout(location = 0) in vec4 aPosition;
@@ -11,7 +11,7 @@ layout(location = 2) in vec2 aUV;
 layout(location = 3) in float aTexIndex;
 
 // ===== INPUTS =====
-layout(std140, binding = 0, shared, row_major) uniform Matrices
+layout(std140, shared, row_major) uniform Matrices
 {
     mat4 viewProjection;
 } iMatrices;
@@ -33,13 +33,13 @@ void main()
 `
 
 opengl:fragment `
-#version 420 core
+#version 410 core
 
 // ===== OUTPUTS =====
 layout(location = 0) out vec4 oColor;
 
 // ===== INPUTS =====
-layout(binding = 0) uniform sampler2D iTextures[8];
+uniform sampler2D iTextures[8];
 
 // ===== VARIANTS =====
 in vec4 vColor;
