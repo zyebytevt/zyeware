@@ -62,6 +62,9 @@ public:
 /// Game states can be set, pushed and popped.
 class GameStateApplication : Application
 {
+private:
+    enum deferWarning = "Changing game state during event emission can cause instability. Use a deferred call instead.";
+
 protected:
     GrowableStack!GameState mStateStack;
 
@@ -94,6 +97,9 @@ public:
     void changeState(GameState state)
         in (state, "Game state cannot be null.")
     {
+        debug if (ZyeWare.isEmittingEvent)
+            Logger.core.log(LogLevel.warning, deferWarning);
+
         if (hasState)
             mStateStack.pop().onDetach();
         
@@ -110,6 +116,9 @@ public:
     void pushState(GameState state)
         in (state, "Game state cannot be null.")
     {
+        debug if (ZyeWare.isEmittingEvent)
+            Logger.core.log(LogLevel.warning, deferWarning);
+
         if (hasState)
             currentState.onDetach();
         
@@ -122,6 +131,9 @@ public:
     /// Pops the current state from the stack, restoring the previous state.
     void popState()
     {
+        debug if (ZyeWare.isEmittingEvent)
+            Logger.core.log(LogLevel.warning, deferWarning);
+
         if (hasState)
             mStateStack.pop().onDetach();
         

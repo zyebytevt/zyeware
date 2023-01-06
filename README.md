@@ -1,8 +1,8 @@
 # ZyeWare Game Engine
-[![License](https://img.shields.io/github/license/zyebytevt/zyeware?style=plastic)](https://github.com/zyebytevt/zyeware/blob/main/LICENSE.txt) ![Open issues](https://img.shields.io/github/issues/zyebytevt/zyeware?style=plastic) ![Last commit](https://img.shields.io/github/last-commit/zyebytevt/zyeware?style=plastic)
+[![License](https://img.shields.io/github/license/zyebytevt/zyeware?style=plastic)](https://github.com/zyebytevt/zyeware/blob/main/LICENSE.txt) [![Open issues](https://img.shields.io/github/issues/zyebytevt/zyeware?style=plastic)](https://github.com/zyebytevt/zyeware/issues) [![Last commit](https://img.shields.io/github/last-commit/zyebytevt/zyeware?style=plastic)](https://github.com/zyebytevt/zyeware/commits/main)
 
 <p align="center">
-    <img src="core-package/textures/engine-logo.png" width="600" alt="ZyeWare Logo">
+    <img src="res/core-package/textures/engine-logo.png" width="600" alt="ZyeWare Logo">
 </p>
 
 ## Introduction

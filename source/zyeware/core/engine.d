@@ -55,11 +55,10 @@ struct ZyeWare
     @disable this(this);
 
 private static:
+    alias DeferFunc = void delegate();
+
     Window sMainWindow;
-    
-    // Change this around too
     Application sApplication;
-    Application sApplicationToSwitchTo;
 
     Duration sFrameTime;
     Duration sUpTime;
@@ -75,8 +74,17 @@ private static:
     ProjectProperties sProjectProperties;
     string[] sCmdArgs;
 
+    DeferFunc[16] sDeferredFunctions;
+    size_t sDeferredFunctionsCount;
+
     bool sRunning;
     float sTimeScale = 1f;
+
+    debug
+    {
+        bool sIsProcessingDeferred;
+        bool sIsEmittingEvent;
+    }
 
     void runMainLoop()
     {
@@ -126,18 +134,17 @@ private static:
             immutable nextFrameTime = FrameTime(dur!"hnsecs"(cast(long) (lag.total!"hnsecs" * sTimeScale)), lag);
             drawFramebuffer(nextFrameTime);
 
-            // If we have to switch to a new application, do it at the end of the frame.
-            if (sApplicationToSwitchTo)
+            // Call all registered deferred functions at the end of the frame.
             {
-                if (sApplication)
-                    sApplication.cleanup();
+                debug
+                {
+                    sIsProcessingDeferred = true;
+                    scope (exit) sIsProcessingDeferred = false;
+                }
 
-                sApplication = sApplicationToSwitchTo;
-                sApplication.initialize();
-
-                recalculateFramebufferArea();
-
-                sApplicationToSwitchTo = null;
+                for (size_t i; i < sDeferredFunctionsCount; ++i)
+                    sDeferredFunctions[i]();
+                sDeferredFunctionsCount = 0;
             }
         }
 
@@ -257,7 +264,10 @@ package(zyeware.core) static:
         Renderer2D.initialize();
         Renderer3D.initialize();
 
-        sApplication = new StartupApplication(properties.mainApplication);
+        // In release mode, we want to display our fancy splash screen.
+        debug sApplication = properties.mainApplication;
+        else sApplication = new StartupApplication(properties.mainApplication);
+
         sApplication.initialize();
     }
 
@@ -318,6 +328,12 @@ public static:
     void emit(in Event ev) nothrow
         in (ev, "Event to emit cannot be null.")
     {
+        debug
+        {
+            sIsEmittingEvent = true;
+            scope (exit) sIsEmittingEvent = false;
+        }
+
         if (auto wev = cast(WindowResizedEvent) ev)
         {
             sWindowProjection = Matrix4f.orthographic(0, wev.size.x, 0, wev.size.y, -1, 1);
@@ -372,6 +388,19 @@ public static:
         framebufferSize = Vector2i(size);
     }
 
+    /// Registers a callback to be called at the very end of a frame.
+    ///
+    /// Params:
+    ///     func = The deferred callback.
+    void callDeferred(DeferFunc func)
+    {
+        debug enforce!CoreException(!sIsProcessingDeferred, "Cannot defer calls while processing deferred calls!");
+        enforce!CoreException(sDeferredFunctionsCount < sDeferredFunctions.length,
+            format!"Cannot have more than %d deferred functions!"(sDeferredFunctions.length));
+
+        sDeferredFunctions[sDeferredFunctionsCount++] = func;
+    }
+
     /// The current application.
     Application application() nothrow
     {
@@ -379,9 +408,17 @@ public static:
     }
 
     /// Sets the current application. It will only be set active after the current frame.
-    void application(Application value) nothrow
+    void application(Application value)
     {
-        sApplicationToSwitchTo = value;
+        callDeferred(() {
+            if (sApplication)
+                sApplication.cleanup();
+
+            sApplication = value;
+            sApplication.initialize();
+
+            recalculateFramebufferArea();
+        });
     }
 
     /// The duration the engine is already running.
@@ -417,16 +454,19 @@ public static:
         return sRandom;
     }
 
+    /// The main window of the engine.
     Window mainWindow() nothrow
     {
         return sMainWindow;
     }
 
+    /// The size of the main framebuffer.
     Vector2i framebufferSize() nothrow
     {
         return sMainFramebuffer.properties.size;
     }
 
+    /// ditto
     void framebufferSize(Vector2i newSize)
         in (newSize.x > 0 && newSize.y > 0, "Framebuffer size cannot be negative.")
     {
@@ -439,22 +479,30 @@ public static:
         recalculateFramebufferArea();
     }
 
-    Vector2f convertWindowToFramebufferLocation(Vector2f winCurPos) nothrow
+    /// Converts the given window-relative position to the main framebuffer location.
+    /// Use this method whenever you have to e.g. convert mouse pointer coordinates.
+    /// 
+    /// Params:
+    ///     location = The window relative position.
+    /// Returns: The converted framebuffer position.
+    Vector2f convertWindowToFramebufferLocation(Vector2f location) nothrow
     {
         float fbActualWidth = sFramebufferArea.max.x - sFramebufferArea.min.x;
         float fbActualHeight = sFramebufferArea.max.y - sFramebufferArea.min.y;
 
-        float x = ((winCurPos.x - sFramebufferArea.min.x) / fbActualWidth) * sMainFramebuffer.properties.size.x;
-        float y = ((winCurPos.y - sFramebufferArea.min.y) / fbActualHeight) * sMainFramebuffer.properties.size.y;
+        float x = ((location.x - sFramebufferArea.min.x) / fbActualWidth) * sMainFramebuffer.properties.size.x;
+        float y = ((location.y - sFramebufferArea.min.y) / fbActualHeight) * sMainFramebuffer.properties.size.y;
 
         return Vector2f(x, y);
     }
 
+    /// Determines how the displayed framebuffer will be scaled according to the window size and shape.
     ScaleMode scaleMode() nothrow
     {
         return sScaleMode;
     }
 
+    /// ditto
     void scaleMode(ScaleMode value) nothrow
     {
         sScaleMode = value;
@@ -468,8 +516,27 @@ public static:
         return sCmdArgs;
     }
 
+    /// The `ProjectProperties` the engine was started with.
+    /// See_Also: ProjectProperties
     const(ProjectProperties) projectProperties() nothrow
     {
         return sProjectProperties;
+    }
+
+    debug
+    {
+        /// If the engine is currently processing deferred calls.
+        /// **This method is only available in debug builds!**
+        bool isProcessingDeferred() nothrow
+        {
+            return sIsProcessingDeferred;
+        }
+
+        /// If the engine is currently emitting any event.
+        /// **This method is only available in debug builds!**
+        bool isEmittingEvent() nothrow
+        {
+            return sIsEmittingEvent;
+        }
     }
 }
