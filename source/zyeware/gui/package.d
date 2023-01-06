@@ -11,4 +11,5 @@ public
     import zyeware.gui.label;
     import zyeware.gui.texture;
     import zyeware.gui.button;
+    import zyeware.gui.parser;
 }

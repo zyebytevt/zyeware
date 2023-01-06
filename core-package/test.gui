@@ -1,3 +1,0 @@
-node name="root" margin="0,0,0,0" anchor="0,0,0,0" {
-    button name="testbutton" margin="0,0,0,0" anchor="0,0,0,0"
-}

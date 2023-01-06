@@ -25,3 +25,4 @@ mixin(CreateGenericExceptionType!"RenderException");
 mixin(CreateGenericExceptionType!"EntityException");
 mixin(CreateGenericExceptionType!"ComponentException");
 mixin(CreateGenericExceptionType!"SystemException");
+mixin(CreateGenericExceptionType!"GUIException");

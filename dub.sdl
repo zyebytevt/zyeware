@@ -11,9 +11,8 @@ dependency "bmfont" version="~>0.2.0"
 dependency "audio-formats" version="~>2.0.1"
 targetType "library"
 targetPath "out"
-preBuildCommands "dub run zpklink -- -i core-package -o core.zpk"
-dflags "-J."
-copyFiles "core.zpk"
+postBuildCommands "dub run zpklink -- -i res/core-package -o out/core.zpk"
+copyFiles "out/core.zpk"
 
 sourcePaths "source"
 

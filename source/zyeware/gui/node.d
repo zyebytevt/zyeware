@@ -15,7 +15,7 @@ struct Sides
     enum zero = Sides(0, 0, 0, 0);
     enum one = Sides(1, 1, 1, 1);
     
-    enum full = Sides(0, 1, 1, 0);
+    enum fill = Sides(0, 1, 1, 0);
     enum center = Sides(0.5, 0.5, 0.5, 0.5);
     
     enum topSide = Sides(0, 1, 0, 0);
