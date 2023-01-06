@@ -6,9 +6,11 @@
 module zyeware.rendering.renderer.renderer3d;
 
 import std.typecons : Rebindable;
+import std.exception : enforce;
 
 import zyeware.common;
 import zyeware.rendering;
+
 debug import zyeware.rendering.renderer.renderer2d : currentRenderer, CurrentRenderer;
 
 /// This struct gives access to the 3D rendering API.
@@ -86,6 +88,10 @@ package(zyeware) static:
             BufferElement("attenuation", BufferElement.Type.vec4, maxLights),
             BufferElement("count", BufferElement.Type.int_),
         ]));
+
+        // Make sure to always initialize the count variable with 0, in case lights
+        // are not uploaded.
+        sLightsBuffer.setData(sLightsBuffer.getEntryOffset("count"), [0]);
     }
 
     /// Cleans up all used resources.
@@ -113,7 +119,6 @@ public static:
     /// Params:
     ///     lights = The array of lights to upload.
     void uploadLights(Light[] lights)
-        in (lights)
     {
         if (lights.length > maxLights)
         {
@@ -135,7 +140,8 @@ public static:
     void begin(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
         in (environment, "Environment cannot be null.")
     {
-        debug assert(currentRenderer == CurrentRenderer.none, "A renderer is currently active, cannot begin.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.none,
+            "A renderer is currently active, cannot begin.");
 
         sActiveProjectionMatrix = projectionMatrix;
         sActiveViewMatrix = viewMatrix;
@@ -162,7 +168,8 @@ public static:
     /// everything to the screen.
     void end()
     {
-        debug assert(currentRenderer == CurrentRenderer.renderer3D, "3D renderer is not active, cannot end.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer3D,
+            "3D renderer is not active, cannot end.");
 
         flush();
 
@@ -225,7 +232,8 @@ public static:
     void submit(BufferGroup group, Material material, in Matrix4f transform)
         in (group && material)
     {
-        debug assert(currentRenderer == CurrentRenderer.renderer3D, "3D renderer is not active, cannot submit.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer3D,
+            "3D renderer is not active, cannot submit.");
 
         size_t i, j;
 

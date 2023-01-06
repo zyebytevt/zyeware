@@ -24,6 +24,7 @@ class Shader
 {
 private:
     static Rebindable!(const Shader) sCurrentlyBoundShader;
+    static int[string] sUniformBlockBindings;
 
 protected:
     uint mProgramID;
@@ -31,7 +32,10 @@ protected:
     uint[] mCompiledShaderIDs;
     size_t mTextureCount;
 
-    void parseUniforms() @trusted nothrow
+    // As to get it compiling on MacOS, we limit to OpenGL 4.1 and assign
+    // bindings directly. Additionally, this method calculates the amount
+    // of texture uniforms in this program.
+    void parseUniforms() @trusted
     {
         bind().assumeWontThrow;
 
@@ -74,22 +78,12 @@ protected:
 
         mTextureCount = samplerID;
 
-        // TODO: Improve this horribleness of code duplication
-        int blockIndex = glGetUniformBlockIndex(mProgramID, "Matrices");
-        if (blockIndex != -1)
-            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.matrices);
-
-        blockIndex = glGetUniformBlockIndex(mProgramID, "Environment");
-        if (blockIndex != -1)
-            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.environment);
-
-        blockIndex = glGetUniformBlockIndex(mProgramID, "Lights");
-        if (blockIndex != -1)
-            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.lights);
-
-        blockIndex = glGetUniformBlockIndex(mProgramID, "ModelUniforms");
-        if (blockIndex != -1)
-            glUniformBlockBinding(mProgramID, blockIndex, ConstantBuffer.Slot.modelVariables);
+        foreach (string name, int binding; sUniformBlockBindings)
+        {
+            int blockIndex = glGetUniformBlockIndex(mProgramID, name.toStringz);
+            if (blockIndex != -1)
+                glUniformBlockBinding(mProgramID, blockIndex, binding);
+        }
     }
 
 public:
@@ -97,6 +91,13 @@ public:
     {
         mProgramID = glCreateProgram();
         enforce!GraphicsException(mProgramID > 0, "Failed to allocate new shader program.");
+
+        sUniformBlockBindings = [
+            "Matrices": ConstantBuffer.Slot.matrices,
+            "Environment": ConstantBuffer.Slot.environment,
+            "Lights": ConstantBuffer.Slot.lights,
+            "ModelUniforms": ConstantBuffer.Slot.modelVariables
+        ];
     }
 
     ~this()

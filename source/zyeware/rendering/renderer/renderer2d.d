@@ -8,6 +8,7 @@ module zyeware.rendering.renderer.renderer2d;
 import std.traits : isSomeString;
 import std.string : lineSplitter;
 import std.typecons : Rebindable;
+import std.exception : enforce;
 
 import bmfont : BMFont = Font;
 
@@ -86,6 +87,11 @@ package(zyeware) static:
 
             sBatchBuffers ~= batchBuffer;
         }
+
+        // To circumvent a bug in MacOS builds that require a VAO to be bound before validating a
+        // shader program in OpenGL. Due to Renderer2D being initialized early during the
+        // engines lifetime, this should fix all further shader loadings.
+        sBatchBuffers[0].bind();
         
         sDefaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
 
@@ -112,7 +118,8 @@ public static:
     ///     viewMatrix = A 4x4 matrix used for view.
     void begin(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
     {
-        debug assert(currentRenderer == CurrentRenderer.none, "A renderer is currently active, cannot begin.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.none,
+            "A renderer is currently active, cannot begin.");
 
         sMatrixData.bind(ConstantBuffer.Slot.matrices);
         sMatrixData.setData(sMatrixData.getEntryOffset("viewProjection"),
@@ -129,7 +136,8 @@ public static:
     /// everything to the screen.
     void end()
     {
-        debug assert(currentRenderer == CurrentRenderer.renderer2D, "2D renderer is not active, cannot end.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
+            "2D renderer is not active, cannot end.");
 
         flush();
 
@@ -141,7 +149,8 @@ public static:
     /// Flushes all currently cached drawing commands to the screen.
     void flush()
     {
-        debug assert(currentRenderer == CurrentRenderer.renderer2D, "2D renderer is not active, cannot flush.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
+            "2D renderer is not active, cannot flush.");
 
         BufferGroup activeGroup = sBatchBuffers[sActiveBatchBufferIndex++];
         sActiveBatchBufferIndex %= sBatchBuffers.length;
@@ -174,8 +183,8 @@ public static:
     void drawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Vector4f(1),
         in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1), modulate,
-            texture, region);
+        drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
+            modulate, texture, region);
     }
 
     /// Draws a rectangle.
@@ -207,7 +216,8 @@ public static:
     void drawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1), in Texture2D texture = null,
         in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        debug assert(currentRenderer == CurrentRenderer.renderer2D, "2D renderer is not active, cannot draw.");
+        debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
+            "2D renderer is not active, cannot draw.");
 
         static Vector4f[4] quadPositions; 
         quadPositions[0] = Vector4f(dimensions.min.x, dimensions.min.y, 0.0f, 1);
