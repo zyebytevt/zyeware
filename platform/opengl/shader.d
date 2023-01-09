@@ -215,7 +215,7 @@ public:
 
                 foreach (ref Include include; includes)
                 {
-                    scope VFSFile includeFile = VFS.getFile(cast(string) include.path);
+                    VFSFile includeFile = VFS.getFile(cast(string) include.path);
                     char[] includeSource = cast(char[]) includeFile.readAll!string;
                     includeFile.close();
 
@@ -230,7 +230,7 @@ public:
             return mutableSource.idup;
         }
 
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
         immutable string source = file.readAll!string;
         Logger.core.log(LogLevel.debug_, source);
         Tag root = parseSource(source);
@@ -242,7 +242,7 @@ public:
         {
             if (string filePath = tag.getAttribute("file", null))
             {
-                scope VFSFile shaderFile = VFS.getFile(filePath);
+                VFSFile shaderFile = VFS.getFile(filePath);
                 shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
                 shaderFile.close();
             }

@@ -272,7 +272,7 @@ public:
         {
             import sdlang;
 
-            scope VFSFile propsFile = VFS.getFile(path ~ ".props");
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
             Tag root = parseSource(propsFile.readAll!string);
             propsFile.close();
 

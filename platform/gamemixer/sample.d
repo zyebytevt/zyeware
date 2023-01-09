@@ -22,7 +22,7 @@ package:
 public:
     static AudioSample load(string path)
     {
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
         ubyte[] data = file.readAll!(ubyte[]);
         file.close();
 

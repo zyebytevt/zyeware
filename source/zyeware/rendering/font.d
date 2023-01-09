@@ -116,7 +116,7 @@ public:
     {
         Logger.core.log(LogLevel.trace, "Loading Font from '%s'...", path);
         
-        scope VFSFile source = VFS.getFile(path);
+        VFSFile source = VFS.getFile(path);
         auto bmFont = parseFnt(source.readAll!(ubyte[]));
         source.close();
 

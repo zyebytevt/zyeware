@@ -137,7 +137,7 @@ public:
             import std.conv : to;
             import sdlang;
 
-            scope VFSFile propsFile = VFS.getFile(path ~ ".props");
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
             Tag root = parseSource(propsFile.readAll!string);
             propsFile.close();
 
@@ -241,7 +241,7 @@ public:
     {
         TextureProperties properties;
 
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
         Tag root = parseSource(file.readAll!string);
         file.close();
 
@@ -258,7 +258,7 @@ public:
         {
             import std.conv : to;
 
-            scope VFSFile propsFile = VFS.getFile(path ~ ".props");
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
             root = parseSource(propsFile.readAll!string);
             propsFile.close();
 

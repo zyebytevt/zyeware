@@ -61,7 +61,7 @@ public:
     static SpriteFrames load(string path)
         in (path, "Path cannot be null")
     {
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
         Tag root = parseSource(file.readAll!string);
         file.close();
 
