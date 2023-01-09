@@ -39,7 +39,8 @@ public static:
         return key;
     }
 
-    /// Registers a locale to the manager.
+    /// Registers a locale to the manager. If the given locale is already registered, then
+    /// the new translation gets merged into the existing one.
     ///
     /// Params:
     ///     file = The translation file to register. The locale is stored inside of it.
@@ -48,8 +49,23 @@ public static:
     void addLocale(Translation file) nothrow
         in (file, "Translation cannot be null.")
     {
-        sLoadedLocales[file.mLocale] = file;
-        Logger.core.log(LogLevel.debug_, "Added locale '%s'.", file.mLocale);
+        import std.range : chain, byPair, assocArray;
+
+        Translation locale = sLoadedLocales.get(file.mLocale, null).assumeWontThrow;
+
+        if (!locale)
+        {
+            sLoadedLocales[file.mLocale] = file;
+            file.optimize();
+            Logger.core.log(LogLevel.debug_, "Added locale '%s' and optimized translation.", file.mLocale);
+        }
+        else
+        {
+            locale.mTranslations = locale.mTranslations.byPair.chain(file.mTranslations.byPair).assocArray;
+            locale.optimize();
+            Logger.core.log(LogLevel.debug_, "Merged new translations into locale '%s' and optimized translation.",
+                file.mLocale);
+        }
     }
 
     /// Unregisters a locale from the manager.
@@ -110,7 +126,6 @@ public:
     {
         mLocale = locale;
         mTranslations = translations;
-        optimize();
     }
 
     /// Adds a key with the corresponding translation to the locale.
@@ -166,7 +181,7 @@ public:
     static Translation load(string path)
         in (path, "Path cannot be null.")
     {
-        enum subnodeSeparator = ".";
+        import std.algorithm : filter;
 
         VFSFile file = VFS.getFile(path);
         Tag root = parseSource(file.readAll!string);
@@ -176,22 +191,13 @@ public:
         
         string[string] translations;
 
-        void parseTag(Tag tag, string namePrefix)
+        foreach (Tag translationTag; root.all.tags.filter!(a => a.name == "translate"))
         {
-            auto children = tag.all.tags;
-            immutable string fullName = namePrefix ~ tag.name;
+            immutable string old = translationTag.expectTag("old").expectValue!string;
+            immutable string new_ = translationTag.expectTag("new").expectValue!string;
 
-            if (children.length > 0)
-            {
-                foreach (Tag child; children)
-                    parseTag(child, fullName ~ subnodeSeparator);
-            }
-            else
-                translations[fullName] = tag.expectValue!string;
-        }
-        
-        foreach (Tag trTag; root.expectTag("translations").all.tags)
-            parseTag(trTag, "");
+            translations[old] = new_;
+        } 
 
         return new Translation(locale, translations);
     }
