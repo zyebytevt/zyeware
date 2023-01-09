@@ -193,6 +193,8 @@ public:
     static Shader load(string path)
         in (path, "Path cannot be null.")
     {
+        Logger.core.log(LogLevel.debug_, "Loading shader '%s'...", path);
+
         string parseIncludes(string source)
         {
             enum includeRegex = ctRegex!("^#include \"(.*)\"$", "m");
@@ -232,7 +234,6 @@ public:
 
         VFSFile file = VFS.getFile(path);
         immutable string source = file.readAll!string;
-        Logger.core.log(LogLevel.debug_, source);
         Tag root = parseSource(source);
         file.close();
 
@@ -240,8 +241,9 @@ public:
 
         void loadShader(ref Tag tag, int type)
         {
-            if (string filePath = tag.getAttribute("file", null))
+            if (string filePath = tag.getAttribute!string("file", null))
             {
+                Logger.core.log(LogLevel.trace, "Loading external shader source '%s'...", filePath);
                 VFSFile shaderFile = VFS.getFile(filePath);
                 shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
                 shaderFile.close();

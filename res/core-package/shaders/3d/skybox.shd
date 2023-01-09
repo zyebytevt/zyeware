@@ -2,45 +2,6 @@
 // Very similar to the unshaded shader, but only using the
 // view-projection matrix and a samplerCube.
 
-opengl:vertex `
-#version 410 core
+opengl:vertex file="core://shaders/3d/glsl/skybox.vert.glsl"
 
-// ===== ATTRIBUTES =====
-layout(location = 0) in vec3 aPosition;
-
-// ===== INPUTS =====
-layout(std140, shared, row_major) uniform Matrices
-{
-    mat4 mvp;
-} iMatrices;
-
-// ===== VARIANTS =====
-out vec3 vUV;
-
-// ===== FUNCTIONS =====
-void main()
-{
-    vUV = aPosition;
-    vec4 pos = iMatrices.mvp * vec4(aPosition, 1.0);
-    gl_Position = pos.xyzz;
-}
-`
-
-opengl:fragment `
-#version 410 core
-
-// ===== OUTPUTS =====
-layout(location = 0) out vec4 oColor;
-
-// ===== INPUTS =====
-uniform samplerCube iTexture;
-
-// ===== VARIANTS =====
-in vec3 vUV;
-
-// ===== FUNCTIONS =====
-void main()
-{
-    oColor = texture(iTexture, vUV);
-}
-`
+opengl:fragment file="core://shaders/3d/glsl/skybox.frag.glsl"
