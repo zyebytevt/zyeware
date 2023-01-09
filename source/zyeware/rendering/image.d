@@ -88,14 +88,13 @@ public:
     static Image load(string path)
         in (path, "Path cannot be null.")
     {
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
 
         ubyte[] data = new ubyte[file.size];
         file.read(data);
-        file.dispose();
+        file.close();
 
         IFImage img = read_image(data);
-        data.dispose();
 
         return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
     }

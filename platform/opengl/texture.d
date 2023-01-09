@@ -137,7 +137,7 @@ public:
             import std.conv : to;
             import sdlang;
 
-            scope VFSFile propsFile = VFS.getFile(path ~ ".props");
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
             Tag root = parseSource(propsFile.readAll!string);
             propsFile.close();
 
@@ -151,7 +151,6 @@ public:
             catch (Exception ex)
             {
                 Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
-                ex.dispose();
             }
         }
 
@@ -242,9 +241,9 @@ public:
     {
         TextureProperties properties;
 
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
         Tag root = parseSource(file.readAll!string);
-        file.dispose();
+        file.close();
 
         Image[6] images = [
             AssetManager.load!Image(root.expectTagValue!string("positive-x")),
@@ -259,9 +258,9 @@ public:
         {
             import std.conv : to;
 
-            scope VFSFile propsFile = VFS.getFile(path ~ ".props");
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
             root = parseSource(propsFile.readAll!string);
-            propsFile.dispose();
+            propsFile.close();
 
             try
             {
@@ -273,7 +272,6 @@ public:
             catch (Exception ex)
             {
                 Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
-                ex.dispose();
             }
         }
 

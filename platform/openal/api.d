@@ -97,7 +97,6 @@ public static:
     {
         if (name in sBusses)
         {
-            sBusses[name].dispose();
             sBusses.remove(name);
         }
     }

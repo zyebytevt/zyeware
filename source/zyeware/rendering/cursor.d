@@ -32,7 +32,7 @@ public:
         import std.conv : to;
         import sdlang;
 
-        scope VFSFile propsFile = VFS.getFile(path);
+        VFSFile propsFile = VFS.getFile(path);
         Tag root = parseSource(propsFile.readAll!string);
         propsFile.close();
 

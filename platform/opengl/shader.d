@@ -106,7 +106,7 @@ public:
     }
 
     void compileShader(string source, int type)
-    {
+    { 
         immutable uint shaderID = glCreateShader(type);
         enforce!GraphicsException(shaderID > 0, "Failed to allocate new shader.");
 
@@ -193,6 +193,8 @@ public:
     static Shader load(string path)
         in (path, "Path cannot be null.")
     {
+        Logger.core.log(LogLevel.debug_, "Loading shader '%s'...", path);
+
         string parseIncludes(string source)
         {
             enum includeRegex = ctRegex!("^#include \"(.*)\"$", "m");
@@ -215,38 +217,36 @@ public:
 
                 foreach (ref Include include; includes)
                 {
-                    scope VFSFile includeFile = VFS.getFile(cast(string) include.path);
+                    VFSFile includeFile = VFS.getFile(cast(string) include.path);
                     char[] includeSource = cast(char[]) includeFile.readAll!string;
-                    includeFile.dispose();
+                    includeFile.close();
 
                     immutable size_t from = include.position + offset;
                     immutable size_t to = from + include.length;
 
                     mutableSource.replaceInPlace(from, to, includeSource);
                     offset += cast(ptrdiff_t) includeSource.length - include.length;
-                    
-                    includeSource.dispose();
                 }
             } while (includes.length > 0);
 
             return mutableSource.idup;
         }
 
-        scope VFSFile file = VFS.getFile(path);
+        VFSFile file = VFS.getFile(path);
         immutable string source = file.readAll!string;
         Tag root = parseSource(source);
-        file.dispose();
-        source.dispose();
+        file.close();
 
         auto shader = new Shader();
 
         void loadShader(ref Tag tag, int type)
         {
-            if (string filePath = tag.getAttribute("file", null))
+            if (string filePath = tag.getAttribute!string("file", null))
             {
-                scope VFSFile shaderFile = VFS.getFile(filePath);
+                Logger.core.log(LogLevel.trace, "Loading external shader source '%s'...", filePath);
+                VFSFile shaderFile = VFS.getFile(filePath);
                 shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
-                shaderFile.dispose();
+                shaderFile.close();
             }
             else
                 shader.compileShader(parseIncludes(tag.getValue!string), type);

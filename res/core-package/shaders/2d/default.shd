@@ -1,54 +1,6 @@
 // ZyeWare - Default 2D shader
 // Used by the 2D batch renderer.
 
-opengl:vertex `
-#version 410 core
+opengl:vertex file="core://shaders/2d/glsl/default.vert.glsl"
 
-// ===== ATTRIBUTES =====
-layout(location = 0) in vec4 aPosition;
-layout(location = 1) in vec4 aColor;
-layout(location = 2) in vec2 aUV;
-layout(location = 3) in float aTexIndex;
-
-// ===== INPUTS =====
-layout(std140, shared, row_major) uniform Matrices
-{
-    mat4 viewProjection;
-} iMatrices;
-
-// ===== VARIANTS =====
-out vec4 vColor;
-out vec2 vUV;
-flat out float vTexIndex;
-
-// ===== FUNCTIONS =====
-void main()
-{
-    vUV = aUV;
-    vColor = aColor;
-    vTexIndex = aTexIndex;
-
-    gl_Position = iMatrices.viewProjection * aPosition;
-}
-`
-
-opengl:fragment `
-#version 410 core
-
-// ===== OUTPUTS =====
-layout(location = 0) out vec4 oColor;
-
-// ===== INPUTS =====
-uniform sampler2D iTextures[8];
-
-// ===== VARIANTS =====
-in vec4 vColor;
-in vec2 vUV;
-flat in float vTexIndex;
-
-// ===== FUNCTIONS =====
-void main()
-{
-    oColor = texture(iTextures[int(vTexIndex)], vUV) * vColor;
-}
-`
+opengl:fragment file="core://shaders/2d/glsl/default.frag.glsl"

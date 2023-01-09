@@ -120,12 +120,12 @@ public:
             foreach (LogSink sink; mSinks)
                 sink.log(data);
 
+            // TODO: Is there a better way than disposing?
             text.dispose();
         }
         catch (Exception ex)
         {
             printf("Logger threw an exception. Could not log.\n");
-            ex.dispose();
         }
     }
 
