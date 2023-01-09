@@ -24,11 +24,10 @@ public:
     {
         scope VFSFile file = VFS.getFile(path);
         ubyte[] data = file.readAll!(ubyte[]);
-        file.dispose();
+        file.close();
 
         IAudioSource source = AudioAPI.sMixer.createSourceFromMemory(data);
         enforce!AudioException(source, format!"Failed to load audio sample '%s'."(path));
-        data.dispose();
 
         return new AudioSample(source);
     }

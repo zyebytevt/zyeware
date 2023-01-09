@@ -202,7 +202,7 @@ public:
     {
         scope VFSFile file = VFS.getFile(path);
         Tag root = parseSource(file.readAll!string);
-        file.dispose();
+        file.close();
 
         Material material;
 

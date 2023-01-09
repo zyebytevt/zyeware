@@ -106,7 +106,7 @@ public:
     }
 
     void compileShader(string source, int type)
-    {
+    { 
         immutable uint shaderID = glCreateShader(type);
         enforce!GraphicsException(shaderID > 0, "Failed to allocate new shader.");
 
@@ -217,15 +217,13 @@ public:
                 {
                     scope VFSFile includeFile = VFS.getFile(cast(string) include.path);
                     char[] includeSource = cast(char[]) includeFile.readAll!string;
-                    includeFile.dispose();
+                    includeFile.close();
 
                     immutable size_t from = include.position + offset;
                     immutable size_t to = from + include.length;
 
                     mutableSource.replaceInPlace(from, to, includeSource);
                     offset += cast(ptrdiff_t) includeSource.length - include.length;
-                    
-                    includeSource.dispose();
                 }
             } while (includes.length > 0);
 
@@ -234,9 +232,9 @@ public:
 
         scope VFSFile file = VFS.getFile(path);
         immutable string source = file.readAll!string;
+        Logger.core.log(LogLevel.debug_, source);
         Tag root = parseSource(source);
-        file.dispose();
-        source.dispose();
+        file.close();
 
         auto shader = new Shader();
 
@@ -246,7 +244,7 @@ public:
             {
                 scope VFSFile shaderFile = VFS.getFile(filePath);
                 shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
-                shaderFile.dispose();
+                shaderFile.close();
             }
             else
                 shader.compileShader(parseIncludes(tag.getValue!string), type);

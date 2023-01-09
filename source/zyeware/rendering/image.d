@@ -92,10 +92,9 @@ public:
 
         ubyte[] data = new ubyte[file.size];
         file.read(data);
-        file.dispose();
+        file.close();
 
         IFImage img = read_image(data);
-        data.dispose();
 
         return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
     }

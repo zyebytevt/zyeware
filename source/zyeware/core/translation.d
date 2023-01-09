@@ -170,7 +170,7 @@ public:
 
         scope VFSFile file = VFS.getFile(path);
         Tag root = parseSource(file.readAll!string);
-        file.dispose();
+        file.close();
 
         immutable string locale = root.expectTagValue!string("locale");
         

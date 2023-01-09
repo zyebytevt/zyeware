@@ -118,7 +118,7 @@ public:
         
         scope VFSFile source = VFS.getFile(path);
         auto bmFont = parseFnt(source.readAll!(ubyte[]));
-        source.dispose();
+        source.close();
 
         return new Font(bmFont);
     }
