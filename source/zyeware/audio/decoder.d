@@ -26,10 +26,12 @@ public:
     {
         mFile = file;
 
-        try {
+        try 
+        {
             stream.openFromMemory(mFile.readAll!(ubyte[])());
-        } catch (AudioFormatsException ex) {
-
+        }
+        catch (AudioFormatsException ex)
+        {
             // Copy manually managed memory to GC memory and rethrow exception.
             string errMsg = ex.msg.dup;
             string errFile = ex.file.dup;
@@ -55,9 +57,11 @@ public:
         in (buffer.length % stream.getNumChannels() == 0, "Buffer length is not a multiple of channel count.")
     {
         static if (is(T == float))
-            return stream.readSamplesFloat(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()));
+            return stream.readSamplesFloat(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()))
+                * stream.getNumChannels();
         else static if (is(T == double))
-            return stream.readSamplesDouble(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()));
+            return stream.readSamplesDouble(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()))
+                * stream.getNumChannels();
         else
             static assert(false, "'read' cannot process type " ~ T.stringof);
     }
@@ -67,6 +71,7 @@ public:
     /// Params:
     ///     samples = The amount of samples to read.
     /// Returns: A newly allocated buffer with the read samples.
+    /*
     T[] read(T)(size_t samples)
     {
         auto buffer = new T[samples * mAudioInfo.channels];
@@ -78,7 +83,7 @@ public:
             static assert(false, "'read' cannot process type " ~ T.stringof);
 
         return buffer[0 .. sampleCount];
-    }
+    }*/
 
     size_t sampleCount() 
     {
@@ -87,7 +92,7 @@ public:
 
     size_t sampleRate() 
     {
-        return cast(size_t)stream.getSamplerate();
+        return cast(size_t) stream.getSamplerate();
     }
 
     size_t channels() 
