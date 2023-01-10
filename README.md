@@ -13,7 +13,7 @@ I'm mainly developing this engine on stream over on [my channel](https://twitch.
 
 ## History
 
-Initial work started back in 2019 when developing a game engine for a physics engine assignment. This was then rewritten in 2021 to the current structure, until it was forgotten about. Beginning with 2023, I've picked it up again, rebranded, and am trying to finally mature it enough as to be able to create simple (or maybe even more sophisticated) games with it.
+Initial work started back in March 2019 when developing a game engine for a physics engine assignment. This was then rewritten in August 2020 to the current structure, until it was forgotten about. Beginning with 2023, I've picked it up again, rebranded, and am trying to finally mature it enough as to be able to create simple (or maybe even more sophisticated) games with it.
 
 A very important resource, especially for the early stages of the engine rewrite, has been [Hazel](https://github.com/TheCherno/Hazel) from Cherno! He's really cool, you should check him out!
 

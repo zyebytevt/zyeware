@@ -45,6 +45,8 @@ public:
         while ((readCount = decoder.read(readBuffer)) != 0)
             data ~= readBuffer[0 .. readCount];
 
+        Logger.core.log(LogLevel.debug_, "data size: %d", data.length);
+
         return new Sound(decoder.channels, decoder.sampleRate, data);
     }
 }
