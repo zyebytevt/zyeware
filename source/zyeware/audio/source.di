@@ -10,6 +10,25 @@ import zyeware.audio;
 
 class AudioSource
 {
+package(zyeware):
+    void updateBuffers();
+
+public:
+    this(AudioBus bus = null);
+
+    ~this();
+
+    void play();
+    void pause();
+    void stop();
+
+    inout(AudioStream) stream() pure inout nothrow;
+    void stream(AudioStream value) pure nothrow;
+}
+
+/*
+class AudioSource
+{
 protected:
     uint mId;
     float mSelfVolume = 1f;
@@ -48,4 +67,4 @@ public:
     override void stop() nothrow;
     override bool loop() nothrow;
     override void loop(bool value) nothrow;
-}
+}*/

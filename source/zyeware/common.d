@@ -15,6 +15,7 @@ public
     import zyeware.utils.codes;
     import zyeware.utils.format;
     import zyeware.utils.memory;
+    import zyeware.utils.collection;
 
     import zyeware.vfs;
 }

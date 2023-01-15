@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.main;
 
+import core.stdc.stdlib;
+
 import zyeware.common;
 import zyeware.core.application;
 
@@ -30,7 +32,7 @@ else
         {
             if (ZyeWare.crashHandler)
                 ZyeWare.crashHandler.show(t);
-            return 1;
+            abort();
         }
     }
 }

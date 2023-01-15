@@ -12,23 +12,26 @@ import zyeware.common;
 struct AudioDecoder
 {
 protected:
-    VFSFile mFile;
-    AudioStream stream;
+    const(ubyte)[] mEncodedMemory;
+    AudioStream mStream;
 
 public:
-    @disable this();
+    //@disable this();
     @disable this(this);
 
-    /// Params:
-    ///     file = The file used for audio decoding.
-    /// Throws: `AudioException` if the file could not be opened for decoding.
-    this(VFSFile file)
+    ~this()
     {
-        mFile = file;
+        if (mStream.isOpenForReading())
+            destroy!false(mStream);
+    }
+
+    void setData(const(ubyte)[] encodedMemory)
+    {
+        mEncodedMemory = encodedMemory;
 
         try 
         {
-            stream.openFromMemory(mFile.readAll!(ubyte[])());
+            mStream.openFromMemory(mEncodedMemory);
         }
         catch (AudioFormatsException ex)
         {
@@ -38,14 +41,8 @@ public:
             size_t errLine = ex.line;
             destroyAudioFormatException(ex);
 
-            throw new Exception(errMsg, null, errFile, errLine);
+            throw new AudioException(errMsg, errFile, errLine, null);
         }
-    }
-
-    ~this()
-    {
-        if (stream.isOpenForReading())
-            destroy!false(stream);
     }
 
     /// Tries to read samples into the supplied buffer.
@@ -54,14 +51,14 @@ public:
     ///     buffer = The buffer to read into. It's length should be a multiple of the channel count.
     /// Returns: The amount of samples actually read.
     size_t read(T)(ref T[] buffer)
-        in (buffer.length % stream.getNumChannels() == 0, "Buffer length is not a multiple of channel count.")
+        in (buffer.length % mStream.getNumChannels() == 0, "Buffer length is not a multiple of channel count.")
     {
         static if (is(T == float))
-            return stream.readSamplesFloat(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()))
-                * stream.getNumChannels();
+            return mStream.readSamplesFloat(buffer.ptr, cast(int)(buffer.length/mStream.getNumChannels()))
+                * mStream.getNumChannels();
         else static if (is(T == double))
-            return stream.readSamplesDouble(buffer.ptr, cast(int)(buffer.length/stream.getNumChannels()))
-                * stream.getNumChannels();
+            return mStream.readSamplesDouble(buffer.ptr, cast(int)(buffer.length/mStream.getNumChannels()))
+                * mStream.getNumChannels();
         else
             static assert(false, "'read' cannot process type " ~ T.stringof);
     }
@@ -76,27 +73,32 @@ public:
     {
         auto buffer = new T[samples * mAudioInfo.channels];
         static if (is(T == float))
-            return stream.readSamplesFloat(buffer.ptr, buffer.length/stream.getNumChannels());
+            return mStream.readSamplesFloat(buffer.ptr, buffer.length/mStream.getNumChannels());
         else static if (is(T == double))
-            return stream.readSamplesDouble(buffer.ptr, buffer.length/stream.getNumChannels());
+            return mStream.readSamplesDouble(buffer.ptr, buffer.length/mStream.getNumChannels());
         else
             static assert(false, "'read' cannot process type " ~ T.stringof);
 
         return buffer[0 .. sampleCount];
     }*/
 
+    void seekTo(size_t frame)
+    {
+        mStream.seekPosition(cast(int) frame); // ?????
+    }
+
     size_t sampleCount() 
     {
-        return stream.getLengthInFrames();
+        return mStream.getLengthInFrames();
     }
 
     size_t sampleRate() 
     {
-        return cast(size_t) stream.getSamplerate();
+        return cast(size_t) mStream.getSamplerate();
     }
 
     size_t channels() 
     {
-        return stream.getNumChannels();
+        return mStream.getNumChannels();
     }
 }
