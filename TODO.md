@@ -43,10 +43,10 @@ A lot of stuff has already been done before this file has been started.
 [X] Work on (G)UI
 [ ] Add more GUI widgets (TextInputBox, CheckBox, RadioButton, Slider)
 [X] Change cursor shape
-[ ] Explain building steps
-[ ] Markup for creating GUI
-[ ] Get audio working
-[ ] Add streaming audio
+[X] Explain building steps
+[X] Markup for creating GUI
+[X] Get audio working
+[X] Add streaming audio
 [ ] Fix profiler omg
 [ ] Add unittests
 [ ] MMAP shenanigans for ZPK files
