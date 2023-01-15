@@ -43,25 +43,10 @@ public:
 
         for (size_t i; i < amount; ++i)
         {
-            if (particles.freeIndices.empty)
-                return;
-
-            immutable size_t nextFree = particles.freeIndices.front;
-            particles.freeIndices.removeFront();
-
-            particles.positions[nextFree] = position;
-            particles.sizes[nextFree] = ZyeWare.random.getRange(particles.type.size.min, particles.type.size.max);
-            particles.rotations[nextFree] = ZyeWare.random.getRange(particles.type.spriteAngle.min, particles.type.spriteAngle.max);
-
-            immutable float speed = ZyeWare.random.getRange(particles.type.speed.min, particles.type.speed.max);
-            immutable float direction = ZyeWare.random.getRange(particles.type.direction.min, particles.type.direction.max);
-            particles.velocities[nextFree] = Vector2f(cos(direction) * speed, sin(direction) * speed);
-
-            particles.lifeTimes[nextFree] = hnsecs(ZyeWare.random.getRange(particles.type.lifeTime.min.total!"hnsecs", particles.type.lifeTime.max.total!"hnsecs"));
-            particles.startLifeTimes[nextFree] = particles.lifeTimes[nextFree];
-
-            //particles.activeIndices.insertFront(nextFree);
-            particles.activeIndices[particles.activeIndicesLength++] = nextFree;
+            if (particles.activeParticlesCount >= particles.positions.length)
+                break;
+            
+            particles.add(position);
         }
     }
 
@@ -69,49 +54,25 @@ public:
     {
         immutable float delta = frameTime.deltaTime.toFloatSeconds;
 
-        static size_t[] indicesToRemove;
-
         foreach (ParticleContainer* particles; mParticles.values)
         {
-            indicesToRemove.length = 0;
-
-            for (size_t i; i < particles.activeIndicesLength; ++i)
+            for (size_t i; i < particles.activeParticlesCount; ++i)
             {
-                immutable size_t particleIdx = particles.activeIndices[i];
-
-                particles.lifeTimes[particleIdx] -= frameTime.deltaTime;
-                if (particles.lifeTimes[particleIdx] <= Duration.zero)
+                particles.lifeTimes[i] -= frameTime.deltaTime;
+                if (particles.lifeTimes[i] <= Duration.zero)
                 {
-                    particles.activeIndices[particleIdx] = particles.activeIndices[particles.activeIndicesLength - 1];
-                    particles.activeIndicesLength = particles.activeIndicesLength - 1;
+                    particles.remove(i);
 
-                    particles.freeIndices.insertBack(particleIdx);
-
-                    if (particles.type.typeOnDeath > ParticleRegistrationID.init)
-                        emit(particles.type.typeOnDeath, particles.positions[particleIdx], 1);
+                    //if (particles.type.typeOnDeath > ParticleRegistrationID.init)
+                    //    emit(particles.type.typeOnDeath, particles.positions[particleIdx], 1);
 
                     --i;
                     continue;
                 }
 
-                particles.positions[particleIdx] += particles.velocities[particleIdx] * delta;
-                particles.velocities[particleIdx] += particles.type.gravity;
+                particles.positions[i] += particles.velocities[i] * delta;
+                particles.velocities[i] += particles.type.gravity;
             }
-
-            /*
-            foreach (size_t idx2; indicesToRemove)
-            {
-                //particles.activeIndices.linearRemoveElement(idx);
-
-                Logger.core.log(LogLevel.trace, "Removing index %d", idx2);
-                particles.activeIndices[idx2] = particles.activeIndices[particles.activeIndicesLength - 1];
-                particles.activeIndicesLength = particles.activeIndicesLength - 1;
-
-                particles.freeIndices.insertBack(idx2);
-
-                if (particles.type.typeOnDeath > ParticleRegistrationID.init)
-                    emit(particles.type.typeOnDeath, particles.positions[idx2], 1);
-            }*/
         }
     }
 
@@ -123,10 +84,10 @@ public:
         {
             immutable static Rect2f dimensions = Rect2f(-2, -2, 2, 2);
 
-            foreach (size_t idx; particles.activeIndices[0 .. particles.activeIndicesLength])
+            for (size_t i; i < particles.activeParticlesCount; ++i)
             {
-                immutable float progression = 1f - (particles.lifeTimes[idx].total!"hnsecs" / cast(float) particles.startLifeTimes[idx].total!"hnsecs");
-                immutable Vector2f position = particles.positions[idx] + particles.velocities[idx] * delta;
+                immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(float) particles.startLifeTimes[i].total!"hnsecs");
+                immutable Vector2f position = particles.positions[i] + particles.velocities[i] * delta;
 
                 import std.math.traits : isNaN;
 
@@ -134,7 +95,7 @@ public:
                 if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b) || isNaN(color.a))
                     color = Color.white;
 
-                Renderer2D.drawRect(dimensions, position, Vector2f(particles.sizes[idx]), particles.rotations[idx],
+                Renderer2D.drawRect(dimensions, position, Vector2f(particles.sizes[i]), particles.rotations[i],
                     color, particles.type.texture);
             }
         }
@@ -146,7 +107,7 @@ public:
         size_t bigDEnergy;
 
         foreach (ParticleContainer* particles; mParticles.values)
-            bigDEnergy += particles.activeIndicesLength;
+            bigDEnergy += particles.activeParticlesCount;
 
         return bigDEnergy;
     }
@@ -179,11 +140,7 @@ private struct ParticleContainer
     Duration[] lifeTimes;
     Duration[] startLifeTimes;
 
-    DList!size_t freeIndices;
-    // SList!size_t activeIndices;
-
-    size_t[] activeIndices;
-    size_t activeIndicesLength;
+    size_t activeParticlesCount;
 
     this(in ParticleProperties2D type, size_t count) pure nothrow
     {
@@ -195,11 +152,6 @@ private struct ParticleContainer
         velocities = new Vector2f[count];
         lifeTimes = new Duration[count];
         startLifeTimes = new Duration[count];
-
-        activeIndices = new size_t[count];
-
-        for (size_t i; i < count; ++i)
-            freeIndices.insertBack(i);
     }
 
     ~this()
@@ -210,5 +162,37 @@ private struct ParticleContainer
         velocities.dispose();
         lifeTimes.dispose();
         startLifeTimes.dispose();
+    }
+
+    void add(in Vector2f position)
+    {
+        assert(activeParticlesCount < positions.length, "No more free particles.");
+
+        positions[activeParticlesCount] = position;
+        sizes[activeParticlesCount] = ZyeWare.random.getRange(type.size.min, type.size.max);
+        rotations[activeParticlesCount] = ZyeWare.random.getRange(type.spriteAngle.min, type.spriteAngle.max);
+
+        immutable float speed = ZyeWare.random.getRange(type.speed.min, type.speed.max);
+        immutable float direction = ZyeWare.random.getRange(type.direction.min, type.direction.max);
+        velocities[activeParticlesCount] = Vector2f(cos(direction) * speed, sin(direction) * speed);
+
+        lifeTimes[activeParticlesCount] = hnsecs(ZyeWare.random.getRange(type.lifeTime.min.total!"hnsecs", type.lifeTime.max.total!"hnsecs"));
+        startLifeTimes[activeParticlesCount] = lifeTimes[activeParticlesCount];
+
+        ++activeParticlesCount;
+    }
+
+    void remove(size_t idx)
+    {
+        assert(activeParticlesCount > 0, "No active particles to remove.");
+
+        positions[idx] = positions[activeParticlesCount - 1];
+        sizes[idx] = sizes[activeParticlesCount - 1];
+        rotations[idx] = rotations[activeParticlesCount - 1];
+        velocities[idx] = velocities[activeParticlesCount - 1];
+        lifeTimes[idx] = lifeTimes[activeParticlesCount - 1];
+        startLifeTimes[idx] = startLifeTimes[activeParticlesCount - 1];
+
+        --activeParticlesCount;
     }
 }

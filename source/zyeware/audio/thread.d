@@ -22,6 +22,8 @@ private static:
                 source.updateBuffers();
 
             // TODO: Check if the buffer is still alive (or smth idk)
+            // TODO: Also change sleep time depending on buffer length
+            // (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
 
             Thread.sleep(10.msecs);
         }
