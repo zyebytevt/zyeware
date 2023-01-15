@@ -8,6 +8,23 @@ module zyeware.audio.buffer;
 import zyeware.common;
 import zyeware.audio;
 
+alias NoiseBitties = AudioStream;
+alias AirVibrationData = AudioStream;
+alias EarMassager = AudioStream;
+alias SonicStream = AudioStream;
+
+@asset(Yes.cache)
+class AudioStream
+{
+public:
+    this(const(ubyte)[] encodedMemory);
+
+    const(ubyte)[] encodedMemory() pure nothrow;
+
+    static AudioStream load(string path);
+}
+
+/*
 @asset(Yes.cache)
 class Sound
 {
@@ -23,3 +40,4 @@ class StreamedSound
 public:
     static StreamedSound load(string path);
 }
+*/

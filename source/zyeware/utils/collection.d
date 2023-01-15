@@ -5,7 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.utils.collection;
 
-import std.traits : hasIndirections;
+import std.traits : hasIndirections, isDynamicArray;
+import std.algorithm : countUntil, remove;
 
 struct GrowableCircularQueue(T)
 {
@@ -134,4 +135,11 @@ public:
         static if (hasIndirections!T)
             mArray[value + 1 .. $] = T.init;
     }
+}
+
+auto removeElement(R, N)(R haystack, N needle)
+    if (isDynamicArray!R)
+{
+    auto index = haystack.countUntil(needle);
+    return (index != -1) ? haystack.remove(index) : haystack;
 }

@@ -10,6 +10,37 @@ import bindbc.openal;
 import zyeware.common;
 import zyeware.audio;
 
+// TODO: Check memory constness someday.
+@asset(Yes.cache)
+class AudioStream
+{
+protected:
+    const(ubyte)[] mEncodedMemory;
+
+public:
+    this(const(ubyte)[] encodedMemory)
+    {
+        mEncodedMemory = encodedMemory;
+    }
+
+    const(ubyte)[] encodedMemory() pure nothrow
+    {
+        return mEncodedMemory;
+    }
+
+    static AudioStream load(string path)
+    {
+        VFSFile source = VFS.getFile(path);
+        ubyte[] bestCommunityData = source.readAll!(ubyte[])();
+        source.close();
+
+        Logger.core.log(LogLevel.debug_, "Loaded file '%s' as audio.", path);
+
+        return new AudioStream(bestCommunityData);
+    }
+}
+
+/*
 @asset(Yes.cache)
 class Sound
 {
@@ -56,4 +87,4 @@ class StreamingSound
 {
 public:
     static StreamingSound load(string path);
-}
+}*/
