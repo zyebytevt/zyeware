@@ -42,7 +42,7 @@ private static:
             }
         }
 
-        enforce!GUIException(tag.values.length == 4, format!"Invalid number of values for sides tag '%s'."(tag.fullName));
+        enforce!GUIException(tag.values.length == 4, format!"Invalid number of values for sides tag '%s'."(tag.getFullName().toString()));
         return Sides(tag.values[0].coerce!float,
             tag.values[1].coerce!float,
             tag.values[2].coerce!float,

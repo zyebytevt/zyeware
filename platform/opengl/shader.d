@@ -78,9 +78,9 @@ protected:
 
         mTextureCount = samplerID;
 
-        foreach (string name, int binding; sUniformBlockBindings)
+        foreach (string uniformName, int binding; sUniformBlockBindings)
         {
-            int blockIndex = glGetUniformBlockIndex(mProgramID, name.toStringz);
+            int blockIndex = glGetUniformBlockIndex(mProgramID, uniformName.toStringz);
             if (blockIndex != -1)
                 glUniformBlockBinding(mProgramID, blockIndex, binding);
         }
