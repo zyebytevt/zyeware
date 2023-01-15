@@ -18,7 +18,7 @@ alias ParticleRegistrationID = size_t;
 class Particles2D
 {
 protected:
-    ParticleContainer[ParticleRegistrationID] mParticles;
+    ParticleContainer*[ParticleRegistrationID] mParticles;
     ParticleRegistrationID mNextTypeId = 1;
 
 public:
@@ -27,7 +27,7 @@ public:
         enforce!RenderException(type.typeOnDeath != mNextTypeId, "Cannot spawn same particle type on death.");
 
         immutable size_t nextId = mNextTypeId++;
-        mParticles[nextId] = ParticleContainer(type, maxParticles);
+        mParticles[nextId] = new ParticleContainer(type, maxParticles);
         return nextId;
     }
 
@@ -38,7 +38,7 @@ public:
 
     void emit(ParticleRegistrationID id, Vector2f position, size_t amount)
     {
-        ParticleContainer* particles = id in mParticles;
+        ParticleContainer* particles = mParticles.get(id, null);
         enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(id));
 
         for (size_t i; i < amount; ++i)
@@ -60,7 +60,8 @@ public:
             particles.lifeTimes[nextFree] = hnsecs(ZyeWare.random.getRange(particles.type.lifeTime.min.total!"hnsecs", particles.type.lifeTime.max.total!"hnsecs"));
             particles.startLifeTimes[nextFree] = particles.lifeTimes[nextFree];
 
-            particles.activeIndices.insertFront(nextFree);
+            //particles.activeIndices.insertFront(nextFree);
+            particles.activeIndices[particles.activeIndicesLength++] = nextFree;
         }
     }
 
@@ -70,31 +71,47 @@ public:
 
         static size_t[] indicesToRemove;
 
-        foreach (ref ParticleContainer particles; mParticles.values)
+        foreach (ParticleContainer* particles; mParticles.values)
         {
             indicesToRemove.length = 0;
 
-            foreach (size_t idx; particles.activeIndices)
+            for (size_t i; i < particles.activeIndicesLength; ++i)
             {
-                particles.lifeTimes[idx] -= frameTime.deltaTime;
-                if (particles.lifeTimes[idx] <= Duration.zero)
+                immutable size_t particleIdx = particles.activeIndices[i];
+
+                particles.lifeTimes[particleIdx] -= frameTime.deltaTime;
+                if (particles.lifeTimes[particleIdx] <= Duration.zero)
                 {
-                    indicesToRemove ~= idx;
+                    particles.activeIndices[particleIdx] = particles.activeIndices[particles.activeIndicesLength - 1];
+                    particles.activeIndicesLength = particles.activeIndicesLength - 1;
+
+                    particles.freeIndices.insertBack(particleIdx);
+
+                    if (particles.type.typeOnDeath > ParticleRegistrationID.init)
+                        emit(particles.type.typeOnDeath, particles.positions[particleIdx], 1);
+
+                    --i;
                     continue;
                 }
 
-                particles.positions[idx] += particles.velocities[idx] * delta;
-                particles.velocities[idx] += particles.type.gravity;
+                particles.positions[particleIdx] += particles.velocities[particleIdx] * delta;
+                particles.velocities[particleIdx] += particles.type.gravity;
             }
 
-            foreach (size_t idx; indicesToRemove)
+            /*
+            foreach (size_t idx2; indicesToRemove)
             {
-                particles.activeIndices.linearRemoveElement(idx);
-                particles.freeIndices.insertBack(idx);
+                //particles.activeIndices.linearRemoveElement(idx);
+
+                Logger.core.log(LogLevel.trace, "Removing index %d", idx2);
+                particles.activeIndices[idx2] = particles.activeIndices[particles.activeIndicesLength - 1];
+                particles.activeIndicesLength = particles.activeIndicesLength - 1;
+
+                particles.freeIndices.insertBack(idx2);
 
                 if (particles.type.typeOnDeath > ParticleRegistrationID.init)
-                    emit(particles.type.typeOnDeath, particles.positions[idx], 1);
-            }
+                    emit(particles.type.typeOnDeath, particles.positions[idx2], 1);
+            }*/
         }
     }
 
@@ -102,11 +119,11 @@ public:
     {
         immutable float delta = nextFrameTime.deltaTime.toFloatSeconds;
 
-        foreach (ref ParticleContainer particles; mParticles.values)
+        foreach (ParticleContainer* particles; mParticles.values)
         {
             immutable static Rect2f dimensions = Rect2f(-2, -2, 2, 2);
 
-            foreach (size_t idx; particles.activeIndices)
+            foreach (size_t idx; particles.activeIndices[0 .. particles.activeIndicesLength])
             {
                 immutable float progression = 1f - (particles.lifeTimes[idx].total!"hnsecs" / cast(float) particles.startLifeTimes[idx].total!"hnsecs");
                 immutable Vector2f position = particles.positions[idx] + particles.velocities[idx] * delta;
@@ -128,8 +145,8 @@ public:
         // is "total"; redeemed by TheFrozenKnights
         size_t bigDEnergy;
 
-        foreach (ref ParticleContainer particles; mParticles.values)
-            bigDEnergy += walkLength(particles.activeIndices[]);
+        foreach (ParticleContainer* particles; mParticles.values)
+            bigDEnergy += particles.activeIndicesLength;
 
         return bigDEnergy;
     }
@@ -163,7 +180,10 @@ private struct ParticleContainer
     Duration[] startLifeTimes;
 
     DList!size_t freeIndices;
-    SList!size_t activeIndices;
+    // SList!size_t activeIndices;
+
+    size_t[] activeIndices;
+    size_t activeIndicesLength;
 
     this(in ParticleProperties2D type, size_t count) pure nothrow
     {
@@ -175,6 +195,8 @@ private struct ParticleContainer
         velocities = new Vector2f[count];
         lifeTimes = new Duration[count];
         startLifeTimes = new Duration[count];
+
+        activeIndices = new size_t[count];
 
         for (size_t i; i < count; ++i)
             freeIndices.insertBack(i);
