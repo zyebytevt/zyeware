@@ -15,6 +15,8 @@ import std.typecons : scoped;
 import std.datetime : Duration, dur;
 import std.algorithm : min;
 
+import semver;
+
 import zyeware.common;
 import zyeware.core.events;
 import zyeware.core.application;
@@ -60,6 +62,8 @@ struct ZyeWare
 
 private static:
     alias DeferFunc = void delegate();
+
+    SemVer sVersion;
 
     Window sMainWindow;
     Application sApplication;
@@ -235,6 +239,15 @@ package(zyeware.core) static:
     {
         GC.disable();
 
+        {
+            import std.string : chomp;
+
+            string v = import(".zwversion").chomp;
+            debug v ~= "-debug";
+            sVersion = SemVer(v);
+        }
+        
+
         sCmdArgs = args;
         sProjectProperties = properties;
 
@@ -271,7 +284,8 @@ package(zyeware.core) static:
 
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
-        else sApplication = new StartupApplication(properties.mainApplication);
+        else 
+        sApplication = new StartupApplication(properties.mainApplication);
 
         sApplication.initialize();
     }
@@ -527,6 +541,11 @@ public static:
     const(ProjectProperties) projectProperties() nothrow
     {
         return sProjectProperties;
+    }
+
+    const(SemVer) engineVersion() nothrow
+    {
+        return sVersion;
     }
 
     debug

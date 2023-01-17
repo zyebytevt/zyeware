@@ -9,4 +9,4 @@ bin/
 *.a
 .vscode
 dub.selections.json
-core.zpk
+out/*

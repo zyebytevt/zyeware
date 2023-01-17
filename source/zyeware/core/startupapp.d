@@ -8,9 +8,10 @@ final class StartupApplication : Application
 {
 protected:
     Texture2D mEngineLogo;
-    version(ZyeByteStartup) Texture2D mZyeByte;
     Application mMainApplication;
     OrthographicCamera mCamera;
+    Font mInternalFont;
+    string mVersionString;
 
     Gradient mBackgroundGradient;
     Interpolator!(float, lerp) mAlphaInterpolator;
@@ -28,9 +29,8 @@ public:
         ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
         mEngineLogo = AssetManager.load!Texture2D("core://textures/engine-logo.png");
-
-        version(ZyeByteStartup)
-            mZyeByte = AssetManager.load!Texture2D("core://textures/zyebyte.png");
+        mInternalFont = AssetManager.load!Font("core://fonts/internal.fnt");
+        mVersionString = "v" ~ ZyeWare.engineVersion.toString();
 
         mCamera = new OrthographicCamera(-1, 1, 1, -1);
 
@@ -82,8 +82,8 @@ public:
         Renderer2D.drawRect(Rect2f(min, max), Matrix4f.identity,
             Color(1, 1, 1, alpha), mEngineLogo);
 
-        version(ZyeByteStartup) Renderer2D.drawRect(Rect2f(0, 0.82, 1, 1), Matrix4f.identity,
-            Color(1, 1, 1, alpha), mZyeByte);
+        Renderer2D.drawText(mVersionString, mInternalFont, Vector2f(-1, -1), Color(1, 1, 1, alpha),
+            Font.Alignment.left | Font.Alignment.bottom);
         
         Renderer2D.end();
     }
