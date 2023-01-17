@@ -17,7 +17,7 @@ import zyeware.rendering;
 
 /// Represents an application that can be run by ZyeWare.
 /// To write a ZyeWare app, you must inherit from this class and return an
-/// instance of it with the `createZyeWareApplication` function.
+/// instance of it with the `getProjectProperties` function.
 ///
 /// Examples:
 /// --------------------
@@ -26,9 +26,11 @@ import zyeware.rendering;
 ///     ...    
 /// }
 ///
-/// extern(C) Application createZyeWareApplication(string[] args)
+/// extern(C) ProjectProperties getProjectProperties();
 /// {
-///     return new MyApplication(args);   
+///     ProjectProperties props;
+///     props.application = new MyApplication();
+///     return props;
 /// }
 /// --------------------
 abstract class Application
