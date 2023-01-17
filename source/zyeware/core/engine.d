@@ -39,6 +39,9 @@ struct ProjectProperties
     CrashHandler crashHandler; /// The crash handler to use.
     WindowProperties mainWindowProperties; /// The properties of the main window.
 
+    uint audioBufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
+    uint audioBufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
+
     uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
 }
 

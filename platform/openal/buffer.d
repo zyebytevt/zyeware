@@ -5,22 +5,36 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.buffer;
 
+import std.sumtype;
+
 import bindbc.openal;
 
 import zyeware.common;
 import zyeware.audio;
 
-// TODO: Check memory constness someday.
 @asset(Yes.cache)
-class AudioStream
+class Audio
 {
 protected:
     const(ubyte)[] mEncodedMemory;
+    bool mLooping;
+    LoopPoint mLoopPoint;
 
 public:
-    this(const(ubyte)[] encodedMemory)
+    this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
     {
         mEncodedMemory = encodedMemory;
+        mLoopPoint = properties.loopPoint;
+    }
+
+    LoopPoint loopPoint() pure const nothrow
+    {
+        return mLoopPoint;
+    }
+
+    void loopPoint(LoopPoint value) pure nothrow
+    {
+        mLoopPoint = value;
     }
 
     const(ubyte)[] encodedMemory() pure nothrow
@@ -28,63 +42,46 @@ public:
         return mEncodedMemory;
     }
 
-    static AudioStream load(string path)
+    static Audio load(string path)
     {
         VFSFile source = VFS.getFile(path);
         ubyte[] bestCommunityData = source.readAll!(ubyte[])();
         source.close();
 
-        Logger.core.log(LogLevel.debug_, "Loaded file '%s' as audio.", path);
+        AudioProperties properties;
 
-        return new AudioStream(bestCommunityData);
+        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+        {
+            import std.conv : to;
+            import sdlang;
+
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
+            Tag root = parseSource(propsFile.readAll!string);
+            propsFile.close();
+
+            try
+            {
+                if (Tag loopTag = root.getTag("loop-point"))
+                {
+                    int v1, v2;
+
+                    if ((v1 = loopTag.getAttribute!int("sample")) != int.init)
+                        properties.loopPoint = LoopPoint(v1);
+                    else if ((v1 = loopTag.getAttribute!int("pattern")) != int.init
+                        && (v2 = loopTag.getAttribute!int("row")) != int.init)
+                        properties.loopPoint = LoopPoint(ModuleLoopPoint(v1, v2));
+                    else
+                        throw new Exception("Could not interpret loop point.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+            }
+        }
+
+        Logger.core.log(LogLevel.debug_, "Loaded file '%s' into memory for streaming.", path);
+
+        return new Audio(bestCommunityData, properties);
     }
 }
-
-/*
-@asset(Yes.cache)
-class Sound
-{
-protected:
-    uint mId;
-
-public:
-    this(size_t channels, size_t sampleRate, in float[] data) nothrow
-    {
-        alGenBuffers(1, &mId);
-        alBufferData(mId, channels == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-            data.ptr, cast(int) (data.length * float.sizeof), cast(int) sampleRate);
-    }
-
-    ~this()
-    {
-        alDeleteBuffers(1, &mId);
-    }
-
-    uint id() const pure nothrow
-    {
-        return mId;
-    }
-
-    static Sound load(string path)
-    {
-        auto decoder = AudioDecoder(VFS.getFile(path));
-
-        float[] data;
-        float[] readBuffer = new float[2048];
-        size_t readCount;
-
-        while ((readCount = decoder.read(readBuffer)) != 0)
-            data ~= readBuffer[0 .. readCount];
-
-        Logger.core.log(LogLevel.debug_, "data size: %d", data.length);
-
-        return new Sound(decoder.channels, decoder.sampleRate, data);
-    }
-}
-
-@asset(Yes.cache)
-class StreamingSound
-{
-public:
-    static StreamingSound load(string path);
-}*/

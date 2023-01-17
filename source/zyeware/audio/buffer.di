@@ -5,39 +5,30 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.buffer;
 
+import std.sumtype;
+
 import zyeware.common;
 import zyeware.audio;
 
-alias NoiseBitties = AudioStream;
-alias AirVibrationData = AudioStream;
-alias EarMassager = AudioStream;
-alias SonicStream = AudioStream;
+deprecated("This was a joke.")
+{
+    alias NoiseBitties = Audio;
+    alias AirVibrationData = Audio;
+    alias EarMassager = Audio;
+    alias SonicStream = Audio;
+}
 
 @asset(Yes.cache)
-class AudioStream
+class Audio
 {
 public:
-    this(const(ubyte)[] encodedMemory);
+    this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init);
+
+    LoopPoint loopPoint() pure const nothrow;
+
+    void loopPoint(LoopPoint value) pure nothrow;
 
     const(ubyte)[] encodedMemory() pure nothrow;
 
-    static AudioStream load(string path);
+    static Audio load(string path);
 }
-
-/*
-@asset(Yes.cache)
-class Sound
-{
-public:
-    static Sound load(string path);
-
-    uint id() const pure nothrow;
-}
-
-@asset(Yes.cache)
-class StreamedSound
-{
-public:
-    static StreamedSound load(string path);
-}
-*/

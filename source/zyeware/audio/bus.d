@@ -8,6 +8,7 @@ module zyeware.audio.bus;
 import std.algorithm : clamp;
 
 import zyeware.common;
+import zyeware.audio.thread;
 
 class AudioBus
 {
@@ -33,8 +34,9 @@ public:
     }
 
     /// ditto
-    void gain(float value) nothrow
+    void volume(float value) nothrow
     {
         mVolume = clamp(value, 0.0f, 1.0f);
+        AudioThread.updateVolumeForSources();
     }
 }

@@ -1,43 +1,63 @@
 module zyeware.audio.thread;
 
-import core.thread : Thread, msecs;
+import core.thread : Thread, Duration, msecs;
 import std.algorithm : countUntil, remove;
 
 import zyeware.common;
 import zyeware.audio;
+import zyeware.core.weakref;
 
 package(zyeware) struct AudioThread
 {
 private static:
     Thread sThread;
     
-    __gshared AudioSource[] sRegisteredSources;
+    __gshared WeakReference!AudioSource[] sRegisteredSources;
     __gshared bool sRunning;
 
     void threadBody()
     {
+        // Determine the sleep time between updating the buffers.
+        // YukieVT supplied the following formula for this:
+        //     (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
+        // We assume a default sample rate of 44100 for audio.
+
+        immutable Duration waitTime = msecs(ZyeWare.projectProperties.audioBufferSize
+            / ZyeWare.projectProperties.audioBufferCount / 44_100 / 2 * 1000);
+
         while (sRunning)
         {
-            foreach (AudioSource source; sRegisteredSources)
-                source.updateBuffers();
+            for (size_t i; i < sRegisteredSources.length; ++i)
+            {
+                if (!sRegisteredSources[i].alive)
+                {
+                    sRegisteredSources[i] = sRegisteredSources[$ - 1];
+                    --i;
+                    continue;
+                }
 
-            // TODO: Check if the buffer is still alive (or smth idk)
-            // TODO: Also change sleep time depending on buffer length
-            // (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
-
-            Thread.sleep(10.msecs);
+                sRegisteredSources[i].target.updateBuffers();
+            }
+            
+            Thread.sleep(waitTime);
         }
     }
 
 package(zyeware):
     void register(AudioSource source)
     {
-        sRegisteredSources ~= source;
+        sRegisteredSources ~= weakReference(source);
     }
 
-    void unregister(AudioSource source)
+    void updateVolumeForSources() nothrow
     {
-        sRegisteredSources.removeElement(source);
+        for (size_t i; i < sRegisteredSources.length; ++i)
+        {
+            if (!sRegisteredSources[i].alive)
+                continue;
+
+            sRegisteredSources[i].target.updateVolume();
+        }
     }
 
 public static:
