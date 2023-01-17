@@ -40,7 +40,8 @@ public:
             //if (!trace.startsWith("??:?"))
             Logger.core.log(LogLevel.info, trace);
         
-        Logger.core.log(LogLevel.fatal, "You are on your own now.");
+        Logger.core.log(LogLevel.fatal, "------------------------------");
+        Logger.core.log(LogLevel.fatal, "If you suspect that this is a ZyeWare issue, please leave a bug report over at https://github.com/zyebytevt/zyeware!");
         Logger.core.log(LogLevel.fatal, "=================================================================");
 
         Logger.core.flush();
@@ -91,8 +92,11 @@ public:
     {
         super.show(t);
 
-        enum title = "Sorry";
-        enum message = "ZyeWare has crashed.";
+        enum title = "Can I go home yet?";
+        enum message = "As it turns out, the application has crashed. ZyeByte is sorry for the inconvenience, be it as "
+        ~ "the game or engine developer alike.\nIf you do suspect it's an issue of the engine though, please leave "
+        ~ "a bug report over at https://github.com/zyebytevt/zyeware!\nWith this, I'm sure it can be fixed soon.\n\n"
+        ~ "(Restarting often fixes issues, I've been told!)";
 
         if (executeShell("type kdialog").status == 0)
             showKDialog(message, t.toString(), title);
