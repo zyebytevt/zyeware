@@ -15,8 +15,6 @@ import std.typecons : scoped;
 import std.datetime : Duration, dur;
 import std.algorithm : min;
 
-import semver;
-
 import zyeware.common;
 import zyeware.core.events;
 import zyeware.core.application;
@@ -63,7 +61,7 @@ struct ZyeWare
 private static:
     alias DeferFunc = void delegate();
 
-    SemVer sVersion;
+    string sVersion;
 
     Window sMainWindow;
     Application sApplication;
@@ -245,7 +243,7 @@ package(zyeware.core) static:
 
             string v = import(".zwversion").chomp;
             debug v ~= "-debug";
-            sVersion = SemVer(v);
+            sVersion = v;
         }
 
         sCmdArgs = args;
@@ -543,7 +541,7 @@ public static:
         return sProjectProperties;
     }
 
-    const(SemVer) engineVersion() nothrow
+    string engineVersion() nothrow
     {
         return sVersion;
     }
