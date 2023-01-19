@@ -22,7 +22,8 @@ class AudioSource
 private:
     /// Loads up `mProcBuffer` and returns the amount of samples read.
     pragma(inline, true)
-    size_t readFromDecoder() 
+    size_t readFromDecoder()
+        in (mDecoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
     {
         return mDecoder.readSamplesFloat(&mProcBuffer[0], cast(int)(mProcBuffer.length/mDecoder.getNumChannels()))
             * mDecoder.getNumChannels();
@@ -45,8 +46,8 @@ protected:
     int mProcessed;
 
     State mState;
-    float mVolume = 1;
-    float mPitch = 1;
+    float mVolume;
+    float mPitch;
     bool mLooping;
     AudioBus mBus;
 
@@ -64,6 +65,7 @@ package(zyeware):
         while (processed--)
         {
             alSourceUnqueueBuffers(mSourceId, 1, &pBuf);
+
             
             lastReadLength = readFromDecoder();
 
@@ -124,11 +126,18 @@ public:
 
         AudioThread.register(this);
 
+        mVolume = 1.0f;
+        mPitch = 1.0f;
+        mLooping = false;
+
+        //mDecoder = new AudioStream;
         updateVolume();
     }
 
     ~this()
     {
+        import std.stdio; writeln("Source destructed!");
+
         if (mDecoder.isOpenForReading())
             destroy!false(mDecoder);
 
@@ -170,7 +179,8 @@ public:
         mState = State.stopped;
         alSourceStop(mSourceId);
 
-        mDecoder.seekPosition(0);
+        if (mDecoder.isOpenForReading())
+            mDecoder.seekPosition(0);
 
         int bufferCount;
         alGetSourcei(mSourceId, AL_BUFFERS_QUEUED, &bufferCount);

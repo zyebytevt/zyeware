@@ -119,7 +119,7 @@ public:
     {
         auto saved = mArray[mNextPointer - 1];
         static if (hasIndirections!T)
-            mArray[mNextPointer] = T.init;
+            mArray[mNextPointer - 1] = T.init;
         --mNextPointer;
         return saved;
     }

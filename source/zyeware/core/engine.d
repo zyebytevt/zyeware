@@ -130,6 +130,7 @@ private static:
 
             while (lag >= sFrameTime)
             {
+                AudioThread.tick(); // For the time being
                 Timer.tickEntries(frameTime);
                 sApplication.tick(frameTime);
                 
@@ -237,7 +238,7 @@ package(zyeware.core) static:
 
     void initialize(string[] args, ProjectProperties properties)
     {
-        GC.disable();
+        //GC.disable();
 
         {
             import std.string : chomp;
@@ -246,7 +247,6 @@ package(zyeware.core) static:
             debug v ~= "-debug";
             sVersion = SemVer(v);
         }
-        
 
         sCmdArgs = args;
         sProjectProperties = properties;

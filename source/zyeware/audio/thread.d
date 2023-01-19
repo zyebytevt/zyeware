@@ -7,6 +7,8 @@ import zyeware.common;
 import zyeware.audio;
 import zyeware.core.weakref;
 
+debug import std.stdio;
+
 package(zyeware) struct AudioThread
 {
 private static:
@@ -15,6 +17,8 @@ private static:
     __gshared WeakReference!AudioSource[] sRegisteredSources;
     __gshared bool sRunning;
 
+    // CAUTION THIS CODE IS NOT ENABLED, LOOK AT `tick()` BELOW
+    version(none)
     void threadBody()
     {
         // Determine the sleep time between updating the buffers.
@@ -31,6 +35,7 @@ private static:
             {
                 if (!sRegisteredSources[i].alive)
                 {
+                    debug writefln("Removing source #%d...", i);
                     sRegisteredSources[i] = sRegisteredSources[$ - 1];
                     --i;
                     continue;
@@ -47,6 +52,13 @@ package(zyeware):
     void register(AudioSource source)
     {
         sRegisteredSources ~= weakReference(source);
+
+        debug
+        {
+            writeln("Source registered! Number is now ", sRegisteredSources.length);
+            for (size_t i; i < sRegisteredSources.length; ++i)
+                writefln("Is #%d alive: %s", i, sRegisteredSources[i].alive);
+        }
     }
 
     void updateVolumeForSources() nothrow
@@ -64,13 +76,29 @@ public static:
     void initialize()
     {
         sRunning = true;
-        sThread = new Thread(&threadBody);
-        sThread.start();
+        //sThread = new Thread(&threadBody);
+        //sThread.start();
     }
 
     void cleanup()
     {
         sRunning = false;
-        sThread.join(true);
+        //sThread.join(true);
+    }
+
+    void tick()
+    {
+        for (size_t i; i < sRegisteredSources.length; ++i)
+        {
+            if (!sRegisteredSources[i].alive)
+            {
+                debug writefln("Removing source #%d...", i);
+                sRegisteredSources[i] = sRegisteredSources[$ - 1];
+                --i;
+                continue;
+            }
+
+            sRegisteredSources[i].target.updateBuffers();
+        }
     }
 }

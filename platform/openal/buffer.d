@@ -17,7 +17,6 @@ class Audio
 {
 protected:
     const(ubyte)[] mEncodedMemory;
-    bool mLooping;
     LoopPoint mLoopPoint;
 
 public:
