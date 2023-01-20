@@ -8,6 +8,7 @@ module zyeware.core.asset;
 import std.string : format;
 import std.exception : collectException, assumeWontThrow, enforce;
 import std.typecons : Tuple;
+import std.traits : fullyQualifiedName;
 
 import zyeware.common;
 import zyeware.core.weakref;
@@ -40,7 +41,7 @@ struct AssetManager
 private static:
     struct AssetUID
     {
-        string typeMangle;
+        string typeFQN;
         string path;
     }
 
@@ -48,15 +49,6 @@ private static:
 
     LoadFunction[string] sLoaders;
     WeakReference!Object[AssetUID] sCache;
-
-    Object getFromCache(AssetUID uid) nothrow
-    {
-        auto weakref = sCache.get(uid, null).assumeWontThrow;
-        if (weakref && weakref.alive)
-            return weakref.target;
-        
-        return null;
-    }
 
 package(zyeware.core) static:
     void initialize()
@@ -97,18 +89,25 @@ public static:
         if (isAsset!T)
         in (path, "Path cannot be null.")
     {
-        LoadFunction* loader = T.mangleof in sLoaders;
-        enforce!CoreException(loader, format!"'%s' was not registered as an asset."(T.stringof));
+        enum fqn = fullyQualifiedName!T;
 
-        auto uid = AssetUID(T.mangleof, path);
+        LoadFunction* loader = fqn in sLoaders;
+        enforce!CoreException(loader, format!"'%s' was not registered as an asset."(fqn));
+
+        auto uid = AssetUID(fqn, path);
 
         // Check if we have it cached, and if so, if it's still alive
-        Object asset = getFromCache(uid);
-        if (asset)
-            return cast(T) asset;
+        auto weakref = sCache.get(uid, null).assumeWontThrow;
+        if (weakref && weakref.alive)
+            return cast(T) weakref.target;
 
         // Otherwise, load asset
-        asset = loader.callback(path);
+        if (weakref)
+            Logger.core.log(LogLevel.debug_, "Asset '%s' (%s) got collected, reloading...", uid.path, uid.typeFQN);
+        else
+            Logger.core.log(LogLevel.debug_, "Loading asset '%s' (%s)...", uid.path, uid.typeFQN);
+
+        Object asset = loader.callback(path);
         assert(asset, format!"Loader for '%s' returned null!"(T.stringof));
 
         if (loader.cache)
@@ -127,7 +126,7 @@ public static:
         import std.traits : getUDAs;
         auto data = getUDAs!(T, asset)[0];
 
-        sLoaders[T.mangleof] = LoadFunction(&T.load, data.cache);
+        sLoaders[fullyQualifiedName!T] = LoadFunction(&T.load, data.cache);
     }
 
     /// Unregisters an asset.
@@ -139,7 +138,7 @@ public static:
     bool unregister(T)()
         if (isAsset!T)
     {
-        return sLoaders.remove(T.mangleof);
+        return sLoaders.remove(fullyQualifiedName!T);
     }
 
     /// Checks if the given file is already cached.
@@ -151,7 +150,7 @@ public static:
         if (isAsset!T)
         in (path, "Path cannot be null.")
     {
-        auto weakref = sCache.get(AssetUID(T.mangleof, path), null).assumeWontThrow;
+        auto weakref = sCache.get(AssetUID(fullyQualifiedName!T, path), null).assumeWontThrow;
         return weakref && weakref.alive;
     }
 
@@ -175,7 +174,7 @@ public static:
             if (!sCache[key].alive)
             {
                 sCache.remove(key).assumeWontThrow;
-                Logger.core.log(LogLevel.trace, "Uncaching '%s'...", key.path);
+                Logger.core.log(LogLevel.trace, "Uncaching '%s' (%s)...", key.path, key.typeFQN);
                 ++cleaned;
             }
         }

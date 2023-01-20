@@ -128,7 +128,6 @@ private static:
 
             while (lag >= sFrameTime)
             {
-                AudioThread.tick(); // For the time being
                 Timer.tickEntries(frameTime);
                 sApplication.tick(frameTime);
                 
@@ -150,7 +149,11 @@ private static:
                 }
 
                 for (size_t i; i < sDeferredFunctionsCount; ++i)
+                {
+                    // After invoking set to null so that no references keep lingering.
                     sDeferredFunctions[i]();
+                    sDeferredFunctions[i] = null;
+                }
                 sDeferredFunctionsCount = 0;
             }
         }

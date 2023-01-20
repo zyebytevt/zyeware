@@ -34,7 +34,7 @@ public:
     }
 
     /// ditto
-    void volume(float value) nothrow
+    void volume(float value)
     {
         mVolume = clamp(value, 0.0f, 1.0f);
         AudioThread.updateVolumeForSources();

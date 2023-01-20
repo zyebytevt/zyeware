@@ -16,9 +16,8 @@ private static:
     
     __gshared WeakReference!AudioSource[] sRegisteredSources;
     __gshared bool sRunning;
+    __gshared Object sMutex = new Object();
 
-    // CAUTION THIS CODE IS NOT ENABLED, LOOK AT `tick()` BELOW
-    version(none)
     void threadBody()
     {
         // Determine the sleep time between updating the buffers.
@@ -31,17 +30,20 @@ private static:
 
         while (sRunning)
         {
-            for (size_t i; i < sRegisteredSources.length; ++i)
+            synchronized (sMutex)
             {
-                if (!sRegisteredSources[i].alive)
+                for (size_t i; i < sRegisteredSources.length; ++i)
                 {
-                    debug writefln("Removing source #%d...", i);
-                    sRegisteredSources[i] = sRegisteredSources[$ - 1];
-                    --i;
-                    continue;
-                }
+                    if (!sRegisteredSources[i].alive)
+                    {
+                        debug writefln("Removing source #%d...", i);
+                        sRegisteredSources[i] = sRegisteredSources[$ - 1];
+                        --i;
+                        continue;
+                    }
 
-                sRegisteredSources[i].target.updateBuffers();
+                    sRegisteredSources[i].target.updateBuffers();
+                }
             }
             
             Thread.sleep(waitTime);
@@ -51,24 +53,30 @@ private static:
 package(zyeware):
     void register(AudioSource source)
     {
-        sRegisteredSources ~= weakReference(source);
-
-        debug
+        synchronized (sMutex)
         {
-            writeln("Source registered! Number is now ", sRegisteredSources.length);
-            for (size_t i; i < sRegisteredSources.length; ++i)
-                writefln("Is #%d alive: %s", i, sRegisteredSources[i].alive);
+            sRegisteredSources ~= weakReference(source);
+
+            debug
+            {
+                writeln("Source registered! Number is now ", sRegisteredSources.length);
+                for (size_t i; i < sRegisteredSources.length; ++i)
+                    writefln("Is #%d alive: %s", i, sRegisteredSources[i].alive);
+            }
         }
     }
 
-    void updateVolumeForSources() nothrow
+    void updateVolumeForSources()
     {
-        for (size_t i; i < sRegisteredSources.length; ++i)
+        synchronized (sMutex)
         {
-            if (!sRegisteredSources[i].alive)
-                continue;
+            for (size_t i; i < sRegisteredSources.length; ++i)
+            {
+                if (!sRegisteredSources[i].alive)
+                    continue;
 
-            sRegisteredSources[i].target.updateVolume();
+                sRegisteredSources[i].target.updateVolume();
+            }
         }
     }
 
@@ -76,29 +84,13 @@ public static:
     void initialize()
     {
         sRunning = true;
-        //sThread = new Thread(&threadBody);
-        //sThread.start();
+        sThread = new Thread(&threadBody);
+        sThread.start();
     }
 
     void cleanup()
     {
         sRunning = false;
-        //sThread.join(true);
-    }
-
-    void tick()
-    {
-        for (size_t i; i < sRegisteredSources.length; ++i)
-        {
-            if (!sRegisteredSources[i].alive)
-            {
-                debug writefln("Removing source #%d...", i);
-                sRegisteredSources[i] = sRegisteredSources[$ - 1];
-                --i;
-                continue;
-            }
-
-            sRegisteredSources[i].target.updateBuffers();
-        }
+        sThread.join(true);
     }
 }
