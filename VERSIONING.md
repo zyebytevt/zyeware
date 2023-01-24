@@ -15,11 +15,8 @@ A small "v" should be prepended in front of the actual version number.
 
 If appropriate, a pre-release version name is appended with a hyphen (-), usually "alpha", "beta" and "rc".
 
-Finally, appended to this is the 7 character long git commit id with a plus (+) sign, for easy identification where a build
-came from.
-
 Which would result in this hypothetical version string:
-`v0.1.2-alpha+fe3f237`
+`v0.1.2-alpha`
 
 Major version zero (0.y.z) is, as defined by SemVer, used for initial development and incompatible changes may happen anytime.
 
@@ -28,4 +25,4 @@ a nice number.
 
 ## Querying the version number
 
-It should always be possible to get the version number from `ZyeWare.Version`
+It should always be possible to get the version number from `ZyeWare.engineVersion`

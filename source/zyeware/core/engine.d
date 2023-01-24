@@ -52,6 +52,20 @@ struct FrameTime
     Duration unscaledDeltaTime; /// Time between this frame and the last, without being multiplied by `ZyeWare.timeScale`.
 }
 
+/// Holds information about a SemVer version.
+struct Version
+{
+    int major;
+    int minor;
+    int patch;
+    string prerelease;
+
+    string toString() immutable pure
+    {
+        return format!"%d.%d.%d%s"(major, minor, patch, prerelease ? "-" ~ prerelease : "");
+    }
+}
+
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
 struct ZyeWare
 {
@@ -60,8 +74,6 @@ struct ZyeWare
 
 private static:
     alias DeferFunc = void delegate();
-
-    string sVersion;
 
     Window sMainWindow;
     Application sApplication;
@@ -241,14 +253,6 @@ package(zyeware.core) static:
     {
         //GC.disable();
 
-        {
-            import std.string : chomp;
-
-            string v = import(".zwversion").chomp;
-            debug v ~= "-debug";
-            sVersion = v;
-        }
-
         sCmdArgs = args;
         sProjectProperties = properties;
 
@@ -317,6 +321,8 @@ package(zyeware.core) static:
     }
 
 public static:
+    immutable Version engineVersion = Version(0, 3, 0, "alpha");
+
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
     {
@@ -542,11 +548,6 @@ public static:
     const(ProjectProperties) projectProperties() nothrow
     {
         return sProjectProperties;
-    }
-
-    string engineVersion() nothrow
-    {
-        return sVersion;
     }
 
     debug
