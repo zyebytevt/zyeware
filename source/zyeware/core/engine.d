@@ -140,6 +140,7 @@ private static:
 
             while (lag >= sFrameTime)
             {
+                AudioThread.tick();
                 Timer.tickEntries(frameTime);
                 sApplication.tick(frameTime);
                 

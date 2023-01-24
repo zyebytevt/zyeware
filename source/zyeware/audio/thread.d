@@ -38,6 +38,7 @@ private static:
                     {
                         debug writefln("Removing source #%d...", i);
                         sRegisteredSources[i] = sRegisteredSources[$ - 1];
+                        --sRegisteredSources.length;
                         --i;
                         continue;
                     }
@@ -84,13 +85,30 @@ public static:
     void initialize()
     {
         sRunning = true;
-        sThread = new Thread(&threadBody);
-        sThread.start();
+        //sThread = new Thread(&threadBody);
+        //sThread.start();
     }
 
     void cleanup()
     {
         sRunning = false;
-        sThread.join(true);
+        //sThread.join(true);
+    }
+
+    void tick()
+    {
+        for (size_t i; i < sRegisteredSources.length; ++i)
+        {
+            if (!sRegisteredSources[i].alive)
+            {
+                debug writefln("Removing source #%d...", i);
+                sRegisteredSources[i] = sRegisteredSources[$ - 1];
+                --sRegisteredSources.length;
+                --i;
+                continue;
+            }
+
+            sRegisteredSources[i].target.updateBuffers();
+        }
     }
 }

@@ -40,7 +40,7 @@ protected:
     float[] mProcBuffer;
 
     Audio mAudioStream;
-    AudioStream mDecoder;
+    AudioStream* mDecoder;
     uint mSourceId;
     uint[] mBufferIDs;
     int mProcessed;
@@ -130,7 +130,7 @@ public:
         mPitch = 1.0f;
         mLooping = false;
 
-        //mDecoder = new AudioStream;
+        mDecoder = new AudioStream;
         updateVolume();
     }
 
