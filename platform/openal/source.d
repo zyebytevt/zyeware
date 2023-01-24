@@ -40,7 +40,7 @@ protected:
     float[] mProcBuffer;
 
     Audio mAudioStream;
-    AudioStream* mDecoder;
+    AudioStream mDecoder;
     uint mSourceId;
     uint[] mBufferIDs;
     int mProcessed;
@@ -116,10 +116,12 @@ package(zyeware):
 public:
     this(AudioBus bus = null)
     {
+        mState = State.stopped;
         mBus = bus ? bus : AudioAPI.getBus("master");
 
         mProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
         mBufferIDs = new uint[ZyeWare.projectProperties.audioBufferCount];
+        //mDecoder = new AudioStream();
 
         alGenSources(1, &mSourceId);
         alGenBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
@@ -130,7 +132,6 @@ public:
         mPitch = 1.0f;
         mLooping = false;
 
-        mDecoder = new AudioStream;
         updateVolume();
     }
 
@@ -143,6 +144,9 @@ public:
 
         alDeleteBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
         alDeleteSources(1, &mSourceId);
+
+        dispose(mProcBuffer);
+        dispose(mBufferIDs);
     }
 
     void play()
@@ -200,6 +204,7 @@ public:
     void audio(Audio value)
         in (value, "Audio cannot be null.")
     {
+        import std.stdio; writeln(mState);
         if (mState != State.stopped)
             stop();
 
