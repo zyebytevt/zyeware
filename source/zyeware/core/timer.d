@@ -46,7 +46,13 @@ package(zyeware.core):
                     timer.mCallback(timer);
 
                 if (timer.mOneshot)
-                    sTimerEntries = sTimerEntries.remove(i--);
+                {
+                    sTimerEntries[i] = sTimerEntries[$ - 1];
+                    sTimerEntries[$ - 1].timer = null;
+                    --sTimerEntries.length;
+                    --i;
+                    continue;
+                }
                 else
                     entry.timeLeft = timer.mInterval;
             }
@@ -90,7 +96,9 @@ public:
         auto idx = countUntil!"a.timer is b"(sTimerEntries, this);
         if (idx >= 0)
         {
-            sTimerEntries = sTimerEntries.remove(idx);
+            sTimerEntries[idx] = sTimerEntries[$ - 1];
+            sTimerEntries[$ - 1].timer = null;
+            --sTimerEntries.length;
             mIsRunning = false;
         }
     }

@@ -57,13 +57,6 @@ package(zyeware):
         synchronized (sMutex)
         {
             sRegisteredSources ~= weakReference(source);
-
-            debug
-            {
-                writeln("Source registered! Number is now ", sRegisteredSources.length);
-                for (size_t i; i < sRegisteredSources.length; ++i)
-                    writefln("Is #%d alive: %s", i, sRegisteredSources[i].alive);
-            }
         }
     }
 
@@ -85,30 +78,13 @@ public static:
     void initialize()
     {
         sRunning = true;
-        //sThread = new Thread(&threadBody);
-        //sThread.start();
+        sThread = new Thread(&threadBody);
+        sThread.start();
     }
 
     void cleanup()
     {
         sRunning = false;
-        //sThread.join(true);
-    }
-
-    void tick()
-    {
-        for (size_t i; i < sRegisteredSources.length; ++i)
-        {
-            if (!sRegisteredSources[i].alive)
-            {
-                debug writefln("Removing source #%d...", i);
-                sRegisteredSources[i] = sRegisteredSources[$ - 1];
-                --sRegisteredSources.length;
-                --i;
-                continue;
-            }
-
-            sRegisteredSources[i].target.updateBuffers();
-        }
+        sThread.join(true);
     }
 }

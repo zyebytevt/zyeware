@@ -15,6 +15,13 @@ package(zyeware):
     void updateVolume();
 
 public:
+    enum State
+    {
+        stopped,
+        paused,
+        playing
+    }
+
     this(AudioBus bus = null);
 
     ~this();
@@ -34,4 +41,6 @@ public:
 
     float pitch() pure const nothrow;
     void pitch(float value) nothrow;
+
+    State state() pure const nothrow;
 }

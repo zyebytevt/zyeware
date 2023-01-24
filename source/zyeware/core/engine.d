@@ -140,7 +140,6 @@ private static:
 
             while (lag >= sFrameTime)
             {
-                AudioThread.tick();
                 Timer.tickEntries(frameTime);
                 sApplication.tick(frameTime);
                 
@@ -252,7 +251,7 @@ package(zyeware.core) static:
 
     void initialize(string[] args, ProjectProperties properties)
     {
-        //GC.disable();
+        GC.disable();
 
         sCmdArgs = args;
         sProjectProperties = properties;

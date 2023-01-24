@@ -30,13 +30,6 @@ private:
     }
 
 protected:
-    enum State
-    {
-        stopped,
-        paused,
-        playing
-    }
-
     float[] mProcBuffer;
 
     Audio mAudioStream;
@@ -114,6 +107,13 @@ package(zyeware):
     }
 
 public:
+    enum State
+    {
+        stopped,
+        paused,
+        playing
+    }
+
     this(AudioBus bus = null)
     {
         mState = State.stopped;
@@ -137,8 +137,6 @@ public:
 
     ~this()
     {
-        import std.stdio; writeln("Source destructed!");
-
         if (mDecoder.isOpenForReading())
             destroy!false(mDecoder);
 
@@ -204,7 +202,6 @@ public:
     void audio(Audio value)
         in (value, "Audio cannot be null.")
     {
-        import std.stdio; writeln(mState);
         if (mState != State.stopped)
             stop();
 
@@ -258,5 +255,10 @@ public:
     {
         mPitch = value;
         alSourcef(mSourceId, AL_PITCH, mPitch);
+    }
+
+    State state() pure const nothrow
+    {
+        return mState;
     }
 }
