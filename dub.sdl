@@ -13,7 +13,7 @@ targetType "library"
 targetPath "out"
 sourcePaths "source"
 copyFiles "out/core.zpk"
-//postBuildCommands "dub run zpklink -- -i res/core-package -o out/core.zpk"
+postBuildCommands "dub run zpklink -- -i res/core-package -o out/core.zpk"
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
 	dependency "bindbc-opengl" version="~>1.0.0"
