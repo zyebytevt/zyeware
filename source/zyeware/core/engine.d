@@ -39,6 +39,9 @@ struct ProjectProperties
     CrashHandler crashHandler; /// The crash handler to use.
     WindowProperties mainWindowProperties; /// The properties of the main window.
 
+    uint audioBufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
+    uint audioBufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
+
     uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
 }
 
@@ -47,6 +50,20 @@ struct FrameTime
 {
     Duration deltaTime; /// Time between this frame and the last.
     Duration unscaledDeltaTime; /// Time between this frame and the last, without being multiplied by `ZyeWare.timeScale`.
+}
+
+/// Holds information about a SemVer version.
+struct Version
+{
+    int major;
+    int minor;
+    int patch;
+    string prerelease;
+
+    string toString() immutable pure
+    {
+        return format!"%d.%d.%d%s"(major, minor, patch, prerelease ? "-" ~ prerelease : "");
+    }
 }
 
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
@@ -144,7 +161,11 @@ private static:
                 }
 
                 for (size_t i; i < sDeferredFunctionsCount; ++i)
+                {
+                    // After invoking set to null so that no references keep lingering.
                     sDeferredFunctions[i]();
+                    sDeferredFunctions[i] = null;
+                }
                 sDeferredFunctionsCount = 0;
             }
         }
@@ -268,7 +289,8 @@ package(zyeware.core) static:
 
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
-        else sApplication = new StartupApplication(properties.mainApplication);
+        else 
+        sApplication = new StartupApplication(properties.mainApplication);
 
         sApplication.initialize();
     }
@@ -299,6 +321,8 @@ package(zyeware.core) static:
     }
 
 public static:
+    immutable Version engineVersion = Version(0, 3, 0, "alpha");
+
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
     {

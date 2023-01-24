@@ -5,9 +5,13 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.source;
 
+import std.exception : enforce;
 import std.algorithm : clamp;
+import std.sumtype : match;
+import std.math : isNaN;
 
 import bindbc.openal;
+import audioformats;
 
 import zyeware.common;
 import zyeware.audio;
@@ -16,39 +20,37 @@ import zyeware.audio.thread;
 class AudioSource
 {
 private:
-    static const(ubyte)[] sEmptyData = new ubyte[0];
-
-protected:
-    enum State
+    /// Loads up `mProcBuffer` and returns the amount of samples read.
+    pragma(inline, true)
+    size_t readFromDecoder()
+        in (mDecoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
     {
-        stopped,
-        paused,
-        playing
+        return mDecoder.readSamplesFloat(&mProcBuffer[0], cast(int)(mProcBuffer.length/mDecoder.getNumChannels()))
+            * mDecoder.getNumChannels();
     }
 
-    // TODO: Add engine-wide buffer size settings
-    enum bufferSize = 4096 * 4;
-    enum bufferCount = 4;
-
+protected:
     float[] mProcBuffer;
 
-    AudioStream mAudioStream;
-    AudioDecoder mDecoder;
+    Audio mAudioStream;
+    AudioStream mDecoder;
     uint mSourceId;
     uint[] mBufferIDs;
     int mProcessed;
 
     State mState;
-    bool mLooping; // TODO: Maybe add loop point?
+    float mVolume;
+    float mPitch;
+    bool mLooping;
     AudioBus mBus;
 
 package(zyeware):
-    void updateBuffers()
+    final void updateBuffers()
     {
         if (mState == State.stopped)
             return;
 
-        long lastReadLength;
+        size_t lastReadLength;
         int processed;
         uint pBuf;
         alGetSourcei(mSourceId, AL_BUFFERS_PROCESSED, &processed);
@@ -57,21 +59,38 @@ package(zyeware):
         {
             alSourceUnqueueBuffers(mSourceId, 1, &pBuf);
 
-            lastReadLength = mDecoder.read(mProcBuffer);
+            
+            lastReadLength = readFromDecoder();
 
             if (lastReadLength <= 0)
             {
                 if (mLooping)
                 {
-                    mDecoder.seekTo(0); // TODO: Replace with a loop point
-                    lastReadLength = mDecoder.read(mProcBuffer);
+                    mAudioStream.loopPoint.match!(
+                        (int sample)
+                        {
+                            enforce!AudioException(!mDecoder.isModule, "Cannot seek by sample in tracker files.");
+                            
+                            if (!mDecoder.seekPosition(sample))
+                                Logger.core.log(LogLevel.warning, "Seeking to sample %d failed.", sample);
+                        },
+                        (ModuleLoopPoint mod)
+                        {
+                            enforce!AudioException(mDecoder.isModule, "Cannot seek by pattern/row in non-tracker files.");
+
+                            if (!mDecoder.seekPosition(mod.pattern, mod.row))
+                                Logger.core.log(LogLevel.warning, "Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
+                        }
+                    );
+
+                    lastReadLength = readFromDecoder();
                 }
                 else
                     break;
             }
 
-            alBufferData(pBuf, mDecoder.channels == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-                &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.sampleRate);
+            alBufferData(pBuf, mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
+                &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.getSamplerate());
 
             alSourceQueueBuffers(mSourceId, 1, &pBuf);
         }
@@ -82,28 +101,50 @@ package(zyeware):
             stop();
     }
 
+    final void updateVolume() nothrow
+    {
+        alSourcef(mSourceId, AL_GAIN, mVolume * mBus.volume);
+    }
+
 public:
+    enum State
+    {
+        stopped,
+        paused,
+        playing
+    }
+
     this(AudioBus bus = null)
     {
+        mState = State.stopped;
         mBus = bus ? bus : AudioAPI.getBus("master");
 
-        mProcBuffer = new float[bufferSize];
-        mBufferIDs = new uint[bufferCount];
+        mProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
+        mBufferIDs = new uint[ZyeWare.projectProperties.audioBufferCount];
+        //mDecoder = new AudioStream();
 
         alGenSources(1, &mSourceId);
         alGenBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
 
         AudioThread.register(this);
+
+        mVolume = 1.0f;
+        mPitch = 1.0f;
+        mLooping = false;
+
+        updateVolume();
     }
 
     ~this()
     {
-        AudioThread.unregister(this);
-
-        destroy!false(mDecoder);
+        if (mDecoder.isOpenForReading())
+            destroy!false(mDecoder);
 
         alDeleteBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
         alDeleteSources(1, &mSourceId);
+
+        dispose(mProcBuffer);
+        dispose(mBufferIDs);
     }
 
     void play()
@@ -114,11 +155,13 @@ public:
         if (mState == State.stopped)
         {
             long lastReadLength;
-            for (size_t i; i < bufferCount; ++i)
+            for (size_t i; i < mBufferIDs.length; ++i)
             {
-                lastReadLength = mDecoder.read(mProcBuffer);
-                alBufferData(mBufferIDs[i], mDecoder.channels == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-                    &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.sampleRate);
+                lastReadLength = readFromDecoder();
+                
+                alBufferData(mBufferIDs[i],
+                    mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
+                    &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.getSamplerate());
                 alSourceQueueBuffers(mSourceId, 1, &mBufferIDs[i]);
             }
         }
@@ -138,7 +181,8 @@ public:
         mState = State.stopped;
         alSourceStop(mSourceId);
 
-        mDecoder.seekTo(0);
+        if (mDecoder.isOpenForReading())
+            mDecoder.seekPosition(0);
 
         int bufferCount;
         alGetSourcei(mSourceId, AL_BUFFERS_QUEUED, &bufferCount);
@@ -150,121 +194,71 @@ public:
         }
     }
 
-    inout(AudioStream) stream() inout nothrow
+    inout(Audio) audio() inout nothrow
     {
         return mAudioStream;
     }
 
-    void stream(AudioStream value)
+    void audio(Audio value)
+        in (value, "Audio cannot be null.")
     {
         if (mState != State.stopped)
             stop();
 
         mAudioStream = value;
-        mDecoder.setData(mAudioStream.encodedMemory);
-    }
-}
+        
+        try 
+        {
+            mDecoder.openFromMemory(mAudioStream.encodedMemory);
+        }
+        catch (AudioFormatsException ex)
+        {
+            // Copy manually managed memory to GC memory and rethrow exception.
+            string errMsg = ex.msg.dup;
+            string errFile = ex.file.dup;
+            size_t errLine = ex.line;
+            destroyAudioFormatException(ex);
 
-/*
-class AudioSource
-{
-protected:
-    uint mId;
-    float mSelfVolume = 1f;
-    AudioBus mBus;
-
-    this(AudioBus bus)
-    {
-        mBus = bus ? bus : AudioAPI.getBus("master");
-
-        alGenSources(1, &mId);
+            throw new AudioException(errMsg, errFile, errLine, null);
+        }
     }
 
-public:
-    ~this()
+    bool looping() pure const nothrow
     {
-        alDeleteSources(1, &mId);
+        return mLooping;
     }
 
-    Vector3f position() const nothrow
+    void looping(bool value) pure nothrow
     {
-        float x, y, z;
-        alGetSource3f(mId, AL_POSITION, &x, &y, &z);
-        return Vector3f(x, y, z);
+        mLooping = value;
     }
 
-    void position(Vector3f value) nothrow
+    float volume() pure const nothrow
     {
-        alSource3f(mId, AL_POSITION, value.x, value.y, value.z);
-    }
-
-    float volume() const nothrow
-    {
-        return mSelfVolume;
+        return mVolume;
     }
 
     void volume(float value) nothrow
+        in (!isNaN(value), "Cannot set NaN as a volume.")
     {
-        mSelfVolume = clamp(value, 0.0f, 1.0f);
-        //AudioServer._recalculateChannelGains(_audioBus);
+        mVolume = clamp(value, 0f, 1f);
+        updateVolume();
     }
 
-    abstract void play() nothrow;
-    abstract void pause() nothrow;
-    abstract void stop() nothrow;
+    float pitch() pure const nothrow
+    {
+        return mPitch;
+    }
 
-    abstract bool loop() nothrow;
-    abstract void loop(bool value) nothrow;
+    void pitch(float value) nothrow
+        in (!isNaN(value), "Cannot set NaN as a pitch.")
+    {
+        mPitch = value;
+        alSourcef(mSourceId, AL_PITCH, mPitch);
+    }
+
+    State state() pure const nothrow
+    {
+        return mState;
+    }
 }
-
-class AudioSampleSource : AudioSource
-{
-protected:
-    Sound mBuffer;
-
-public:
-    this(AudioBus bus)
-    {
-        super(bus);
-    }
-
-    void buffer(Sound value) nothrow
-    {
-        stop();
-        mBuffer = value;
-
-        alSourcei(mId, AL_BUFFER, mBuffer ? mBuffer.id : 0);
-    }
-
-    Sound buffer() nothrow
-    {
-        return mBuffer;
-    }
-
-    override void play() nothrow
-    {
-        alSourcePlay(mId);
-    }
-
-    override void pause() nothrow
-    {
-        alSourcePause(mId);
-    }
-
-    override void stop() nothrow
-    {
-        alSourceStop(mId);
-    }
-
-    override bool loop() nothrow
-    {
-        int loopValue;
-        alGetSourcei(mId, AL_LOOPING, &loopValue);
-        return loopValue == AL_TRUE;
-    }
-
-    override void loop(bool value) nothrow
-    {
-        alSourcei(mId, AL_LOOPING, value);
-    }
-}*/

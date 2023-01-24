@@ -12,8 +12,16 @@ class AudioSource
 {
 package(zyeware):
     void updateBuffers();
+    void updateVolume();
 
 public:
+    enum State
+    {
+        stopped,
+        paused,
+        playing
+    }
+
     this(AudioBus bus = null);
 
     ~this();
@@ -22,49 +30,17 @@ public:
     void pause();
     void stop();
 
-    inout(AudioStream) stream() pure inout nothrow;
-    void stream(AudioStream value) pure nothrow;
-}
+    inout(Audio) audio() pure inout nothrow;
+    void audio(Audio value) pure nothrow;
 
-/*
-class AudioSource
-{
-protected:
-    uint mId;
-    float mSelfVolume = 1f;
-    AudioBus mBus;
+    bool looping() pure const nothrow;
+    void looping(bool value) pure nothrow;
 
-    this(AudioBus bus);
-
-public:
-    Vector3f position() const nothrow;
-    void position(Vector3f value) nothrow;
-    float volume() const nothrow;
-
+    float volume() pure const nothrow;
     void volume(float value) nothrow;
 
-    abstract void play() nothrow;
-    abstract void pause() nothrow;
-    abstract void stop() nothrow;
+    float pitch() pure const nothrow;
+    void pitch(float value) nothrow;
 
-    abstract bool loop() nothrow;
-    abstract void loop(bool value) nothrow;
+    State state() pure const nothrow;
 }
-
-class AudioSampleSource : AudioSource
-{
-protected:
-    Sound mBuffer;
-
-public:
-    this(AudioBus bus);
-
-    void buffer(Sound value) nothrow;
-    Sound buffer() nothrow;
-
-    override void play() nothrow;
-    override void pause() nothrow;
-    override void stop() nothrow;
-    override bool loop() nothrow;
-    override void loop(bool value) nothrow;
-}*/

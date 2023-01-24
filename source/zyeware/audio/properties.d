@@ -5,14 +5,20 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.properties;
 
+import std.sumtype : SumType;
+
 import zyeware.common;
 import zyeware.audio;
 
-struct PlayProperties
+struct ModuleLoopPoint
 {
-    int channel = -1; /// Select on which channel to play.
-    AudioBus bus; /// The audio bus to use.
-    Vector3f position = Vector3f(0); /// Position to play the sound at.
-    float volume = 1f; /// The volume of the sound, relative to the used bus.
-    bool looping; /// If the sound should be looped.
+    int pattern;
+    int row;
+}
+
+alias LoopPoint = SumType!(int, ModuleLoopPoint);
+
+struct AudioProperties
+{
+    LoopPoint loopPoint = LoopPoint(0); /// The point to loop at. It differentiates between a frame or pattern & row (for modules)
 }
