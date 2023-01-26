@@ -13,7 +13,7 @@ import zyeware.common;
 import zyeware.audio;
 
 @asset(Yes.cache)
-class Audio
+class Sound
 {
 protected:
     const(ubyte)[] mEncodedMemory;
@@ -41,7 +41,7 @@ public:
         return mEncodedMemory;
     }
 
-    static Audio load(string path)
+    static Sound load(string path)
     {
         VFSFile source = VFS.getFile(path);
         ubyte[] bestCommunityData = source.readAll!(ubyte[])();
@@ -81,6 +81,6 @@ public:
 
         Logger.core.log(LogLevel.debug_, "Loaded file '%s' into memory for streaming.", path);
 
-        return new Audio(bestCommunityData, properties);
+        return new Sound(bestCommunityData, properties);
     }
 }

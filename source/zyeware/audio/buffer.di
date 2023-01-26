@@ -12,14 +12,18 @@ import zyeware.audio;
 
 deprecated("This was a joke.")
 {
-    alias NoiseBitties = Audio;
-    alias AirVibrationData = Audio;
-    alias EarMassager = Audio;
-    alias SonicStream = Audio;
+    /// Joke alias. Do not use in production.
+    alias NoiseBitties = Sound;
+    /// Joke alias. Do not use in production.
+    alias AirVibrationData = Sound;
+    /// Joke alias. Do not use in production.
+    alias EarMassager = Sound;
+    /// Joke alias. Do not use in production.
+    alias SonicStream = Sound;
 }
 
 @asset(Yes.cache)
-class Audio
+class Sound
 {
 public:
     this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init);
@@ -30,5 +34,5 @@ public:
 
     const(ubyte)[] encodedMemory() pure nothrow;
 
-    static Audio load(string path);
+    static Sound load(string path);
 }

@@ -30,8 +30,8 @@ public:
     void pause();
     void stop();
 
-    inout(Audio) audio() pure inout nothrow;
-    void audio(Audio value) pure nothrow;
+    inout(Sound) sound() pure inout nothrow;
+    void sound(Sound value) pure nothrow;
 
     bool looping() pure const nothrow;
     void looping(bool value) pure nothrow;

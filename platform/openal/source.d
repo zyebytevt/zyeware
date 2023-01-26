@@ -32,15 +32,15 @@ private:
 protected:
     float[] mProcBuffer;
 
-    Audio mAudioStream;
+    Sound mSound;
     AudioStream mDecoder;
     uint mSourceId;
     uint[] mBufferIDs;
     int mProcessed;
 
     State mState;
-    float mVolume;
-    float mPitch;
+    float mVolume = 1f;
+    float mPitch = 1f;
     bool mLooping;
     AudioBus mBus;
 
@@ -54,7 +54,7 @@ package(zyeware):
         int processed;
         uint pBuf;
         alGetSourcei(mSourceId, AL_BUFFERS_PROCESSED, &processed);
-
+        
         while (processed--)
         {
             alSourceUnqueueBuffers(mSourceId, 1, &pBuf);
@@ -65,7 +65,7 @@ package(zyeware):
             {
                 if (mLooping)
                 {
-                    mAudioStream.loopPoint.match!(
+                    mSound.loopPoint.match!(
                         (int sample)
                         {
                             enforce!AudioException(!mDecoder.isModule, "Cannot seek by sample in tracker files.");
@@ -120,16 +120,11 @@ public:
 
         mProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
         mBufferIDs = new uint[ZyeWare.projectProperties.audioBufferCount];
-        //mDecoder = new AudioStream();
 
         alGenSources(1, &mSourceId);
         alGenBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
 
         AudioThread.register(this);
-
-        mVolume = 1.0f;
-        mPitch = 1.0f;
-        mLooping = false;
 
         updateVolume();
     }
@@ -193,22 +188,22 @@ public:
         }
     }
 
-    inout(Audio) audio() inout nothrow
+    inout(Sound) sound() inout nothrow
     {
-        return mAudioStream;
+        return mSound;
     }
 
-    void audio(Audio value)
-        in (value, "Audio cannot be null.")
+    void sound(Sound value)
+        in (value, "Sound cannot be null.")
     {
         if (mState != State.stopped)
             stop();
 
-        mAudioStream = value;
+        mSound = value;
         
         try 
         {
-            mDecoder.openFromMemory(mAudioStream.encodedMemory);
+            mDecoder.openFromMemory(mSound.encodedMemory);
         }
         catch (AudioFormatsException ex)
         {
