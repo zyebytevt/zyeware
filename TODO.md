@@ -47,8 +47,9 @@ A lot of stuff has already been done before this file has been started.
 [X] Markup for creating GUI
 [X] Get audio working
 [X] Add streaming audio
-[ ] Fix profiler omg
+[X] Fix profiler omg
 [ ] Add unittests
+[ ] DOCUMENTATION!
 [ ] MMAP shenanigans for ZPK files
 [ ] Make buildable and executable on Windows
 [ ] Make executable on MacOS
