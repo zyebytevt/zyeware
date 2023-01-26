@@ -224,8 +224,8 @@ public static:
         
         version (Profiling)
         {
-            ++Profiler.sRenderData.drawCalls;
-            Profiler.sRenderData.polygonCount += count / 3;
+            ++Profiler.currentWriteData.renderData.drawCalls;
+            Profiler.currentWriteData.renderData.polygonCount += count / 3;
         }
     }
 

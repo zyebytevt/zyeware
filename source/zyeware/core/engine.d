@@ -127,7 +127,7 @@ private static:
         {
             version (Profiling)
             {
-                Profiler.clear();
+                Profiler.clearAndSwap();
                 scope (exit) ++fpsCounter;
             }
 

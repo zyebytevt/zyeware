@@ -42,6 +42,9 @@ class Window
     bool isMinimized() nothrow;
     void isMinimized(bool value) nothrow;
 
+    bool isFullscreen() nothrow;
+    void isFullscreen(bool value) nothrow;
+
     const(Image) icon() const nothrow;
     void icon(const Image value);
 

@@ -10,28 +10,50 @@ import std.datetime : Duration;
 
 import zyeware.common;
 
-version (Profiling)
+version (Profiling):
+
 struct Profiler
 {
 private static:
-    Result[] sResults;
+    Data[2] sData;
+    size_t sReadDataPointer;
+    size_t sWriteDataPointer = 1;
 
 package(zyeware) static:
-    RenderData sRenderData;
     ushort sFPS;
 
     void initialize() nothrow
     {
-        sResults.reserve(200);
     }
 
-    void clear() nothrow
+    void clearAndSwap() nothrow
     {
-        sResults.length = 0;
-        sRenderData = RenderData.init;
+        if (++sReadDataPointer == sData.length)
+            sReadDataPointer = 0;
+
+        if (++sWriteDataPointer == sData.length)
+            sWriteDataPointer = 0;
+
+        Data* data = currentWriteData;
+
+        data.results.length = 0;
+        data.renderData = RenderData.init;
     }
 
 public static:
+    struct Data
+    {
+        RenderData renderData;
+        Result[] results;
+    }
+
+    struct RenderData
+    {
+        size_t drawCalls;
+        size_t polygonCount;
+        size_t rectCount;
+    }
+
     struct Result
     {
         immutable string name;
@@ -57,25 +79,18 @@ public static:
         {
             mWatch.stop();
 
-            Profiler.sResults ~= Profiler.Result(mName, mWatch.peek);
+            Profiler.currentWriteData.results ~= Profiler.Result(mName, mWatch.peek);
         }
     }
 
-    struct RenderData
+    const(Data)* currentReadData() nothrow
     {
-        size_t drawCalls;
-        size_t polygonCount;
-        size_t rectCount;
+        return &sData[sReadDataPointer];
     }
 
-    Result[] results() nothrow
+    Data* currentWriteData() nothrow
     {
-        return sResults;
-    }
-
-    RenderData renderData() nothrow
-    {
-        return sRenderData;
+        return &sData[sWriteDataPointer];
     }
 
     ushort fps() nothrow

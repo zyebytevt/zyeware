@@ -263,7 +263,7 @@ public static:
 
         ++sCurrentQuad;
 
-        version (Profiling) ++Profiler.sRenderData.rectCount;
+        version (Profiling) ++Profiler.currentWriteData.renderData.rectCount;
     }
 
     /// Draws some text to screen.

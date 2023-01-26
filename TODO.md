@@ -53,6 +53,7 @@ A lot of stuff has already been done before this file has been started.
 [ ] Make buildable and executable on Windows
 [ ] Make executable on MacOS
 [ ] Localization improvements (i18n-d)?
+[ ] 2D batch renderer add custom shader support
 
 [ ] Implement texture atlases in 3D meshes
 [ ] Add CLI (like Angular) (maybe now even more important due to Github workflows?)

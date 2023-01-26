@@ -35,6 +35,7 @@ protected:
     SDL_Surface* mIconSurface;
     bool mVSync;
     bool mIsCursorCaptured;
+    bool mFullscreen;
 
     SDL_Cursor*[const Cursor] mSDLCursors;
 
@@ -516,6 +517,17 @@ public:
             SDL_MinimizeWindow(mHandle);
         else if (isMinimized)
             SDL_RestoreWindow(mHandle);
+    }
+
+    bool isFullscreen() nothrow
+    {
+        return mFullscreen;
+    }
+
+    void isFullscreen(bool value) nothrow
+    {
+        SDL_SetWindowFullscreen(mHandle, value ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+        mFullscreen = value;
     }
 
     const(Image) icon() const nothrow

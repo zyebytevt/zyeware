@@ -58,7 +58,6 @@ package(zyeware):
         while (processed--)
         {
             alSourceUnqueueBuffers(mSourceId, 1, &pBuf);
-
             
             lastReadLength = readFromDecoder();
 
