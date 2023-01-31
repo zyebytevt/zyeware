@@ -68,14 +68,14 @@ package(zyeware):
                     mSound.loopPoint.match!(
                         (int sample)
                         {
-                            enforce!AudioException(!mDecoder.isModule, "Cannot seek by sample in tracker files.");
+                            //enforce!AudioException(!mDecoder.isModule, "Cannot seek by sample in tracker files.");
                             
                             if (!mDecoder.seekPosition(sample))
                                 Logger.core.log(LogLevel.warning, "Seeking to sample %d failed.", sample);
                         },
                         (ModuleLoopPoint mod)
                         {
-                            enforce!AudioException(mDecoder.isModule, "Cannot seek by pattern/row in non-tracker files.");
+                            //enforce!AudioException(mDecoder.isModule, "Cannot seek by pattern/row in non-tracker files.");
 
                             if (!mDecoder.seekPosition(mod.pattern, mod.row))
                                 Logger.core.log(LogLevel.warning, "Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
@@ -166,12 +166,18 @@ public:
 
     void pause()
     {
+        if (mState != State.playing)
+            return;
+
         mState = State.paused;
         alSourcePause(mSourceId);
     }
 
     void stop()
     {
+        if (mState == State.stopped)
+            return;
+
         mState = State.stopped;
         alSourceStop(mSourceId);
 

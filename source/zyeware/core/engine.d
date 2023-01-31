@@ -27,13 +27,14 @@ import zyeware.utils.format;
 import zyeware.core.startupapp;
 
 /// Struct that holds information about the project.
+/// Note that the author name and project name are used to determine the save data directory.
 struct ProjectProperties
 {
-    string authorName = "Anonymous";
-    string projectName = "ZyeWare Project";
+    string authorName = "Anonymous"; /// The author of the game. Can be anything, from a person to a company.
+    string projectName = "ZyeWare Project"; /// The name of the project.
 
-    LogLevel coreLogLevel = LogLevel.trace; /// The log level for the core logger.
-    LogLevel clientLogLevel = LogLevel.trace; /// The log level for the client logger.
+    LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
+    LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
@@ -55,10 +56,10 @@ struct FrameTime
 /// Holds information about a SemVer version.
 struct Version
 {
-    int major;
-    int minor;
-    int patch;
-    string prerelease;
+    int major; /// The major release version.
+    int minor; /// The minor release version.
+    int patch; /// The patch version.
+    string prerelease; /// Any additional version declarations, e.g. "alpha".
 
     string toString() immutable pure
     {
@@ -256,7 +257,7 @@ package(zyeware.core) static:
         sCmdArgs = args;
         sProjectProperties = properties;
 
-        sFrameTime = dur!"msecs"(1000 / properties.targetFrameRate);
+        targetFrameRate = properties.targetFrameRate;
         sRandom = new RandomNumberGenerator();
 
         if (properties.crashHandler)
@@ -321,6 +322,7 @@ package(zyeware.core) static:
     }
 
 public static:
+    /// The current version of the engine.
     immutable Version engineVersion = Version(0, 3, 0, "alpha");
 
     /// How the framebuffer should be scaled on resizing.
@@ -328,7 +330,7 @@ public static:
     {
         center, /// Keep the original size at the center of the window.
         keepAspect, /// Scale with window, but keep the aspect.
-        fill, /// Fill the window completly.
+        fill, /// Fill the window completely.
         changeWindowSize /// Resize the framebuffer itself.
     }
 
@@ -405,7 +407,9 @@ public static:
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 
-    // TODO: Change name?
+    /// Changes the window size, respecting various window states with it (e.g. full screen, minimised etc.)
+    /// Params:
+    ///   size = The new size of the window.
     void changeWindowSize(Vector2i size)
         in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
     {
@@ -454,6 +458,7 @@ public static:
         return sUpTime;
     }
 
+    /// The target framerate to hit. This is not a guarantee.
     void targetFrameRate(int fps) 
         in (fps > 0, "Target FPS must be greater than 0.")
     {
@@ -545,7 +550,7 @@ public static:
 
     /// The `ProjectProperties` the engine was started with.
     /// See_Also: ProjectProperties
-    const(ProjectProperties) projectProperties() nothrow
+    const(ProjectProperties) projectProperties() nothrow @nogc
     {
         return sProjectProperties;
     }

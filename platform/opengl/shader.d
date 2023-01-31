@@ -243,7 +243,7 @@ public:
         {
             if (string filePath = tag.getAttribute!string("file", null))
             {
-                Logger.core.log(LogLevel.trace, "Loading external shader source '%s'...", filePath);
+                Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
                 VFSFile shaderFile = VFS.getFile(filePath);
                 shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
                 shaderFile.close();

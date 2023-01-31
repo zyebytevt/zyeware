@@ -31,8 +31,8 @@ private template isAsset(E)
 
 /// Responsible for loading assets into memory. It caches all loaded assets, therefore
 /// it will not invoke a loader again as long as the reference in memory is valid.
-/// The `AssetManager` will only keep weak references, e.g. it will not cause memory
-/// to not be freed.
+/// The `AssetManager` will only keep weak references, e.g. it will not keep an unused
+/// asset from being collected by the GC.
 struct AssetManager
 {
     @disable this();
@@ -174,7 +174,7 @@ public static:
             if (!sCache[key].alive)
             {
                 sCache.remove(key).assumeWontThrow;
-                Logger.core.log(LogLevel.trace, "Uncaching '%s' (%s)...", key.path, key.typeFQN);
+                Logger.core.log(LogLevel.verbose, "Uncaching '%s' (%s)...", key.path, key.typeFQN);
                 ++cleaned;
             }
         }

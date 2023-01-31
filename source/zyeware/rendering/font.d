@@ -114,7 +114,7 @@ public:
     static Font load(string path)
         in (path, "Path cannot be null.")
     {
-        Logger.core.log(LogLevel.trace, "Loading Font from '%s'...", path);
+        Logger.core.log(LogLevel.verbose, "Loading Font from '%s'...", path);
         
         VFSFile source = VFS.getFile(path);
         auto bmFont = parseFnt(source.readAll!(ubyte[]));

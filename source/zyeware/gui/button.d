@@ -21,13 +21,11 @@ protected:
 
     override void onCursorEnter() nothrow
     {
-        //cursor.shape = VirtualCursor.Shape.pointingHand;
         mColor = Color.red;
     }
 
     override void onCursorExit() nothrow
     {
-        //cursor.shape = VirtualCursor.Shape.arrow;
         mColor = Color.white;
     }
 

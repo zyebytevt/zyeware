@@ -49,7 +49,7 @@ protected:
         LogLevel level;
         switch (priority)
         {
-        case SDL_LOG_PRIORITY_VERBOSE: level = LogLevel.trace; break;
+        case SDL_LOG_PRIORITY_VERBOSE: level = LogLevel.verbose; break;
         case SDL_LOG_PRIORITY_DEBUG: level = LogLevel.debug_; break;
         case SDL_LOG_PRIORITY_INFO: level = LogLevel.info; break;
         case SDL_LOG_PRIORITY_WARN: level = LogLevel.warning; break;

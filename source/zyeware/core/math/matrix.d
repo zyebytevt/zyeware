@@ -5,9 +5,12 @@ import inmath.linalg;
 
 import zyeware.common;
 
+/// A quaternion with float values.
 alias Quaternionf = Quaternion!(float);
 
+/// A 4x4 matrix with float values.
 alias Matrix4f = Matrix!(float, 4, 4);
+/// A 3x3 matrix with float values.
 alias Matrix3f = Matrix!(float, 3, 3);
 
 /// Convert a 2D position from world to local space.

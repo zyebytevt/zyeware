@@ -12,6 +12,7 @@ import zyeware.common;
 
 version (Profiling):
 
+/// Contains various functions for profiling.
 struct Profiler
 {
 private static:
@@ -20,6 +21,19 @@ private static:
     size_t sWriteDataPointer = 1;
 
 package(zyeware) static:
+    struct Data
+    {
+        RenderData renderData;
+        Result[] results;
+    }
+
+    struct RenderData
+    {
+        size_t drawCalls;
+        size_t polygonCount;
+        size_t rectCount;
+    }
+
     ushort sFPS;
 
     void initialize() nothrow
@@ -41,25 +55,14 @@ package(zyeware) static:
     }
 
 public static:
-    struct Data
-    {
-        RenderData renderData;
-        Result[] results;
-    }
-
-    struct RenderData
-    {
-        size_t drawCalls;
-        size_t polygonCount;
-        size_t rectCount;
-    }
-
     struct Result
     {
         immutable string name;
         immutable Duration duration;
     }
 
+    /// Represents a profiling timer, allowing easy profiling of code sections.
+    /// Use the mixins `ProfileScope` and `ProfileFunction` for convenience.
     struct Timer
     {
     private:
@@ -67,6 +70,8 @@ public static:
         immutable string mName;
 
     public:
+        /// Params:
+        ///   name = The name of the section that is timed.
         this(string name) nothrow
             in (name, "Name cannot be null.")
         {
@@ -75,6 +80,7 @@ public static:
                 mWatch.start();
         }
 
+        /// Stops the timer.
         void stop() nothrow
         {
             mWatch.stop();
@@ -83,22 +89,28 @@ public static:
         }
     }
 
+    /// Returns the profiling data from last frame. This should only be read from.
     const(Data)* currentReadData() nothrow
     {
         return &sData[sReadDataPointer];
     }
 
+    /// Returns the profiling data of the current frame. This should only be written to.
     Data* currentWriteData() nothrow
     {
         return &sData[sWriteDataPointer];
     }
 
+    /// The current frames per second.
     ushort fps() nothrow
     {
         return sFPS;
     }
 }
 
+/// Convenience mixin template that creates a profiling timer for the
+/// current function. If not assigned a custom name, it will take
+/// the pretty name of the function.
 template ProfileFunction(string customName = null)
 {
     static if (!customName)
@@ -112,6 +124,9 @@ template ProfileFunction(string customName = null)
     }`;
 }
 
+/// Convenience mixin template that creates a profiling timer for
+/// the enclosing scope. The name will always contain the function,
+/// and if not given a custom name, also contains the line number.
 template ProfileScope(string customName = null)
 {
     static if (!customName)

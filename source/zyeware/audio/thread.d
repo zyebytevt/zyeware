@@ -1,6 +1,6 @@
 module zyeware.audio.thread;
 
-import core.thread : Thread, Duration, msecs;
+import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 import std.algorithm : countUntil, remove;
 
 import zyeware.common;
@@ -9,17 +9,23 @@ import zyeware.core.weakref;
 
 debug import std.stdio;
 
-package(zyeware) struct AudioThread
+package(zyeware)
+struct AudioThread
 {
 private static:
     Thread sThread;
     
-    __gshared WeakReference!AudioSource[] sRegisteredSources;
+    __gshared WeakReference!AudioSource[64] sRegisteredSources;
+    __gshared size_t sRegisteredSourcesPointer;
     __gshared bool sRunning;
     __gshared Object sMutex = new Object();
 
     void threadBody()
     {
+        thread_detachThis();
+        // Just as a safety precaution, we want to call the TLS destructors.
+        scope (exit) rt_moduleTlsDtor();
+
         // Determine the sleep time between updating the buffers.
         // YukieVT supplied the following formula for this:
         //     (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
@@ -32,13 +38,13 @@ private static:
         {
             synchronized (sMutex)
             {
-                for (size_t i; i < sRegisteredSources.length; ++i)
+                for (size_t i; i < sRegisteredSourcesPointer; ++i)
                 {
                     if (!sRegisteredSources[i].alive)
                     {
                         debug writefln("Removing source #%d...", i);
-                        sRegisteredSources[i] = sRegisteredSources[$ - 1];
-                        --sRegisteredSources.length;
+                        sRegisteredSources[i] = sRegisteredSources[sRegisteredSourcesPointer - 1];
+                        --sRegisteredSourcesPointer;
                         --i;
                         continue;
                     }
@@ -56,7 +62,8 @@ package(zyeware):
     {
         synchronized (sMutex)
         {
-            sRegisteredSources ~= weakReference(source);
+            assert(sRegisteredSourcesPointer < sRegisteredSources.length, "Cannot add more sources.");
+            sRegisteredSources[sRegisteredSourcesPointer++] = weakReference(source);
         }
     }
 
@@ -74,7 +81,6 @@ package(zyeware):
         }
     }
 
-public static:
     void initialize()
     {
         sRunning = true;

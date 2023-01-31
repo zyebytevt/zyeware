@@ -155,7 +155,7 @@ public:
         immutable Rect2f bb = collision.shape.getBoundingBox(transform.globalMatrix);
         immutable Vector2f pos = transform.position;
 
-        Rect2ui cellExtremes = Rect2ui(
+        Rect2i cellExtremes = Rect2i(
             cast(uint) ((pos.x + bb.min.x) / mGridCellSize),
             cast(uint) ((pos.y + bb.min.y) / mGridCellSize),
             cast(uint) ((pos.x + bb.max.x) / mGridCellSize),

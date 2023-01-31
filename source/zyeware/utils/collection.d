@@ -8,44 +8,55 @@ module zyeware.utils.collection;
 import std.traits : hasIndirections, isDynamicArray;
 import std.algorithm : countUntil, remove;
 
+/// A growable circular queue represents a FIFO collection that,
+/// except if it needs to grow, doesn't allocate and free memory
+/// with each push and pop.
 struct GrowableCircularQueue(T)
 {
 private:
+    size_t mLength;
     size_t mFirst, mLast;
     T[] mArray = [T.init];
 
 public:
-    size_t length;
-
+    /// Params:
+    ///   items = The items to initialise this queue with.
     this(T[] items...) pure nothrow
     {
         foreach (x; items)
             push(x);
     }
 
+    /// Whether the collection is empty.
     bool empty() pure const nothrow
     {
-        return length == 0;
+        return mLength == 0;
     }
 
+    /// Returns the front element of the queue.
     inout(T) front() pure inout nothrow
-        in (length != 0, "Cannot get front, is empty.")
+        in (mLength != 0, "Cannot get front, is empty.")
     {
         return mArray[mFirst];
     }
 
+    /// Returns the n-th element of the queue, starting from 0.
     inout(T) opIndex(in size_t i) pure inout nothrow
-        in (i < length, "OpIndex out of bounds!")
+        in (i < mLength, "OpIndex out of bounds!")
     {
-        return mArray[(mFirst + i) & (mArray.length - 1)];
+        return mArray[(mFirst + i) & (mArray.mLength - 1)];
     }
 
+    /// Pushes an item into the queue. Can cause a growth and allocation
+    /// if there is not enough space.
+    /// Params:
+    ///   item = The item to push into the queue.
     void push(T item) pure nothrow
     {
-        if (length >= mArray.length)
+        if (mLength >= mArray.mLength)
         { // Double the queue.
-            immutable oldALen = mArray.length;
-            mArray.length *= 2;
+            immutable oldALen = mArray.mLength;
+            mArray.mLength *= 2;
             if (mLast < mFirst)
             {
                 mArray[oldALen .. oldALen + mLast + 1] = mArray[0 .. mLast + 1];
@@ -55,20 +66,27 @@ public:
             }
         }
 
-        mLast = (mLast + 1) & (mArray.length - 1);
+        mLast = (mLast + 1) & (mArray.mLength - 1);
         mArray[mLast] = item;
-        length++;
+        mLength++;
     }
 
+    /// Pops the front-most item from the queue.
     T pop() pure nothrow
-        in (length != 0, "Cannot pop from queue, is empty.")
+        in (mLength != 0, "Cannot pop from queue, is empty.")
     {
         auto saved = mArray[mFirst];
         static if (hasIndirections!T)
             mArray[mFirst] = T.init; // Help for the GC.
-        mFirst = (mFirst + 1) & (mArray.length - 1);
-        length--;
+        mFirst = (mFirst + 1) & (mArray.mLength - 1);
+        mLength--;
         return saved;
+    }
+
+    /// The length of the queue.
+    size_t length() pure const nothrow
+    {
+        return mLength;
     }
 }
 
@@ -124,12 +142,12 @@ public:
         return saved;
     }
 
-    size_t length() pure const nothrow
+    size_t mLength() pure const nothrow
     {
         return mNextPointer;
     }
 
-    void length(size_t value) pure nothrow
+    void mLength(size_t value) pure nothrow
     {
         mNextPointer = value;
         static if (hasIndirections!T)

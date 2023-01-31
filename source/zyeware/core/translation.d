@@ -94,6 +94,7 @@ public static:
         return sActiveLocale.mLocale;
     }
 
+    /// ditto
     void locale(string locale)
         in (locale, "Locale cannot be null.")
     {

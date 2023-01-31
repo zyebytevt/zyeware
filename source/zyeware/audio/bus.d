@@ -10,6 +10,7 @@ import std.algorithm : clamp;
 import zyeware.common;
 import zyeware.audio.thread;
 
+/// Controls the mixing of various sounds which are assigned to this audio bus, 
 class AudioBus
 {
 protected:
@@ -17,11 +18,14 @@ protected:
     float mVolume = 1;
 
 public:
+    /// Params:
+    ///   name = The name of this audio bus.
     this(string name) pure nothrow
     {
         mName = name;
     }
     
+    /// The name of this audio bus, as registered in the audio subsystem.
     string name() const nothrow
     {
         return mName;

@@ -19,26 +19,16 @@ import terminal;
 import zyeware.common;
 
 
-// LogLevel usage is as follows:
-// 
-// Fatal:      Extremely severe incidents which almost certainly are followed by a crash.
-// Error:      Severe incidents that can impact the stability of the application.
-// Warning:    Incidents that can impact the usability of the application.
-// Info:       Messages with useful information when troubleshooting, but which have no
-//             visible effect on the application itself.
-// Debug:      Messages useful for debugging, containing information a normal user wouldn't
-//             make much sense of.
-// Trace:      Used when traversing through code, "tracing" each step with messages.
-
+/// The log level to use for various logs.
 enum LogLevel
 {
-    off,
-    fatal,
-    error,
-    warning,
-    info,
-    debug_,
-    trace
+    off, /// No logs should go through. This is only useful for setting a "minimum log level."
+    fatal, /// Extremely severe incidents which almost certainly are followed by a crash.
+    error, /// Severe incidents that can impact the stability of the application.
+    warning, // Incidents that can impact the usability of the application.
+    info, // Messages with useful information when troubleshooting, but which have no visible effect on the application itself.
+    debug_, // Messages useful for debugging, containing information a normal user wouldn't make much sense of.
+    verbose /// Used when logging very minute details.
 }
 
 private immutable dstring[] levelNames = [
@@ -47,9 +37,10 @@ private immutable dstring[] levelNames = [
     "Warning",
     "Info",
     "Debug",
-    "Trace"
+    "Verbose"
 ];
 
+/// Represents a single logger, and also contains the standard core and client loggers.
 final class Logger
 {
 private:
@@ -75,6 +66,10 @@ package(zyeware):
     }
 
 public:
+    /// Params:
+    ///   baseSink = The log sink to use for writing messages.
+    ///   logLevel = The minimum log level that should be logged.
+    ///   name = The name of the logger.
     this(LogSink baseSink, LogLevel logLevel, dstring name) pure
     {
         addSink(baseSink);
@@ -83,11 +78,16 @@ public:
         mName = name;
     }
 
+    /// Add a log sink to this logger.
     void addSink(LogSink sink) @trusted pure
     {
         mSinks ~= sink;
     }
 
+    /// Remove the specified log sink from this logger.
+    /// If the given sink doesn't exist, nothing happens.
+    /// Params:
+    ///   sink = The sink to remove.
     void removeSink(LogSink sink) @trusted
     {
         for (size_t i; i < mSinks.length; ++i)
@@ -98,6 +98,11 @@ public:
             }
     }
 
+    /// Writes a message to this log.
+    /// Params:
+    ///   level = The log level the message should be written as.
+    ///   message = The message itself. Can be a format string.
+    ///   args = Arguments used for formatting.
     void log(S, T...)(LogLevel level, S message, T args) nothrow
         if (isSomeString!S)
     {
@@ -129,44 +134,58 @@ public:
         }
     }
 
+    /// Flushes all log sinks connected to this log.
     void flush() 
     {
         foreach (LogSink sink; mSinks)
             sink.flush();
     }
 
-    static Logger client()  nothrow
+    /// The default client logger.
+    static Logger client() nothrow
     {
         return sClientLogger;
     }
 
-    static LogSink defaultLogSink()  nothrow
+    /// The default log sink that all loggers have as a base sink.
+    static LogSink defaultLogSink() nothrow
     {
         return sDefaultLogSink;
     }
 }
 
+/// Represents a sink to write a message into. This can be either a file, a console,
+/// a in-game window, etc.
 abstract class LogSink
 {
 public:
+    /// The data that should be logged.
     struct LogData
     {
-        dstring loggerName;
-        LogLevel level;
-        TimeOfDay time;
-        dstring message;
+        dstring loggerName; /// The name of the logger.
+        LogLevel level; /// The log level of the message.
+        TimeOfDay time; /// The time this message was sent.
+        dstring message; /// The message itself.
     }
 
+    /// Logs the given data.
+    /// Params:
+    ///   data = The data to log.
     abstract void log(LogData data);
+
+    /// Flushes the current sink.
     abstract void flush() ;
 }
 
+/// Represents a log sink that logs into a real file.
 class FileLogSink : LogSink
 {
 private:
     File mFile;
 
 public:
+    /// Params:
+    ///   file = The file to log into.
     this(File file)
     {
         mFile = file;
@@ -179,12 +198,15 @@ public:
     }
 }
 
+/// Represents a sink that writes to a (colour) terminal.
 class TerminalLogSink : LogSink
 {
 private:
     Terminal mTerm;
 
 public:
+    /// Params:
+    ///   terminal = The terminal to log into.
     this(Terminal terminal)
     {
         mTerm = terminal;

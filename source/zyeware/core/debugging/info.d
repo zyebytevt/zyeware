@@ -5,6 +5,7 @@ import core.memory;
 import zyeware.common;
 
 version (Profiling)
+package(zyeware)
 struct DebugInfoManager
 {
     @disable this();
