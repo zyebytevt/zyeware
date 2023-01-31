@@ -14,7 +14,7 @@ import zyeware.rendering;
 version (ZWOpenGLBackend):
 package(zyeware.platform.opengl):
 
-bool[RenderFlag] flagValues;
+bool[RenderFlag] pFlagValues;
 
 version (Windows)
 {
@@ -86,7 +86,7 @@ void glErrorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity,
     Logger.core.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
 }
 
-void initialize()
+void apiInitialize()
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -110,19 +110,19 @@ void initialize()
         GLint resultInt;
 
         glGetBooleanv(GL_DEPTH_TEST, &resultBool);
-        flagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
+        pFlagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
         glGetBooleanv(GL_DEPTH_WRITEMASK, &resultBool);
-        flagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
+        pFlagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
         glGetBooleanv(GL_CULL_FACE, &resultBool);
-        flagValues[RenderFlag.culling] = cast(bool) resultBool;
+        pFlagValues[RenderFlag.culling] = cast(bool) resultBool;
         glGetBooleanv(GL_STENCIL_TEST, &resultBool);
-        flagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
+        pFlagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
         glGetIntegerv(GL_POLYGON_MODE, &resultInt);
-        flagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
+        pFlagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
     }
 }
 
-void loadLibraries()
+void apiLoadLibraries()
 {
     import loader = bindbc.loader.sharedlib;
     import std.string : fromStringz;
@@ -154,26 +154,26 @@ void loadLibraries()
     }
 }
 
-void cleanup()
+void apiCleanup()
 {
 }
 
-void setClearColor(Color value) nothrow
+void apiSetClearColor(Color value) nothrow
 {
     glClearColor(value.r, value.g, value.b, value.a);
 }
 
-void clear() nothrow
+void apiClear() nothrow
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void setViewport(int x, int y, uint width, uint height) nothrow
+void apiSetViewport(int x, int y, uint width, uint height) nothrow
 {
     glViewport(x, y, cast(GLsizei) width, cast(GLsizei) height);
 }
 
-void drawIndexed(size_t count) nothrow
+void apiDrawIndexed(size_t count) nothrow
 {
     glDrawElements(GL_TRIANGLES, cast(int) count, GL_UNSIGNED_INT, null);
     
@@ -184,7 +184,7 @@ void drawIndexed(size_t count) nothrow
     }
 }
 
-void packLightConstantBuffer(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow
+void apiPackLightConstantBuffer(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow
 {
     Vector4f[10] positions;
     Vector4f[10] colors;
@@ -202,14 +202,14 @@ void packLightConstantBuffer(ref ConstantBuffer buffer, in Renderer3D.Light[] li
     buffer.setData(buffer.getEntryOffset("attenuation"), attenuations);
 }
 
-bool getFlag(RenderFlag flag) nothrow
+bool apiGetFlag(RenderFlag flag) nothrow
 {
-    return flagValues[flag];
+    return pFlagValues[flag];
 }
 
-void setFlag(RenderFlag flag, bool value) nothrow
+void apiSetFlag(RenderFlag flag, bool value) nothrow
 {
-    if (flagValues[flag] == value)
+    if (pFlagValues[flag] == value)
         return;
 
     final switch (flag) with (RenderFlag)
@@ -244,10 +244,10 @@ void setFlag(RenderFlag flag, bool value) nothrow
         break;
     }
 
-    flagValues[flag] = value;
+    pFlagValues[flag] = value;
 }
 
-size_t getCapability(RenderCapability capability) nothrow
+size_t apiGetCapability(RenderCapability capability) nothrow
 {
     final switch (capability) with (RenderCapability)
     {

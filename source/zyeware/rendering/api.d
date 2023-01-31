@@ -14,9 +14,17 @@ struct RenderAPI
     @disable this(this);
 
 package(zyeware) static:
-    void function() initialize;
-    void function() loadLibraries;
-    void function() cleanup;
+    void function() sInitializeImpl;
+    void function() sLoadLibrariesImpl;
+    void function() sCleanupImpl;
+    void function(in Color) nothrow sSetClearColorImpl;
+    void function() nothrow sClearImpl;
+    void function(int, int, uint, uint) nothrow sSetViewportImpl;
+    void function(size_t) nothrow sDrawIndexedImpl;
+    void function(ref ConstantBuffer, in Renderer3D.Light[]) nothrow sPackLightConstantBufferImpl;
+    bool function(RenderFlag) nothrow sGetFlagImpl;
+    void function(RenderFlag, bool) nothrow sSetFlagImpl;
+    size_t function(RenderCapability) nothrow sGetCapabilityImpl;
 
     // TODO: Add functions for creating platform dependent objects (e.g. shader, texture etc.)
 
@@ -25,10 +33,18 @@ public static:
     ///
     /// Params:
     ///     value = The color to use.
-    void function(Color value) nothrow setClearColor;
+    pragma(inline, true)
+    void setClearColor(Color value) nothrow
+    {
+        sSetClearColorImpl(value);
+    }
 
     /// Clears the screen with the color specified with `setClearColor`.
-    void function() nothrow clear;
+    pragma(inline, true)
+    void clear() nothrow
+    {
+        sClearImpl();
+    }
 
     /// Sets the viewport of the window.
     ///
@@ -37,34 +53,58 @@ public static:
     ///     y = The y coordinate of the viewport.
     ///     width = The width of the viewport.
     ///     height = The height of the viewport.
-    void function(int x, int y, uint width, uint height) nothrow setViewport;
+    pragma(inline, true)
+    void setViewport(int x, int y, uint width, uint height) nothrow
+    {
+        // TODO: Change to vectors
+        sSetViewportImpl(x, y, width, height);
+    }
 
     /// Draws the currently bound `BufferGroup` to the screen.
     ///
     /// Params:
     ///     count = How many indicies to actually draw.
-    void function(size_t count) nothrow drawIndexed;
+    pragma(inline, true)
+    void drawIndexed(size_t count) nothrow
+    {
+        sDrawIndexedImpl(count);
+    }
 
     /// Packs a lights array into a constant buffer.
     ///
     /// Params:
     ///     buffer = The constant buffer to use.
     ///     lights = The lights array.
-    void function(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow packLightConstantBuffer;
+    pragma(inline, true)
+    void packLightConstantBuffer(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow
+    {
+        sPackLightConstantBufferImpl(buffer, lights);
+    }
 
     /// Gets a render flag.
     ///
     /// Params:
     ///     flag = The flag to query for.
-    bool function(RenderFlag flag) nothrow getFlag;
+    pragma(inline, true)
+    bool getFlag(RenderFlag flag) nothrow
+    {
+        return sGetFlagImpl(flag);
+    }
 
     /// Sets a render flag.
     ///
     /// Params:
     ///     flag = The flag to set.
     ///     value = Whether to enable or disable the flag.
-    void function(RenderFlag flag, bool value) nothrow setFlag;
+    pragma(inline, true)
+    void setFlag(RenderFlag flag, bool value) nothrow
+    {
+        sSetFlagImpl(flag, value);
+    }
 
     /// Queries a render capability.
-    size_t function(RenderCapability capability) nothrow getCapability;
+    size_t getCapability(RenderCapability capability) nothrow
+    {
+        return sGetCapabilityImpl(capability);
+    }
 }

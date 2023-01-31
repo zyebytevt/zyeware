@@ -1,22 +1,26 @@
 module zyeware.platform.opengl.impl;
 
 import zyeware.platform.opengl.api;
+import zyeware.platform.opengl.renderer2d;
 
 import zyeware.rendering;
 
 void loadOpenGLBackend()
 {
     // ===== RenderAPI =====
-    RenderAPI.initialize = &initialize;
-    RenderAPI.loadLibraries = &loadLibraries;
-    RenderAPI.cleanup = &cleanup;
+    RenderAPI.initialize = &apiInitialize;
+    RenderAPI.loadLibraries = &apiLoadLibraries;
+    RenderAPI.cleanup = &apiCleanup;
 
-    RenderAPI.setClearColor = &setClearColor;
-    RenderAPI.clear = &clear;
-    RenderAPI.setViewport = &setViewport;
-    RenderAPI.drawIndexed = &drawIndexed;
-    RenderAPI.packLightConstantBuffer = &packLightConstantBuffer;
-    RenderAPI.getFlag = &getFlag;
-    RenderAPI.setFlag = &setFlag;
-    RenderAPI.getCapability = &getCapability;
+    RenderAPI.setClearColor = &apiSetClearColor;
+    RenderAPI.clear = &apiClear;
+    RenderAPI.setViewport = &apiSetViewport;
+    RenderAPI.drawIndexed = &apiDrawIndexed;
+    RenderAPI.packLightConstantBuffer = &apiPackLightConstantBuffer;
+    RenderAPI.getFlag = &apiGetFlag;
+    RenderAPI.setFlag = &apiSetFlag;
+    RenderAPI.getCapability = &apiGetCapability;
+
+    // ===== Renderer2D =====
+    
 }

@@ -30,39 +30,38 @@ struct QuadVertex
     float textureIndex;
 }
 
-bool oldCullingValue;
+bool pOldCullingValue;
 
-Shader defaultShader;
-BufferGroup[] batchBuffers;
-size_t sActiveBatchBufferIndex;
-ConstantBuffer sMatrixData;
+Shader pDefaultShader;
+BufferGroup[] pBatchBuffers;
+size_t pActiveBatchBufferIndex;
+ConstantBuffer pMatrixData;
 
-QuadVertex[maxVerticesPerBatch] sBatchVertices;
-uint[maxIndicesPerBatch] sBatchIndices;
-size_t sCurrentQuad;
+QuadVertex[maxVerticesPerBatch] pBatchVertices;
+uint[maxIndicesPerBatch] pBatchIndices;
+size_t pCurrentQuad;
 
-Rebindable!(const Texture2D)[] sBatchTextures;
-size_t sNextFreeTexture = 1; // because 0 is the white texture
+Rebindable!(const Texture2D)[] pBatchTextures;
+size_t pNextFreeTexture = 1; // because 0 is the white texture
 
-size_t getIndexForTexture(in Texture2D texture) nothrow
+size_t r2dGetIndexForTexture(in Texture2D texture) nothrow
 {
-    for (size_t i = 1; i < sNextFreeTexture; ++i)
-        if (texture is sBatchTextures[i])
+    for (size_t i = 1; i < pNextFreeTexture; ++i)
+        if (texture is pBatchTextures[i])
             return i;
 
-    if (sNextFreeTexture == sBatchTextures.length)
+    if (pNextFreeTexture == pBatchTextures.length)
         return size_t.max;
 
-    sBatchTextures[sNextFreeTexture++] = texture;
-    return sNextFreeTexture - 1;
+    pBatchTextures[pNextFreeTexture++] = texture;
+    return pNextFreeTexture - 1;
 }
 
-/// Initializes 2D rendering.
-void initialize()
+void r2dInitialize()
 {
-    sBatchTextures = new Rebindable!(const Texture2D)[8];
+    pBatchTextures = new Rebindable!(const Texture2D)[8];
 
-    sMatrixData = new ConstantBuffer(BufferLayout([
+    pMatrixData = new ConstantBuffer(BufferLayout([
         BufferElement("viewProjection", BufferElement.Type.mat4)
     ]));
 
@@ -79,134 +78,96 @@ void initialize()
 
         batchBuffer.indexBuffer = new IndexBuffer(maxIndicesPerBatch * uint.sizeof, Yes.dynamic);
 
-        batchBuffers ~= batchBuffer;
+        pBatchBuffers ~= batchBuffer;
     }
 
     // To circumvent a bug in MacOS builds that require a VAO to be bound before validating a
     // shader program in OpenGL. Due to Renderer2D being initialized early during the
     // engines lifetime, this should fix all further shader loadings.
-    batchBuffers[0].bind();
+    pBatchBuffers[0].bind();
     
     defaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
 
     static ubyte[3] pixels = [255, 255, 255];
-    sBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
+    pBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
 }
 
-/// Cleans up all used resources.
-void cleanup()
+void r2dCleanup()
 {
     defaultShader.dispose();
-    sBatchTextures[0].dispose();
-    sBatchTextures.dispose();
+    pBatchTextures[0].dispose();
+    pBatchTextures.dispose();
 
-    foreach (BufferGroup buffer; batchBuffers)
+    foreach (BufferGroup buffer; pBatchBuffers)
         buffer.dispose();
 }
 
-/// Starts a 2D scene. This must be called before any 2D drawing commands.
-///
-/// Params:
-///     projectionMatrix = A 4x4 matrix used for projection.
-///     viewMatrix = A 4x4 matrix used for view.
-void begin(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
+void r2dBegin(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
 {
     debug enforce!RenderException(currentRenderer == CurrentRenderer.none,
         "A renderer is currently active, cannot begin.");
 
-    sMatrixData.bind(ConstantBuffer.Slot.matrices);
-    sMatrixData.setData(sMatrixData.getEntryOffset("viewProjection"),
+    pMatrixData.bind(ConstantBuffer.Slot.matrices);
+    pMatrixData.setData(pMatrixData.getEntryOffset("viewProjection"),
         (projectionMatrix * viewMatrix).matrix);
 
     RenderAPI.setFlag(RenderFlag.depthTesting, false);
-    oldCullingValue = RenderAPI.getFlag(RenderFlag.culling);
+    pOldCullingValue = RenderAPI.getFlag(RenderFlag.culling);
     RenderAPI.setFlag(RenderFlag.culling, false);
 
     debug currentRenderer = CurrentRenderer.renderer2D;
 }
 
-/// Ends a 2D scene. This must be called at the end of all 2D drawing commands, as it flushes
-/// everything to the screen.
-void end()
+void r2dEnd()
 {
     debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
         "2D renderer is not active, cannot end.");
 
     flush();
 
-    RenderAPI.setFlag(RenderFlag.culling, oldCullingValue);
+    RenderAPI.setFlag(RenderFlag.culling, pOldCullingValue);
 
     debug currentRenderer = CurrentRenderer.none;
 }
 
-/// Flushes all currently cached drawing commands to the screen.
-void flush()
+void r2dFlush()
 {
     debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
         "2D renderer is not active, cannot flush.");
 
-    BufferGroup activeGroup = batchBuffers[sActiveBatchBufferIndex++];
-    sActiveBatchBufferIndex %= batchBuffers.length;
+    BufferGroup activeGroup = pBatchBuffers[pActiveBatchBufferIndex++];
+    pActiveBatchBufferIndex %= pBatchBuffers.length;
 
     activeGroup.bind();
-    activeGroup.dataBuffer.setData(sBatchVertices);
-    activeGroup.indexBuffer.setData(sBatchIndices);
+    activeGroup.dataBuffer.setData(pBatchVertices);
+    activeGroup.indexBuffer.setData(pBatchIndices);
 
     defaultShader.bind();
 
-    for (int i = 0; i < sNextFreeTexture; ++i)
-        sBatchTextures[i].bind(i);
+    for (int i = 0; i < pNextFreeTexture; ++i)
+        pBatchTextures[i].bind(i);
     
-    RenderAPI.drawIndexed(sCurrentQuad * 6);
+    RenderAPI.drawIndexed(pCurrentQuad * 6);
 
-    sCurrentQuad = 0;
-    sNextFreeTexture = 1;
+    pCurrentQuad = 0;
+    pNextFreeTexture = 1;
 }
 
-/// Draws a rectangle.
-///
-/// Params:
-///     dimensions = The dimensions of the rectangle to draw.
-///     position = 2D position where to draw the rectangle to.
-///     scale = How much to scale the dimensions.
-///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
-///     texture = The texture to use. If `null`, draws a blank rectangle.
-///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-pragma(inline, true)
-void drawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Vector4f(1),
+void r2dDrawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Vector4f(1),
     in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
 {
     drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
         modulate, texture, region);
 }
 
-/// Draws a rectangle.
-///
-/// Params:
-///     dimensions = The dimensions of the rectangle to draw.
-///     position = 2D position where to draw the rectangle to.
-///     scale = How much to scale the dimensions.
-///     rotation = The rotation of the rectangle, in radians.
-///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
-///     texture = The texture to use. If `null`, draws a blank rectangle.
-///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-pragma(inline, true)
-void drawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, float rotation, in Color modulate = Vector4f(1),
+void r2dDrawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, float rotation, in Color modulate = Vector4f(1),
     in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
 {
     drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.rotation(rotation, Vector3f(0, 0, 1))
         * Matrix4f.scaling(scale.x, scale.y, 1), modulate, texture, region);
 }
 
-/// Draws a rectangle.
-///
-/// Params:
-///     dimensions = The dimensions of the rectangle to draw.
-///     transform = A 4x4 matrix used for transformation of the rectangle.
-///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
-///     texture = The texture to use. If `null`, draws a blank rectangle.
-///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-void drawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1), in Texture2D texture = null,
+void r2dDrawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1), in Texture2D texture = null,
     in Rect2f region = Rect2f(0, 0, 1, 1))
 {
     debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
@@ -224,7 +185,7 @@ void drawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate = V
     quadUVs[2] = Vector2f(region.max.x, region.max.y);
     quadUVs[3] = Vector2f(region.min.x, region.max.y);
 
-    if (sCurrentQuad == maxQuadsPerBatch)
+    if (pCurrentQuad == maxQuadsPerBatch)
         flush();
 
     float texIdx = 0;
@@ -241,35 +202,26 @@ void drawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate = V
     }
 
     for (size_t i; i < 4; ++i)
-        sBatchVertices[sCurrentQuad * 4 + i] = QuadVertex(transform * quadPositions[i], modulate,
+        pBatchVertices[pCurrentQuad * 4 + i] = QuadVertex(transform * quadPositions[i], modulate,
             quadUVs[i], texIdx);
 
-    immutable uint currentQuadIndex = cast(uint) sCurrentQuad * 4;
-    immutable size_t baseIndex = sCurrentQuad * 6;
+    immutable uint currentQuadIndex = cast(uint) pCurrentQuad * 4;
+    immutable size_t baseIndex = pCurrentQuad * 6;
     
-    sBatchIndices[baseIndex] = currentQuadIndex + 2;
-    sBatchIndices[baseIndex + 1] = currentQuadIndex + 1;
-    sBatchIndices[baseIndex + 2] = currentQuadIndex;
-    sBatchIndices[baseIndex + 3] = currentQuadIndex;
-    sBatchIndices[baseIndex + 4] = currentQuadIndex + 3;
-    sBatchIndices[baseIndex + 5] = currentQuadIndex + 2;
+    pBatchIndices[baseIndex] = currentQuadIndex + 2;
+    pBatchIndices[baseIndex + 1] = currentQuadIndex + 1;
+    pBatchIndices[baseIndex + 2] = currentQuadIndex;
+    pBatchIndices[baseIndex + 3] = currentQuadIndex;
+    pBatchIndices[baseIndex + 4] = currentQuadIndex + 3;
+    pBatchIndices[baseIndex + 5] = currentQuadIndex + 2;
 
-    ++sCurrentQuad;
+    ++pCurrentQuad;
 
     version (Profiling) ++Profiler.currentWriteData.renderData.rectCount;
 }
 
-/// Draws some text to screen.
-///
-/// Params:
-///     text = The text to draw. May be of any string type.
-///     font = The font to use.
-///     position = 2D position where to draw the text to.
-///     modulate = The color of the text.
-///     alignment = How to align the text. Horizontal and vertical alignment can be OR'd together.
-void drawText(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
+void drawText(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
     ubyte alignment = Font.Alignment.left | Font.Alignment.top)
-    if (isSomeString!T)
     in (text && font)
 {
     Vector2f cursor = Vector2f(0);
