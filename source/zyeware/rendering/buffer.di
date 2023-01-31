@@ -29,13 +29,21 @@ public:
     ///     divisor = The divisor of this element.
     this(string name, Type type, uint amount = 1, Flag!"normalized" normalized = No.normalized, uint divisor = 0);
 
+    /// The name of the buffer element.
     string name() pure const nothrow;
+    /// The type of the buffer element.
     Type type() pure const nothrow;
+    /// The size of the buffer element in bytes.
     uint size() pure const nothrow;
+    /// The amount of individual elements of this buffer element.
     uint amount() pure const nothrow;
+    /// The size of an individual element of this buffer element, in bytes.
     uint elementSize() pure const nothrow;
+    /// Offset of this buffer element inside the buffer.
     uint offset() pure const nothrow;
+    /// If the values of this buffer element are normalized.
     bool normalized() pure const nothrow;
+    /// The divisor of this element.
     uint divisor() pure const nothrow;
 }
 

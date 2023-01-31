@@ -49,12 +49,14 @@ A lot of stuff has already been done before this file has been started.
 [X] Add streaming audio
 [X] Fix profiler omg
 [ ] Add unittests
-[ ] DOCUMENTATION!
+[X] DOCUMENTATION!
 [ ] MMAP shenanigans for ZPK files
 [ ] Make buildable and executable on Windows
 [ ] Make executable on MacOS
 [ ] Localization improvements (i18n-d)?
 [ ] 2D batch renderer add custom shader support
+[ ] Move ECS into a separate sub-package
+[ ] Rethink the different backend situation
 
 [ ] Implement texture atlases in 3D meshes
 [ ] Add CLI (like Angular) (maybe now even more important due to Github workflows?)
