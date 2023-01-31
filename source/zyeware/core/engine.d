@@ -254,6 +254,9 @@ package(zyeware.core) static:
     {
         GC.disable();
 
+        import zyeware.platform.opengl.impl;
+        loadOpenGLBackend();
+
         sCmdArgs = args;
         sProjectProperties = properties;
 

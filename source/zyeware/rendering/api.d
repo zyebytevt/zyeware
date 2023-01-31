@@ -14,19 +14,21 @@ struct RenderAPI
     @disable this(this);
 
 package(zyeware) static:
-    void initialize();
-    void loadLibraries();
-    void cleanup();
+    void function() initialize;
+    void function() loadLibraries;
+    void function() cleanup;
+
+    // TODO: Add functions for creating platform dependent objects (e.g. shader, texture etc.)
 
 public static:
     /// Sets which color to use for clearing the screen.
     ///
     /// Params:
     ///     value = The color to use.
-    void setClearColor(Color value) nothrow;
+    void function(Color value) nothrow setClearColor;
 
     /// Clears the screen with the color specified with `setClearColor`.
-    void clear() nothrow;
+    void function() nothrow clear;
 
     /// Sets the viewport of the window.
     ///
@@ -35,34 +37,34 @@ public static:
     ///     y = The y coordinate of the viewport.
     ///     width = The width of the viewport.
     ///     height = The height of the viewport.
-    void setViewport(int x, int y, uint width, uint height) nothrow;
+    void function(int x, int y, uint width, uint height) nothrow setViewport;
 
     /// Draws the currently bound `BufferGroup` to the screen.
     ///
     /// Params:
     ///     count = How many indicies to actually draw.
-    void drawIndexed(size_t count) nothrow;
+    void function(size_t count) nothrow drawIndexed;
 
     /// Packs a lights array into a constant buffer.
     ///
     /// Params:
     ///     buffer = The constant buffer to use.
     ///     lights = The lights array.
-    void packLightConstantBuffer(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow;
+    void function(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow packLightConstantBuffer;
 
     /// Gets a render flag.
     ///
     /// Params:
     ///     flag = The flag to query for.
-    bool getFlag(RenderFlag flag) nothrow;
+    bool function(RenderFlag flag) nothrow getFlag;
 
     /// Sets a render flag.
     ///
     /// Params:
     ///     flag = The flag to set.
     ///     value = Whether to enable or disable the flag.
-    void setFlag(RenderFlag flag, bool value) nothrow;
+    void function(RenderFlag flag, bool value) nothrow setFlag;
 
     /// Queries a render capability.
-    size_t getCapability(RenderCapability capability) nothrow;
+    size_t function(RenderCapability capability) nothrow getCapability;
 }
