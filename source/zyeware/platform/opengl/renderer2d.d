@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.renderer.renderer2d;
+module zyeware.platform.opengl.renderer2d;
 
 import std.traits : isSomeString;
 import std.string : lineSplitter;
@@ -16,6 +16,7 @@ import zyeware.common;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
 
+version (ZWOpenGLBackend):
 package(zyeware.platform.opengl):
 
 enum maxQuadsPerBatch = 5000;
@@ -86,7 +87,7 @@ void r2dInitialize()
     // engines lifetime, this should fix all further shader loadings.
     pBatchBuffers[0].bind();
     
-    defaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
+    pDefaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
 
     static ubyte[3] pixels = [255, 255, 255];
     pBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
@@ -94,7 +95,7 @@ void r2dInitialize()
 
 void r2dCleanup()
 {
-    defaultShader.dispose();
+    pDefaultShader.dispose();
     pBatchTextures[0].dispose();
     pBatchTextures.dispose();
 
@@ -123,7 +124,7 @@ void r2dEnd()
     debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer2D,
         "2D renderer is not active, cannot end.");
 
-    flush();
+    r2dFlush();
 
     RenderAPI.setFlag(RenderFlag.culling, pOldCullingValue);
 
@@ -142,7 +143,7 @@ void r2dFlush()
     activeGroup.dataBuffer.setData(pBatchVertices);
     activeGroup.indexBuffer.setData(pBatchIndices);
 
-    defaultShader.bind();
+    pDefaultShader.bind();
 
     for (int i = 0; i < pNextFreeTexture; ++i)
         pBatchTextures[i].bind(i);
@@ -151,20 +152,6 @@ void r2dFlush()
 
     pCurrentQuad = 0;
     pNextFreeTexture = 1;
-}
-
-void r2dDrawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Vector4f(1),
-    in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
-{
-    drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
-        modulate, texture, region);
-}
-
-void r2dDrawRect(in Rect2f dimensions, in Vector2f position, in Vector2f scale, float rotation, in Color modulate = Vector4f(1),
-    in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
-{
-    drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.rotation(rotation, Vector3f(0, 0, 1))
-        * Matrix4f.scaling(scale.x, scale.y, 1), modulate, texture, region);
 }
 
 void r2dDrawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1), in Texture2D texture = null,
@@ -186,16 +173,16 @@ void r2dDrawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate 
     quadUVs[3] = Vector2f(region.min.x, region.max.y);
 
     if (pCurrentQuad == maxQuadsPerBatch)
-        flush();
+        r2dFlush();
 
     float texIdx = 0;
     if (texture)
     {
-        size_t idx = getIndexForTexture(texture);
+        size_t idx = r2dGetIndexForTexture(texture);
         if (idx == size_t.max) // No more room for new textures
         {
-            flush();
-            idx = getIndexForTexture(texture);
+            r2dFlush();
+            idx = r2dGetIndexForTexture(texture);
         }
 
         texIdx = cast(float) idx;
@@ -220,7 +207,7 @@ void r2dDrawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate 
     version (Profiling) ++Profiler.currentWriteData.renderData.rectCount;
 }
 
-void drawText(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
+void r2dDrawText(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
     ubyte alignment = Font.Alignment.left | Font.Alignment.top)
     in (text && font)
 {
@@ -232,7 +219,7 @@ void drawText(in dstring text, in Font font, in Vector2f position, in Color modu
         cursor.y -= (alignment & Font.Alignment.middle) ? height / 2 : height;
     }
 
-    foreach (T line; text.lineSplitter)
+    foreach (dstring line; text.lineSplitter)
     {
         if (alignment & Font.Alignment.center || alignment & Font.Alignment.right)
         {
@@ -263,8 +250,11 @@ void drawText(in dstring text, in Font font, in Vector2f position, in Color modu
                     immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
                         cast(float) (c.x + c.width) / size.x, cast(float) (c.y + c.height) / size.y);
 
-                    drawRect(Rect2f(0, 0, c.width, c.height), Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)),
-                        Vector2f(1), modulate, pageTexture, region);
+                    //r2dDrawRect(Rect2f(0, 0, c.width, c.height), Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)),
+                    //    Vector2f(1), modulate, pageTexture, region);
+
+                    drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
+                        modulate, texture, region);
 
                     cursor.x += c.xadvance + kerning;
             }

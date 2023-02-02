@@ -23,13 +23,25 @@ struct Renderer2D
     @disable this(this);
 
 package(zyeware) static:
-    void function() sInitialize;
-    void function() sCleanup;
+    void function() sInitializeImpl;
+    void function() sCleanupImpl;
     void function(in Matrix4f, in Matrix4f) sBeginImpl;
     void function() sEndImpl;
     void function() sFlushImpl;
     void function(in Rect2f, in Matrix4f, in Color, in Texture2D, in Rect2f) sDrawRectImpl;
     void function(in dstring, in Font, in Vector2f, in Color, ubyte alignment) sDrawTextImpl;
+
+    pragma(inline, true)
+    void initialize()
+    {
+        sInitializeImpl();
+    }
+
+    pragma(inline, true)
+    void cleanup()
+    {
+        sCleanupImpl();
+    }
 
 public static:
     /// Starts a 2D scene. This must be called before any 2D drawing commands.
@@ -98,7 +110,7 @@ public static:
     /// Params:
     ///     dimensions = The dimensions of the rectangle to draw.
     ///     transform = A 4x4 matrix used for transformation of the rectangle.
-    ///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
+    ///     modulate = The color of the rectangle. If a texture is suppliedW, it will be tinted in this color.
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)

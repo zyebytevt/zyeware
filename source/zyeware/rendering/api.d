@@ -26,6 +26,24 @@ package(zyeware) static:
     void function(RenderFlag, bool) nothrow sSetFlagImpl;
     size_t function(RenderCapability) nothrow sGetCapabilityImpl;
 
+    pragma(inline, true)
+    void initialize()
+    {
+        sInitializeImpl();
+    }
+
+    pragma(inline, true)
+    void loadLibraries()
+    {
+        sLoadLibrariesImpl();
+    }
+
+    pragma(inline, true)
+    void cleanup()
+    {
+        sCleanupImpl();
+    }
+
     // TODO: Add functions for creating platform dependent objects (e.g. shader, texture etc.)
 
 public static:
@@ -103,6 +121,7 @@ public static:
     }
 
     /// Queries a render capability.
+    pragma(inline, true)
     size_t getCapability(RenderCapability capability) nothrow
     {
         return sGetCapabilityImpl(capability);

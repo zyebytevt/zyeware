@@ -18,11 +18,25 @@ struct Renderer3D
     @disable this(this);
 
 package(zyeware) static:
-    /// Initializes 3D rendering.
-    void initialize();
+    void function() sInitializeImpl;
+    void function() sCleanupImpl;
+    void function(in Light[]) sUploadLightsImpl;
+    void function(in Matrix4f, in Matrix4f, Environment3D) sBeginImpl;
+    void function() sEndImpl;
+    void function() sFlushImpl;
+    void function(BufferGroup, Material, in Matrix4f) sSubmitImpl;
 
-    /// Cleans up all used resources.
-    void cleanup();
+    pragma(inline, true)
+    void initialize()
+    {
+        sInitializeImpl();
+    }
+
+    pragma(inline, true)
+    void cleanup()
+    {
+        sCleanupImpl();
+    }
 
 public static:
     /// Represents a light.
@@ -34,11 +48,18 @@ public static:
         Vector3f attenuation; /// The attenuation of the light.
     }
 
+    /// How many lights can be rendered in one draw call.
+    enum maxLights = 10;
+
     /// Uploads a struct of light arrays to the rendering API for the next draw call.
     ///
     /// Params:
     ///     lights = The array of lights to upload.
-    void uploadLights(Light[] lights);
+    pragma(inline, true)
+    void uploadLights(Light[] lights)
+    {
+        sUploadLightsImpl(light);
+    }
 
     /// Starts a 3D scene. This must be called before any 3D drawing commands.
     ///
@@ -47,14 +68,26 @@ public static:
     ///     viewMatrix = A 4x4 matrix used for view.
     ///     environment = The rendering environment for this scene. May be `null`.
     ///     depthTest = Whether to use depth testing for this scene or not.
-    void begin(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment);
+    pragma(inline, true)
+    void begin(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
+    {
+        sBeginImpl(projectionMatrix, viewMatrix, environment);
+    }
 
     /// Ends a 3D scene. This must be called at the end of all 3D drawing commands, as it flushes
     /// everything to the screen.
-    void end();
+    pragma(inline, true)
+    void end()
+    {
+        sEndImpl();
+    }
 
     /// Flushes all currently cached drawing commands to the screen.
-    void flush();
+    pragma(inline, true)
+    void flush()
+    {
+        sFlushImpl();
+    }
 
     /// Submits a draw command.
     ///
@@ -62,7 +95,10 @@ public static:
     ///     renderable = The renderable instance to draw.
     ///     transform = A 4x4 matrix used for transformation.
     pragma(inline, true)
-    void submit(Renderable renderable, in Matrix4f transform);
+    void submit(Renderable renderable, in Matrix4f transform)
+    {
+        sSubmitImpl(renderable.bufferGroup, renderable.material, transform);
+    }
 
     // TODO: Check constness!
     /// Submits a draw command.
@@ -71,5 +107,9 @@ public static:
     ///     group = The buffer group to draw.
     ///     material = The material to use for drawing.
     ///     transform = A 4x4 matrix used for transformation.
-    void submit(BufferGroup group, Material material, in Matrix4f transform);
+    pragma(inline, true)
+    void submit(BufferGroup group, Material material, in Matrix4f transform)
+    {
+        sSubmitImpl(group, material, transform);
+    }
 }
