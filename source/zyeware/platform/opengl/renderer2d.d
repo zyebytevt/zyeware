@@ -207,7 +207,7 @@ void r2dDrawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate 
     version (Profiling) ++Profiler.currentWriteData.renderData.rectCount;
 }
 
-void r2dDrawText(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
+void r2dDrawString(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
     ubyte alignment = Font.Alignment.left | Font.Alignment.top)
     in (text && font)
 {
@@ -219,7 +219,7 @@ void r2dDrawText(in dstring text, in Font font, in Vector2f position, in Color m
         cursor.y -= (alignment & Font.Alignment.middle) ? height / 2 : height;
     }
 
-    foreach (dstring line; text.lineSplitter)
+    foreach (T line; text.lineSplitter)
     {
         if (alignment & Font.Alignment.center || alignment & Font.Alignment.right)
         {
@@ -253,8 +253,11 @@ void r2dDrawText(in dstring text, in Font font, in Vector2f position, in Color m
                     //r2dDrawRect(Rect2f(0, 0, c.width, c.height), Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)),
                     //    Vector2f(1), modulate, pageTexture, region);
 
-                    drawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
-                        modulate, texture, region);
+                    r2dDrawRect(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
+                        modulate, pageTexture, region);
+
+                    /*r2dDrawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
+                        modulate, texture, region);*/
 
                     cursor.x += c.xadvance + kerning;
             }

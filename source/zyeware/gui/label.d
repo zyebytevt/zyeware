@@ -36,7 +36,7 @@ protected:
 
     override void customDraw(in FrameTime nextFrameTime) const
     {
-        Renderer2D.drawText(text, font, mTextPosition, color, mAlignment);
+        Renderer2D.drawString(text, font, mTextPosition, color, mAlignment);
     }
 
     override void updateArea(Rect2f parentArea) nothrow

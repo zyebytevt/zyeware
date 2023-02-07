@@ -58,7 +58,7 @@ public static:
     pragma(inline, true)
     void uploadLights(Light[] lights)
     {
-        sUploadLightsImpl(light);
+        sUploadLightsImpl(lights);
     }
 
     /// Starts a 3D scene. This must be called before any 3D drawing commands.

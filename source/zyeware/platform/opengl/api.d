@@ -158,7 +158,7 @@ void apiCleanup()
 {
 }
 
-void apiSetClearColor(Color value) nothrow
+void apiSetClearColor(in Color value) nothrow
 {
     glClearColor(value.r, value.g, value.b, value.a);
 }

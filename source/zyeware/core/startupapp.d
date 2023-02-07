@@ -82,7 +82,7 @@ public:
         Renderer2D.drawRect(Rect2f(min, max), Matrix4f.identity,
             Color(1, 1, 1, alpha), mEngineLogo);
 
-        Renderer2D.drawText(mVersionString, mInternalFont, Vector2f(-1, -1), Color(1, 1, 1, alpha),
+        Renderer2D.drawString(mVersionString, mInternalFont, Vector2f(-1, -1), Color(1, 1, 1, alpha),
             Font.Alignment.left | Font.Alignment.bottom);
         
         Renderer2D.end();

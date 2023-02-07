@@ -27,9 +27,12 @@ void loadOpenGLBackend()
     Renderer2D.sCleanupImpl = &r2dCleanup;
     Renderer2D.sBeginImpl = &r2dBegin;
     Renderer2D.sDrawRectImpl = &r2dDrawRect;
-    Renderer2D.sDrawTextImpl = &r2dDrawText;
     Renderer2D.sEndImpl = &r2dEnd;
     Renderer2D.sFlushImpl = &r2dFlush;
+
+    Renderer2D.sDrawStringImpl = &r2dDrawString!string;
+    Renderer2D.sDrawWStringImpl = &r2dDrawString!wstring;
+    Renderer2D.sDrawDStringImpl = &r2dDrawString!dstring;
     
     // ===== Renderer3D =====
     Renderer3D.sCleanupImpl = &r3dCleanup;

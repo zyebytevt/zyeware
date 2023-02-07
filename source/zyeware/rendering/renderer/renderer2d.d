@@ -29,7 +29,9 @@ package(zyeware) static:
     void function() sEndImpl;
     void function() sFlushImpl;
     void function(in Rect2f, in Matrix4f, in Color, in Texture2D, in Rect2f) sDrawRectImpl;
-    void function(in dstring, in Font, in Vector2f, in Color, ubyte alignment) sDrawTextImpl;
+    void function(in string, in Font, in Vector2f, in Color, ubyte alignment) sDrawStringImpl;
+    void function(in wstring, in Font, in Vector2f, in Color, ubyte alignment) sDrawWStringImpl;
+    void function(in dstring, in Font, in Vector2f, in Color, ubyte alignment) sDrawDStringImpl;
 
     pragma(inline, true)
     void initialize()
@@ -120,7 +122,7 @@ public static:
         sDrawRectImpl(dimensions, transform, modulate, texture, region);
     }
 
-    /// Draws some text to screen.
+    /// Draws some string to the screen.
     ///
     /// Params:
     ///     text = The text to draw. May be of any string type.
@@ -129,9 +131,17 @@ public static:
     ///     modulate = The color of the text.
     ///     alignment = How to align the text. Horizontal and vertical alignment can be OR'd together.
     pragma(inline, true)
-    void drawText(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
+    void drawString(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
         ubyte alignment = Font.Alignment.left | Font.Alignment.top)
+        if (isSomeString!T)
     {
-        sDrawTextImpl(text, font, position, modulate, alignment);
+        static if (is(T == string))
+            sDrawStringImpl(text, font, position, modulate, alignment);
+        else static if (is(T == wstring))
+            sDrawWStringImpl(text, font, position, modulate, alignment);
+        else static if (is(T == dstring))
+            sDrawDStringImpl(text, font, position, modulate, alignment);
+        else
+            static assert(false, "Cannot render string of type " ~ T.stringof);
     }
 }

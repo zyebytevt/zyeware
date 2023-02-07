@@ -16,7 +16,7 @@ package(zyeware.platform.opengl):
 
 debug import zyeware.platform.opengl.renderer2d : currentRenderer, CurrentRenderer;
 
-
+enum maxLights = 10;
 enum maxMaterialsPerBatch = 10;
 enum maxBufferGroupsPerMaterial = 10;
 enum maxTransformsPerBufferGroup = 10;
@@ -95,7 +95,7 @@ void r3dCleanup()
     pEnvironmentBuffer.dispose();
 }
 
-void r3dUploadLights(Renderer3D.Light[] lights)
+void r3dUploadLights(in Renderer3D.Light[] lights)
 {
     if (lights.length > maxLights)
     {
@@ -139,7 +139,7 @@ void r3dEnd()
     debug enforce!RenderException(currentRenderer == CurrentRenderer.renderer3D,
         "3D renderer is not active, cannot end.");
 
-    flush();
+    r3dFlush();
 
     if (pActiveEnvironment.sky)
         r3dRenderSky(pActiveEnvironment.sky);
@@ -194,7 +194,7 @@ retryInsert:
     if (i == pCurrentMaterialBatch)
     {
         if (pCurrentMaterialBatch == maxMaterialsPerBatch)
-            flush();
+            r3dFlush();
         
         pMaterialBatches[pCurrentMaterialBatch++].material = material;
     }
@@ -210,7 +210,7 @@ retryInsert:
     {
         if (materialBatch.currentBufferGroupBatch == maxBufferGroupsPerMaterial)
         {
-            flush();
+            r3dFlush();
             goto retryInsert;
         }
 
@@ -222,7 +222,7 @@ retryInsert:
     // Add transform last.
     if (bufferGroupBatch.currentTransform == maxTransformsPerBufferGroup)
     {
-        flush();
+        r3dFlush();
         goto retryInsert;
     }
 
