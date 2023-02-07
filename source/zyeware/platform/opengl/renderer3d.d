@@ -5,14 +5,14 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.opengl.renderer3d;
 
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
+
 import std.typecons : Rebindable;
 import std.exception : enforce;
 
 import zyeware.common;
 import zyeware.rendering;
-
-version (ZWOpenGLBackend):
-package(zyeware.platform.opengl):
 
 debug import zyeware.platform.opengl.renderer2d : currentRenderer, CurrentRenderer;
 
@@ -64,20 +64,20 @@ void r3dRenderSky(Renderable sky)
 
 void r3dInitialize()
 {
-    pMatricesBuffer = new ConstantBuffer(BufferLayout([
+    pMatricesBuffer = ConstantBuffer.create(BufferLayout([
         BufferElement("mvp", BufferElement.Type.mat4),
         BufferElement("projection", BufferElement.Type.mat4),
         BufferElement("view", BufferElement.Type.mat4),
         BufferElement("model", BufferElement.Type.mat4)
     ]));
 
-    pEnvironmentBuffer = new ConstantBuffer(BufferLayout([
+    pEnvironmentBuffer = ConstantBuffer.create(BufferLayout([
         BufferElement("cameraPosition", BufferElement.Type.vec4),
         BufferElement("ambientColor", BufferElement.Type.vec4),
         BufferElement("fogColor", BufferElement.Type.vec4),
     ]));
 
-    pLightsBuffer = new ConstantBuffer(BufferLayout([
+    pLightsBuffer = ConstantBuffer.create(BufferLayout([
         BufferElement("position", BufferElement.Type.vec4, maxLights),
         BufferElement("color", BufferElement.Type.vec4, maxLights),
         BufferElement("attenuation", BufferElement.Type.vec4, maxLights),

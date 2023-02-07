@@ -25,14 +25,9 @@ deprecated("This was a joke.")
 /// Contains an encoded audio segment, plus various information like
 /// loop point etc.
 @asset(Yes.cache)
-class Sound
+interface Sound
 {
 public:
-    /// Params:
-    ///   encodedMemory = An array of unsigned bytes that contains the encoded audio data.
-    ///   properties = Instance of an `AudioProperties` struct to initialize the Sound with.
-    this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init);
-
     /// The point where this sound should loop, if played through an `AudioSource`.
     LoopPoint loopPoint() pure const nothrow;
 
@@ -42,10 +37,22 @@ public:
     /// The encoded audio data.
     const(ubyte)[] encodedMemory() pure nothrow;
 
+    /// Creates a new sound buffer with the given data.
+    /// Params:
+    ///   encodedMemory = An array of unsigned bytes that contains the encoded audio data.
+    ///   properties = Instance of an `AudioProperties` struct to initialize the Sound with.
+    static Sound create(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
+    {
+        return AudioAPI.sCreateSoundImpl(encodedMemory, properties);
+    }
+
     /// Loads a sound from a given VFS path.
     /// Params:
     ///   path = The path inside the VFS.
     /// Returns: A newly created `Sound` instance.
     /// Throws: `VFSException` if the given file can't be loaded.
-    static Sound load(string path);
+    static Sound load(string path)
+    {
+        return AudioAPI.sLoadSoundImpl(path);
+    }
 }

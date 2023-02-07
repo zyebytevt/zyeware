@@ -1,8 +1,21 @@
+// This file is part of the ZyeWare Game Engine, and subject to the terms
+// and conditions defined in the file 'LICENSE.txt', which is part
+// of this source code package.
+//
+// Copyright 2021 ZyeByte
 module zyeware.platform.opengl.impl;
+
+version (ZWBackendOpenGL):
+package(zyeware):
 
 import zyeware.platform.opengl.api;
 import zyeware.platform.opengl.renderer2d;
 import zyeware.platform.opengl.renderer3d;
+import zyeware.platform.opengl.buffer;
+import zyeware.platform.opengl.texture;
+import zyeware.platform.opengl.framebuffer;
+import zyeware.platform.opengl.shader;
+import zyeware.platform.opengl.window;
 
 import zyeware.rendering;
 
@@ -21,6 +34,23 @@ void loadOpenGLBackend()
     RenderAPI.sGetFlagImpl = &apiGetFlag;
     RenderAPI.sSetFlagImpl = &apiSetFlag;
     RenderAPI.sGetCapabilityImpl = &apiGetCapability;
+
+    RenderAPI.sCreateBufferGroupImpl = () => new OGLBufferGroup();
+    RenderAPI.sCreateDataBufferImpl = (size, layout, dynamic) => new OGLDataBuffer(size, layout, dynamic);
+    RenderAPI.sCreateDataBufferWithDataImpl = (data, layout, dynamic) => new OGLDataBuffer(data, layout, dynamic);
+    RenderAPI.sCreateIndexBufferImpl = (size, dynamic) => new OGLIndexBuffer(size, dynamic);
+    RenderAPI.sCreateIndexBufferWithDataImpl = (indices, dynamic) => new OGLIndexBuffer(indices, dynamic);
+    RenderAPI.sCreateConstantBufferImpl = (layout) => new OGLConstantBuffer(layout);
+
+    RenderAPI.sCreateFramebufferImpl = (props) => new OGLFramebuffer(props);
+    RenderAPI.sCreateTexture2DImpl = (image, props) => new OGLTexture2D(image, props);
+    RenderAPI.sCreateTextureCubeMapImpl = (images, props) => new OGLTextureCubeMap(images, props);
+    RenderAPI.sCreateWindowImpl = (props) => new OGLWindow(props);
+    RenderAPI.sCreateShaderImpl = () => new OGLShader();
+
+    RenderAPI.sLoadTexture2DImpl = (path) => OGLTexture2D.load(path);
+    RenderAPI.sLoadTextureCubeMapImpl = (path) => OGLTextureCubeMap.load(path);
+    RenderAPI.sLoadShaderImpl = (path) => OGLShader.load(path);
 
     // ===== Renderer2D =====
     Renderer2D.sInitializeImpl = &r2dInitialize;

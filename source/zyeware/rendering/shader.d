@@ -8,16 +8,23 @@ module zyeware.rendering.shader;
 import inmath.linalg;
 
 import zyeware.common;
+import zyeware.rendering;
 
 @asset(Yes.cache)
-class Shader
+interface Shader
 {
 public:
-    this();
-
     void bind() const;
 
     size_t textureCount() pure const nothrow;
 
-    static Shader load(string path);
+    static Shader create()
+    {
+        return RenderAPI.sCreateShaderImpl();
+    }
+
+    static Shader load(string path)
+    {
+        return RenderAPI.sLoadShaderImpl(path);
+    }
 }

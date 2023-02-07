@@ -10,12 +10,8 @@ import zyeware.audio;
 
 /// Represents an individual source that can play sounds. Only one sound
 /// can play at a time.
-class AudioSource
+interface AudioSource
 {
-package(zyeware):
-    void updateBuffers() @nogc;
-    void updateVolume();
-
 public:
     /// Represents what state the `AudioSource` is currently in.
     enum State
@@ -25,12 +21,6 @@ public:
         playing /// Currently playing audio.
     }
 
-    /// Params:
-    ///   bus = The audio bus this source belongs to.
-    this(AudioBus bus = null);
-
-    ~this();
-
     /// Starts playback, or resumes if the source has been paused previously.
     void play();
     /// Pauses playback. If playback wasn't started, nothing happens.
@@ -39,10 +29,10 @@ public:
     void stop();
 
     /// The `Sound` instance assigned to this source.
-    inout(Sound) sound() pure inout nothrow;
+    inout(Sound) sound() inout;
     
     /// ditto
-    void sound(Sound value) pure nothrow;
+    void sound(Sound value);
 
     /// Determines whether the source is looping it's sound. The loop point is defined by
     /// the assigned `Sound`.
@@ -66,4 +56,17 @@ public:
 
     /// The state this source is currently in.
     State state() pure const nothrow;
+
+    /// ZyeWare internal call, do not use!
+    void updateBuffers();
+    /// ZyeWare internal call, do not use!
+    void updateVolume();
+
+    /// Creates a new audio source.
+    /// Params:
+    ///   bus = The audio bus this source belongs to.
+    static AudioSource create(AudioBus bus = null)
+    {
+        return AudioAPI.sCreateAudioSourceImpl(bus);
+    }
 }

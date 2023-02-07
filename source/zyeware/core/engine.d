@@ -178,7 +178,7 @@ private static:
     {
         FramebufferProperties fbProps;
         fbProps.size = sMainWindow.size;
-        sMainFramebuffer = new Framebuffer(fbProps);
+        sMainFramebuffer = Framebuffer.create(fbProps);
 
         sWindowProjection = Matrix4f.orthographic(0, sMainWindow.size.x, 0, sMainWindow.size.y, -1, 1);
         sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
@@ -255,7 +255,9 @@ package(zyeware.core) static:
         GC.disable();
 
         import zyeware.platform.opengl.impl;
+        import zyeware.platform.openal.impl;
         loadOpenGLBackend();
+        loadOpenALBackend();
 
         sCmdArgs = args;
         sProjectProperties = properties;
@@ -278,7 +280,7 @@ package(zyeware.core) static:
         Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
         
         // Creates a new window and render context.
-        sMainWindow = new Window(properties.mainWindowProperties);
+        sMainWindow = Window.create(properties.mainWindowProperties);
         enforce!CoreException(sMainWindow, "Main window creation failed.");
         createFramebuffer();
 

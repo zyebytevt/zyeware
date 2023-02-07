@@ -18,10 +18,8 @@ public:
 }
 
 @asset(Yes.cache)
-class Texture2D : Texture
+interface Texture2D : Texture
 {
-    this(in Image image, in TextureProperties properties);
-
     void bind(uint unit = 0) const;
     void setPixels(const(ubyte)[] pixels);
 
@@ -31,18 +29,32 @@ class Texture2D : Texture
     Vector2i size() pure const nothrow;
     ubyte channels() pure const nothrow;
 
-    static Texture2D load(string path);
+    static Texture2D create(in Image image, in TextureProperties properties)
+    {
+        return RenderAPI.sCreateTexture2DImpl(image, properties);
+    }
+
+    static Texture2D load(string path)
+    {
+        return RenderAPI.sLoadTexture2DImpl(path);
+    }
 }
 
 @asset(Yes.cache)
-class TextureCubeMap : Texture
+interface TextureCubeMap : Texture
 {
-    this(in Image[6] images, in TextureProperties properties);
-    
     void bind(uint unit = 0) const;
 
     const(TextureProperties) properties() pure const nothrow;
     uint id() pure const nothrow;
 
-    static TextureCubeMap load(string path);
+    static TextureCubeMap create(in Image[6] images, in TextureProperties properties)
+    {
+        return RenderAPI.sCreateTextureCubeMapImpl(images, properties);
+    }
+
+    static TextureCubeMap load(string path)
+    {
+        return RenderAPI.sLoadTextureCubeMapImpl(path);
+    }
 }

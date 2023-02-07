@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.window;
+module zyeware.platform.opengl.window;
+
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
 
 import core.stdc.string : memcpy;
 
@@ -18,10 +21,9 @@ import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.platform.opengl.utils;
 
-import platform.opengl.utils;
-
-class Window
+class OGLWindow : Window
 {
 private:
     static size_t sWindowCount = 0;
@@ -131,8 +133,8 @@ protected:
         return getGamepadIndex(SDL_GameControllerFromInstanceID(instanceId));
     }
 
-public:
-    this(in WindowProperties properties = WindowProperties.init)
+package(zyeware.platform.opengl):
+    this(in WindowProperties properties)
     {
         mTitle = properties.title;
         
@@ -194,6 +196,7 @@ public:
         ++sWindowCount;
     }
 
+public:
     ~this()
     {
         SDL_DestroyWindow(mHandle);
@@ -537,8 +540,6 @@ public:
 
     void icon(const Image value)
     {
-        import platform.opengl.utils;
-
         if (mIconSurface)
             SDL_FreeSurface(mIconSurface);
 

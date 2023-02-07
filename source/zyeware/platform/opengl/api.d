@@ -5,14 +5,16 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.opengl.api;
 
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
+
 import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
 
-version (ZWOpenGLBackend):
-package(zyeware.platform.opengl):
+import zyeware.platform.opengl.buffer;
 
 bool[RenderFlag] pFlagValues;
 

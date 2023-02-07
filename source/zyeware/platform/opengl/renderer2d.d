@@ -5,6 +5,9 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.opengl.renderer2d;
 
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
+
 import std.traits : isSomeString;
 import std.string : lineSplitter;
 import std.typecons : Rebindable;
@@ -15,9 +18,6 @@ import bmfont : BMFont = Font;
 import zyeware.common;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
-
-version (ZWOpenGLBackend):
-package(zyeware.platform.opengl):
 
 enum maxQuadsPerBatch = 5000;
 enum maxVerticesPerBatch = maxQuadsPerBatch * 4;
@@ -62,22 +62,22 @@ void r2dInitialize()
 {
     pBatchTextures = new Rebindable!(const Texture2D)[8];
 
-    pMatrixData = new ConstantBuffer(BufferLayout([
+    pMatrixData = ConstantBuffer.create(BufferLayout([
         BufferElement("viewProjection", BufferElement.Type.mat4)
     ]));
 
     for (size_t i; i < 2; ++i)
     {
-        auto batchBuffer = new BufferGroup();
+        auto batchBuffer = BufferGroup.create();
 
-        batchBuffer.dataBuffer = new DataBuffer(maxVerticesPerBatch * QuadVertex.sizeof, BufferLayout([
+        batchBuffer.dataBuffer = DataBuffer.create(maxVerticesPerBatch * QuadVertex.sizeof, BufferLayout([
             BufferElement("aPosition", BufferElement.Type.vec4),
             BufferElement("aColor", BufferElement.Type.vec4),
             BufferElement("aUV", BufferElement.Type.vec2),
             BufferElement("aTexIndex", BufferElement.Type.float_)
         ]), Yes.dynamic);
 
-        batchBuffer.indexBuffer = new IndexBuffer(maxIndicesPerBatch * uint.sizeof, Yes.dynamic);
+        batchBuffer.indexBuffer = IndexBuffer.create(maxIndicesPerBatch * uint.sizeof, Yes.dynamic);
 
         pBatchBuffers ~= batchBuffer;
     }
@@ -90,7 +90,7 @@ void r2dInitialize()
     pDefaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
 
     static ubyte[3] pixels = [255, 255, 255];
-    pBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
+    pBatchTextures[0] = Texture2D.create(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
 }
 
 void r2dCleanup()

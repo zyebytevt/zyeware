@@ -8,11 +8,9 @@ module zyeware.rendering.framebuffer;
 import zyeware.common;
 import zyeware.rendering;
 
-class Framebuffer
+interface Framebuffer
 {
 public:
-    this(in FramebufferProperties properties);
-
     void bind() const;
     void unbind() const;
     void invalidate();
@@ -22,4 +20,9 @@ public:
 
     const(Texture2D) colorAttachment() const nothrow;
     const(Texture2D) depthAttachment() const nothrow;
+
+    static Framebuffer create(in FramebufferProperties properties)
+    {
+        return RenderAPI.sCreateFramebufferImpl(properties);
+    }
 }

@@ -44,12 +44,12 @@ public:
             1, 2, 5, 5, 2, 6
         ];
 
-        mBufferGroup = new BufferGroup();
-        mBufferGroup.dataBuffer = new DataBuffer(vertices, BufferLayout([
+        mBufferGroup = BufferGroup.create();
+        mBufferGroup.dataBuffer = DataBuffer.create(vertices, BufferLayout([
             BufferElement("aPosition", BufferElement.Type.vec3)
         ]), No.dynamic);
 
-        mBufferGroup.indexBuffer = new IndexBuffer(indices, No.dynamic);
+        mBufferGroup.indexBuffer = IndexBuffer.create(indices, No.dynamic);
     }
 
     inout(BufferGroup) bufferGroup() inout pure nothrow

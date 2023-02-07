@@ -8,10 +8,8 @@ module zyeware.rendering.window;
 import zyeware.common;
 import zyeware.rendering;
 
-class Window
+interface Window
 {
-    this(in WindowProperties properties = WindowProperties.init);
-
     void update();
     void swapBuffers();
 
@@ -53,4 +51,9 @@ class Window
 
     void cursor(Cursor value) nothrow;
     const(Cursor) cursor() const nothrow;
+
+    static Window create(in WindowProperties properties)
+    {
+        return RenderAPI.sCreateWindowImpl(properties);
+    }
 }

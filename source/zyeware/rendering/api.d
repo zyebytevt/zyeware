@@ -17,6 +17,7 @@ package(zyeware) static:
     void function() sInitializeImpl;
     void function() sLoadLibrariesImpl;
     void function() sCleanupImpl;
+
     void function(in Color) nothrow sSetClearColorImpl;
     void function() nothrow sClearImpl;
     void function(int, int, uint, uint) nothrow sSetViewportImpl;
@@ -25,6 +26,23 @@ package(zyeware) static:
     bool function(RenderFlag) nothrow sGetFlagImpl;
     void function(RenderFlag, bool) nothrow sSetFlagImpl;
     size_t function(RenderCapability) nothrow sGetCapabilityImpl;
+    
+    BufferGroup function() sCreateBufferGroupImpl;
+    DataBuffer function(size_t, BufferLayout, bool) sCreateDataBufferImpl;
+    DataBuffer function(const void[], BufferLayout, bool) sCreateDataBufferWithDataImpl;
+    IndexBuffer function(size_t, bool) sCreateIndexBufferImpl;
+    IndexBuffer function(const uint[], bool) sCreateIndexBufferWithDataImpl;
+    ConstantBuffer function(in BufferLayout) sCreateConstantBufferImpl;
+
+    Framebuffer function(in FramebufferProperties) sCreateFramebufferImpl;
+    Texture2D function(in Image, in TextureProperties) sCreateTexture2DImpl;
+    TextureCubeMap function(in Image[6], in TextureProperties) sCreateTextureCubeMapImpl;
+    Window function(in WindowProperties) sCreateWindowImpl;
+    Shader function() sCreateShaderImpl;
+
+    Texture2D function(string path) sLoadTexture2DImpl;
+    TextureCubeMap function(string path) sLoadTextureCubeMapImpl;
+    Shader function(string path) sLoadShaderImpl;
 
     pragma(inline, true)
     void initialize()
@@ -43,8 +61,6 @@ package(zyeware) static:
     {
         sCleanupImpl();
     }
-
-    // TODO: Add functions for creating platform dependent objects (e.g. shader, texture etc.)
 
 public static:
     /// Sets which color to use for clearing the screen.

@@ -41,7 +41,7 @@ public:
                 bmFont.info.fontName, bmFont.info.fontSize);
 
         foreach (string pagePath; bmFont.pages)
-            mPageTextures ~= Texture2D.load(pagePath);//AssetManager.load!Texture2D(pagePath);
+            mPageTextures ~= cast(Texture2D) Texture2D.load(pagePath);//AssetManager.load!Texture2D(pagePath);
     }
 
     

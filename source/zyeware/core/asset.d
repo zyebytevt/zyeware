@@ -24,7 +24,7 @@ private template isAsset(E)
     import std.traits : hasUDA;
 
     static if(__traits(compiles, hasUDA!(E, asset)))
-        enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test")) && is(E : Object);
+        enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test"));// && is(E : Object);
     else
         enum bool isAsset = false;
 }
@@ -45,7 +45,8 @@ private static:
         string path;
     }
 
-    alias LoadFunction = Tuple!(Object function(string), "callback", bool, "cache");
+    alias LoadCallback = Object function(string);
+    alias LoadFunction = Tuple!(LoadCallback, "callback", bool, "cache");
 
     LoadFunction[string] sLoaders;
     WeakReference!Object[AssetUID] sCache;
@@ -58,17 +59,19 @@ package(zyeware.core) static:
         import zyeware.core.translation : Translation;
         import zyeware.audio : Sound;
 
-        register!Shader();
-        register!Image();
-        register!Texture2D();
-        register!TextureCubeMap();
-        register!Mesh();
-        register!Font();
-        register!Material();
-        register!Translation();
-        register!Sound();
-        register!SpriteFrames();
-        register!Cursor();
+        register!Shader((path) => cast(Object) Shader.load(path));
+        register!Texture2D((path) => cast(Object) Texture2D.load(path));
+        register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
+
+        register!Sound((path) => cast(Object) Sound.load(path));
+
+        register!Image(&Image.load);
+        register!Mesh(&Mesh.load);
+        register!Font(&Font.load);
+        register!Material(&Material.load);
+        register!Translation(&Translation.load);
+        register!SpriteFrames(&SpriteFrames.load);
+        register!Cursor(&Cursor.load);
     }
 
     void cleanup()
@@ -120,13 +123,13 @@ public static:
     /// 
     /// Params:
     ///     T = The asset type to register.
-    void register(T)()
+    void register(T)(LoadCallback callback)
         if (isAsset!T)
     {
         import std.traits : getUDAs;
         auto data = getUDAs!(T, asset)[0];
 
-        sLoaders[fullyQualifiedName!T] = LoadFunction(&T.load, data.cache);
+        sLoaders[fullyQualifiedName!T] = LoadFunction(callback, data.cache);
     }
 
     /// Unregisters an asset.
