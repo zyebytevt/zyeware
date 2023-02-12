@@ -8,6 +8,13 @@ module zyeware.rendering.window;
 import zyeware.common;
 import zyeware.rendering;
 
+struct WindowProperties
+{
+    string title = "ZyeWare Engine";
+    Vector2i size = Vector2i(1280, 720);
+    Image icon;
+}
+
 interface Window
 {
     void update();

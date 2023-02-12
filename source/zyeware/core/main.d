@@ -7,6 +7,8 @@ module zyeware.core.main;
 
 import core.stdc.stdlib;
 
+import std.stdio : stderr;
+
 import zyeware.common;
 import zyeware.core.application;
 
@@ -19,7 +21,7 @@ version (unittest)
 }
 else
 {
-    int main(string[] args)
+    export int main(string[] args)
     {
         try
         {
@@ -32,6 +34,9 @@ else
         {
             if (ZyeWare.crashHandler)
                 ZyeWare.crashHandler.show(t);
+            else
+                stderr.writeln(t.toString());
+
             abort();
         }
     }

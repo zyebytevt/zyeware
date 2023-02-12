@@ -36,6 +36,9 @@ struct ProjectProperties
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
+    RenderBackend renderBackend = RenderBackend.openGL; /// Determines the rendering backend used.
+    AudioBackend audioBackend = AudioBackend.openAL; /// Determines the audio backend used.
+
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
     WindowProperties mainWindowProperties; /// The properties of the main window.
@@ -247,6 +250,57 @@ private static:
         sMainWindow.swapBuffers();
     }
 
+    void parseCmdArgs(string[] args, ref ProjectProperties properties)
+    {
+        import std.getopt : getopt;
+        import std.stdio : writeln;
+        import core.stdc.stdlib : exit;
+
+        auto helpInfo = getopt(args,
+            "render-backend", &properties.renderBackend,
+            "audio-backend", &properties.audioBackend,
+            "loglevel-core", &properties.coreLogLevel,
+            "loglevel-client", &properties.clientLogLevel,
+            "target-frame-rate", &properties.targetFrameRate
+        );
+
+        if (helpInfo.helpWanted)
+        {
+            writeln("Help requested!");
+            exit(0);
+        }
+    }
+
+    void loadBackends(const ProjectProperties properties)
+    {
+        import zyeware.platform.opengl.impl;
+        import zyeware.platform.openal.impl;
+
+        switch (properties.renderBackend) with (RenderBackend)
+        {
+        case openGL:
+        default:
+            version (ZWBackendOpenGL)
+            {
+                loadOpenGLBackend();
+                break;
+            }
+            else throw new CoreException("ZyeWare has not been compiled with OpenGL support.");
+        }
+
+        switch (properties.audioBackend) with (AudioBackend)
+        {
+        case openAL:
+        default:
+            version (ZWBackendOpenAL)
+            {
+                loadOpenALBackend();
+                break;
+            }
+            else throw new CoreException("ZyeWare has not been compiled with OpenAL support.");
+        }
+    }
+
 package(zyeware.core) static:
     CrashHandler crashHandler;
 
@@ -254,17 +308,19 @@ package(zyeware.core) static:
     {
         GC.disable();
 
-        import zyeware.platform.opengl.impl;
-        import zyeware.platform.openal.impl;
-        loadOpenGLBackend();
-        loadOpenALBackend();
+        parseCmdArgs(args, properties);
+        loadBackends(properties);
 
         sCmdArgs = args;
         sProjectProperties = properties;
-
         targetFrameRate = properties.targetFrameRate;
         sRandom = new RandomNumberGenerator();
 
+        // Initialize profiler and logger before anything else.
+        version (Profiling) Profiler.initialize();
+        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
+
+        // Initialize crash handler afterwards because it relies on the logger.
         if (properties.crashHandler)
             crashHandler = properties.crashHandler;
         else
@@ -274,10 +330,6 @@ package(zyeware.core) static:
             else
                 crashHandler = new DefaultCrashHandler();
         }
-
-        // Initialize profiler and logger before anything else.
-        version (Profiling) Profiler.initialize();
-        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
         
         // Creates a new window and render context.
         sMainWindow = Window.create(properties.mainWindowProperties);
@@ -328,7 +380,7 @@ package(zyeware.core) static:
 
 public static:
     /// The current version of the engine.
-    immutable Version engineVersion = Version(0, 3, 0, "alpha");
+    immutable Version engineVersion = Version(0, 4, 0, "alpha");
 
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode

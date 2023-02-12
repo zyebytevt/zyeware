@@ -8,6 +8,28 @@ module zyeware.rendering.texture;
 import zyeware.common;
 import zyeware.rendering;
 
+struct TextureProperties
+{
+    enum Filter
+    {
+        nearest,
+        linear,
+        bilinear,
+        trilinear
+    }
+
+    enum WrapMode
+    {
+        repeat,
+        mirroredRepeat,
+        clampToEdge
+    }
+
+    Filter minFilter, magFilter;
+    WrapMode wrapS, wrapT;
+    bool generateMipmaps = true;
+}
+
 interface Texture
 {
 public:

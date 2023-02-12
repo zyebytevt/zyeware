@@ -8,6 +8,13 @@ module zyeware.audio.api;
 import zyeware.common;
 import zyeware.audio;
 
+/// Used for selecting an audio backend at the start of the engine.
+enum AudioBackend
+{
+    headless, /// A dummy API, does nothing.
+    openAL /// Used OpenAL for audio playback.
+}
+
 /// Allows direct access to the audio API.
 struct AudioAPI
 {

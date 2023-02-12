@@ -8,6 +8,13 @@ module zyeware.rendering.framebuffer;
 import zyeware.common;
 import zyeware.rendering;
 
+struct FramebufferProperties
+{
+    Vector2i size;
+    ubyte channels;
+    bool swapChainTarget;
+}
+
 interface Framebuffer
 {
 public:
