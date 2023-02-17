@@ -380,7 +380,7 @@ package(zyeware.core) static:
 
 public static:
     /// The current version of the engine.
-    immutable Version engineVersion = Version(0, 4, 0, "alpha");
+    immutable Version engineVersion = Version(0, 5, 0, "alpha");
 
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
