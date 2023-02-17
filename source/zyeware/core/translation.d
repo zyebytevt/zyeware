@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.translation;
 
-import std.string : format;
+import std.string : format, startsWith;
 import std.exception : enforce, assumeWontThrow;
 
 import sdlang;
@@ -37,6 +37,20 @@ public static:
 
         Logger.core.log(LogLevel.warning, "Tried to translate '%s' without active locale.", key);
         return key;
+    }
+
+    /// Remaps an asset path.
+    ///
+    /// Params:
+    ///     origPath = The original VFS path to remap.
+    ///
+    /// Returns: The remapped asset, or `origPath` if noo remapping exists.
+    string remapAssetPath(string origPath) nothrow
+    {
+        if (sActiveLocale)
+            return sActiveLocale.remapAssetPath(origPath);
+
+        return origPath;
     }
 
     /// Registers a locale to the manager. If the given locale is already registered, then
@@ -116,17 +130,17 @@ class Translation
 protected:
     string mLocale;
     string[string] mTranslations;
+    string[string] mAssetRemaps;
 
 public:
     /// Params:
     ///     locale = The ISO 639-1 name for the language.
-    ///     translations = Key-to-language translations in a AA.
-    this(string locale, string[string] translations)
+    ///     translations = Key-to-language translations in an AA.
+    ///     assetRemaps = The resource remaps in an AA.
+    this(string locale)
         in (locale, "Locale cannot be null.")
-        in (translations, "Translation AA cannot be null.")
     {
         mLocale = locale;
-        mTranslations = translations;
     }
 
     /// Adds a key with the corresponding translation to the locale.
@@ -151,10 +165,30 @@ public:
         mTranslations.remove(key);
     }
 
+    /// Adds an asset remap path.
+    /// 
+    /// Params:
+    ///   origPath = The original path to remap
+    ///   newPath = The new path
+    void addAssetRemap(string origPath, string newPath) pure
+    {
+        enforce!CoreException(VFS.isValidVFSPath(origPath) && VFS.isValidVFSPath(newPath), "Malformed VFS paths for asset remapping.");
+        enforce!CoreException(!origPath.startsWith("core://"), "Cannot remap assets from core package.");
+
+        mAssetRemaps[origPath] = newPath;
+    }
+
+    /// Removes an asset remap path.
+    void removeAssetRemap(string origPath) pure nothrow
+    {
+        mAssetRemaps.remove(origPath);
+    }
+
     /// Tries to optimize all further key lookups.
     void optimize() pure nothrow
     {
         mTranslations = mTranslations.rehash;
+        mAssetRemaps = mAssetRemaps.rehash;
     }
 
     /// Translates a key to it's specified translation.
@@ -167,6 +201,17 @@ public:
         in (key, "Key cannot be null.")
     {
         return mTranslations.get(key, key).assumeWontThrow;
+    }
+
+    /// Remaps a resource path.
+    ///
+    /// Params:
+    ///     origPath = The original VFS path to remap.
+    ///
+    /// Returns: The remapped resource, or `origPath` if noo remapping exists.
+    string remapAssetPath(string origPath) pure const nothrow
+    {
+        return mAssetRemaps.get(origPath, origPath).assumeWontThrow;
     }
 
     /// The ISO 639-1 name of this locale.
@@ -189,17 +234,36 @@ public:
         file.close();
 
         immutable string locale = root.expectTagValue!string("locale");
-        
-        string[string] translations;
+        auto translation = new Translation(locale);
 
-        foreach (Tag translationTag; root.all.tags.filter!(a => a.name == "translate"))
+        foreach (Tag tag; root.all.tags)
         {
-            immutable string old = translationTag.expectTag("old").expectValue!string;
-            immutable string new_ = translationTag.expectTag("new").expectValue!string;
+            switch (tag.name)
+            {
+            case "locale":
+                break;
 
-            translations[old] = new_;
+            case "translate":
+                immutable string orig = tag.expectTag("old").expectValue!string;
+                immutable string new_ = tag.expectTag("new").expectValue!string;
+
+                translation.addTranslation(orig, new_);
+                break;
+
+            case "remap":
+                immutable string orig = tag.expectTag("old").expectValue!string;
+                immutable string new_ = tag.expectTag("new").expectValue!string;
+
+                translation.addAssetRemap(orig, new_);
+                break;
+
+            default:
+                Logger.core.log(LogLevel.warning, "%s(%d): Unknown top-level declaration '%s'.", path,
+                    tag.location.line, tag.name);
+            }
         } 
 
-        return new Translation(locale, translations);
+        translation.optimize();
+        return translation;
     }
 }

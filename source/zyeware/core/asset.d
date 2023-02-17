@@ -97,6 +97,8 @@ public static:
         LoadFunction* loader = fqn in sLoaders;
         enforce!CoreException(loader, format!"'%s' was not registered as an asset."(fqn));
 
+        path = TranslationManager.remapAssetPath(path);
+
         auto uid = AssetUID(fqn, path);
 
         // Check if we have it cached, and if so, if it's still alive

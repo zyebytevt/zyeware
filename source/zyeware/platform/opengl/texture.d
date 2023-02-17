@@ -59,9 +59,6 @@ package(zyeware.platform.opengl):
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mID);
 
-        //glTextureStorage2D(mID, 1, internalFormat, mSize.x, mSize.y);
-        //glTextureSubImage2D(mID, 0, 0, 0, mSize.x, mSize.y, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
-
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mSize.x, mSize.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
@@ -71,10 +68,7 @@ package(zyeware.platform.opengl):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
 
         if (properties.generateMipmaps)
-        {
-            // glEnable(GL_TEXTURE_2D); // To circumvent a bug in certain ATI drivers
             glGenerateMipmap(GL_TEXTURE_2D);
-        }
     }
 
     this(uint id)

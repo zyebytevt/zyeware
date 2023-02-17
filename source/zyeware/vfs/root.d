@@ -12,7 +12,7 @@ import std.typecons : Tuple;
 import std.range : empty;
 import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
-import std.path : buildNormalizedPath, dirName;
+import std.path : buildNormalizedPath, dirName, isValidPath;
 
 import zyeware.common;
 import zyeware.vfs;
@@ -176,5 +176,11 @@ public static:
     bool portableMode() nothrow
     {
         return sPortableMode;
+    }
+
+    bool isValidVFSPath(string path) pure nothrow
+    {
+        auto splitResult = path.findSplit("://");
+        return !splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty;
     }
 }
