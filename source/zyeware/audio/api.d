@@ -12,7 +12,7 @@ import zyeware.audio;
 enum AudioBackend
 {
     headless, /// A dummy API, does nothing.
-    openAL /// Used OpenAL for audio playback.
+    openAl /// Used OpenAL for audio playback.
 }
 
 /// Allows direct access to the audio API.

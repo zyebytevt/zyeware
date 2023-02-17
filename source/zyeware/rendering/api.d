@@ -12,7 +12,7 @@ import zyeware.rendering;
 enum RenderBackend
 {
     headless, /// A dummy API, does nothing.
-    openGL, /// Uses OpenGL for rendering.
+    openGl, /// Uses OpenGL for rendering.
 }
 
 enum RenderFlag

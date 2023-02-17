@@ -38,8 +38,6 @@ package(zyeware.platform.opengl):
 public:
     ~this()
     {
-        mColorAttachment.dispose();
-        mDepthAttachment.dispose();
         glDeleteFramebuffers(1, &mID);
     }
 

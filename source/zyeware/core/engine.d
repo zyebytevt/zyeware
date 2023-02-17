@@ -36,8 +36,8 @@ struct ProjectProperties
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
-    RenderBackend renderBackend = RenderBackend.openGL; /// Determines the rendering backend used.
-    AudioBackend audioBackend = AudioBackend.openAL; /// Determines the audio backend used.
+    RenderBackend renderBackend = RenderBackend.openGl; /// Determines the rendering backend used.
+    AudioBackend audioBackend = AudioBackend.openAl; /// Determines the audio backend used.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
@@ -252,22 +252,39 @@ private static:
 
     void parseCmdArgs(string[] args, ref ProjectProperties properties)
     {
-        import std.getopt : getopt;
-        import std.stdio : writeln;
+        import std.getopt : getopt, defaultGetoptPrinter, config;
+        import std.stdio : writeln, writefln;
+        import std.traits : EnumMembers;
         import core.stdc.stdlib : exit;
 
-        auto helpInfo = getopt(args,
-            "render-backend", &properties.renderBackend,
-            "audio-backend", &properties.audioBackend,
-            "loglevel-core", &properties.coreLogLevel,
-            "loglevel-client", &properties.clientLogLevel,
-            "target-frame-rate", &properties.targetFrameRate
-        );
-
-        if (helpInfo.helpWanted)
+        try
         {
-            writeln("Help requested!");
-            exit(0);
+            auto helpInfo = getopt(args,
+                config.passThrough,
+                "render-backend", "The rendering backend to use.", &properties.renderBackend,
+                "audio-backend", "The audio backend to use.", &properties.audioBackend,
+                "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
+                "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
+                "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
+            );
+
+            if (helpInfo.helpWanted)
+            {
+                defaultGetoptPrinter(format!"ZyeWare Game Engine v%s"(engineVersion), helpInfo.options);
+                writeln("If no arguments are given, the selection of said options are to the disgression of the game developer.");
+                writeln("All arguments not understood by the engine are passed through to the game.");
+                writeln("------------------------------------------");
+                writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
+                writefln("Available rendering backends: %(%s, %)", [EnumMembers!RenderBackend]);
+                writefln("Available audio backends: %(%s, %)", [EnumMembers!AudioBackend]);
+                exit(0);
+            }
+        }
+        catch (Exception ex)
+        {
+            writeln("Could not parse arguments: ", ex.message);
+            writeln("Please use -h or --help to show information about the command line arguments.");
+            exit(1);
         }
     }
 
@@ -278,7 +295,7 @@ private static:
 
         switch (properties.renderBackend) with (RenderBackend)
         {
-        case openGL:
+        case openGl:
         default:
             version (ZWBackendOpenGL)
             {
@@ -290,7 +307,7 @@ private static:
 
         switch (properties.audioBackend) with (AudioBackend)
         {
-        case openAL:
+        case openAl:
         default:
             version (ZWBackendOpenAL)
             {

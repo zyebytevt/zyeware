@@ -261,7 +261,7 @@ public:
 
         parseUniforms();
 
-        Logger.client.log(LogLevel.debug_, "Shader linked successfully.");
+        Logger.core.log(LogLevel.debug_, "Shader linked successfully.");
     }
 
     void bind() const
