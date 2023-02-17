@@ -9,7 +9,6 @@ public
 {
     import zyeware.audio.api;
     import zyeware.audio.bus;
-    import zyeware.audio.properties;
     import zyeware.audio.buffer;
     import zyeware.audio.source;
 }

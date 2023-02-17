@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.window;
+module zyeware.platform.opengl.window;
+
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
 
 import core.stdc.string : memcpy;
 
@@ -18,10 +21,9 @@ import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.platform.opengl.utils;
 
-import platform.opengl.utils;
-
-class Window
+class OGLWindow : Window
 {
 private:
     static size_t sWindowCount = 0;
@@ -35,6 +37,7 @@ protected:
     SDL_Surface* mIconSurface;
     bool mVSync;
     bool mIsCursorCaptured;
+    bool mFullscreen;
 
     SDL_Cursor*[const Cursor] mSDLCursors;
 
@@ -48,7 +51,7 @@ protected:
         LogLevel level;
         switch (priority)
         {
-        case SDL_LOG_PRIORITY_VERBOSE: level = LogLevel.trace; break;
+        case SDL_LOG_PRIORITY_VERBOSE: level = LogLevel.verbose; break;
         case SDL_LOG_PRIORITY_DEBUG: level = LogLevel.debug_; break;
         case SDL_LOG_PRIORITY_INFO: level = LogLevel.info; break;
         case SDL_LOG_PRIORITY_WARN: level = LogLevel.warning; break;
@@ -130,8 +133,8 @@ protected:
         return getGamepadIndex(SDL_GameControllerFromInstanceID(instanceId));
     }
 
-public:
-    this(in WindowProperties properties = WindowProperties.init)
+package(zyeware.platform.opengl):
+    this(in WindowProperties properties)
     {
         mTitle = properties.title;
         
@@ -193,6 +196,7 @@ public:
         ++sWindowCount;
     }
 
+public:
     ~this()
     {
         SDL_DestroyWindow(mHandle);
@@ -518,6 +522,17 @@ public:
             SDL_RestoreWindow(mHandle);
     }
 
+    bool isFullscreen() nothrow
+    {
+        return mFullscreen;
+    }
+
+    void isFullscreen(bool value) nothrow
+    {
+        SDL_SetWindowFullscreen(mHandle, value ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+        mFullscreen = value;
+    }
+
     const(Image) icon() const nothrow
     {
         return mIcon;
@@ -525,8 +540,6 @@ public:
 
     void icon(const Image value)
     {
-        import platform.opengl.utils;
-
         if (mIconSurface)
             SDL_FreeSurface(mIconSurface);
 

@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.texture;
+module zyeware.platform.opengl.texture;
+
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
 
 import bindbc.opengl;
 import imagefmt;
@@ -12,17 +15,7 @@ import sdlang;
 import zyeware.common;
 import zyeware.rendering;
 
-interface Texture
-{
-public:
-    void bind(uint unit = 0) const;
-
-    const(TextureProperties) properties() pure const nothrow;
-    uint id() pure const nothrow;
-}
-
-@asset(Yes.cache)
-class Texture2D : Texture
+class OGLTexture2D : Texture2D
 {
 protected:
     TextureProperties mProperties;
@@ -30,7 +23,7 @@ protected:
     ubyte mChannels;
     uint mID;
 
-public:
+package(zyeware.platform.opengl):
     this(in Image image, in TextureProperties properties)
     {
         const(ubyte)[] pixels = image.pixels;
@@ -66,9 +59,6 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mID);
 
-        //glTextureStorage2D(mID, 1, internalFormat, mSize.x, mSize.y);
-        //glTextureSubImage2D(mID, 0, 0, 0, mSize.x, mSize.y, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
-
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mSize.x, mSize.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
@@ -78,10 +68,7 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
 
         if (properties.generateMipmaps)
-        {
-            // glEnable(GL_TEXTURE_2D); // To circumvent a bug in certain ATI drivers
             glGenerateMipmap(GL_TEXTURE_2D);
-        }
     }
 
     this(uint id)
@@ -89,6 +76,37 @@ public:
         mID = id;
     }
 
+    static Texture2D load(string path)
+    {
+        TextureProperties properties;
+        Image img = AssetManager.load!Image(path);
+
+        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+        {
+            import std.conv : to;
+            import sdlang;
+
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
+            Tag root = parseSource(propsFile.readAll!string);
+            propsFile.close();
+
+            try
+            {
+                properties.minFilter = root.getTagValue!string("min-filter", "nearest").to!(TextureProperties.Filter);
+                properties.magFilter = root.getTagValue!string("mag-filter", "nearest").to!(TextureProperties.Filter);
+                properties.wrapS = root.getTagValue!string("wrap-s", "repeat").to!(TextureProperties.WrapMode);
+                properties.wrapT = root.getTagValue!string("wrap-t", "repeat").to!(TextureProperties.WrapMode);
+            }
+            catch (Exception ex)
+            {
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+            }
+        }
+
+        return new OGLTexture2D(img, properties);
+    }
+
+public:
     ~this()
     {
         glDeleteTextures(1, &mID);
@@ -126,40 +144,9 @@ public:
     {
         return mChannels;
     }
-
-    static Texture2D load(string path)
-    {
-        TextureProperties properties;
-        Image img = AssetManager.load!Image(path);
-
-        if (VFS.hasFile(path ~ ".props")) // Properties file exists
-        {
-            import std.conv : to;
-            import sdlang;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
-            Tag root = parseSource(propsFile.readAll!string);
-            propsFile.close();
-
-            try
-            {
-                properties.minFilter = root.getTagValue!string("min-filter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = root.getTagValue!string("mag-filter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = root.getTagValue!string("wrap-s", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = root.getTagValue!string("wrap-t", "repeat").to!(TextureProperties.WrapMode);
-            }
-            catch (Exception ex)
-            {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
-            }
-        }
-
-        return new Texture2D(img, properties);
-    }
 }
 
-@asset(Yes.cache)
-class TextureCubeMap : Texture
+class OGLTextureCubeMap : TextureCubeMap
 {
 protected:
     TextureProperties mProperties;
@@ -275,7 +262,7 @@ public:
             }
         }
 
-        return new TextureCubeMap(images, properties);
+        return new OGLTextureCubeMap(images, properties);
     }
 }
 

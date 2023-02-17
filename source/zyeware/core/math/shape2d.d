@@ -348,7 +348,7 @@ public:
 }
 
 /// A shape representing a rectangle in 2D space.
-/// Using this in favor of a rectangle `PolygonShape2D` can increase performance.
+/// Using this in favour of a rectangle `PolygonShape2D` can increase performance.
 /// See_Also: PolygonShape2D
 // TODO: Documentation is a lie. Improve performance!
 class RectangleShape2D : PolygonShape2D

@@ -94,9 +94,7 @@ public:
         file.read(data);
         file.close();
 
-        IFImage img = read_image(data);
-
-        return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
+        return load(data);
     }
 
     static Image load(in ubyte[] data)

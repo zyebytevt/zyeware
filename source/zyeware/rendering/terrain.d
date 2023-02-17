@@ -10,6 +10,16 @@ import std.math : fmod;
 import zyeware.common;
 import zyeware.rendering;
 
+struct TerrainProperties
+{
+    Vector2f size;
+    Vector2i vertexCount;
+    float[] heightData; // Row-major
+    Texture2D[4] textures;
+    Texture2D blendMap;
+    Vector2f textureTiling = Vector2f(1);
+}
+
 class Terrain : Renderable
 {
 protected:

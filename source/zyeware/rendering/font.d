@@ -41,7 +41,7 @@ public:
                 bmFont.info.fontName, bmFont.info.fontSize);
 
         foreach (string pagePath; bmFont.pages)
-            mPageTextures ~= Texture2D.load(pagePath);//AssetManager.load!Texture2D(pagePath);
+            mPageTextures ~= cast(Texture2D) Texture2D.load(pagePath);//AssetManager.load!Texture2D(pagePath);
     }
 
     
@@ -114,7 +114,7 @@ public:
     static Font load(string path)
         in (path, "Path cannot be null.")
     {
-        Logger.core.log(LogLevel.trace, "Loading Font from '%s'...", path);
+        Logger.core.log(LogLevel.verbose, "Loading Font from '%s'...", path);
         
         VFSFile source = VFS.getFile(path);
         auto bmFont = parseFnt(source.readAll!(ubyte[]));

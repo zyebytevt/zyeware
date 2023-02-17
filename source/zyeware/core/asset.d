@@ -24,15 +24,15 @@ private template isAsset(E)
     import std.traits : hasUDA;
 
     static if(__traits(compiles, hasUDA!(E, asset)))
-        enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test")) && is(E : Object);
+        enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test"));// && is(E : Object);
     else
         enum bool isAsset = false;
 }
 
 /// Responsible for loading assets into memory. It caches all loaded assets, therefore
 /// it will not invoke a loader again as long as the reference in memory is valid.
-/// The `AssetManager` will only keep weak references, e.g. it will not cause memory
-/// to not be freed.
+/// The `AssetManager` will only keep weak references, e.g. it will not keep an unused
+/// asset from being collected by the GC.
 struct AssetManager
 {
     @disable this();
@@ -45,7 +45,8 @@ private static:
         string path;
     }
 
-    alias LoadFunction = Tuple!(Object function(string), "callback", bool, "cache");
+    alias LoadCallback = Object function(string);
+    alias LoadFunction = Tuple!(LoadCallback, "callback", bool, "cache");
 
     LoadFunction[string] sLoaders;
     WeakReference!Object[AssetUID] sCache;
@@ -56,19 +57,21 @@ package(zyeware.core) static:
         //registerDefaultLoaders();
         import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh, Font, Material, SpriteFrames, Cursor;
         import zyeware.core.translation : Translation;
-        import zyeware.audio : Audio;
+        import zyeware.audio : Sound;
 
-        register!Shader();
-        register!Image();
-        register!Texture2D();
-        register!TextureCubeMap();
-        register!Mesh();
-        register!Font();
-        register!Material();
-        register!Translation();
-        register!Audio();
-        register!SpriteFrames();
-        register!Cursor();
+        register!Shader((path) => cast(Object) Shader.load(path));
+        register!Texture2D((path) => cast(Object) Texture2D.load(path));
+        register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
+
+        register!Sound((path) => cast(Object) Sound.load(path));
+
+        register!Image(&Image.load);
+        register!Mesh(&Mesh.load);
+        register!Font(&Font.load);
+        register!Material(&Material.load);
+        register!Translation(&Translation.load);
+        register!SpriteFrames(&SpriteFrames.load);
+        register!Cursor(&Cursor.load);
     }
 
     void cleanup()
@@ -93,6 +96,8 @@ public static:
 
         LoadFunction* loader = fqn in sLoaders;
         enforce!CoreException(loader, format!"'%s' was not registered as an asset."(fqn));
+
+        path = TranslationManager.remapAssetPath(path);
 
         auto uid = AssetUID(fqn, path);
 
@@ -120,13 +125,13 @@ public static:
     /// 
     /// Params:
     ///     T = The asset type to register.
-    void register(T)()
+    void register(T)(LoadCallback callback)
         if (isAsset!T)
     {
         import std.traits : getUDAs;
         auto data = getUDAs!(T, asset)[0];
 
-        sLoaders[fullyQualifiedName!T] = LoadFunction(&T.load, data.cache);
+        sLoaders[fullyQualifiedName!T] = LoadFunction(callback, data.cache);
     }
 
     /// Unregisters an asset.
@@ -174,7 +179,7 @@ public static:
             if (!sCache[key].alive)
             {
                 sCache.remove(key).assumeWontThrow;
-                Logger.core.log(LogLevel.trace, "Uncaching '%s' (%s)...", key.path, key.typeFQN);
+                Logger.core.log(LogLevel.verbose, "Uncaching '%s' (%s)...", key.path, key.typeFQN);
                 ++cleaned;
             }
         }

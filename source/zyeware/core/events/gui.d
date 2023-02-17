@@ -10,99 +10,9 @@ import std.format : format;
 import zyeware.common;
 import zyeware.gui;
 
-/*
-abstract class VirtualCursorEvent : Event
-{
-protected:
-    VirtualCursor mCursor;
-
-    this(VirtualCursor cursor) pure nothrow
-    {
-        mCursor = cursor;
-    }
-
-public:
-    inout(VirtualCursor) cursor() @property pure inout nothrow
-    {
-        return mCursor;
-    }
-}
-
-class VirtualCursorEventButton : VirtualCursorEvent
-{
-protected:
-    Vector2f mPosition;
-    MouseCode mButton;
-    bool mIsPressed;
-
-public:
-    /// Params:
-    ///     button = The mouse code of the button that was activated.
-    ///     isPressed = Whether the button was pressed or not.
-    this(VirtualCursor cursor, Vector2f position, MouseCode button, bool isPressed) pure nothrow
-    {
-        super(cursor);
-
-        mPosition = position;
-        mButton = button;
-        mIsPressed = isPressed;
-    }
-
-    /// The current cursor position.
-    Vector2f position() @property const pure nothrow
-    {
-        return mPosition;
-    }
-
-    /// The mouse code of the button that was activated.
-    MouseCode button() @property const pure nothrow
-    {
-        return mButton;
-    }
-
-    /// Whether the button was pressed or not.
-    bool isPressed() @property const pure nothrow
-    {
-        return mIsPressed;
-    }
-
-    override string toString() const
-    {
-        return format!"VirtualCursorEventButton(cursor: %s, button: %d, isPressed: %s)"(mCursor, mButton, mIsPressed);
-    }
-}
-
-class VirtualCursorEventMotion : VirtualCursorEvent
-{
-protected:
-    Vector2f mPosition;
-
-public:
-    /// Params:
-    ///     window = The window this event was sent from.
-    ///     position = The current cursor position.
-    this(VirtualCursor cursor, Vector2f position) pure nothrow
-    {
-        super(cursor);
-
-        mPosition = position;
-    }
-
-    /// The current cursor position.
-    Vector2f position() @property const pure nothrow
-    {
-        return mPosition;
-    }
-
-    override string toString() const
-    {
-        return format!"VirtualCursorEventMotion(cursor: %s, position: %s)"(mCursor, mPosition);
-    }
-}
-*/
-
 // ==============================================================
 
+/// Represents any kind of event that happened in the GUI layer.
 abstract class GUIEvent : Event
 {
 protected:
@@ -114,12 +24,14 @@ protected:
     }
 
 public:
+    /// The `GUINode` instance that caused this event to occur.
     GUINode emitter() @property pure nothrow
     {
         return mEmitter;
     }
 }
 
+/// This event is emitted when a GUI button is interacted with.
 class GUIEventButton : GUIEvent
 {
 protected:
@@ -127,13 +39,18 @@ protected:
     MouseCode mButton;
 
 public:
+    /// The type of the interaction.
     enum Type
     {
-        pressed,
-        released,
-        clicked
+        pressed, /// Mouse button has been pressed down.
+        released, /// Mouse button has been depressed.
+        clicked /// A click sequence occurred, which happens if a press and release have occurred on the button.
     }
 
+    /// Params:
+    ///   emitter = The node that caused this event to occur.
+    ///   type = The type of interaction that happened.
+    ///   button = The mouse button that caused the interaction.
     this(GUINode emitter, Type type, MouseCode button)
     {
         super(emitter);
@@ -142,11 +59,13 @@ public:
         mButton = button;
     }
 
+    /// The type of interaction that happened.
     Type type() @property pure const nothrow
     {
         return mType;
     }
 
+    /// The mouse button that caused the interaction.
     MouseCode button() @property pure nothrow
     {
         return mButton;

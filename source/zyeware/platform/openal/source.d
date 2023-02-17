@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.audio.source;
+module zyeware.platform.openal.source;
+
+version (ZWBackendOpenAL):
+package(zyeware.platform.openal):
 
 import std.exception : enforce;
 import std.algorithm : clamp;
@@ -17,12 +20,12 @@ import zyeware.common;
 import zyeware.audio;
 import zyeware.audio.thread;
 
-class AudioSource
+class OALAudioSource : AudioSource
 {
 private:
     /// Loads up `mProcBuffer` and returns the amount of samples read.
     pragma(inline, true)
-    size_t readFromDecoder()
+    size_t readFromDecoder() @nogc
         in (mDecoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
     {
         return mDecoder.readSamplesFloat(&mProcBuffer[0], cast(int)(mProcBuffer.length/mDecoder.getNumChannels()))
@@ -32,109 +35,36 @@ private:
 protected:
     float[] mProcBuffer;
 
-    Audio mAudioStream;
+    Sound mSound;
     AudioStream mDecoder;
     uint mSourceId;
     uint[] mBufferIDs;
     int mProcessed;
 
     State mState;
-    float mVolume;
-    float mPitch;
+    float mVolume = 1f;
+    float mPitch = 1f;
     bool mLooping;
     AudioBus mBus;
 
-package(zyeware):
-    final void updateBuffers()
-    {
-        if (mState == State.stopped)
-            return;
-
-        size_t lastReadLength;
-        int processed;
-        uint pBuf;
-        alGetSourcei(mSourceId, AL_BUFFERS_PROCESSED, &processed);
-
-        while (processed--)
-        {
-            alSourceUnqueueBuffers(mSourceId, 1, &pBuf);
-
-            
-            lastReadLength = readFromDecoder();
-
-            if (lastReadLength <= 0)
-            {
-                if (mLooping)
-                {
-                    mAudioStream.loopPoint.match!(
-                        (int sample)
-                        {
-                            enforce!AudioException(!mDecoder.isModule, "Cannot seek by sample in tracker files.");
-                            
-                            if (!mDecoder.seekPosition(sample))
-                                Logger.core.log(LogLevel.warning, "Seeking to sample %d failed.", sample);
-                        },
-                        (ModuleLoopPoint mod)
-                        {
-                            enforce!AudioException(mDecoder.isModule, "Cannot seek by pattern/row in non-tracker files.");
-
-                            if (!mDecoder.seekPosition(mod.pattern, mod.row))
-                                Logger.core.log(LogLevel.warning, "Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
-                        }
-                    );
-
-                    lastReadLength = readFromDecoder();
-                }
-                else
-                    break;
-            }
-
-            alBufferData(pBuf, mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-                &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.getSamplerate());
-
-            alSourceQueueBuffers(mSourceId, 1, &pBuf);
-        }
-
-        int buffersQueued;
-        alGetSourcei(mSourceId, AL_BUFFERS_QUEUED, &buffersQueued);
-        if (buffersQueued == 0)
-            stop();
-    }
-
-    final void updateVolume() nothrow
-    {
-        alSourcef(mSourceId, AL_GAIN, mVolume * mBus.volume);
-    }
-
-public:
-    enum State
-    {
-        stopped,
-        paused,
-        playing
-    }
-
-    this(AudioBus bus = null)
+package(zyeware.platform.openal):
+    this(AudioBus bus)
     {
         mState = State.stopped;
         mBus = bus ? bus : AudioAPI.getBus("master");
 
         mProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
         mBufferIDs = new uint[ZyeWare.projectProperties.audioBufferCount];
-        //mDecoder = new AudioStream();
 
         alGenSources(1, &mSourceId);
         alGenBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
 
         AudioThread.register(this);
 
-        mVolume = 1.0f;
-        mPitch = 1.0f;
-        mLooping = false;
-
         updateVolume();
     }
 
+public:
     ~this()
     {
         if (mDecoder.isOpenForReading())
@@ -172,12 +102,18 @@ public:
 
     void pause()
     {
+        if (mState != State.playing)
+            return;
+
         mState = State.paused;
         alSourcePause(mSourceId);
     }
 
     void stop()
     {
+        if (mState == State.stopped)
+            return;
+
         mState = State.stopped;
         alSourceStop(mSourceId);
 
@@ -194,22 +130,22 @@ public:
         }
     }
 
-    inout(Audio) audio() inout nothrow
+    inout(Sound) sound() inout nothrow
     {
-        return mAudioStream;
+        return mSound;
     }
 
-    void audio(Audio value)
-        in (value, "Audio cannot be null.")
+    void sound(Sound value)
+        in (value, "Sound cannot be null.")
     {
         if (mState != State.stopped)
             stop();
 
-        mAudioStream = value;
+        mSound = value;
         
         try 
         {
-            mDecoder.openFromMemory(mAudioStream.encodedMemory);
+            mDecoder.openFromMemory(mSound.encodedMemory);
         }
         catch (AudioFormatsException ex)
         {
@@ -260,5 +196,65 @@ public:
     State state() pure const nothrow
     {
         return mState;
+    }
+
+    final void updateBuffers()
+    {
+        if (mState == State.stopped)
+            return;
+
+        size_t lastReadLength;
+        int processed;
+        uint pBuf;
+        alGetSourcei(mSourceId, AL_BUFFERS_PROCESSED, &processed);
+        
+        while (processed--)
+        {
+            alSourceUnqueueBuffers(mSourceId, 1, &pBuf);
+            
+            lastReadLength = readFromDecoder();
+
+            if (lastReadLength <= 0)
+            {
+                if (mLooping)
+                {
+                    mSound.loopPoint.match!(
+                        (int sample)
+                        {
+                            //enforce!AudioException(!mDecoder.isModule, "Cannot seek by sample in tracker files.");
+                            
+                            if (!mDecoder.seekPosition(sample))
+                                Logger.core.log(LogLevel.warning, "Seeking to sample %d failed.", sample);
+                        },
+                        (ModuleLoopPoint mod)
+                        {
+                            //enforce!AudioException(mDecoder.isModule, "Cannot seek by pattern/row in non-tracker files.");
+
+                            if (!mDecoder.seekPosition(mod.pattern, mod.row))
+                                Logger.core.log(LogLevel.warning, "Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
+                        }
+                    );
+
+                    lastReadLength = readFromDecoder();
+                }
+                else
+                    break;
+            }
+
+            alBufferData(pBuf, mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
+                &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.getSamplerate());
+
+            alSourceQueueBuffers(mSourceId, 1, &pBuf);
+        }
+
+        int buffersQueued;
+        alGetSourcei(mSourceId, AL_BUFFERS_QUEUED, &buffersQueued);
+        if (buffersQueued == 0)
+            stop();
+    }
+
+    final void updateVolume() nothrow
+    {
+        alSourcef(mSourceId, AL_GAIN, mVolume * mBus.volume);
     }
 }

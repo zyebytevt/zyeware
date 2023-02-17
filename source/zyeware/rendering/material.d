@@ -60,7 +60,7 @@ public:
         mIsRoot = true;
 
         mTextureSlots.length = shader.textureCount;
-        mBuffer = new ConstantBuffer(layout);
+        mBuffer = ConstantBuffer.create(layout);
     }
 
     this(Material parent)

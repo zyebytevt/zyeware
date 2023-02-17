@@ -89,24 +89,3 @@ public:
         return format!"WindowMovedEvent(position: %s)"(mPosition);
     }
 }
-
-version(none)
-{
-    class WindowOpenedEvent : WindowEvent
-    {
-    public:
-        this(Window window) pure nothrow
-        {
-            super(window);
-        }
-    }
-
-    class WindowClosedEvent : WindowEvent
-    {
-    public:
-        this(Window window) pure nothrow
-        {
-            super(window);
-        }
-    }
-}

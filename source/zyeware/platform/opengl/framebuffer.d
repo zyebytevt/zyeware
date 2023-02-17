@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.framebuffer;
+module zyeware.platform.opengl.framebuffer;
+
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
 
 import std.exception : enforce;
 
@@ -11,25 +14,30 @@ import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.platform.opengl.texture;
 
-class Framebuffer
+class OGLFramebuffer : Framebuffer
 {
 protected:
     FramebufferProperties mProperties;
     uint mID;
     Texture2D mColorAttachment, mDepthAttachment;
 
-public:
+package(zyeware.platform.opengl):
     this(in FramebufferProperties properties)
     {
         mProperties = properties;
         invalidate();
     }
 
+    static Framebuffer create(in FramebufferProperties properties)
+    {
+        return new OGLFramebuffer(properties);
+    }
+
+public:
     ~this()
     {
-        mColorAttachment.dispose();
-        mDepthAttachment.dispose();
         glDeleteFramebuffers(1, &mID);
     }
 
@@ -66,8 +74,8 @@ public:
 
         enforce!GraphicsException(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 
-        mColorAttachment = new Texture2D(colorAttachmentID);
-        mDepthAttachment = new Texture2D(depthAttachmentID);
+        mColorAttachment = new OGLTexture2D(colorAttachmentID);
+        mDepthAttachment = new OGLTexture2D(depthAttachmentID);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }

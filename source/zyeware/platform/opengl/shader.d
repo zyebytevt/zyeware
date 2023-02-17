@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.shader;
+module zyeware.platform.opengl.shader;
+
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
 
 import std.typecons : Rebindable;
 import std.string : toStringz, fromStringz, format;
@@ -19,8 +22,7 @@ import sdlang;
 import zyeware.common;
 import zyeware.rendering;
 
-@asset(Yes.cache)
-class Shader
+class OGLShader : Shader
 {
 private:
     static Rebindable!(const Shader) sCurrentlyBoundShader;
@@ -86,7 +88,7 @@ protected:
         }
     }
 
-public:
+package(zyeware.platform.opengl):
     this()
     {
         mProgramID = glCreateProgram();
@@ -100,6 +102,92 @@ public:
         ];
     }
 
+    static Shader load(string path)
+        in (path, "Path cannot be null.")
+    {
+        Logger.core.log(LogLevel.debug_, "Loading shader '%s'...", path);
+
+        string parseIncludes(string source)
+        {
+            enum includeRegex = ctRegex!("^#include \"(.*)\"$", "m");
+
+            char[] mutableSource = source.dup;
+            alias Include = Tuple!(char[], "path", size_t, "position", size_t, "length");
+            
+            Include[] includes;
+            ptrdiff_t offset;
+            size_t includeIterations;
+
+            do
+            {
+                enforce!GraphicsException(++includeIterations < 100,
+                    "Too many iterations, possible infinite include recursion.");
+
+                includes.length = 0;
+                foreach (m; matchAll(mutableSource, includeRegex))
+                    includes ~= Include(m[1], m.pre.length, m.hit.length);
+
+                foreach (ref Include include; includes)
+                {
+                    VFSFile includeFile = VFS.getFile(cast(string) include.path);
+                    char[] includeSource = cast(char[]) includeFile.readAll!string;
+                    includeFile.close();
+
+                    immutable size_t from = include.position + offset;
+                    immutable size_t to = from + include.length;
+
+                    mutableSource.replaceInPlace(from, to, includeSource);
+                    offset += cast(ptrdiff_t) includeSource.length - include.length;
+                }
+            } while (includes.length > 0);
+
+            return mutableSource.idup;
+        }
+
+        VFSFile file = VFS.getFile(path);
+        immutable string source = file.readAll!string;
+        Tag root = parseSource(source);
+        file.close();
+
+        auto shader = new OGLShader();
+
+        void loadShader(ref Tag tag, int type)
+        {
+            if (string filePath = tag.getAttribute!string("file", null))
+            {
+                Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
+                VFSFile shaderFile = VFS.getFile(filePath);
+                shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
+                shaderFile.close();
+            }
+            else
+                shader.compileShader(parseIncludes(tag.getValue!string), type);
+        }
+
+        foreach (ref Tag tag; root.namespaces["opengl"].tags)
+        {
+            switch (tag.name)
+            {
+            case "vertex":
+                loadShader(tag, GL_VERTEX_SHADER);
+                break;
+
+            case "fragment":
+                loadShader(tag, GL_FRAGMENT_SHADER);
+                break;
+
+            default:
+                Logger.core.log(LogLevel.warning, "'%s' %s: Unknown tag '%s'.",
+                    path, tag.location, tag.getFullName());
+            }
+        }
+
+        shader.link();
+
+        return shader;
+    }
+
+public:
     ~this()
     {
         glDeleteProgram(mProgramID);
@@ -173,7 +261,7 @@ public:
 
         parseUniforms();
 
-        Logger.client.log(LogLevel.debug_, "Shader linked successfully.");
+        Logger.core.log(LogLevel.debug_, "Shader linked successfully.");
     }
 
     void bind() const
@@ -188,90 +276,5 @@ public:
     size_t textureCount() pure const nothrow
     {
         return mTextureCount;
-    }
-
-    static Shader load(string path)
-        in (path, "Path cannot be null.")
-    {
-        Logger.core.log(LogLevel.debug_, "Loading shader '%s'...", path);
-
-        string parseIncludes(string source)
-        {
-            enum includeRegex = ctRegex!("^#include \"(.*)\"$", "m");
-
-            char[] mutableSource = source.dup;
-            alias Include = Tuple!(char[], "path", size_t, "position", size_t, "length");
-            
-            Include[] includes;
-            ptrdiff_t offset;
-            size_t includeIterations;
-
-            do
-            {
-                enforce!GraphicsException(++includeIterations < 100,
-                    "Too many iterations, possible infinite include recursion.");
-
-                includes.length = 0;
-                foreach (m; matchAll(mutableSource, includeRegex))
-                    includes ~= Include(m[1], m.pre.length, m.hit.length);
-
-                foreach (ref Include include; includes)
-                {
-                    VFSFile includeFile = VFS.getFile(cast(string) include.path);
-                    char[] includeSource = cast(char[]) includeFile.readAll!string;
-                    includeFile.close();
-
-                    immutable size_t from = include.position + offset;
-                    immutable size_t to = from + include.length;
-
-                    mutableSource.replaceInPlace(from, to, includeSource);
-                    offset += cast(ptrdiff_t) includeSource.length - include.length;
-                }
-            } while (includes.length > 0);
-
-            return mutableSource.idup;
-        }
-
-        VFSFile file = VFS.getFile(path);
-        immutable string source = file.readAll!string;
-        Tag root = parseSource(source);
-        file.close();
-
-        auto shader = new Shader();
-
-        void loadShader(ref Tag tag, int type)
-        {
-            if (string filePath = tag.getAttribute!string("file", null))
-            {
-                Logger.core.log(LogLevel.trace, "Loading external shader source '%s'...", filePath);
-                VFSFile shaderFile = VFS.getFile(filePath);
-                shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
-                shaderFile.close();
-            }
-            else
-                shader.compileShader(parseIncludes(tag.getValue!string), type);
-        }
-
-        foreach (ref Tag tag; root.namespaces["opengl"].tags)
-        {
-            switch (tag.name)
-            {
-            case "vertex":
-                loadShader(tag, GL_VERTEX_SHADER);
-                break;
-
-            case "fragment":
-                loadShader(tag, GL_FRAGMENT_SHADER);
-                break;
-
-            default:
-                Logger.core.log(LogLevel.warning, "'%s' %s: Unknown tag '%s'.",
-                    path, tag.location, tag.getFullName());
-            }
-        }
-
-        shader.link();
-
-        return shader;
     }
 }

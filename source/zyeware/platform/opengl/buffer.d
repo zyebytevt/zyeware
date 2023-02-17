@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.buffer;
+module zyeware.platform.opengl.buffer;
+
+version (ZWBackendOpenGL):
+package(zyeware.platform.opengl):
 
 import std.exception : enforce, assumeWontThrow;
 import std.typecons : Rebindable;
@@ -14,137 +17,15 @@ import bindbc.opengl;
 import zyeware.common;
 import zyeware.rendering;
 
-struct BufferElement
-{
-private:
-    string mName;
-    Type mType;
-    uint mSize;
-    uint mOffset;
-    bool mNormalized;
-    uint mDivisor;
-    uint mAmount;
-
-    static uint getTypeSize(Type type) pure nothrow
-    {
-        final switch (type) with (Type)
-        {
-        case none: return 1;
-        case vec2: return float.sizeof * 2;
-        case vec3: return float.sizeof * 3;
-        case vec4: return float.sizeof * 4;
-        case mat3: return float.sizeof * 3 * 3;
-        case mat4: return float.sizeof * 4 * 4;
-        case float_: return float.sizeof;
-        case int_: return int.sizeof;
-        case bool_: return 1;
-        }
-    }
-
-public:
-    enum Type : ubyte
-    {
-        none,
-        vec2, vec3, vec4,
-        mat3, mat4,
-        float_, int_, bool_
-    }
-
-    this(string name, Type type, uint amount = 1, Flag!"normalized" normalized = No.normalized, uint divisor = 0)
-    {
-        mName = name;
-        mType = type;
-        mNormalized = normalized;
-        mSize = elementSize * amount;
-        mAmount = amount;
-        mDivisor = divisor;
-    }
-
-    string name() pure const nothrow
-    {
-        return mName;
-    }
-
-    Type type() pure const nothrow
-    {
-        return mType;
-    }
-
-    uint size() pure const nothrow
-    {
-        return mSize;
-    }
-
-    uint amount() pure const nothrow
-    {
-        return mAmount;
-    }
-
-    uint elementSize() pure const nothrow
-    {
-        return getTypeSize(mType);
-    }
-
-    uint offset() pure const nothrow
-    {
-        return mOffset;
-    }
-
-    bool normalized() pure const nothrow
-    {
-        return mNormalized;
-    }
-
-    uint divisor() pure const nothrow
-    {
-        return mDivisor;
-    }
-}
-
-struct BufferLayout
-{
-private:
-    BufferElement[] mElements;
-    uint mStride;
-
-    void calculateOffsetAndStride() pure nothrow
-    {
-        mStride = 0;
-
-        foreach (ref BufferElement element; mElements)
-        {
-            element.mOffset = mStride;
-            mStride += element.size;
-        }
-    }
-
-public:
-    this(BufferElement[] elements)
-    {
-        mElements = elements;
-        calculateOffsetAndStride();
-    }
-
-    uint stride() pure const nothrow
-    {
-        return mStride;
-    }
-
-    inout(BufferElement[]) elements() pure inout nothrow
-    {
-        return mElements;
-    }
-}
-
 // OpenGL implements BufferGroup as VertexArray
-class BufferGroup
+class OGLBufferGroup : BufferGroup
 {
 protected:
     uint mVertexArrayID;
     DataBuffer mDataBuffer;
     IndexBuffer mIndexBuffer;
 
-public:
+package(zyeware.platform.opengl):
     this()
     {
         glGenVertexArrays(1, &mVertexArrayID);
@@ -152,7 +33,13 @@ public:
 
         glBindVertexArray(0);
     }
+    
+    static BufferGroup create()
+    {
+        return new OGLBufferGroup();
+    }
 
+public:
     ~this()
     {
         glDeleteVertexArrays(1, &mVertexArrayID);
@@ -212,7 +99,7 @@ public:
 
 
 
-class DataBuffer
+class OGLDataBuffer : DataBuffer
 {
 protected:
     uint mBufferID;
@@ -221,27 +108,21 @@ protected:
     size_t mLength;
     bool mInitialized;
 
-public:
-    this(size_t size, BufferLayout layout, Flag!"dynamic" dynamic)
+package(zyeware.platform.opengl):
+    this(size_t size, BufferLayout layout, bool dynamic)
     {
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL vertex buffer!");
 
-        //glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        //glBufferStorage(GL_ARRAY_BUFFER, size, null, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
-        
         mLayout = layout;
         mLength = size;
         mDynamic = dynamic;
     }
 
-    this(const void[] data, BufferLayout layout, Flag!"dynamic" dynamic)
+    this(const void[] data, BufferLayout layout, bool dynamic)
     {
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL vertex buffer!");
-
-        //glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-        //glBufferStorage(GL_ARRAY_BUFFER, data.length, data.ptr, dynamic ?  GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLayout = layout;
         mLength = data.length;
@@ -249,7 +130,18 @@ public:
 
         setData(data);
     }
+    
+    static DataBuffer create(size_t size, BufferLayout layout, bool dynamic)
+    {
+        return new OGLDataBuffer(size, layout, dynamic);
+    }
 
+    static DataBuffer createWithData(const void[] data, BufferLayout layout, bool dynamic)
+    {
+        return new OGLDataBuffer(data, layout, dynamic);
+    }
+
+public:
     ~this()
     {
         glDeleteBuffers(1, &mBufferID);
@@ -262,7 +154,6 @@ public:
 
     void setData(const void[] data)
         in (data.length <= mLength, "Too much data for buffer size.")
-        //in (mDynamic, "Data buffer is not set as dynamic.")
     {   
         glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
 
@@ -293,7 +184,7 @@ public:
 
 
 
-class IndexBuffer
+class OGLIndexBuffer : IndexBuffer
 {
 protected:
     uint mBufferID;
@@ -301,27 +192,20 @@ protected:
     bool mDynamic;
     bool mInitialized;
 
-public:
-    this(size_t size, Flag!"dynamic" dynamic)
+package(zyeware.platform.opengl):
+    this(size_t size, bool dynamic)
     {
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL index buffer!");
-
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        //glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, size, null, dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLength = size;
         mDynamic = dynamic;
     }
 
-    this(const uint[] indices, Flag!"dynamic" dynamic)
+    this(const uint[] indices, bool dynamic)
     {
         glGenBuffers(1, &mBufferID);
         enforce!GraphicsException(mBufferID != 0, "Failed to create OpenGL index buffer!");
-
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
-        //glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, indices.ptr,
-        //    dynamic ? GL_DYNAMIC_STORAGE_BIT : 0);
 
         mLength = indices.length;
         mDynamic = dynamic;
@@ -329,6 +213,17 @@ public:
         setData(indices);
     }
 
+    static IndexBuffer create(size_t size, bool dynamic)
+    {
+        return new OGLIndexBuffer(size, dynamic);
+    }
+
+    static IndexBuffer createWithData(const uint[] indices, bool dynamic)
+    {
+        return new OGLIndexBuffer(indices, dynamic);
+    }
+
+public:
     ~this()
     {
         glDeleteBuffers(1, &mBufferID);
@@ -341,7 +236,6 @@ public:
 
     void setData(const uint[] indices)
         in (indices.length <= mLength, "Too much data for buffer size.")
-        //in (mDynamic, "Index buffer is not set as dynamic.")
     {   
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
 
@@ -363,7 +257,7 @@ public:
 
 
 
-class ConstantBuffer
+class OGLConstantBuffer : ConstantBuffer
 {
 protected:
     uint mBufferID;
@@ -384,15 +278,7 @@ protected:
         mLength = offset;
     }
 
-public:
-    enum Slot
-    {
-        matrices,
-        environment,
-        lights,
-        modelVariables
-    }
-
+package(zyeware.platform.opengl):
     this(in BufferLayout layout)
     {
         glGenBuffers(1, &mBufferID);
@@ -404,6 +290,12 @@ public:
         glBufferData(GL_UNIFORM_BUFFER, mLength, null, GL_DYNAMIC_DRAW);
     }
 
+    static ConstantBuffer create(in BufferLayout layout)
+    {
+        return new OGLConstantBuffer(layout);
+    }
+
+public:
     ~this()
     {
         glDeleteBuffers(1, &mBufferID);

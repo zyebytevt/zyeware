@@ -5,6 +5,10 @@ import std.typecons : Tuple;
 
 import zyeware.common;
 
+/// The `Interpolator` allows to create various keypoints on a 
+/// one dimensional line, and interpolating between them.
+/// You can supply a custom type and lerping function for various
+/// different types.
 struct Interpolator(T, alias lerp)
 {
 protected:
@@ -14,18 +18,24 @@ protected:
     bool mMustSortPoints;
 
 public:
+    /// Add a keypoint to the interpolator with the given offset and value.
+    /// Params:
+    ///   offset = The offset of the keypoint.
+    ///   value = The value of the keypoint.
     void addPoint(float offset, const T value) pure nothrow
     {
         mPoints ~= Point(offset, value);
         mMustSortPoints = true;
     }
 
+    /// Removes a keypoint with the given index.
     void removePoint(size_t idx) pure nothrow
     {
         mPoints = mPoints.remove(idx);
         mMustSortPoints = true;
     }
 
+    /// Removes all keypoints from this interpolator.
     void clearPoints() pure nothrow
     {
         mPoints.length = 0;
@@ -33,6 +43,10 @@ public:
 
     // Thanks to the Godot Engine for this code!
     // https://github.com/godotengine/godot/blob/master/scene/resources/gradient.h
+    /// Interpolates a value from the keypoints in this interpolator from the given offset.
+    /// Params:
+    ///   offset = The offset to use.
+    /// Returns: The interpolated value.
     T interpolate(float offset) pure nothrow
     {
         if (mPoints.length == 0)

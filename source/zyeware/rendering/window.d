@@ -8,10 +8,15 @@ module zyeware.rendering.window;
 import zyeware.common;
 import zyeware.rendering;
 
-class Window
+struct WindowProperties
 {
-    this(in WindowProperties properties = WindowProperties.init);
+    string title = "ZyeWare Engine";
+    Vector2i size = Vector2i(1280, 720);
+    Image icon;
+}
 
+interface Window
+{
     void update();
     void swapBuffers();
 
@@ -42,6 +47,9 @@ class Window
     bool isMinimized() nothrow;
     void isMinimized(bool value) nothrow;
 
+    bool isFullscreen() nothrow;
+    void isFullscreen(bool value) nothrow;
+
     const(Image) icon() const nothrow;
     void icon(const Image value);
 
@@ -50,4 +58,9 @@ class Window
 
     void cursor(Cursor value) nothrow;
     const(Cursor) cursor() const nothrow;
+
+    static Window create(in WindowProperties properties)
+    {
+        return RenderAPI.sCreateWindowImpl(properties);
+    }
 }

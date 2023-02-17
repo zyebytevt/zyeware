@@ -6,9 +6,10 @@ import inmath.linalg;
 
 import zyeware.common;
 
+/// A two dimensional rectangle with float values.
 alias Rect2f = Rect!float;
+/// A two dimensional rectangle with int values.
 alias Rect2i = Rect!int;
-alias Rect2ui = Rect!uint;
 
 /// Represents an axis-aligned rectangle in 2D space.
 struct Rect(T)
@@ -42,12 +43,18 @@ struct Rect(T)
     }
 
     /// Checks if a point falls within the rectangle.
+    /// Params:
+    ///   v = The point to check for.
+    /// Returns: Whether the point is inside the rectangle.
     bool contains(VT v) pure nothrow const
     {
         return v.x >= min.x && v.y >= min.y && v.x <= max.x && v.y <= max.y;
     }
 
     /// Check if any of the area bounded by this rectangle is bounded by another
+    /// Params:
+    ///   b = The rectangle to check for.
+    /// Returns: Whether the rectangle is overlapping.
     bool overlaps(Rect!T b) pure nothrow const
     {
         // TODO check if this works (unit test!)
@@ -58,6 +65,7 @@ struct Rect(T)
 
     /// Move the rectangle so it is entirely contained with another
     /// If the rectangle is moved it will always be flush with a border of the given area
+    // TODO: implement this!
     version(none)
     Rect!T constrain(Rect!T outer) const
     {

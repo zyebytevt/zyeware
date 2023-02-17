@@ -10,55 +10,21 @@ import std.datetime : Duration;
 
 import zyeware.common;
 
-version (Profiling)
+version (Profiling):
+
+/// Contains various functions for profiling.
 struct Profiler
 {
 private static:
-    Result[] sResults;
+    Data[2] sData;
+    size_t sReadDataPointer;
+    size_t sWriteDataPointer = 1;
 
 package(zyeware) static:
-    RenderData sRenderData;
-    ushort sFPS;
-
-    void initialize() nothrow
+    struct Data
     {
-        sResults.reserve(200);
-    }
-
-    void clear() nothrow
-    {
-        sResults.length = 0;
-        sRenderData = RenderData.init;
-    }
-
-public static:
-    struct Result
-    {
-        immutable string name;
-        immutable Duration duration;
-    }
-
-    struct Timer
-    {
-    private:
-        StopWatch mWatch;
-        immutable string mName;
-
-    public:
-        this(string name) nothrow
-            in (name, "Name cannot be null.")
-        {
-            mName = name;
-            if (!mWatch.running)
-                mWatch.start();
-        }
-
-        void stop() nothrow
-        {
-            mWatch.stop();
-
-            Profiler.sResults ~= Profiler.Result(mName, mWatch.peek);
-        }
+        RenderData renderData;
+        Result[] results;
     }
 
     struct RenderData
@@ -68,22 +34,83 @@ public static:
         size_t rectCount;
     }
 
-    Result[] results() nothrow
+    ushort sFPS;
+
+    void initialize() nothrow
     {
-        return sResults;
     }
 
-    RenderData renderData() nothrow
+    void clearAndSwap() nothrow
     {
-        return sRenderData;
+        if (++sReadDataPointer == sData.length)
+            sReadDataPointer = 0;
+
+        if (++sWriteDataPointer == sData.length)
+            sWriteDataPointer = 0;
+
+        Data* data = currentWriteData;
+
+        data.results.length = 0;
+        data.renderData = RenderData.init;
     }
 
+public static:
+    struct Result
+    {
+        immutable string name;
+        immutable Duration duration;
+    }
+
+    /// Represents a profiling timer, allowing easy profiling of code sections.
+    /// Use the mixins `ProfileScope` and `ProfileFunction` for convenience.
+    struct Timer
+    {
+    private:
+        StopWatch mWatch;
+        immutable string mName;
+
+    public:
+        /// Params:
+        ///   name = The name of the section that is timed.
+        this(string name) nothrow
+            in (name, "Name cannot be null.")
+        {
+            mName = name;
+            if (!mWatch.running)
+                mWatch.start();
+        }
+
+        /// Stops the timer.
+        void stop() nothrow
+        {
+            mWatch.stop();
+
+            Profiler.currentWriteData.results ~= Profiler.Result(mName, mWatch.peek);
+        }
+    }
+
+    /// Returns the profiling data from last frame. This should only be read from.
+    const(Data)* currentReadData() nothrow
+    {
+        return &sData[sReadDataPointer];
+    }
+
+    /// Returns the profiling data of the current frame. This should only be written to.
+    Data* currentWriteData() nothrow
+    {
+        return &sData[sWriteDataPointer];
+    }
+
+    /// The current frames per second.
     ushort fps() nothrow
     {
         return sFPS;
     }
 }
 
+/// Convenience mixin template that creates a profiling timer for the
+/// current function. If not assigned a custom name, it will take
+/// the pretty name of the function.
 template ProfileFunction(string customName = null)
 {
     static if (!customName)
@@ -97,6 +124,9 @@ template ProfileFunction(string customName = null)
     }`;
 }
 
+/// Convenience mixin template that creates a profiling timer for
+/// the enclosing scope. The name will always contain the function,
+/// and if not given a custom name, also contains the line number.
 template ProfileScope(string customName = null)
 {
     static if (!customName)

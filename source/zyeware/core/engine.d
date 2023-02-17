@@ -27,13 +27,17 @@ import zyeware.utils.format;
 import zyeware.core.startupapp;
 
 /// Struct that holds information about the project.
+/// Note that the author name and project name are used to determine the save data directory.
 struct ProjectProperties
 {
-    string authorName = "Anonymous";
-    string projectName = "ZyeWare Project";
+    string authorName = "Anonymous"; /// The author of the game. Can be anything, from a person to a company.
+    string projectName = "ZyeWare Project"; /// The name of the project.
 
-    LogLevel coreLogLevel = LogLevel.trace; /// The log level for the core logger.
-    LogLevel clientLogLevel = LogLevel.trace; /// The log level for the client logger.
+    LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
+    LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
+
+    RenderBackend renderBackend = RenderBackend.openGl; /// Determines the rendering backend used.
+    AudioBackend audioBackend = AudioBackend.openAl; /// Determines the audio backend used.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
@@ -55,10 +59,10 @@ struct FrameTime
 /// Holds information about a SemVer version.
 struct Version
 {
-    int major;
-    int minor;
-    int patch;
-    string prerelease;
+    int major; /// The major release version.
+    int minor; /// The minor release version.
+    int patch; /// The patch version.
+    string prerelease; /// Any additional version declarations, e.g. "alpha".
 
     string toString() immutable pure
     {
@@ -127,7 +131,7 @@ private static:
         {
             version (Profiling)
             {
-                Profiler.clear();
+                Profiler.clearAndSwap();
                 scope (exit) ++fpsCounter;
             }
 
@@ -177,7 +181,7 @@ private static:
     {
         FramebufferProperties fbProps;
         fbProps.size = sMainWindow.size;
-        sMainFramebuffer = new Framebuffer(fbProps);
+        sMainFramebuffer = Framebuffer.create(fbProps);
 
         sWindowProjection = Matrix4f.orthographic(0, sMainWindow.size.x, 0, sMainWindow.size.y, -1, 1);
         sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
@@ -246,6 +250,74 @@ private static:
         sMainWindow.swapBuffers();
     }
 
+    void parseCmdArgs(string[] args, ref ProjectProperties properties)
+    {
+        import std.getopt : getopt, defaultGetoptPrinter, config;
+        import std.stdio : writeln, writefln;
+        import std.traits : EnumMembers;
+        import core.stdc.stdlib : exit;
+
+        try
+        {
+            auto helpInfo = getopt(args,
+                config.passThrough,
+                "render-backend", "The rendering backend to use.", &properties.renderBackend,
+                "audio-backend", "The audio backend to use.", &properties.audioBackend,
+                "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
+                "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
+                "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
+            );
+
+            if (helpInfo.helpWanted)
+            {
+                defaultGetoptPrinter(format!"ZyeWare Game Engine v%s"(engineVersion), helpInfo.options);
+                writeln("If no arguments are given, the selection of said options are to the disgression of the game developer.");
+                writeln("All arguments not understood by the engine are passed through to the game.");
+                writeln("------------------------------------------");
+                writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
+                writefln("Available rendering backends: %(%s, %)", [EnumMembers!RenderBackend]);
+                writefln("Available audio backends: %(%s, %)", [EnumMembers!AudioBackend]);
+                exit(0);
+            }
+        }
+        catch (Exception ex)
+        {
+            writeln("Could not parse arguments: ", ex.message);
+            writeln("Please use -h or --help to show information about the command line arguments.");
+            exit(1);
+        }
+    }
+
+    void loadBackends(const ProjectProperties properties)
+    {
+        import zyeware.platform.opengl.impl;
+        import zyeware.platform.openal.impl;
+
+        switch (properties.renderBackend) with (RenderBackend)
+        {
+        case openGl:
+        default:
+            version (ZWBackendOpenGL)
+            {
+                loadOpenGLBackend();
+                break;
+            }
+            else throw new CoreException("ZyeWare has not been compiled with OpenGL support.");
+        }
+
+        switch (properties.audioBackend) with (AudioBackend)
+        {
+        case openAl:
+        default:
+            version (ZWBackendOpenAL)
+            {
+                loadOpenALBackend();
+                break;
+            }
+            else throw new CoreException("ZyeWare has not been compiled with OpenAL support.");
+        }
+    }
+
 package(zyeware.core) static:
     CrashHandler crashHandler;
 
@@ -253,12 +325,19 @@ package(zyeware.core) static:
     {
         GC.disable();
 
+        parseCmdArgs(args, properties);
+        loadBackends(properties);
+
         sCmdArgs = args;
         sProjectProperties = properties;
-
-        sFrameTime = dur!"msecs"(1000 / properties.targetFrameRate);
+        targetFrameRate = properties.targetFrameRate;
         sRandom = new RandomNumberGenerator();
 
+        // Initialize profiler and logger before anything else.
+        version (Profiling) Profiler.initialize();
+        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
+
+        // Initialize crash handler afterwards because it relies on the logger.
         if (properties.crashHandler)
             crashHandler = properties.crashHandler;
         else
@@ -268,13 +347,9 @@ package(zyeware.core) static:
             else
                 crashHandler = new DefaultCrashHandler();
         }
-
-        // Initialize profiler and logger before anything else.
-        version (Profiling) Profiler.initialize();
-        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
         
         // Creates a new window and render context.
-        sMainWindow = new Window(properties.mainWindowProperties);
+        sMainWindow = Window.create(properties.mainWindowProperties);
         enforce!CoreException(sMainWindow, "Main window creation failed.");
         createFramebuffer();
 
@@ -321,14 +396,15 @@ package(zyeware.core) static:
     }
 
 public static:
-    immutable Version engineVersion = Version(0, 3, 0, "alpha");
+    /// The current version of the engine.
+    immutable Version engineVersion = Version(0, 5, 0, "alpha");
 
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
     {
         center, /// Keep the original size at the center of the window.
         keepAspect, /// Scale with window, but keep the aspect.
-        fill, /// Fill the window completly.
+        fill, /// Fill the window completely.
         changeWindowSize /// Resize the framebuffer itself.
     }
 
@@ -405,7 +481,9 @@ public static:
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 
-    // TODO: Change name?
+    /// Changes the window size, respecting various window states with it (e.g. full screen, minimised etc.)
+    /// Params:
+    ///   size = The new size of the window.
     void changeWindowSize(Vector2i size)
         in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
     {
@@ -454,6 +532,7 @@ public static:
         return sUpTime;
     }
 
+    /// The target framerate to hit. This is not a guarantee.
     void targetFrameRate(int fps) 
         in (fps > 0, "Target FPS must be greater than 0.")
     {
@@ -545,7 +624,7 @@ public static:
 
     /// The `ProjectProperties` the engine was started with.
     /// See_Also: ProjectProperties
-    const(ProjectProperties) projectProperties() nothrow
+    const(ProjectProperties) projectProperties() nothrow @nogc
     {
         return sProjectProperties;
     }

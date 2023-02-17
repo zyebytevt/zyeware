@@ -7,13 +7,19 @@ public import inmath.linalg : dot, cross;
 
 import zyeware.common;
 
+/// A two dimensional vector with float values.
 alias Vector2f = Vector!(float, 2);
+/// A two dimensional vector with int values.
 alias Vector2i = Vector!(int, 2);
 
+/// A three dimensional vector with float values.
 alias Vector3f = Vector!(float, 3);
+/// A three dimensional vector with int values.
 alias Vector3i = Vector!(int, 3);
 
+/// A four dimensional vector with float values.
 alias Vector4f = Vector!(float, 4);
+/// A four dimensional vector with int values.
 alias Vector4i = Vector!(int, 4);
 
 /// Calculates the height on a specific point of a triangle using the barycentric algorithm.

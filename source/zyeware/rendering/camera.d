@@ -8,11 +8,18 @@ module zyeware.rendering.camera;
 import zyeware.common;
 import zyeware.rendering;
 
+/// Provides common functionality between different types of cameras.
 interface Camera
 {
 public:
+    /// The projection matrix of this camera.
     Matrix4f projectionMatrix() pure const nothrow;
 
+    /// Calculates a new view matrix based on the given translation.
+    /// Params:
+    ///   position = The position of the camera.
+    ///   rotation = The rotation of the camera.
+    /// Returns: A newly calculated view matrix.
     pragma(inline, true)
     static final Matrix4f calculateViewMatrix(Vector3f position, Quaternionf rotation) pure nothrow
     {
@@ -20,12 +27,20 @@ public:
     }
 }
 
+/// Represents a camera with a orthographic projection.
 class OrthographicCamera : Camera
 {
 protected:
     Matrix4f mProjectionMatrix;
 
 public:
+    /// Params:
+    ///   left = 
+    ///   right = 
+    ///   bottom = 
+    ///   top = 
+    ///   near = 
+    ///   far = 
     this(float left, float right, float bottom, float top, float near = -1f, float far = 1f) pure nothrow
     {
         setData(left, right, bottom, top, near, far);

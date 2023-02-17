@@ -93,9 +93,12 @@ public:
     }
 
     /// Change the current state to the given one.
+    /// This method should not be called during event emission. Use a deferred call
+    /// for this purpose.
     ///
     /// Params:
     ///     state = The game state to switch to.
+    /// See_Also: ZyeWare.callDeferred
     void changeState(GameState state)
         in (state, "Game state cannot be null.")
     {
@@ -112,9 +115,12 @@ public:
     }
 
     /// Pushes the given state onto the stack, and switches to it.
+    /// This method should not be called during event emission. Use a deferred call
+    /// for this purpose.
     ///
     /// Params:
     ///     state = The state to push and switch to.
+    /// See_Also: ZyeWare.callDeferred
     void pushState(GameState state)
         in (state, "Game state cannot be null.")
     {
@@ -131,6 +137,9 @@ public:
     }
 
     /// Pops the current state from the stack, restoring the previous state.
+    /// This method should not be called during event emission. Use a deferred call
+    /// for this purpose.
+    /// See_Also: ZyeWare.callDeferred
     void popState()
     {
         debug if (ZyeWare.isEmittingEvent)
@@ -144,12 +153,14 @@ public:
         ZyeWare.collect();
     }
 
+    /// The current game state.
     pragma(inline, true)
     GameState currentState()
     {
         return mStateStack.peek;
     }
 
+    /// If this application currently has a game state loaded.
     pragma(inline, true)
     bool hasState() const nothrow
     {

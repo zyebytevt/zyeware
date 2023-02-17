@@ -3,7 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.audio.buffer;
+module zyeware.platform.openal.buffer;
+
+version (ZWBackendOpenAL):
+package(zyeware.platform.openal):
 
 import std.sumtype;
 
@@ -12,36 +15,20 @@ import bindbc.openal;
 import zyeware.common;
 import zyeware.audio;
 
-@asset(Yes.cache)
-class Audio
+class OALSound : Sound
 {
 protected:
     const(ubyte)[] mEncodedMemory;
     LoopPoint mLoopPoint;
 
-public:
+package(zyeware.platform.openal):
     this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
     {
         mEncodedMemory = encodedMemory;
         mLoopPoint = properties.loopPoint;
     }
 
-    LoopPoint loopPoint() pure const nothrow
-    {
-        return mLoopPoint;
-    }
-
-    void loopPoint(LoopPoint value) pure nothrow
-    {
-        mLoopPoint = value;
-    }
-
-    const(ubyte)[] encodedMemory() pure nothrow
-    {
-        return mEncodedMemory;
-    }
-
-    static Audio load(string path)
+    static Sound load(string path)
     {
         VFSFile source = VFS.getFile(path);
         ubyte[] bestCommunityData = source.readAll!(ubyte[])();
@@ -81,6 +68,22 @@ public:
 
         Logger.core.log(LogLevel.debug_, "Loaded file '%s' into memory for streaming.", path);
 
-        return new Audio(bestCommunityData, properties);
+        return new OALSound(bestCommunityData, properties);
+    }
+
+public:
+    LoopPoint loopPoint() pure const nothrow
+    {
+        return mLoopPoint;
+    }
+
+    void loopPoint(LoopPoint value) pure nothrow
+    {
+        mLoopPoint = value;
+    }
+
+    const(ubyte)[] encodedMemory() pure nothrow
+    {
+        return mEncodedMemory;
     }
 }

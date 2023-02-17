@@ -225,15 +225,15 @@ public:
     {
         calculateNormals(vertices, indices);
 
-        mBufferGroup = new BufferGroup();
-        mBufferGroup.dataBuffer = new DataBuffer(vertices, BufferLayout([
+        mBufferGroup = BufferGroup.create();
+        mBufferGroup.dataBuffer = DataBuffer.create(vertices, BufferLayout([
             BufferElement("aPosition", BufferElement.Type.vec3),
             BufferElement("aUV", BufferElement.Type.vec2),
             BufferElement("aNormal", BufferElement.Type.vec3),
             BufferElement("aColor", BufferElement.Type.vec4)
         ]), No.dynamic);
 
-        mBufferGroup.indexBuffer = new IndexBuffer(indices, No.dynamic);
+        mBufferGroup.indexBuffer = IndexBuffer.create(indices, No.dynamic);
 
         mMaterial = material;
     }

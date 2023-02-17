@@ -20,6 +20,5 @@ configuration "sdl-opengl" {
 	dependency "bindbc-openal" version="~>1.0.0"
 	dependency "bindbc-sdl" version="~>1.0.1"
 	targetType "library"
-	sourcePaths "platform/opengl" "platform/openal"
-	versions "GL_41" "SDL_204" "GL_KHR_debug"
+	versions "GL_41" "SDL_204" "GL_KHR_debug" "ZWBackendOpenGL" "ZWBackendOpenAL"
 }

@@ -18,7 +18,6 @@ public
     import zyeware.rendering.image;
     import zyeware.rendering.material;
     import zyeware.rendering.mesh;
-    import zyeware.rendering.properties;
     import zyeware.rendering.renderable;
     import zyeware.rendering.shader;
     import zyeware.rendering.sky;
