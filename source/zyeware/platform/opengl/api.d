@@ -100,8 +100,8 @@ void apiInitialize()
     //glAlphaFunc(GL_GREATER, 0);
 
     glDepthFunc(GL_LEQUAL);
-
-    glEnable(GL_DEBUG_OUTPUT);
+    
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(&glErrorCallback, null);
 
     glLineWidth(2);
