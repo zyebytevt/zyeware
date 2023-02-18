@@ -72,8 +72,10 @@ protected:
         execute([
             "zenity",
             "--error",
-            "--text=" ~ message,
-            "--title" ~ title,
+            "--text",
+            message,
+            "--title",
+            title,
             "--width=500"
         ]);
     }
@@ -82,6 +84,18 @@ protected:
     {
         execute([
             "xmessage",
+            "-center",
+            message
+        ]);
+    }
+
+    void showGXMessage(string message, string title)
+    {
+        execute([
+            "xmessage",
+            "-ontop",
+            "-title",
+            title,
             "-center",
             message
         ]);
@@ -102,7 +116,41 @@ public:
             showKDialog(message, t.toString(), title);
         else if (executeShell("type zenity").status == 0)
             showZenity(message ~ "\n\n" ~ t.toString(), title);
+        else if (executeShell("type gxmessage").status == 0)
+            showGXMessage(message ~ "\n\n" ~ t.toString(), title);
         else
             showXMessage(message ~ "\n\n" ~ t.toString());
+    }
+}
+
+/// The default crash handler for Windows operating systems.
+version (Windows)
+class WindowsDefaultCrashHandler : DefaultCrashHandler
+{
+    import core.sys.windows.windows;
+    import std.utf : toUTFz;
+
+protected:
+    void showMessageBox(string message, string title)
+    {
+        MessageBoxW(null, message.toUTFz!(const(wchar)*), title.toUTFz!(const(wchar)*), MB_OK | MB_ICONERROR);
+    }
+
+    // TODO: Couldn't get TaskDialog to work as apparently, there is no declaration for it in D.
+    // Manually declaring it also didn't work. Whenever someone gets to it, replacing the MessageBox
+    // with a TaskDialog would be nice.
+
+public:
+    override void show(Throwable t)
+    {
+        super.show(t);
+
+        enum title = "Can I go home yet?";
+        enum message = "As it turns out, the application has crashed. ZyeByte is sorry for the inconvenience, be it as "
+        ~ "the game or engine developer alike.\nIf you do suspect it's an issue of the engine though, please leave "
+        ~ "a bug report over at https://github.com/zyebytevt/zyeware!\nWith this, I'm sure it can be fixed soon.\n\n"
+        ~ "(Restarting often fixes issues, I've been told!)";
+
+        showMessageBox(message ~ "\n\n" ~ t.toString(), title);
     }
 }

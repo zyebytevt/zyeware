@@ -344,6 +344,8 @@ package(zyeware.core) static:
         {
             version (linux)
                 crashHandler = new LinuxDefaultCrashHandler();
+            else version (Windows)
+                crashHandler = new WindowsDefaultCrashHandler();
             else
                 crashHandler = new DefaultCrashHandler();
         }
