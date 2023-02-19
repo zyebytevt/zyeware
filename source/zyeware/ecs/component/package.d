@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component;
 
+version (ZW_ECS):
+
 public
 {
     import zyeware.ecs.component.camera;

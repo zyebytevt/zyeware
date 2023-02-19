@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.system.render3d;
 
+version (ZW_ECS):
+
 import zyeware.common;
 import zyeware.ecs;
 import zyeware.rendering;

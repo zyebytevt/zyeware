@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.openal.api;
 
-version (ZWBackendOpenAL):
+version (ZW_OpenAL):
 package(zyeware.platform.openal):
 
 import std.string : format, fromStringz;

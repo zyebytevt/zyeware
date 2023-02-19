@@ -297,7 +297,7 @@ private static:
         {
         case openGl:
         default:
-            version (ZWBackendOpenGL)
+            version (ZW_OpenGL)
             {
                 loadOpenGLBackend();
                 break;
@@ -309,7 +309,7 @@ private static:
         {
         case openAl:
         default:
-            version (ZWBackendOpenAL)
+            version (ZW_OpenAL)
             {
                 loadOpenALBackend();
                 break;

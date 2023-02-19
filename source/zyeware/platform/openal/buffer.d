@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.openal.buffer;
 
-version (ZWBackendOpenAL):
+version (ZW_OpenAL):
 package(zyeware.platform.openal):
 
 import std.sumtype;

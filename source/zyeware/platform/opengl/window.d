@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.opengl.window;
 
-version (ZWBackendOpenGL):
+version (ZW_OpenGL):
 package(zyeware.platform.opengl):
 
 import core.stdc.string : memcpy;

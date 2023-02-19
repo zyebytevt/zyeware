@@ -21,6 +21,8 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.entity;
 
+version (ZW_ECS):
+
 import std.bitmanip;
 import std.container;
 import std.string;

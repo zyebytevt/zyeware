@@ -21,6 +21,8 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core;
 
+version (ZW_ECS):
+
 public
 {
     import zyeware.ecs.core.entity;

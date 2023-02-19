@@ -21,6 +21,8 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.pool;
 
+version (ZW_ECS):
+
 
 template hasConst(C)
 {

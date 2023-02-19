@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component.transform;
 
+version (ZW_ECS):
+
 import std.algorithm : remove;
 import std.string : format;
 import std.exception : enforce;

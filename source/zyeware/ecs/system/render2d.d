@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.system.render2d;
 
+version (ZW_ECS):
+
 import std.datetime : Duration;
 
 import zyeware.common;

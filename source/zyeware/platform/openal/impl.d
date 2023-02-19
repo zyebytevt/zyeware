@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.openal.impl;
 
-version (ZWBackendOpenAL):
+version (ZW_OpenAL):
 package(zyeware):
 
 import zyeware.audio;

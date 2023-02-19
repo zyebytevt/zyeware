@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.platform.opengl.impl;
 
-version (ZWBackendOpenGL):
+version (ZW_OpenGL):
 package(zyeware):
 
 import zyeware.platform.opengl.api;
