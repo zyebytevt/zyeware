@@ -161,6 +161,7 @@ public:
         else
             mPosition = value;
         
+        recalculateLocalMatrix();
         recalculateGlobalMatrix();
     }
 
