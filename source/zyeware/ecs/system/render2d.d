@@ -43,6 +43,10 @@ public:
                     }
 
                     sprite.atlas.frame = animation.mCurrentFrame;
+
+                    // Just converting from bool to Flag, nothing to see here...
+                    sprite.hFlip = cast(typeof(sprite.hFlip)) animation.mCurrentAnimation.hFlip;
+                    sprite.vFlip = cast(typeof(sprite.vFlip)) animation.mCurrentAnimation.vFlip;
                     animation.mCurrentFrameLength = Duration.zero;
                 }
             }
@@ -82,7 +86,28 @@ public:
         foreach (Entity entity, Transform2DComponent* transform, SpriteComponent* sprite;
             entities.entitiesWith!(Transform2DComponent, SpriteComponent))
         {
-            Renderer2D.drawRect(Rect2f(-sprite.offset, sprite.size - sprite.offset), transform.globalMatrix,
+            //immutable Vector2f p1 = Vector2f(sprite.hFlip ? sprite.offset.x : -sprite.offset.x,
+            //    sprite.vFlip ? sprite.offset.y : -sprite.offset.y);
+            //immutable Vector2f p2 = Vector2f(sprite.hFlip ? );
+
+            float x1 = -sprite.offset.x;
+            float y1 = -sprite.offset.y;
+            float x2 = sprite.size.x - sprite.offset.x;
+            float y2 = sprite.size.y - sprite.offset.y;
+
+            if (sprite.hFlip)
+            {
+                x1 *= -1;
+                x2 *= -1;
+            }
+
+            if (sprite.vFlip)
+            {
+                y1 *= -1;
+                y2 *= -1;
+            }
+
+            Renderer2D.drawRect(Rect2f(x1, y1, x2, y2), transform.globalMatrix,
                 sprite.modulate, sprite.atlas.texture, sprite.atlas.region);
         }
 

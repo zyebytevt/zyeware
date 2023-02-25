@@ -36,6 +36,8 @@ struct SpriteComponent
     Vector2f offset; /// The offset of the sprite.
     TextureAtlas atlas; /// The texture atlas used for sprite rendering.
     Color modulate = Color.white; /// The modulation of this sprite.
+    Flag!"hFlip" hFlip; /// If the sprite is horizontally flipped.
+    Flag!"vFlip" vFlip; /// If the sprite is vertically flipped.
 }
 
 /// The `SpriteAnimationComponent` causes an entity with a `SpriteComponent` to animate

@@ -209,7 +209,7 @@ public:
      *
      * It will be dispatched to all receivers that subscribed to it.
      */
-    void emit(E)(in ref E event)
+    void emit(E)(auto ref E event)
         if (isEvent!E)
     {
         auto eventId = EventCounter!E.getId();

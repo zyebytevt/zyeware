@@ -179,7 +179,7 @@ void apiDrawIndexed(size_t count) nothrow
 {
     glDrawElements(GL_TRIANGLES, cast(int) count, GL_UNSIGNED_INT, null);
     
-    version (Profiling)
+    version (ZW_Profiling)
     {
         ++Profiler.currentWriteData.renderData.drawCalls;
         Profiler.currentWriteData.renderData.polygonCount += count / 3;

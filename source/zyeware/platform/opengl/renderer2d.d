@@ -204,7 +204,7 @@ void r2dDrawRect(in Rect2f dimensions, in Matrix4f transform, in Color modulate 
 
     ++pCurrentQuad;
 
-    version (Profiling) ++Profiler.currentWriteData.renderData.rectCount;
+    version (ZW_Profiling) ++Profiler.currentWriteData.renderData.rectCount;
 }
 
 void r2dDrawString(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
@@ -250,14 +250,8 @@ void r2dDrawString(T)(in T text, in Font font, in Vector2f position, in Color mo
                     immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
                         cast(float) (c.x + c.width) / size.x, cast(float) (c.y + c.height) / size.y);
 
-                    //r2dDrawRect(Rect2f(0, 0, c.width, c.height), Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)),
-                    //    Vector2f(1), modulate, pageTexture, region);
-
                     r2dDrawRect(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
                         modulate, pageTexture, region);
-
-                    /*r2dDrawRect(dimensions, Matrix4f.translation(Vector3f(position, 0)) * Matrix4f.scaling(scale.x, scale.y, 1),
-                        modulate, texture, region);*/
 
                     cursor.x += c.xadvance + kerning;
             }

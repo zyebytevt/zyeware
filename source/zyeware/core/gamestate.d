@@ -119,4 +119,10 @@ public:
     {
         return mSystems;
     }
+
+    /// The EventManager of this game state.
+    EventManager events() pure nothrow
+    {
+        return mEvents;
+    }
 }
