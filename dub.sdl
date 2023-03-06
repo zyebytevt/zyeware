@@ -1,7 +1,7 @@
 name "zyeware"
 description "Simple, general purpose 2D and 3D game engine."
 authors "ZyeByte"
-copyright "Copyright © 2022, ZyeByte"
+copyright "Copyright © 2023, ZyeByte"
 license "LGPL-3.0"
 
 dependency "terminal" version="~>1.0.0"
@@ -16,7 +16,10 @@ targetPath "out"
 sourcePaths "source"
 copyFiles "out/core.zpk"
 
-postBuildCommands "dub run zpklink -- -i res/core-package -o out/core.zpk"
+postBuildCommands "dub run zyeware:zpklink -- -i res/core-package -o out/core.zpk"
+
+subPackage "examples/techdemo"
+subPackage "tools/zpklink"
 
 configuration "sdl-opengl" {
 	platforms "posix" "windows"

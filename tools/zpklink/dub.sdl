@@ -1,0 +1,6 @@
+name "zpklink"
+description "Tool for handling ZyeWare packages."
+authors "ZyeByte"
+copyright "Copyright © 2023, ZyeByte"
+license "LGPL-3.0"
+targetPath "out"

@@ -1,0 +1,5 @@
+extends "core://materials/default.mtl"
+
+parameter:shineDamper type="float" value="1"
+
+texture type="2d" path="res://terraindemo/tree/texture.png"

@@ -1,0 +1,11 @@
+.dub
+docs.json
+__dummy.html
+docs/
+out/
+.vscode
+*.exe
+*.o
+*.lst
+*.a
+dub.selections.json

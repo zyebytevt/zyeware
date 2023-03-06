@@ -1,0 +1,13 @@
+walk {
+    start 0
+    end 1
+    interval-msecs 200
+    loop true
+}
+
+up {
+    start 2
+    end 3
+    interval-msecs 200
+    loop true
+}
