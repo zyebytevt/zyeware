@@ -19,7 +19,7 @@ A very important resource, especially for the early stages of the engine rewrite
 
 ## What can it do?
 
-Not much currently. It supports a Virtual File System with high moddability, various rendering functionalities (where 2D is rendered with batching), audio of course, and has a quite well integrated Entity Component System structure on top of it. Available backends are currently OpenGL (with SDL) and OpenAL.
+A few things. It supports a Virtual File System with high moddability, various rendering functionalities (where 2D is rendered with batching), audio of course, and has a quite well integrated Entity Component System structure on top of it. Available backends are currently OpenGL (with SDL) and OpenAL.
 
 ## Games created with ZyeWare
 
@@ -27,9 +27,8 @@ Not yet. I'll start listing them as soon as there are, though.
 
 ## Contributions?
 
-If you want to contribute, that would be really cool! Please just be aware of various pitfalls:
+If you want to contribute, that would be really cool! Please just be aware of a few small points:
 
-- Methods declared in DI files must be implemented in a separate file *exactly* in the order they were declared in. Otherwise very strange linking issues occur.
 - I try to take readability of code very seriously, so while still trying to be performant, please perfer clear and easy to understand code instead of black magic.
 
 ### How to build (or create a game)
