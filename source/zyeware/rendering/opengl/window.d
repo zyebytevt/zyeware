@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.window;
+module zyeware.rendering.opengl.window;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import core.stdc.string : memcpy;
 
@@ -21,7 +21,7 @@ import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.platform.opengl.utils;
+import zyeware.rendering.opengl.utils;
 
 class OGLWindow : Window
 {
@@ -133,7 +133,7 @@ protected:
         return getGamepadIndex(SDL_GameControllerFromInstanceID(instanceId));
     }
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this(in WindowProperties properties)
     {
         mTitle = properties.title;

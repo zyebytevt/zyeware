@@ -3,16 +3,16 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.openal.impl;
+module zyeware.audio.openal.impl;
 
 version (ZW_OpenAL):
 package(zyeware):
 
 import zyeware.audio;
 
-import zyeware.platform.openal.api;
-import zyeware.platform.openal.buffer;
-import zyeware.platform.openal.source;
+import zyeware.audio.openal.api;
+import zyeware.audio.openal.buffer;
+import zyeware.audio.openal.source;
 
 void loadOpenALBackend()
 {

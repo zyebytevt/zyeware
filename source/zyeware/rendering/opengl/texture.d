@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.texture;
+module zyeware.rendering.opengl.texture;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import bindbc.opengl;
 import imagefmt;
@@ -23,7 +23,7 @@ protected:
     ubyte mChannels;
     uint mID;
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this(in Image image, in TextureProperties properties)
     {
         const(ubyte)[] pixels = image.pixels;

@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.shader;
+module zyeware.rendering.opengl.shader;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import std.typecons : Rebindable;
 import std.string : toStringz, fromStringz, format;
@@ -88,7 +88,7 @@ protected:
         }
     }
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this()
     {
         mProgramID = glCreateProgram();

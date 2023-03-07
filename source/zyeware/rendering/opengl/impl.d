@@ -3,17 +3,17 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.impl;
+module zyeware.rendering.opengl.impl;
 
 version (ZW_OpenGL):
 package(zyeware):
 
-import zyeware.platform.opengl.api;
-import zyeware.platform.opengl.buffer;
-import zyeware.platform.opengl.texture;
-import zyeware.platform.opengl.framebuffer;
-import zyeware.platform.opengl.shader;
-import zyeware.platform.opengl.window;
+import zyeware.rendering.opengl.api;
+import zyeware.rendering.opengl.buffer;
+import zyeware.rendering.opengl.texture;
+import zyeware.rendering.opengl.framebuffer;
+import zyeware.rendering.opengl.shader;
+import zyeware.rendering.opengl.window;
 
 import zyeware.rendering;
 

@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.openal.api;
+module zyeware.audio.openal.api;
 
 version (ZW_OpenAL):
-package(zyeware.platform.openal):
+package(zyeware.audio.openal):
 
 import std.string : format, fromStringz;
 import std.exception : enforce;

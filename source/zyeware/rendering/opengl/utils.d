@@ -1,7 +1,7 @@
-module zyeware.platform.opengl.utils;
+module zyeware.rendering.opengl.utils;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import bindbc.sdl;
 

@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.buffer;
+module zyeware.rendering.opengl.buffer;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import std.exception : enforce, assumeWontThrow;
 import std.typecons : Rebindable;
@@ -25,7 +25,7 @@ protected:
     DataBuffer mDataBuffer;
     IndexBuffer mIndexBuffer;
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this()
     {
         glGenVertexArrays(1, &mVertexArrayID);
@@ -108,7 +108,7 @@ protected:
     size_t mLength;
     bool mInitialized;
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this(size_t size, BufferLayout layout, bool dynamic)
     {
         glGenBuffers(1, &mBufferID);
@@ -192,7 +192,7 @@ protected:
     bool mDynamic;
     bool mInitialized;
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this(size_t size, bool dynamic)
     {
         glGenBuffers(1, &mBufferID);
@@ -278,7 +278,7 @@ protected:
         mLength = offset;
     }
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this(in BufferLayout layout)
     {
         glGenBuffers(1, &mBufferID);

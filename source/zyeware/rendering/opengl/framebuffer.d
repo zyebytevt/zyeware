@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.framebuffer;
+module zyeware.rendering.opengl.framebuffer;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import std.exception : enforce;
 
@@ -14,7 +14,7 @@ import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.platform.opengl.texture;
+import zyeware.rendering.opengl.texture;
 
 class OGLFramebuffer : Framebuffer
 {
@@ -23,7 +23,7 @@ protected:
     uint mID;
     Texture2D mColorAttachment, mDepthAttachment;
 
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
     this(in FramebufferProperties properties)
     {
         mProperties = properties;

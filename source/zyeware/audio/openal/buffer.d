@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.openal.buffer;
+module zyeware.audio.openal.buffer;
 
 version (ZW_OpenAL):
-package(zyeware.platform.openal):
+package(zyeware.audio.openal):
 
 import std.sumtype;
 
@@ -21,7 +21,7 @@ protected:
     const(ubyte)[] mEncodedMemory;
     LoopPoint mLoopPoint;
 
-package(zyeware.platform.openal):
+package(zyeware.audio.openal):
     this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
     {
         mEncodedMemory = encodedMemory;

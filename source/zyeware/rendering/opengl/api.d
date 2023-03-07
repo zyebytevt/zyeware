@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.opengl.api;
+module zyeware.rendering.opengl.api;
 
 version (ZW_OpenGL):
-package(zyeware.platform.opengl):
+package(zyeware.rendering.opengl):
 
 import bindbc.opengl;
 
@@ -14,7 +14,7 @@ import zyeware.common;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
 
-import zyeware.platform.opengl.buffer;
+import zyeware.rendering.opengl.buffer;
 
 bool[RenderFlag] pFlagValues;
 

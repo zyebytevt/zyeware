@@ -290,8 +290,8 @@ private static:
 
     void loadBackends(const ProjectProperties properties)
     {
-        import zyeware.platform.opengl.impl;
-        import zyeware.platform.openal.impl;
+        import zyeware.rendering.opengl.impl;
+        import zyeware.audio.openal.impl;
 
         switch (properties.renderBackend) with (RenderBackend)
         {

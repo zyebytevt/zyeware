@@ -3,10 +3,10 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.platform.openal.source;
+module zyeware.audio.openal.source;
 
 version (ZW_OpenAL):
-package(zyeware.platform.openal):
+package(zyeware.audio.openal):
 
 import std.exception : enforce;
 import std.algorithm : clamp;
@@ -47,7 +47,7 @@ protected:
     bool mLooping;
     AudioBus mBus;
 
-package(zyeware.platform.openal):
+package(zyeware.audio.openal):
     this(AudioBus bus)
     {
         mState = State.stopped;
