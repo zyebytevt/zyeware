@@ -149,12 +149,10 @@ public:
                 (*parameter).match!(
                     (void[] x) => bindBuffer.setData(offset, x),
                     (int x) => bindBuffer.setData(offset, [x]),
-                    //(int[] x) => bindBuffer.setData(offset, x),
                     (float x) => bindBuffer.setData(offset, [x]),
                     (Vector2f x) => bindBuffer.setData(offset, x.vector),
                     (Vector3f x) => bindBuffer.setData(offset, x.vector),
                     (Vector4f x) => bindBuffer.setData(offset, x.vector),
-                    //(Matrix4f x) => bindBuffer.setData(offset, x.matrix),
                 );
             }
 

@@ -7,8 +7,6 @@ module zyeware.rendering;
 
 public
 {
-    import zyeware.rendering.renderer;
-
     import zyeware.rendering.api;
     import zyeware.rendering.buffer;
     import zyeware.rendering.camera;
@@ -29,4 +27,6 @@ public
     import zyeware.rendering.color;
     import zyeware.rendering.particles2d;
     import zyeware.rendering.cursor;
+    import zyeware.rendering.renderer2d;
+    import zyeware.rendering.renderer3d;
 }
