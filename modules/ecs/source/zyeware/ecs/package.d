@@ -5,11 +5,11 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs;
 
-version (ZW_ECS):
-
 public
 {
     import zyeware.ecs.core;
     import zyeware.ecs.component;
     import zyeware.ecs.system;
+
+    import zyeware.ecs.gamestate;
 }

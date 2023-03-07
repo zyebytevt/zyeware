@@ -21,8 +21,6 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.system;
 
-version (ZW_ECS):
-
 import std.algorithm;
 import std.container;
 import std.format;
@@ -31,8 +29,9 @@ import std.typecons;
 import std.exception : enforce;
 
 import zyeware.ecs.core.entity;
-import zyeware.common;
 import zyeware.core.debugging.profiler;
+import zyeware.common;
+import zyeware.ecs;
 
 /// How a system handles pause mode.
 enum PauseMode

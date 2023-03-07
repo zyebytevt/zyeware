@@ -4,6 +4,7 @@ import std.algorithm : clamp;
 
 import zyeware.common;
 import zyeware.audio;
+import zyeware.ecs;
 
 import techdemo.creeps.ecs.component.player;
 import techdemo.creeps.ecs.events.player;

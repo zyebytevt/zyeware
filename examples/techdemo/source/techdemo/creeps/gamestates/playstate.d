@@ -8,6 +8,7 @@ import std.random : uniform;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.audio;
+import zyeware.ecs;
 
 import techdemo.creeps.ecs.component.player;
 import techdemo.creeps.ecs.component.mob;

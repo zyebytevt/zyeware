@@ -21,8 +21,6 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.entity;
 
-version (ZW_ECS):
-
 import std.bitmanip;
 import std.container;
 import std.string;
@@ -31,6 +29,7 @@ import std.exception : enforce;
 import zyeware.ecs.core.component;
 import zyeware.ecs.core.pool;
 import zyeware.common;
+import zyeware.ecs;
 
 /// Attribute to use upon component struct's and union's.
 public import zyeware.ecs.core.component : component;

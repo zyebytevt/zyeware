@@ -5,8 +5,6 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.system;
 
-version (ZW_ECS):
-
 public
 {
     import zyeware.ecs.system.render2d;

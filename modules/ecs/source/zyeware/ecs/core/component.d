@@ -21,8 +21,6 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.component;
 
-version (ZW_ECS):
-
 // UDA for component types
 enum component;
 

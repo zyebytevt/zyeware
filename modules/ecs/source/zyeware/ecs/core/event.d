@@ -21,8 +21,6 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.event;
 
-version (ZW_ECS):
-
 import std.algorithm;
 import std.container;
 import std.typecons;

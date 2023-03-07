@@ -1,7 +1,5 @@
 module zyeware.ecs.system.particles2d;
 
-version (ZW_ECS):
-
 import std.datetime : Duration;
 
 import zyeware.common;

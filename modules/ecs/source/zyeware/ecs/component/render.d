@@ -5,8 +5,6 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component.render;
 
-version (ZW_ECS):
-
 import std.datetime : Duration;
 import std.typecons : Tuple;
 import std.string : format;

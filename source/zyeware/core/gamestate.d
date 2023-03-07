@@ -9,7 +9,6 @@ public import zyeware.core.application : GameStateApplication;
 
 import zyeware.common;
 import zyeware.rendering.api;
-import zyeware.ecs.core;
 
 /// A game state is used in conjunction with a `GameStateApplication` instance
 /// to make managing an application with different states easier.
@@ -63,66 +62,5 @@ public:
     bool wasAlreadyAttached() pure const nothrow
     {
         return mWasAlreadyAttached;
-    }
-}
-
-/// `ECSGameState` implements the logic for a state that uses the
-/// entity-component-system model.
-class ECSGameState : GameState
-{
-private:
-    EntityManager mEntities;
-    EventManager mEvents;
-    SystemManager mSystems;
-
-protected:
-    this(GameStateApplication application, size_t maxComponentTypes = 64,
-            size_t componentPoolSize = 8192)
-    {
-        super(application);
-
-        mEvents = new EventManager();
-        mEntities = new EntityManager(mEvents, maxComponentTypes, componentPoolSize);
-        mSystems = new SystemManager(mEntities, mEvents);
-    }
-
-    ~this()
-    {
-        destroy(mEntities);
-        destroy(mSystems);
-    }
-
-public:
-    override void tick(in FrameTime frameTime)
-    {
-        mSystems.tickFull(frameTime);
-    }
-
-    override void draw(in FrameTime nextFrameTime)
-    {
-        mSystems.draw(nextFrameTime);
-    }
-
-    override void receive(in Event ev)
-    {
-        mSystems.receive(ev);
-    }
-
-    /// The EntityManager of this game state.
-    EntityManager entities() pure nothrow
-    {
-        return mEntities;
-    }
-
-    /// The SystemManager of this game state.
-    SystemManager systems() pure nothrow
-    {
-        return mSystems;
-    }
-
-    /// The EventManager of this game state.
-    EventManager events() pure nothrow
-    {
-        return mEvents;
     }
 }

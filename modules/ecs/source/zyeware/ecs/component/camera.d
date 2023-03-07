@@ -5,8 +5,6 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component.camera;
 
-version (ZW_ECS):
-
 import inmath.linalg;
 
 import zyeware.common;

@@ -18,6 +18,8 @@ copyFiles "out/core.zpk"
 
 postBuildCommands "dub run zyeware:zpklink -- -i res/core-package -o out/core.zpk"
 
+subPackage "modules/ecs"
+
 subPackage "examples/techdemo"
 subPackage "tools/zpklink"
 

@@ -5,8 +5,6 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component.collision;
 
-version (ZW_ECS):
-
 import std.bitmanip;
 
 import zyeware.common;

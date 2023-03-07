@@ -5,8 +5,6 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component.transform;
 
-version (ZW_ECS):
-
 import std.algorithm : remove;
 import std.string : format;
 import std.exception : enforce;
@@ -14,6 +12,7 @@ import std.exception : enforce;
 import inmath.linalg;
 
 import zyeware.common;
+import zyeware.ecs;
 
 /// The Transform2DComponent, if attached, will give an entity a 2D
 /// world transformation. This is a base component necessary for most
