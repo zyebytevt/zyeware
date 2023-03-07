@@ -24,7 +24,7 @@ import zyeware.audio;
 import zyeware.audio.thread;
 import zyeware.core.crash;
 import zyeware.utils.format;
-import zyeware.core.startupapp;
+import zyeware.core.introapp;
 
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
@@ -367,7 +367,7 @@ package(zyeware.core) static:
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
         else 
-        sApplication = new StartupApplication(properties.mainApplication);
+        sApplication = new IntroApplication(properties.mainApplication);
 
         sApplication.initialize();
     }

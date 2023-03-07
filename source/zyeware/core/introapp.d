@@ -1,10 +1,10 @@
-module zyeware.core.startupapp;
+module zyeware.core.introapp;
 
 import zyeware.common;
 import zyeware.rendering;
 
 package(zyeware.core)
-final class StartupApplication : Application
+final class IntroApplication : Application
 {
 protected:
     Texture2D mEngineLogo;
