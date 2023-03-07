@@ -9,6 +9,13 @@ import std.datetime : Duration;
 public import inmath.math : degrees, radians;
 import inmath.util : isVector;
 
+/// Represents a range of values, given a `min` and `max`.
+struct Range(T)
+{
+    T min;
+    T max;
+}
+
 /// Linearly interpolate between two numeric values.
 /// 
 /// Params:

@@ -8,18 +8,18 @@ import techdemo.menu.menu;
 
 extern(C) ProjectProperties getProjectProperties()
 {
-	WindowProperties windowProps;
+	ProjectProperties props = {
+		authorName: "ZyeByte",
+		projectName: "ZyeWare Sandbox",
 
-	windowProps.title = "ZyeWare Tech Demo";
-	windowProps.size = Vector2i(640, 480);
-	windowProps.icon = Image.load(cast(ubyte[]) import("icon.png"));
+		mainWindowProperties: {
+			title: "ZyeWare Tech Demo",
+			size: Vector2i(640, 480),
+			icon: Image.load(cast(ubyte[]) import("icon.png"))
+		},
 
-	ProjectProperties props;
-
-	props.authorName = "ZyeByte";
-	props.projectName = "ZyeWare Sandbox";
-	props.mainWindowProperties = windowProps;
-	props.mainApplication = new TechDemoApplication();
+		mainApplication: new TechDemoApplication()
+	};
 
     return props;
 }

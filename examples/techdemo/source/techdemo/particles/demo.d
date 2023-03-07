@@ -60,19 +60,21 @@ public:
             gradient.addPoint(0.5, Color.blue);
             gradient.addPoint(1, Color.yellow);
 
-            ParticleProperties2D starType;
+            ParticleProperties2D starType = {
+                texture: AssetManager.load!Texture2D("res://menu/menuStar.png"),
+                gravity: Vector2f(0, 15),
+                speed: {
+                    min: 30f,
+                    max: 300f
+                },
+                lifeTime: {
+                    min: seconds(3),
+                    max: seconds(3)
+                },
+                color: gradient
+            };
 
-            starType.texture = AssetManager.load!Texture2D("res://menu/menuStar.png");
-            starType.gravity = Vector2f(0, 15);
-            starType.speed.min = 30f;
-            starType.speed.max = 300f;
-            starType.lifeTime.min = seconds(3);
-            starType.lifeTime.max = seconds(3);
-            starType.color = gradient;
-
-            mStarParticlesId = mParticles.registerType(starType, 60000);
-
-            //mParticles.emit(mStarParticlesId, Vector2f(320, 200), 10);
+            mStarParticlesId = mParticles.registerType(starType, 60_000);
         }
     }
 }

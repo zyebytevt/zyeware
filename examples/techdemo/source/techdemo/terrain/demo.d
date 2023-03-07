@@ -58,14 +58,16 @@ protected:
 
     Entity createTerrain()
     {
-        TerrainProperties properties;
-        properties.size = Vector2f(256, 256);
+        TerrainProperties properties = {
+            size: Vector2f(256, 256),
+            blendMap: AssetManager.load!Texture2D("res://terraindemo/terrain/blendmap.png"),
+            textureTiling: Vector2f(10)
+        };
+        
         properties.textures[0] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/grass.png");
         properties.textures[1] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/grassFlowers.png");
         properties.textures[2] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/mud.png");
         properties.textures[3] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/path.png");
-        properties.blendMap = AssetManager.load!Texture2D("res://terraindemo/terrain/blendmap.png");
-        properties.textureTiling = Vector2f(10);
 
         Entity terrain = entities.create();
         
