@@ -11,7 +11,7 @@ import zyeware.rendering;
 @asset(Yes.cache)
 class SpriteFrames
 {
-private:
+protected:
     Animation[string] mAnimations;
 
 public:
