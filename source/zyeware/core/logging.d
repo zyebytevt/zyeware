@@ -48,8 +48,8 @@ private:
     LogLevel mLogLevel;
     dstring mName;
     
-    static LogSink sDefaultLogSink;
-    static Logger sCoreLogger, sClientLogger;
+    __gshared LogSink sDefaultLogSink;
+    __gshared Logger sCoreLogger, sClientLogger;
 
 package(zyeware):
     static void initialize(LogLevel coreLevel, LogLevel clientLevel)
@@ -60,7 +60,7 @@ package(zyeware):
         sClientLogger = new Logger(sDefaultLogSink, clientLevel, "Client");
     }
 
-    static Logger core()  nothrow
+    static Logger core() nothrow
     {
         return sCoreLogger;
     }

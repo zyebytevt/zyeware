@@ -110,7 +110,7 @@ private static:
 
     void runMainLoop()
     {
-        version (Profiling)
+        version (ZW_Profiling)
         {
             ushort fpsCounter;
 
@@ -129,7 +129,7 @@ private static:
 
         while (sRunning)
         {
-            version (Profiling)
+            version (ZW_Profiling)
             {
                 Profiler.clearAndSwap();
                 scope (exit) ++fpsCounter;
@@ -174,7 +174,7 @@ private static:
             }
         }
 
-        version (Profiling) fpsCounterTimer.stop();
+        version (ZW_Profiling) fpsCounterTimer.stop();
     }
 
     void createFramebuffer()
@@ -290,14 +290,14 @@ private static:
 
     void loadBackends(const ProjectProperties properties)
     {
-        import zyeware.platform.opengl.impl;
-        import zyeware.platform.openal.impl;
+        import zyeware.rendering.opengl.impl;
+        import zyeware.audio.openal.impl;
 
         switch (properties.renderBackend) with (RenderBackend)
         {
         case openGl:
         default:
-            version (ZWBackendOpenGL)
+            version (ZW_OpenGL)
             {
                 loadOpenGLBackend();
                 break;
@@ -309,7 +309,7 @@ private static:
         {
         case openAl:
         default:
-            version (ZWBackendOpenAL)
+            version (ZW_OpenAL)
             {
                 loadOpenALBackend();
                 break;
@@ -334,7 +334,7 @@ package(zyeware.core) static:
         sRandom = new RandomNumberGenerator();
 
         // Initialize profiler and logger before anything else.
-        version (Profiling) Profiler.initialize();
+        version (ZW_Profiling) Profiler.initialize();
         Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
 
         // Initialize crash handler afterwards because it relies on the logger.
@@ -344,6 +344,8 @@ package(zyeware.core) static:
         {
             version (linux)
                 crashHandler = new LinuxDefaultCrashHandler();
+            else version (Windows)
+                crashHandler = new WindowsDefaultCrashHandler();
             else
                 crashHandler = new DefaultCrashHandler();
         }
@@ -460,7 +462,7 @@ public static:
         if (auto input = cast(InputEvent) ev)
             InputManager.receive(input).assumeWontThrow;
 
-        version (Profiling)
+        version (ZW_Profiling)
         {
             if (auto key = cast(InputEventKey) ev)
                 DebugInfoManager.receive(key);

@@ -1,0 +1,10 @@
+node {
+    prop:margin "zero"
+    prop:anchor "fill"
+
+    button {
+        prop:name "mainButton"
+        prop:margin 60 60 60 60
+        prop:anchor "fill"
+    }
+}

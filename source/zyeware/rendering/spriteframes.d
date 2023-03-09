@@ -22,6 +22,8 @@ public:
         size_t endFrame; /// Which frame to display last.
         Duration frameInterval; /// Determines how long a frame stays until it advances to the next one.
         bool isLooping; /// If the animation should loop after the last frame.
+        bool hFlip; /// If the animation is horizontally flipped.
+        bool vFlip; /// If the animation is vertically flipped.
     }
 
     /// Adds an animation.
@@ -73,8 +75,15 @@ public:
 
             animation.startFrame = animationTag.expectTagValue!int("start").to!size_t;
             animation.endFrame = animationTag.expectTagValue!int("end").to!size_t;
-            animation.frameInterval = dur!"msecs"(animationTag.expectTagValue!int("interval-msecs"));
+
+            if (Tag fpsTag = animationTag.getTag("fps"))
+                animation.frameInterval = dur!"msecs"(1000 / fpsTag.expectValue!int());
+            else
+                animation.frameInterval = dur!"msecs"(animationTag.expectTagValue!int("interval-msecs"));
+            
             animation.isLooping = animationTag.getTagValue!bool("loop", false);
+            animation.hFlip = animationTag.getTagValue!bool("h-flip", false);
+            animation.vFlip = animationTag.getTagValue!bool("v-flip", false);
 
             spriteFrames.addAnimation(animationTag.name, animation);
         }

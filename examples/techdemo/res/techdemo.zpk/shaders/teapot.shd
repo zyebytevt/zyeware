@@ -1,0 +1,52 @@
+opengl:vertex `
+#version 330 core
+
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec2 a_UV;
+layout(location = 2) in vec3 a_Normal;
+layout(location = 3) in vec4 a_Color;
+
+uniform mat4 i_VPMatrix;
+uniform mat4 i_ModelMatrix;
+uniform mat4 i_ViewMatrix;
+
+out vec3 v_Normal;
+out vec3 v_ToCameraVector;
+
+void main()
+{
+    vec4 worldPosition = i_ModelMatrix * vec4(a_Position, 1.0);
+
+    v_ToCameraVector = (inverse(i_ViewMatrix) * vec4(0, 0, 0, 1)).xyz - worldPosition.xyz;
+    v_Normal = (i_ModelMatrix * vec4(a_Normal, 0)).xyz;
+
+    gl_Position = i_VPMatrix * worldPosition;
+}
+`
+
+opengl:fragment `
+#version 330 core
+
+layout(location = 0) out vec4 color;
+
+in vec3 v_Normal;
+in vec3 v_ToCameraVector;
+
+uniform vec3 u_Albedo;
+uniform float u_ShineDamper;
+uniform float u_Reflectivity;
+
+void main()
+{
+    vec3 unitLightVector = normalize(vec3(1, 0, 1));
+    vec3 unitCameraVector = normalize(v_ToCameraVector);
+
+    float brightness = max(dot(v_Normal, unitLightVector), 0.05);
+    float specularFactor = max(dot(reflect(-unitLightVector, v_Normal), unitCameraVector), 0.0);
+    
+    vec3 diffuse = brightness * vec3(1);
+    vec3 specular = pow(specularFactor, u_ShineDamper) * u_Reflectivity * vec3(1);
+
+    color = vec4(diffuse, 1) * vec4(u_Albedo, 1) + vec4(specular, 0);
+}
+`

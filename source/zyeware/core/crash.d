@@ -55,6 +55,11 @@ class LinuxDefaultCrashHandler : DefaultCrashHandler
     import std.process : execute, executeShell;
 
 protected:
+    bool commandExists(string command)
+    {
+        return executeShell("type " ~ command).status == 0;
+    }
+
     void showKDialog(string message, string details, string title)
     {
         execute([
@@ -62,8 +67,10 @@ protected:
             "--detailederror",
             message,
             details,
-            "--title=" ~ title,
-            "--ok-label=Close ZyeWare"
+            "--title",
+            title,
+            "--ok-label",
+            "Close ZyeWare"
         ]);
     }
 
@@ -72,9 +79,14 @@ protected:
         execute([
             "zenity",
             "--error",
-            "--text=" ~ message,
-            "--title" ~ title,
-            "--width=500"
+            "--text",
+            message,
+            "--title",
+            title,
+            "--width",
+            "500",
+            "--ok-label",
+            "Close ZyeWare"
         ]);
     }
 
@@ -82,6 +94,22 @@ protected:
     {
         execute([
             "xmessage",
+            "-buttons",
+            "Close ZyeWare:0",
+            "-center",
+            message
+        ]);
+    }
+
+    void showGXMessage(string message, string title)
+    {
+        execute([
+            "gxmessage",
+            "-ontop",
+            "-buttons",
+            "Close ZyeWare:0",
+            "-title",
+            title,
             "-center",
             message
         ]);
@@ -98,11 +126,50 @@ public:
         ~ "a bug report over at https://github.com/zyebytevt/zyeware!\nWith this, I'm sure it can be fixed soon.\n\n"
         ~ "(Restarting often fixes issues, I've been told!)";
 
-        if (executeShell("type kdialog").status == 0)
+        if (commandExists("kdialog"))
             showKDialog(message, t.toString(), title);
-        else if (executeShell("type zenity").status == 0)
+        else if (commandExists("zenity"))
             showZenity(message ~ "\n\n" ~ t.toString(), title);
-        else
+        else if (commandExists("gxmessage"))
+            showGXMessage(message ~ "\n\n" ~ t.toString(), title);
+        else if (commandExists("xmessage"))
             showXMessage(message ~ "\n\n" ~ t.toString());
+        else
+        {
+            Logger.core.log(LogLevel.warning, "Could not find appropriate message box application to use.");
+            Logger.core.log(LogLevel.warning, "I hope you're looking at the logs!");
+        }
+    }
+}
+
+/// The default crash handler for Windows operating systems.
+version (Windows)
+class WindowsDefaultCrashHandler : DefaultCrashHandler
+{
+    import core.sys.windows.windows;
+    import std.utf : toUTFz;
+
+protected:
+    void showMessageBox(string message, string title)
+    {
+        MessageBoxW(null, message.toUTFz!(const(wchar)*), title.toUTFz!(const(wchar)*), MB_OK | MB_ICONERROR);
+    }
+
+    // TODO: Couldn't get TaskDialog to work as apparently, there is no declaration for it in D.
+    // Manually declaring it also didn't work. Whenever someone gets to it, replacing the MessageBox
+    // with a TaskDialog would be nice.
+
+public:
+    override void show(Throwable t)
+    {
+        super.show(t);
+
+        enum title = "Can I go home yet?";
+        enum message = "As it turns out, the application has crashed. ZyeByte is sorry for the inconvenience, be it as "
+        ~ "the game or engine developer alike.\nIf you do suspect it's an issue of the engine though, please leave "
+        ~ "a bug report over at https://github.com/zyebytevt/zyeware!\nWith this, I'm sure it can be fixed soon.\n\n"
+        ~ "(Restarting often fixes issues, I've been told!)";
+
+        showMessageBox(message ~ "\n\n" ~ t.toString(), title);
     }
 }

@@ -10,7 +10,7 @@ import std.datetime : Duration;
 
 import zyeware.common;
 
-version (Profiling):
+version (ZW_Profiling):
 
 /// Contains various functions for profiling.
 struct Profiler
@@ -118,7 +118,7 @@ template ProfileFunction(string customName = null)
     else
         enum timerName = customName;
 
-    enum ProfileFunction = `version (Profiling) {
+    enum ProfileFunction = `version (ZW_Profiling) {
         auto ptimer__ = Profiler.Timer(` ~ timerName ~ `);
         scope (success) ptimer__.stop();
     }`;
@@ -134,7 +134,7 @@ template ProfileScope(string customName = null)
     else
         enum timerName = `"` ~ customName ~ `" ~ " @ " ~ __FUNCTION__`;
 
-    enum ProfileScope = `version (Profiling) {
+    enum ProfileScope = `version (ZW_Profiling) {
         auto ptimer__ = Profiler.Timer(` ~ timerName ~ `);
         scope (success) ptimer__.stop();
     }`;

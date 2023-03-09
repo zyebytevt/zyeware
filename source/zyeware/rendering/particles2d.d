@@ -115,18 +115,15 @@ public:
 
 struct ParticleProperties2D
 {
-private:
-    alias MinMax(T) = Tuple!(T, "min", T, "max");
-
 public:
     Texture2D texture;
-    auto size = MinMax!float(1, 1);
-    MinMax!Duration lifeTime;
+    auto size = Range!float(1, 1);
+    Range!Duration lifeTime;
     Gradient color;
     Vector2f gravity;
-    auto spriteAngle = MinMax!float(0, 0);
-    auto direction = MinMax!float(0, PI*2);
-    auto speed = MinMax!float(0, 1);
+    auto spriteAngle = Range!float(0, 0);
+    auto direction = Range!float(0, PI*2);
+    auto speed = Range!float(0, 1);
     ParticleRegistrationID typeOnDeath;
 }
 

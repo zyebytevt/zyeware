@@ -4,7 +4,7 @@ import core.memory;
 
 import zyeware.common;
 
-version (Profiling)
+version (ZW_Profiling)
 package(zyeware)
 struct DebugInfoManager
 {

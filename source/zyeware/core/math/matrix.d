@@ -12,6 +12,8 @@ alias Quaternionf = Quaternion!(float);
 alias Matrix4f = Matrix!(float, 4, 4);
 /// A 3x3 matrix with float values.
 alias Matrix3f = Matrix!(float, 3, 3);
+/// A 2x2 matrix with float values.
+alias Matrix2f = Matrix!(float, 2, 2);
 
 /// Convert a 2D position from world to local space.
 /// 

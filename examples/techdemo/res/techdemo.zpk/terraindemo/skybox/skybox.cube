@@ -1,0 +1,6 @@
+positive-x "res://terraindemo/skybox/left.png"
+negative-x "res://terraindemo/skybox/right.png"
+positive-y "res://terraindemo/skybox/top.png"
+negative-y "res://terraindemo/skybox/bottom.png"
+positive-z "res://terraindemo/skybox/back.png"
+negative-z "res://terraindemo/skybox/front.png"

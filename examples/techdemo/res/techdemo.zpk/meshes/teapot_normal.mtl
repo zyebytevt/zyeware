@@ -1,0 +1,3 @@
+extends "core://materials/default.mtl"
+
+parameter:reflectivity type="float" value="1"

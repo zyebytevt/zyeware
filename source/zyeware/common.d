@@ -10,7 +10,6 @@ public
     import std.typecons : Flag, Yes, No;
     
     import zyeware.core;
-    import zyeware.ecs;
 
     import zyeware.utils.codes;
     import zyeware.utils.format;
