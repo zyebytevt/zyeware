@@ -53,12 +53,12 @@ interface Texture2D : Texture
 
     static Texture2D create(in Image image, in TextureProperties properties)
     {
-        return RenderAPI.sCreateTexture2DImpl(image, properties);
+        return GraphicsAPI.sCreateTexture2DImpl(image, properties);
     }
 
     static Texture2D load(string path)
     {
-        return RenderAPI.sLoadTexture2DImpl(path);
+        return GraphicsAPI.sLoadTexture2DImpl(path);
     }
 }
 
@@ -72,11 +72,11 @@ interface TextureCubeMap : Texture
 
     static TextureCubeMap create(in Image[6] images, in TextureProperties properties)
     {
-        return RenderAPI.sCreateTextureCubeMapImpl(images, properties);
+        return GraphicsAPI.sCreateTextureCubeMapImpl(images, properties);
     }
 
     static TextureCubeMap load(string path)
     {
-        return RenderAPI.sLoadTextureCubeMapImpl(path);
+        return GraphicsAPI.sLoadTextureCubeMapImpl(path);
     }
 }

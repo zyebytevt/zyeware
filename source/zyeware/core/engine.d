@@ -225,27 +225,27 @@ private static:
         sMainWindow.update();
 
         // Prepare framebuffer and render application into it.
-        RenderAPI.setViewport(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y);
+        GraphicsAPI.setViewport(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y);
         sMainFramebuffer.bind();
         sApplication.draw(nextFrameTime);
 
         sMainFramebuffer.unbind();
 
-        immutable bool oldWireframe = RenderAPI.getFlag(RenderFlag.wireframe);
-        immutable bool oldCulling = RenderAPI.getFlag(RenderFlag.culling);
+        immutable bool oldWireframe = GraphicsAPI.getFlag(RenderFlag.wireframe);
+        immutable bool oldCulling = GraphicsAPI.getFlag(RenderFlag.culling);
 
         // Prepare window space to render framebuffer into.
-        RenderAPI.setFlag(RenderFlag.culling, false);
-        RenderAPI.setFlag(RenderFlag.wireframe, false);
+        GraphicsAPI.setFlag(RenderFlag.culling, false);
+        GraphicsAPI.setFlag(RenderFlag.wireframe, false);
 
-        RenderAPI.setViewport(0, 0, sMainWindow.size.x, sMainWindow.size.y);
-        RenderAPI.clear();
+        GraphicsAPI.setViewport(0, 0, sMainWindow.size.x, sMainWindow.size.y);
+        GraphicsAPI.clear();
         Renderer2D.begin(sWindowProjection, Matrix4f.identity);
         Renderer2D.drawRect(sFramebufferArea, Matrix4f.identity, Color.white, sMainFramebuffer.colorAttachment);
         Renderer2D.end();
 
-        RenderAPI.setFlag(RenderFlag.culling, oldCulling);
-        RenderAPI.setFlag(RenderFlag.wireframe, oldWireframe);
+        GraphicsAPI.setFlag(RenderFlag.culling, oldCulling);
+        GraphicsAPI.setFlag(RenderFlag.wireframe, oldWireframe);
 
         sMainWindow.swapBuffers();
     }
@@ -360,7 +360,7 @@ package(zyeware.core) static:
         AssetManager.initialize();
         AudioAPI.initialize();
         AudioThread.initialize();
-        RenderAPI.initialize();
+        GraphicsAPI.initialize();
         Renderer2D.initialize();
         Renderer3D.initialize();
 
@@ -379,7 +379,7 @@ package(zyeware.core) static:
         sApplication.cleanup();
         Renderer3D.cleanup();
         Renderer2D.cleanup();
-        RenderAPI.cleanup();
+        GraphicsAPI.cleanup();
         AudioThread.cleanup();
         AudioAPI.cleanup();
 

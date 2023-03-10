@@ -20,11 +20,11 @@ public:
 
     static Shader create()
     {
-        return RenderAPI.sCreateShaderImpl();
+        return GraphicsAPI.sCreateShaderImpl();
     }
 
     static Shader load(string path)
     {
-        return RenderAPI.sLoadShaderImpl(path);
+        return GraphicsAPI.sLoadShaderImpl(path);
     }
 }

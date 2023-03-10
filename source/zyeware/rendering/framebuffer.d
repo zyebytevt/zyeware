@@ -30,6 +30,6 @@ public:
 
     static Framebuffer create(in FramebufferProperties properties)
     {
-        return RenderAPI.sCreateFramebufferImpl(properties);
+        return GraphicsAPI.sCreateFramebufferImpl(properties);
     }
 }

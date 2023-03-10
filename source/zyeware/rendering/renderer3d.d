@@ -62,7 +62,7 @@ private static:
         sky.material.bind();
         sky.bufferGroup.bind();
 
-        RenderAPI.drawIndexed(sky.bufferGroup.indexBuffer.length);
+        GraphicsAPI.drawIndexed(sky.bufferGroup.indexBuffer.length);
     }
 
 package(zyeware) static:
@@ -125,7 +125,7 @@ public static:
         }
 
         sLightsBuffer.setData(sLightsBuffer.getEntryOffset("count"), [cast(int) lights.length]);
-        RenderAPI.packLightConstantBuffer(sLightsBuffer, lights);
+        GraphicsAPI.packLightConstantBuffer(sLightsBuffer, lights);
     }
 
     /// Starts a 3D scene. This must be called before any 3D drawing commands.
@@ -156,7 +156,7 @@ public static:
         sEnvironmentBuffer.setData(sEnvironmentBuffer.getEntryOffset("ambientColor"), sActiveEnvironment.ambientColor.vector);
         sEnvironmentBuffer.setData(sEnvironmentBuffer.getEntryOffset("fogColor"), sActiveEnvironment.fogColor.vector);
 
-        RenderAPI.setFlag(RenderFlag.depthTesting, true);
+        GraphicsAPI.setFlag(RenderFlag.depthTesting, true);
 
         debug pCurrentRenderer = CurrentRenderer.renderer3D;
     }
@@ -197,7 +197,7 @@ public static:
                     sMatricesBuffer.setData(sMatricesBuffer.getEntryOffset("model"), bufferGroupBatch.transforms[k].matrix);
                     sMatricesBuffer.setData(sMatricesBuffer.getEntryOffset("mvp"), (sActiveProjectionMatrix * sActiveViewMatrix
                         * bufferGroupBatch.transforms[k]).matrix);
-                    RenderAPI.drawIndexed(bufferGroupBatch.bufferGroup.indexBuffer.length);
+                    GraphicsAPI.drawIndexed(bufferGroupBatch.bufferGroup.indexBuffer.length);
                 }
 
                 bufferGroupBatch.currentTransform = 0;
