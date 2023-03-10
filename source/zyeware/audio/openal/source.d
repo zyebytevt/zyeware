@@ -28,12 +28,19 @@ private:
     size_t readFromDecoder() @nogc
         in (mDecoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
     {
-        return mDecoder.readSamplesFloat(&mProcBuffer[0], cast(int)(mProcBuffer.length/mDecoder.getNumChannels()))
+        size_t readCount = mDecoder.readSamplesFloat(&mTempProcBuffer[0], cast(int)(mTempProcBuffer.length/mDecoder.getNumChannels()))
             * mDecoder.getNumChannels();
+
+        for (size_t i; i < readCount; ++i)
+            mRealProcBuffer[i] = cast(short) (mTempProcBuffer[i] * short.max);
+
+        return readCount;
     }
 
 protected:
-    float[] mProcBuffer;
+    // TODO: Decoder sucks, replace with a better one soonish.
+    float[] mTempProcBuffer;
+    short[] mRealProcBuffer;
 
     Sound mSound;
     AudioStream mDecoder;
@@ -53,7 +60,8 @@ package(zyeware.audio.openal):
         mState = State.stopped;
         mBus = bus ? bus : AudioAPI.getBus("master");
 
-        mProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
+        mTempProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
+        mRealProcBuffer = new short[mTempProcBuffer.length];
         mBufferIDs = new uint[ZyeWare.projectProperties.audioBufferCount];
 
         alGenSources(1, &mSourceId);
@@ -73,7 +81,7 @@ public:
         alDeleteBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);
         alDeleteSources(1, &mSourceId);
 
-        dispose(mProcBuffer);
+        dispose(mTempProcBuffer);
         dispose(mBufferIDs);
     }
 
@@ -90,8 +98,9 @@ public:
                 lastReadLength = readFromDecoder();
                 
                 alBufferData(mBufferIDs[i],
-                    mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-                    &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.getSamplerate());
+                    mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                    &mRealProcBuffer[0], cast(int) (lastReadLength * short.sizeof), cast(int) mDecoder.getSamplerate());
+                
                 alSourceQueueBuffers(mSourceId, 1, &mBufferIDs[i]);
             }
         }
@@ -241,8 +250,8 @@ public:
                     break;
             }
 
-            alBufferData(pBuf, mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO_FLOAT32 : AL_FORMAT_STEREO_FLOAT32,
-                &mProcBuffer[0], cast(int) (lastReadLength * float.sizeof), cast(int) mDecoder.getSamplerate());
+            alBufferData(pBuf, mDecoder.getNumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                &mRealProcBuffer[0], cast(int) (lastReadLength * short.sizeof), cast(int) mDecoder.getSamplerate());
 
             alSourceQueueBuffers(mSourceId, 1, &pBuf);
         }
