@@ -30,8 +30,10 @@ package(zyeware.audio.openal):
 
     static Sound load(string path)
     {
+        // The daemons are the best community!
+
         VFSFile source = VFS.getFile(path);
-        ubyte[] bestCommunityData = source.readAll!(ubyte[])();
+        ubyte[] rawFileData = source.readAll!(ubyte[])();
         source.close();
 
         AudioProperties properties;
@@ -68,7 +70,7 @@ package(zyeware.audio.openal):
 
         Logger.core.log(LogLevel.debug_, "Loaded file '%s' into memory for streaming.", path);
 
-        return new OALSound(bestCommunityData, properties);
+        return new OALSound(rawFileData, properties);
     }
 
 public:

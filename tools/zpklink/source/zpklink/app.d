@@ -166,15 +166,11 @@ int extract(string sourceZpkName, string targetDirName)
 
 	// Read central directory
 	immutable int fileAmount = zpkFile.readPrimitive!uint();
-	writeln(fileAmount);
 	for (size_t i; i < fileAmount; ++i)
 	{
 		immutable string fullPath = zpkFile.readPString!ushort();
-		writeln(fullPath);
 		immutable int fileOffset = zpkFile.readPrimitive!uint();
-		writeln(fileOffset);
 		immutable int fileSize = zpkFile.readPrimitive!uint();
-		writeln(fileSize);
 
 		fileInfos[fullPath] = FileInfo(fileOffset, fileSize);
 	}
