@@ -1,7 +1,7 @@
-module zyeware.rendering.opengl.utils;
+module zyeware.rendering.vulkan.utils;
 
-version (ZW_OpenGL):
-package(zyeware.rendering.opengl):
+version (ZW_Vulkan):
+package(zyeware.rendering.vulkan):
 
 import bindbc.sdl;
 

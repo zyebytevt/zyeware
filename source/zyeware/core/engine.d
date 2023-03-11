@@ -36,7 +36,7 @@ struct ProjectProperties
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
-    RenderBackend renderBackend = RenderBackend.openGl; /// Determines the rendering backend used.
+    RenderBackend renderBackend = RenderBackend.vulkan; /// Determines the rendering backend used.
     AudioBackend audioBackend = AudioBackend.openAl; /// Determines the audio backend used.
 
     Application mainApplication; /// The application to use.
@@ -290,19 +290,27 @@ private static:
 
     void loadBackends(const ProjectProperties properties)
     {
-        import zyeware.rendering.opengl.impl;
+        import zyeware.rendering.vulkan.impl;
         import zyeware.audio.openal.impl;
-
+        
         switch (properties.renderBackend) with (RenderBackend)
         {
         case openGl:
-        default:
             version (ZW_OpenGL)
             {
                 loadOpenGLBackend();
                 break;
             }
             else throw new CoreException("ZyeWare has not been compiled with OpenGL support.");
+
+        default:
+        case vulkan:
+            version (ZW_Vulkan)
+            {
+                loadVulkanBackend();
+                break;
+            }
+            else throw new CoreException("ZyeWare has not been compiled with Vulkan support.");
         }
 
         switch (properties.audioBackend) with (AudioBackend)
@@ -349,6 +357,8 @@ package(zyeware.core) static:
             else
                 crashHandler = new DefaultCrashHandler();
         }
+
+        GraphicsAPI.loadLibraries();
         
         // Creates a new window and render context.
         sMainWindow = Window.create(properties.mainWindowProperties);

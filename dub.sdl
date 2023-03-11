@@ -23,10 +23,20 @@ subPackage "modules/ecs"
 subPackage "examples/techdemo"
 subPackage "tools/zpklink"
 
-configuration "sdl-opengl" {
+/*configuration "sdl-opengl" {
 	platforms "posix" "windows"
 	dependency "bindbc-opengl" version="~>1.0.0"
 	dependency "bindbc-openal" version="~>1.0.0"
 	dependency "bindbc-sdl" version="~>1.0.1"
 	versions "GL_41" "SDL_204" "GL_KHR_debug" "ZW_OpenGL" "ZW_OpenAL"
+}*/
+
+configuration "sdl-vulkan" {
+	platforms "posix" "windows"
+
+	dependency "bindbc-openal" version="~>1.0.0"
+	dependency "bindbc-sdl" version="~>1.0.1"
+	dependency "erupted" version="~>2.1.87+v1.3.237"
+
+	versions "SDL_206" "ZW_Vulkan" "ZW_OpenAL"
 }

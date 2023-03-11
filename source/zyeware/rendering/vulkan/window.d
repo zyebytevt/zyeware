@@ -1,12 +1,7 @@
-// This file is part of the ZyeWare Game Engine, and subject to the terms
-// and conditions defined in the file 'LICENSE.txt', which is part
-// of this source code package.
-//
-// Copyright 2021 ZyeByte
-module zyeware.rendering.opengl.window;
+module zyeware.rendering.vulkan.window;
 
-version (ZW_OpenGL):
-package(zyeware.rendering.opengl):
+version (ZW_Vulkan):
+package (zyeware.rendering.vulkan):
 
 import core.stdc.string : memcpy;
 
@@ -17,13 +12,13 @@ import std.math : isClose;
 import std.utf : decode;
 
 import bindbc.sdl;
-import bindbc.opengl;
+import erupted;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.rendering.opengl.utils;
+import zyeware.rendering.vulkan.utils;
 
-class OGLWindow : Window
+class VulkanWindow : Window
 {
 private:
     static size_t sWindowCount = 0;
@@ -42,26 +37,8 @@ protected:
     SDL_Cursor*[const Cursor] mSDLCursors;
 
     SDL_Window* mHandle;
-    SDL_GLContext mGLContext;
     ubyte[] mKeyboardState;
     SDL_GameController*[32] mGamepads;
-
-    extern(C) static void sdlLogFunctionCallback(void* userdata, int category, SDL_LogPriority priority, const char* message) nothrow
-    {
-        LogLevel level;
-        switch (priority)
-        {
-        case SDL_LOG_PRIORITY_VERBOSE: level = LogLevel.verbose; break;
-        case SDL_LOG_PRIORITY_DEBUG: level = LogLevel.debug_; break;
-        case SDL_LOG_PRIORITY_INFO: level = LogLevel.info; break;
-        case SDL_LOG_PRIORITY_WARN: level = LogLevel.warning; break;
-        case SDL_LOG_PRIORITY_ERROR: level = LogLevel.error; break;
-        case SDL_LOG_PRIORITY_CRITICAL: level = LogLevel.fatal; break;
-        default:
-        }
-
-        Logger.core.log(level, message.fromStringz);
-    }
 
     final void addGamepad(size_t joyIdx) nothrow
     {
@@ -133,55 +110,26 @@ protected:
         return getGamepadIndex(SDL_GameControllerFromInstanceID(instanceId));
     }
 
-package(zyeware.rendering.opengl):
+package(zyeware.rendering.vulkan):
     this(in WindowProperties properties)
     {
         mTitle = properties.title;
         
         Logger.core.log(LogLevel.info, "Creating SDL window '%s', requested size %s...", mTitle, properties.size);
 
-        if (sWindowCount == 0)
-        {
-            enforce!GraphicsException(loadSDL() == sdlSupport, "Failed to load SDL!");
-            enforce!GraphicsException(SDL_Init(SDL_INIT_EVERYTHING) == 0,
-                format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
-
-            SDL_LogSetOutputFunction(&sdlLogFunctionCallback, null);
-
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-            Logger.core.log(LogLevel.debug_, "SDL initialized.");
-        }
-
         mHandle = SDL_CreateWindow(mTitle.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            cast(int) properties.size.x, cast(int) properties.size.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+            cast(int) properties.size.x, cast(int) properties.size.y, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
         enforce!GraphicsException(mHandle, format!"Failed to create SDL Window: %s!"(SDL_GetError().fromStringz));
 
         if (properties.icon)
             icon = properties.icon;
 
-        // TODO: Possibly split context up into separate file.
-        mGLContext = SDL_GL_CreateContext(mHandle);
-        enforce!GraphicsException(mGLContext, format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
-
-        mVSync = SDL_GL_GetSwapInterval() != 0;
+        mVSync = false;
 
         {
             int length;
             ubyte* state = SDL_GetKeyboardState(&length);
             mKeyboardState = state[0 .. length];
-        }
-        
-        if (sWindowCount == 0)
-        {
-            GraphicsAPI.loadLibraries();
-
-            Logger.core.log(LogLevel.info, "Initialized OpenGL Context:");
-            Logger.core.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
-            Logger.core.log(LogLevel.info, "    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
-            Logger.core.log(LogLevel.info, "    Version: %s", glGetString(GL_VERSION).fromStringz);
         }
 
         {
@@ -200,7 +148,6 @@ public:
     ~this()
     {
         SDL_DestroyWindow(mHandle);
-        SDL_GL_DeleteContext(mGLContext);
 
         if (mIconSurface)
             SDL_FreeSurface(mIconSurface);
@@ -208,8 +155,7 @@ public:
         foreach (SDL_Cursor* cursor; mSDLCursors.values)
             SDL_FreeCursor(cursor);
 
-        if (--sWindowCount == 0)
-            SDL_Quit();
+        --sWindowCount;
     }
 
     void update()
@@ -336,7 +282,6 @@ public:
 
     void swapBuffers()
     {
-        SDL_GL_SwapWindow(mHandle);
     }
 
     bool isKeyPressed(KeyCode code) nothrow
@@ -412,26 +357,7 @@ public:
 
     void vSync(bool value) nothrow
     {
-        if (value)
-        {
-            if (SDL_GL_SetSwapInterval(-1) == -1 && SDL_GL_SetSwapInterval(1) == -1)
-            {
-                Logger.core.log(LogLevel.warning, "Failed to enable VSync: %s.", SDL_GetError().fromStringz);
-                return;
-            }
-
-            mVSync = true;
-        }
-        else
-        {
-            if (SDL_GL_SetSwapInterval(0) == -1)
-            {
-                Logger.core.log(LogLevel.warning, "Failed to disable VSync: %s.", SDL_GetError().fromStringz);
-                return;
-            }
-
-            mVSync = false;
-        }
+        mVSync = value;
     }
 
     bool vSync() const nothrow

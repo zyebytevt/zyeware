@@ -13,6 +13,7 @@ enum RenderBackend
 {
     headless, /// A dummy API, does nothing.
     openGl, /// Uses OpenGL for rendering.
+    vulkan, /// Uses Vulkan for rendering.
 }
 
 enum RenderFlag
