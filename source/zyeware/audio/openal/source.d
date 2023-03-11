@@ -23,7 +23,7 @@ import zyeware.audio.thread;
 class OALAudioSource : AudioSource
 {
 private:
-    /// Loads up `mProcBuffer` and returns the amount of samples read.
+    /// Loads up `mProcTempBuffer` and `mProcRealBuffer` and returns the amount of samples read.
     pragma(inline, true)
     size_t readFromDecoder() @nogc
         in (mDecoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
@@ -38,7 +38,8 @@ private:
     }
 
 protected:
-    // TODO: Decoder sucks, replace with a better one soonish.
+    // TODO: Does decoder suck? Apparently some formats only do support reading
+    // interleaved floats. Do we need to keep this conversion?
     float[] mTempProcBuffer;
     short[] mRealProcBuffer;
 

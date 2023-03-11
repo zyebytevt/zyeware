@@ -71,11 +71,13 @@ public:
         this.playing = autostart;
     }
 
+    /// The name of the currently playing animation.
     string animation() pure nothrow
     {
         return mCurrentAnimationName;
     }
 
+    /// ditto
     void animation(string value) pure
         in (value, "Animation name cannot be null.")
     {
