@@ -8,11 +8,22 @@ module zyeware.audio.api;
 import zyeware.common;
 import zyeware.audio;
 
-/// Used for selecting an audio backend at the start of the engine.
-enum AudioBackend
+
+/// Holds information about the audio backend.
+struct AudioBackendProperties
 {
-    headless, /// A dummy API, does nothing.
-    openAl /// Used OpenAL for audio playback.
+    /// Used for selecting an audio backend at the start of the engine.
+    enum Backend
+    {
+        mostAppropriate, /// Chooses the most appropriate backend for platform.
+        headless, /// A dummy API, does nothing.
+        openAl /// Used OpenAL for audio playback.
+    }
+
+    Backend backend; /// The backend to use.
+    Flag!"debugMode" debugMode = No.debugMode;
+    uint bufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
+    uint bufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
 }
 
 /// Allows direct access to the audio API.

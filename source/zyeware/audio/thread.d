@@ -31,8 +31,8 @@ private static:
         //     (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
         // We assume a default sample rate of 44100 for audio.
 
-        immutable Duration waitTime = msecs(ZyeWare.projectProperties.audioBufferSize
-            / ZyeWare.projectProperties.audioBufferCount / 44_100 / 2 * 1000);
+        immutable Duration waitTime = msecs(ZyeWare.projectProperties.audioBackendProperties.bufferSize
+            / ZyeWare.projectProperties.audioBackendProperties.bufferCount / 44_100 / 2 * 1000);
 
         while (sRunning)
         {

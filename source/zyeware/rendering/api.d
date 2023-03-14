@@ -8,14 +8,6 @@ module zyeware.rendering.api;
 import zyeware.common;
 import zyeware.rendering;
 
-/// Used for selecting a rendering backend at the start of the engine.
-enum RenderBackend
-{
-    headless, /// A dummy API, does nothing.
-    openGl, /// Uses OpenGL for rendering.
-    vulkan, /// Uses Vulkan for rendering.
-}
-
 enum RenderFlag
 {
     depthTesting, /// Whether to use depth testing or not.
@@ -28,6 +20,22 @@ enum RenderFlag
 enum RenderCapability
 {
     maxTextureSlots /// How many texture slots are available to use.
+}
+
+/// Holds information the graphics backend.
+struct GraphicsBackendProperties
+{
+    /// Used for selecting a rendering backend at the start of the engine.
+    enum Backend
+    {
+        mostAppropriate, /// Chooses the most appropriate backend for platform.
+        headless, /// A dummy API, does nothing.
+        openGl, /// Uses OpenGL for rendering.
+        vulkan, /// Uses Vulkan for rendering.
+    }
+
+    Backend backend = Backend.mostAppropriate;
+    Flag!"debugMode" debugMode = No.debugMode;
 }
 
 struct GraphicsAPI

@@ -61,9 +61,9 @@ package(zyeware.audio.openal):
         mState = State.stopped;
         mBus = bus ? bus : AudioAPI.getBus("master");
 
-        mTempProcBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
+        mTempProcBuffer = new float[ZyeWare.projectProperties.audioBackendProperties.bufferSize];
         mRealProcBuffer = new short[mTempProcBuffer.length];
-        mBufferIDs = new uint[ZyeWare.projectProperties.audioBufferCount];
+        mBufferIDs = new uint[ZyeWare.projectProperties.audioBackendProperties.bufferCount];
 
         alGenSources(1, &mSourceId);
         alGenBuffers(cast(int) mBufferIDs.length, &mBufferIDs[0]);

@@ -5,53 +5,34 @@ package (zyeware.rendering.vulkan):
 
 import std.exception : enforce;
 import std.string : format, fromStringz;
+import core.memory : GC;
 
 import bindbc.sdl;
 import erupted;
+import erupted.types;
 import erupted.vulkan_lib_loader;
 
 import zyeware.common;
 import zyeware.core.engine;
 
+import zyeware.rendering.vulkan.init;
+
 // TODO: Can initialize and loadLibraries be combined?
 
 VkInstance pVkInstance;
+VkDebugUtilsMessengerEXT pDebugMessenger;
+VkPhysicalDevice pPhysicalDevice;
 
 void apiInitialize()
 {
-    VkApplicationInfo appInfo = {
-        sType: VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        pApplicationName: "Vulkan Rendering",
-        applicationVersion: VK_MAKE_API_VERSION(0, 1, 0, 0),
-        pEngineName: "ZyeWare",
-        engineVersion: VK_MAKE_API_VERSION(0, 1, 0, 0),
-        apiVersion: VK_API_VERSION_1_0
-    };
-
-    uint sdlExtensionCount = 0;
-    const(char)** sdlExtensions;
-
-    enforce!GraphicsException(SDL_Vulkan_GetInstanceExtensions(cast(SDL_Window*) ZyeWare.mainWindow.nativeWindow,
-        &sdlExtensionCount, sdlExtensions), "Failed to get list of necessary SDL Vulkan extensions.");
-
-    VkInstanceCreateInfo createInfo = {
-        sType: VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        pApplicationInfo: &appInfo,
-
-        enabledExtensionCount: sdlExtensionCount,
-        ppEnabledExtensionNames: sdlExtensions,
-        enabledLayerCount: 0
-    };
-
-    VkResult result = vkCreateInstance(&createInfo, null, &pVkInstance);
-    enforce!GraphicsException(result == VK_SUCCESS, "Failed to create Vulkan instance!");
-
-    loadInstanceLevelFunctions(pVkInstance);
+    apiInitCreateInstance(&pVkInstance);
+    apiInitSetupDebugMessenger(pVkInstance, &pDebugMessenger);
+    apiInitPickPhysicalDevice(pVkInstance, &pPhysicalDevice);
 }
 
 void apiLoadLibraries()
 {
-    // Initialize SDL
+    // Load and initialize SDL
     enforce!GraphicsException(loadSDL() == sdlSupport, "Failed to load SDL!");
     enforce!GraphicsException(SDL_Init(SDL_INIT_EVERYTHING) == 0,
         format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
@@ -68,6 +49,9 @@ void apiCleanup()
 {
     SDL_Quit();
 
+    if (pDebugMessenger)
+        vkDestroyDebugUtilsMessengerEXT(pVkInstance, pDebugMessenger, null);
+    
     vkDestroyInstance(pVkInstance, null);
 }
 

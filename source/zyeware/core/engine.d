@@ -36,15 +36,12 @@ struct ProjectProperties
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
-    RenderBackend renderBackend = RenderBackend.vulkan; /// Determines the rendering backend used.
-    AudioBackend audioBackend = AudioBackend.openAl; /// Determines the audio backend used.
+    GraphicsBackendProperties graphicsBackendProperties = GraphicsBackendProperties.init; /// Holds information about the graphics backend.
+    AudioBackendProperties audioBackendProperties = AudioBackendProperties.init; /// Holds information about the audio backend.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
     WindowProperties mainWindowProperties; /// The properties of the main window.
-
-    uint audioBufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
-    uint audioBufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
 
     uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
 }
@@ -261,8 +258,8 @@ private static:
         {
             auto helpInfo = getopt(args,
                 config.passThrough,
-                "render-backend", "The rendering backend to use.", &properties.renderBackend,
-                "audio-backend", "The audio backend to use.", &properties.audioBackend,
+                "graphics-backend", "The graphics backend to use.", &properties.graphicsBackendProperties.backend,
+                "audio-backend", "The audio backend to use.", &properties.audioBackendProperties.backend,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
                 "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
@@ -275,8 +272,8 @@ private static:
                 writeln("All arguments not understood by the engine are passed through to the game.");
                 writeln("------------------------------------------");
                 writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
-                writefln("Available rendering backends: %(%s, %)", [EnumMembers!RenderBackend]);
-                writefln("Available audio backends: %(%s, %)", [EnumMembers!AudioBackend]);
+                writefln("Available rendering backends: %(%s, %)", [EnumMembers!(GraphicsBackendProperties.Backend)]);
+                writefln("Available audio backends: %(%s, %)", [EnumMembers!(AudioBackendProperties.Backend)]);
                 exit(0);
             }
         }
@@ -293,7 +290,7 @@ private static:
         import zyeware.rendering.vulkan.impl;
         import zyeware.audio.openal.impl;
         
-        switch (properties.renderBackend) with (RenderBackend)
+        switch (properties.graphicsBackendProperties.backend) with (GraphicsBackendProperties.Backend)
         {
         case openGl:
             version (ZW_OpenGL)
@@ -313,7 +310,7 @@ private static:
             else throw new CoreException("ZyeWare has not been compiled with Vulkan support.");
         }
 
-        switch (properties.audioBackend) with (AudioBackend)
+        switch (properties.audioBackendProperties.backend) with (AudioBackendProperties.Backend)
         {
         case openAl:
         default:
@@ -359,20 +356,24 @@ package(zyeware.core) static:
         }
 
         GraphicsAPI.loadLibraries();
-        
+
         // Creates a new window and render context.
         sMainWindow = Window.create(properties.mainWindowProperties);
         enforce!CoreException(sMainWindow, "Main window creation failed.");
-        createFramebuffer();
 
         // Initialize all other sub-systems.
         VFS.initialize();
         AssetManager.initialize();
+
+        GraphicsAPI.initialize();
         AudioAPI.initialize();
         AudioThread.initialize();
-        GraphicsAPI.initialize();
+
         Renderer2D.initialize();
         Renderer3D.initialize();
+
+        // Create the rendering framebuffer.
+        createFramebuffer();
 
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
