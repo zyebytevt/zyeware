@@ -10,6 +10,7 @@ import bindbc.sdl;
 import erupted;
 
 import zyeware.common;
+import zyeware.rendering.vulkan.api;
 
 void apiInitCreateInstance(VkInstance* instance)
 {
@@ -87,10 +88,128 @@ void apiInitSetupDebugMessenger(VkInstance instance, VkDebugUtilsMessengerEXT* m
 
 void apiInitPickPhysicalDevice(VkInstance instance, VkPhysicalDevice* physicalDevice)
 {
+    uint deviceCount;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, null);
 
+    enforce!GraphicsException(deviceCount > 0, "Failed to find any Vulkan devices!");
+
+    auto devices = new VkPhysicalDevice[deviceCount];
+    vkEnumeratePhysicalDevices(instance, &deviceCount, &devices[0]);
+
+    int highestScore;
+    VkPhysicalDevice highestDevice;
+
+    foreach (ref VkPhysicalDevice device; devices)
+    {
+        int score = apiGetDeviceSuitabilityScore(device);
+
+        if (score > highestScore)
+        {
+            highestScore = score;
+            highestDevice = device;
+        }
+    }
+
+    enforce!GraphicsException(highestDevice, "Failed to find a suitable Vulkan device!");
+
+    *physicalDevice = highestDevice;
+}
+
+void apiCreateLogicalDevice(VkPhysicalDevice physicalDevice, VkLogicalDevice* device, ref Queues queues, VkSurfaceKHR surface)
+{
+    QueueFamilyIndices indices = apiFindQueueFamilies(physicalDevice, surface);
+
+    float queuePriority = 1f;
+    VkDeviceQueueCreateInfo[] queueFamilyCreateInfos;
+
+    foreach (uint queueFamily; indices.uniqueIndices)
+    {
+        VkDeviceQueueCreateInfo info = {
+            sType: VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            queueFamilyIndex: queueFamily,
+            queueCount: 1,
+            pQueuePriorities: &queuePriority
+        };
+
+        queueFamilyCreateInfos ~= info;
+    }
+
+    // Leave this empty for now according to the tutorial...
+    VkPhysicalDeviceFeatures deviceFeatures;
+
+    VkDeviceCreateInfo createInfo = {
+        sType: VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        pQueueCreateInfos: &queueFamilyCreateInfos[0],
+        queueCreateInfoCount: cast(uint) queueFamilyCreateInfos.length,
+        pEnabledFeatures = &deviceFeatures
+    };
+
+    // I'll leave validation layers and extensions out for now...
+    enforce!GraphicsException(vkCreateDevice(physicalDevice, &createInfo, null, device) == VK_SUCCESS,
+        "Failed to create a logical device!");
+
+    vkGetDeviceQueue(device, indices.graphicsFamily.value, 0, &queues.graphicsQueue);
+    vkGetDeviceQueue(device, indices.presentFamily.value, 0, &queues.presentQueue);
+}
+
+void apiCreateSurface(VkInstance instance, VkSurfaceKHR* surface)
+{
+    enforce(ZyeWare.mainWindow, "Cannot create Vulkan surface without SDL main window!");
+    SDL_Vulkan_CreateSurface(cast(SDL_Window*) ZyeWare.mainWindow.nativeWindow, instance, surface);
+}
+
+void apiFindQueueFamilies(VkPhysicalDevice device, ref QueueFamilyIndices indices, VkSurfaceKHR surface)
+{
+    uint queueFamilyCount;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, null);
+
+    auto queueFamilies = new VkQueueFamilyProperties[queueFamilyCount];
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, &queueFamilies[0]);
+
+    int i;
+    foreach (const ref VkQueueFamilyProperties queueFamily; queueFamilies)
+    {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            indices.graphicsFamily = i;
+
+        bool presentSupport;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+
+        if (presentSupport)
+            indices.presentFamily = i;
+
+        if (indices.isComplete())
+            break;
+
+        ++i;
+    }
 }
 
 private:
+
+int apiGetDeviceSuitabilityScore(VkPhysicalDevice device)
+{
+    int score;
+
+    QueueFamilyIndices indices;
+    apiFindQueueFamilies(device, indices);
+
+    if (indices.graphicsFamily.isNull())
+        return 0;
+
+    VkPhysicalDeviceProperties props;
+    VkPhysicalDeviceFeatures features;
+
+    vkGetPhysicalDeviceProperties(device, &props);
+    vkGetPhysicalDeviceFeatures(device, &features);
+
+    if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+        score += 1000;
+
+    score += props.limits.maxImageDimension2D;
+    
+    return score;
+}
 
 extern(C) uint vkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* callbackData,

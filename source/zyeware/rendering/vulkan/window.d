@@ -20,9 +20,6 @@ import zyeware.rendering.vulkan.utils;
 
 class VulkanWindow : Window
 {
-private:
-    static size_t sWindowCount = 0;
-
 protected:
     string mTitle;
     Vector2i mSize;
@@ -39,6 +36,8 @@ protected:
     SDL_Window* mHandle;
     ubyte[] mKeyboardState;
     SDL_GameController*[32] mGamepads;
+
+    VkSurfaceKHR mSurface;
 
     final void addGamepad(size_t joyIdx) nothrow
     {
@@ -140,8 +139,6 @@ package(zyeware.rendering.vulkan):
             mSize = Vector2i(width, height);
             mPosition = Vector2i(x, y);
         }
-
-        ++sWindowCount;
     }
 
 public:
@@ -154,8 +151,6 @@ public:
 
         foreach (SDL_Cursor* cursor; mSDLCursors.values)
             SDL_FreeCursor(cursor);
-
-        --sWindowCount;
     }
 
     void update()

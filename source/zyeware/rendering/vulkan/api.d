@@ -5,6 +5,7 @@ package (zyeware.rendering.vulkan):
 
 import std.exception : enforce;
 import std.string : format, fromStringz;
+import std.typecons : Nullable;
 import core.memory : GC;
 
 import bindbc.sdl;
@@ -19,15 +20,48 @@ import zyeware.rendering.vulkan.init;
 
 // TODO: Can initialize and loadLibraries be combined?
 
+struct QueueFamilyIndices
+{
+    Nullable!uint graphicsFamily;
+    Nullable!uint presentFamily;
+
+    bool isComplete()
+    {
+        return !graphicsFamily.isNull() && !presentFamily.isNull();
+    }
+
+    auto uniqueIndices()
+    {
+        import std.algorithm : uniq;
+
+        assert(isComplete, "Cannot get unique indices from incomplete QueueFamilyIndices.");
+
+        return [graphicsFamily.value, presentFamily.value].uniq;
+    }
+}
+
+struct Queues
+{
+    VkQueue graphicsQueue;
+    VkQueue presentQueue;
+}
+
 VkInstance pVkInstance;
 VkDebugUtilsMessengerEXT pDebugMessenger;
 VkPhysicalDevice pPhysicalDevice;
+VkDevice pDevice;
+
+Queues pQueues;
+
+VkSurfaceKHR pSurface;
 
 void apiInitialize()
 {
     apiInitCreateInstance(&pVkInstance);
     apiInitSetupDebugMessenger(pVkInstance, &pDebugMessenger);
     apiInitPickPhysicalDevice(pVkInstance, &pPhysicalDevice);
+    apiCreateSurface(pVkInstance, &pSurface);
+    apiCreateLogicalDevice(pPhysicalDevice, &pDevice, pQueues, pSurface);
 }
 
 void apiLoadLibraries()
@@ -52,6 +86,8 @@ void apiCleanup()
     if (pDebugMessenger)
         vkDestroyDebugUtilsMessengerEXT(pVkInstance, pDebugMessenger, null);
     
+    vkDestroyDevice(pDevice, null);
+    vkDestroySurfaceKHR(pVkInstance, pSurface, null);
     vkDestroyInstance(pVkInstance, null);
 }
 
