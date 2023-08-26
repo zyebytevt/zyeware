@@ -19,34 +19,34 @@ import zyeware.rendering;
 
 void loadOpenGLBackend()
 {
-    // ===== RenderAPI =====
-    RenderAPI.sInitializeImpl = &apiInitialize;
-    RenderAPI.sLoadLibrariesImpl = &apiLoadLibraries;
-    RenderAPI.sCleanupImpl = &apiCleanup;
+    // ===== GraphicsAPI =====
+    GraphicsAPI.sInitializeImpl = &apiInitialize;
+    GraphicsAPI.sLoadLibrariesImpl = &apiLoadLibraries;
+    GraphicsAPI.sCleanupImpl = &apiCleanup;
 
-    RenderAPI.sSetClearColorImpl = &apiSetClearColor;
-    RenderAPI.sClearImpl = &apiClear;
-    RenderAPI.sSetViewportImpl = &apiSetViewport;
-    RenderAPI.sDrawIndexedImpl = &apiDrawIndexed;
-    RenderAPI.sPackLightConstantBufferImpl = &apiPackLightConstantBuffer;
-    RenderAPI.sGetFlagImpl = &apiGetFlag;
-    RenderAPI.sSetFlagImpl = &apiSetFlag;
-    RenderAPI.sGetCapabilityImpl = &apiGetCapability;
+    GraphicsAPI.sSetClearColorImpl = &apiSetClearColor;
+    GraphicsAPI.sClearImpl = &apiClear;
+    GraphicsAPI.sSetViewportImpl = &apiSetViewport;
+    GraphicsAPI.sDrawIndexedImpl = &apiDrawIndexed;
+    GraphicsAPI.sPackLightConstantBufferImpl = &apiPackLightConstantBuffer;
+    GraphicsAPI.sGetFlagImpl = &apiGetFlag;
+    GraphicsAPI.sSetFlagImpl = &apiSetFlag;
+    GraphicsAPI.sGetCapabilityImpl = &apiGetCapability;
 
-    RenderAPI.sCreateBufferGroupImpl = () => new OGLBufferGroup();
-    RenderAPI.sCreateDataBufferImpl = (size, layout, dynamic) => new OGLDataBuffer(size, layout, dynamic);
-    RenderAPI.sCreateDataBufferWithDataImpl = (data, layout, dynamic) => new OGLDataBuffer(data, layout, dynamic);
-    RenderAPI.sCreateIndexBufferImpl = (size, dynamic) => new OGLIndexBuffer(size, dynamic);
-    RenderAPI.sCreateIndexBufferWithDataImpl = (indices, dynamic) => new OGLIndexBuffer(indices, dynamic);
-    RenderAPI.sCreateConstantBufferImpl = (layout) => new OGLConstantBuffer(layout);
+    GraphicsAPI.sCreateBufferGroupImpl = () => new OGLBufferGroup();
+    GraphicsAPI.sCreateDataBufferImpl = (size, layout, dynamic) => new OGLDataBuffer(size, layout, dynamic);
+    GraphicsAPI.sCreateDataBufferWithDataImpl = (data, layout, dynamic) => new OGLDataBuffer(data, layout, dynamic);
+    GraphicsAPI.sCreateIndexBufferImpl = (size, dynamic) => new OGLIndexBuffer(size, dynamic);
+    GraphicsAPI.sCreateIndexBufferWithDataImpl = (indices, dynamic) => new OGLIndexBuffer(indices, dynamic);
+    GraphicsAPI.sCreateConstantBufferImpl = (layout) => new OGLConstantBuffer(layout);
 
-    RenderAPI.sCreateFramebufferImpl = (props) => new OGLFramebuffer(props);
-    RenderAPI.sCreateTexture2DImpl = (image, props) => new OGLTexture2D(image, props);
-    RenderAPI.sCreateTextureCubeMapImpl = (images, props) => new OGLTextureCubeMap(images, props);
-    RenderAPI.sCreateWindowImpl = (props) => new OGLWindow(props);
-    RenderAPI.sCreateShaderImpl = () => new OGLShader();
+    GraphicsAPI.sCreateFramebufferImpl = (props) => new OGLFramebuffer(props);
+    GraphicsAPI.sCreateTexture2DImpl = (image, props) => new OGLTexture2D(image, props);
+    GraphicsAPI.sCreateTextureCubeMapImpl = (images, props) => new OGLTextureCubeMap(images, props);
+    GraphicsAPI.sCreateWindowImpl = (props) => new OGLWindow(props);
+    GraphicsAPI.sCreateShaderImpl = () => new OGLShader();
 
-    RenderAPI.sLoadTexture2DImpl = (path) => OGLTexture2D.load(path);
-    RenderAPI.sLoadTextureCubeMapImpl = (path) => OGLTextureCubeMap.load(path);
-    RenderAPI.sLoadShaderImpl = (path) => OGLShader.load(path);
+    GraphicsAPI.sLoadTexture2DImpl = (path) => OGLTexture2D.load(path);
+    GraphicsAPI.sLoadTextureCubeMapImpl = (path) => OGLTextureCubeMap.load(path);
+    GraphicsAPI.sLoadShaderImpl = (path) => OGLShader.load(path);
 }

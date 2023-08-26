@@ -29,7 +29,7 @@ enum RenderCapability
     maxTextureSlots /// How many texture slots are available to use.
 }
 
-struct RenderAPI
+struct GraphicsAPI
 {
     @disable this();
     @disable this(this);

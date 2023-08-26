@@ -123,9 +123,9 @@ public static:
         sMatrixData.setData(sMatrixData.getEntryOffset("viewProjection"),
             (projectionMatrix * viewMatrix).matrix);
 
-        RenderAPI.setFlag(RenderFlag.depthTesting, false);
-        sOldCullingValue = RenderAPI.getFlag(RenderFlag.culling);
-        RenderAPI.setFlag(RenderFlag.culling, false);
+        GraphicsAPI.setFlag(RenderFlag.depthTesting, false);
+        sOldCullingValue = GraphicsAPI.getFlag(RenderFlag.culling);
+        GraphicsAPI.setFlag(RenderFlag.culling, false);
 
         debug pCurrentRenderer = CurrentRenderer.renderer2D;
     }
@@ -139,7 +139,7 @@ public static:
 
         flush();
 
-        RenderAPI.setFlag(RenderFlag.culling, sOldCullingValue);
+        GraphicsAPI.setFlag(RenderFlag.culling, sOldCullingValue);
 
         debug pCurrentRenderer = CurrentRenderer.none;
     }
@@ -162,7 +162,7 @@ public static:
         for (int i = 0; i < sNextFreeTexture; ++i)
             sBatchTextures[i].bind(i);
         
-        RenderAPI.drawIndexed(sCurrentQuad * 6);
+        GraphicsAPI.drawIndexed(sCurrentQuad * 6);
 
         sCurrentQuad = 0;
         sNextFreeTexture = 1;

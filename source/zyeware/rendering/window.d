@@ -61,6 +61,6 @@ interface Window
 
     static Window create(in WindowProperties properties)
     {
-        return RenderAPI.sCreateWindowImpl(properties);
+        return GraphicsAPI.sCreateWindowImpl(properties);
     }
 }

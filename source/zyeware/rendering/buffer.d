@@ -172,7 +172,7 @@ interface BufferGroup
 
     static BufferGroup create()
     {
-        return RenderAPI.sCreateBufferGroupImpl();
+        return GraphicsAPI.sCreateBufferGroupImpl();
     }
 }
 
@@ -189,12 +189,12 @@ interface DataBuffer
 
     static DataBuffer create(size_t size, BufferLayout layout, Flag!"dynamic" dynamic)
     {
-        return RenderAPI.sCreateDataBufferImpl(size, layout, dynamic);
+        return GraphicsAPI.sCreateDataBufferImpl(size, layout, dynamic);
     }
 
     static DataBuffer create(const void[] data, BufferLayout layout, Flag!"dynamic" dynamic)
     {
-        return RenderAPI.sCreateDataBufferWithDataImpl(data, layout, dynamic);
+        return GraphicsAPI.sCreateDataBufferWithDataImpl(data, layout, dynamic);
     }
 }
 
@@ -208,12 +208,12 @@ interface IndexBuffer
 
     static IndexBuffer create(size_t size, Flag!"dynamic" dynamic)
     {
-        return RenderAPI.sCreateIndexBufferImpl(size, dynamic);
+        return GraphicsAPI.sCreateIndexBufferImpl(size, dynamic);
     }
 
     static IndexBuffer create(const uint[] indices, Flag!"dynamic" dynamic)
     {
-        return RenderAPI.sCreateIndexBufferWithDataImpl(indices, dynamic);
+        return GraphicsAPI.sCreateIndexBufferWithDataImpl(indices, dynamic);
     }
 }
 
@@ -238,6 +238,6 @@ interface ConstantBuffer
 
     static ConstantBuffer create(in BufferLayout layout)
     {
-        return RenderAPI.sCreateConstantBufferImpl(layout);
+        return GraphicsAPI.sCreateConstantBufferImpl(layout);
     }
 }

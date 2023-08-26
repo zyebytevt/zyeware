@@ -57,7 +57,7 @@ public:
             }
         }
 
-        RenderAPI.clear();
+        GraphicsAPI.clear();
 
         if (!foundCamera || !environment)
         {

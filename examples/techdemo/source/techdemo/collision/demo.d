@@ -61,7 +61,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        RenderAPI.clear();
+        GraphicsAPI.clear();
 
         auto r = Rect2f(-50, -50, 50, 50);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);

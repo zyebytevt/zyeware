@@ -90,7 +90,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        RenderAPI.clear();
+        GraphicsAPI.clear();
 
         Material material = mCurrentMesh.material;
         if (!material)
