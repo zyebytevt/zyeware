@@ -10,6 +10,7 @@ import std.math : fmod;
 import zyeware.common;
 import zyeware.rendering;
 
+/+
 struct TerrainProperties
 {
     Vector2f size;
@@ -187,4 +188,4 @@ public:
     {
         return mMesh.material;
     }
-}
+}+/

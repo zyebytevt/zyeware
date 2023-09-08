@@ -90,8 +90,7 @@ public:
     {
         VFSFile file = VFS.getFile(path);
 
-        ubyte[] data = new ubyte[file.size];
-        file.read(data);
+        ubyte[] data = file.readAll!(ubyte[]);
         file.close();
 
         return load(data);

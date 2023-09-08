@@ -8,6 +8,8 @@ module zyeware.rendering.api;
 import zyeware.common;
 import zyeware.rendering;
 
+alias RID = uint;
+
 /// Used for selecting a rendering backend at the start of the engine.
 enum RenderBackend
 {
@@ -29,6 +31,23 @@ enum RenderCapability
     maxTextureSlots /// How many texture slots are available to use.
 }
 
+interface GraphicsAPI
+{
+    void initialize();
+    void cleanup();
+
+    void addRef(RID rid) nothrow;
+    void release(RID rid) nothrow;
+
+    void drawIndexed(size_t count) nothrow;
+
+    RID createMesh(in Vertex3D[] vertices, in uint[] indices);
+    RID createTexture2D(in Image image, in TextureProperties properties);
+    RID createTextureCubeMap(in Image[6] images, in TextureProperties properties);
+    RID createFramebuffer(in FramebufferProperties properties);
+}
+
+/+
 struct GraphicsAPI
 {
     @disable this();
@@ -163,4 +182,4 @@ public static:
     {
         return sGetCapabilityImpl(capability);
     }
-}
+}+/

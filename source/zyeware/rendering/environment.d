@@ -8,13 +8,8 @@ module zyeware.rendering.environment;
 import zyeware.common;
 import zyeware.rendering;
 
-abstract class Environment
+struct Environment3D
 {
-}
-
-class Environment3D : Environment
-{
-public:
     Renderable sky;
     Color fogColor = Color(0, 0, 0, 0.02);
     Color ambientColor = Color(0.5, 0.5, 0.5, 1);

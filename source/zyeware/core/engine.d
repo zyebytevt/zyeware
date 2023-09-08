@@ -25,6 +25,7 @@ import zyeware.audio.thread;
 import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
+import zyeware.rendering.graphics;
 
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
@@ -400,6 +401,9 @@ package(zyeware.core) static:
 public static:
     /// The current version of the engine.
     immutable Version engineVersion = Version(0, 5, 0, "alpha");
+
+    /// TODO: The currently active graphics?
+    Graphics graphics;
 
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode

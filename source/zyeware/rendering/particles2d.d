@@ -13,6 +13,7 @@ import std.string : format;
 import zyeware.common;
 import zyeware.rendering;
 
+/+
 alias ParticleRegistrationID = size_t;
 
 class Particles2D
@@ -192,4 +193,4 @@ private struct ParticleContainer
 
         --activeParticlesCount;
     }
-}
+}+/

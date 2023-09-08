@@ -15,6 +15,31 @@ struct FramebufferProperties
     bool swapChainTarget;
 }
 
+class Framebuffer : Renderable
+{
+protected:
+    RID mRid;
+    FramebufferProperties mProperties;
+
+public:
+    this(in FramebufferProperties properties)
+    {
+        mProperties = properties;
+        mRid = ZyeWare.graphics.api.createFramebuffer(mProperties);
+    }
+
+    ~this()
+    {
+        ZyeWare.graphics.api.release(mRid);
+    }
+
+    const(FramebufferProperties) properties() pure const nothrow
+    {
+        return mRid;
+    }
+}
+
+/+
 interface Framebuffer
 {
 public:
@@ -32,4 +57,4 @@ public:
     {
         return GraphicsAPI.sCreateFramebufferImpl(properties);
     }
-}
+}+/

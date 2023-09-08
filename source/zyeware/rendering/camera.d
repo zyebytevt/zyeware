@@ -34,19 +34,12 @@ protected:
     Matrix4f mProjectionMatrix;
 
 public:
-    /// Params:
-    ///   left = 
-    ///   right = 
-    ///   bottom = 
-    ///   top = 
-    ///   near = 
-    ///   far = 
     this(float left, float right, float bottom, float top, float near = -1f, float far = 1f) pure nothrow
     {
         setData(left, right, bottom, top, near, far);
     }
 
-    void setData(float left, float right, float bottom, float top, float near = -1f, float far = 1f) pure nothrow
+    final void setData(float left, float right, float bottom, float top, float near = -1f, float far = 1f) pure nothrow
     {
         mProjectionMatrix = Matrix4f.orthographic(left, right, bottom, top, near, far);
     }
@@ -63,12 +56,12 @@ protected:
     Matrix4f mProjectionMatrix;
 
 public:
-    this(float width, float height, float fov, float near, float far)
+    this(float width, float height, float fov, float near = 0.001f, float far = 1000f)
     {
         setData(width, height, fov, near, far);
     }
 
-    void setData(float width, float height, float fov, float near = 0.001f, float far = 1000f) pure nothrow
+    final void setData(float width, float height, float fov, float near = 0.001f, float far = 1000f) pure nothrow
     {
         mProjectionMatrix = Matrix4f.perspective(width, height, fov, near, far);
     }

@@ -30,6 +30,114 @@ struct TextureProperties
     bool generateMipmaps = true;
 }
 
+@asset(Yes.cache)
+class Texture2D : Renderable
+{
+protected:
+    RID mRid;
+    TextureProperties mProperties;
+
+public:
+    this(in Image image, in TextureProperties properties = TextureProperties.init)
+    {
+        mProperties = properties;
+        mRid = ZyeWare.graphics.api.createTexture2D(image, mProperties);
+    }
+
+    ~this()
+    {
+        ZyeWare.graphics.api.release(mRid);
+    }
+
+    const(TextureProperties) properties() pure const nothrow
+    {
+        return mProperties;
+    }
+
+    RID rid() pure const nothrow
+    {
+        return mRid;
+    }
+
+    static Texture2D load(string path)
+    {
+        return new Texture2D(AssetManager.load!Image(path));
+    }
+}
+
+@asset(Yes.cache)
+class TextureCubeMap : Renderable
+{
+protected:
+    RID mRid;
+    TextureProperties mProperties;
+
+public:
+    this(in Image[6] images, in TextureProperties properties = TextureProperties.init)
+    {
+        mProperties = properties;
+        mRid = ZyeWare.graphics.api.createTextureCubeMap(images, properties);
+    }
+
+    ~this()
+    {
+        ZyeWare.graphics.api.release(mRid);
+    }
+
+    const(TextureProperties) properties() pure const nothrow
+    {
+        return mProperties;
+    }
+
+    RID rid() pure const nothrow
+    {
+        return mRid;
+    }
+
+    static TextureCubeMap load(string path)
+    {
+        TextureProperties properties;
+
+        VFSFile file = VFS.getFile(path);
+        scope (exit) file.close();
+        Tag root = parseSource(file.readAll!string);
+
+        Image[6] images = [
+            AssetManager.load!Image(root.expectTagValue!string("positive-x")),
+            AssetManager.load!Image(root.expectTagValue!string("negative-x")),
+            AssetManager.load!Image(root.expectTagValue!string("positive-y")),
+            AssetManager.load!Image(root.expectTagValue!string("negative-y")),
+            AssetManager.load!Image(root.expectTagValue!string("positive-z")),
+            AssetManager.load!Image(root.expectTagValue!string("negative-z")),
+        ];
+
+        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+        {
+            import std.conv : to;
+
+            VFSFile propsFile = VFS.getFile(path ~ ".props");
+            scope (exit) propsFile.close();
+            root = parseSource(propsFile.readAll!string);
+
+            try
+            {
+                properties.minFilter = root.getTagValue!string("min-filter", "nearest").to!(TextureProperties.Filter);
+                properties.magFilter = root.getTagValue!string("mag-filter", "nearest").to!(TextureProperties.Filter);
+                properties.wrapS = root.getTagValue!string("wrap-s", "repeat").to!(TextureProperties.WrapMode);
+                properties.wrapT = root.getTagValue!string("wrap-t", "repeat").to!(TextureProperties.WrapMode);
+            }
+            catch (Exception ex)
+            {
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+            }
+        }
+
+        return new TextureCubeMap(images, properties);
+    }
+}
+
+/+
+
 interface Texture
 {
 public:
@@ -79,4 +187,4 @@ interface TextureCubeMap : Texture
     {
         return GraphicsAPI.sLoadTextureCubeMapImpl(path);
     }
-}
+}+/

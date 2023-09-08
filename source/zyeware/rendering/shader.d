@@ -11,16 +11,15 @@ import zyeware.common;
 import zyeware.rendering;
 
 @asset(Yes.cache)
-interface Shader
+class Shader : Renderable
 {
+protected:
+    RID mRid;
+
 public:
-    void bind() const;
-
-    size_t textureCount() pure const nothrow;
-
-    static Shader create()
+    this()
     {
-        return GraphicsAPI.sCreateShaderImpl();
+        
     }
 
     static Shader load(string path)

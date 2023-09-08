@@ -33,8 +33,9 @@ public:
         import sdlang;
 
         VFSFile propsFile = VFS.getFile(path);
+        scope (exit) propsFile.close();
+        
         Tag root = parseSource(propsFile.readAll!string);
-        propsFile.close();
 
         Tag hotspot = root.expectTag("hotspot");
         if (hotspot.values.length != 2)

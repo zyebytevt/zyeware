@@ -10,6 +10,8 @@ import inmath.linalg;
 import zyeware.common;
 import zyeware.rendering;
 
+/+
+
 /// Represents an element in a tightly-bound data buffer.
 struct BufferElement
 {
@@ -241,3 +243,5 @@ interface ConstantBuffer
         return GraphicsAPI.sCreateConstantBufferImpl(layout);
     }
 }
+
++/

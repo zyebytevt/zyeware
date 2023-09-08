@@ -7,8 +7,10 @@ module zyeware.rendering.renderable;
 
 import zyeware.rendering;
 
+/// Describes an object that can be processed by the rendering subsystem.
 interface Renderable
 {
-    inout(BufferGroup) bufferGroup() pure inout nothrow;
-    inout(Material) material() pure inout nothrow;
+    /// Returns the RID of this object. If it has not yet been registered
+    /// by the rendering subsystem, it will do so before returning.
+    RID rid() pure const nothrow;
 }
