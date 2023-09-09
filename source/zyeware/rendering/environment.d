@@ -10,7 +10,7 @@ import zyeware.rendering;
 
 struct Environment3D
 {
-    Renderable sky;
+    Mesh3D sky;
     Color fogColor = Color(0, 0, 0, 0.02);
     Color ambientColor = Color(0.5, 0.5, 0.5, 1);
 }

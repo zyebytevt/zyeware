@@ -31,7 +31,7 @@ struct TextureProperties
 }
 
 @asset(Yes.cache)
-class Texture2D : Renderable
+class Texture2D
 {
 protected:
     RID mRid;
@@ -46,7 +46,7 @@ public:
 
     ~this()
     {
-        ZyeWare.graphics.api.release(mRid);
+        ZyeWare.graphics.api.free(mRid);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -66,7 +66,7 @@ public:
 }
 
 @asset(Yes.cache)
-class TextureCubeMap : Renderable
+class TextureCubeMap
 {
 protected:
     RID mRid;
@@ -81,7 +81,7 @@ public:
 
     ~this()
     {
-        ZyeWare.graphics.api.release(mRid);
+        ZyeWare.graphics.api.free(mRid);
     }
 
     const(TextureProperties) properties() pure const nothrow

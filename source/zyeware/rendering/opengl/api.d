@@ -9,6 +9,7 @@ version (ZW_OpenGL):
 package(zyeware.rendering.opengl):
 
 import std.typecons : Tuple;
+import std.string : format;
 
 import bindbc.opengl;
 
@@ -36,6 +37,7 @@ else
     }
 }
 
+pragma(inline, true)
 void glErrorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const(char)* message, void* userParam) nothrow
 {
@@ -94,38 +96,68 @@ final class OpenGLAPI : GraphicsAPI
 protected:
     alias MeshData = Tuple!(uint, "vao", uint, "vbo", uint, "ebo");
 
-    enum RIDType
+    enum RIDCategory : ushort
     {
         texture,
-        mesh
+        mesh,
+        framebuffer,
+        shader
     }
 
     bool[RenderFlag] mFlagValues;
-    
-    size_t[RID] mRefCount;
-    RIDType[RID] mRidType;
-    RID mNextRID;
-    
-    uint[RID] mTextureIDs;
-    MeshData[RID] mMeshData;
+    ushort[ushort] mNextRID;
+
+    uint[ushort] mTextureIDs;
+    MeshData[ushort] mMeshData;
+    uint[ushort] mFramebufferIDs;
+    uint[ushort] mShaderIDs;
 
     pragma(inline, true)
-    RID getNextRID() pure nothrow
+    ushort getNextRID(ushort category) pure nothrow
     {
-        return mNextRID++;
+        ushort* nextId = category in mNextRID;
+        
+        return RID(category, nextId ? (*nextId)++ : (mNextRID[category] = 0));
     }
 
 public:
     void initialize()
     {
+        import loader = bindbc.loader.sharedlib;
+        import std.string : fromStringz;
+
+        if (isOpenGLLoaded())
+            return;
+
+        immutable glResult = loadOpenGL();
+        
+        if (glResult != glSupport)
+        {
+            foreach (info; loader.errors)
+                Logger.core.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
+
+            switch (glResult)
+            {
+            case GLSupport.noLibrary:
+                throw new GraphicsException("Could not find OpenGL shared library.");
+
+            case GLSupport.badLibrary:
+                throw new GraphicsException("Provided OpenGL shared is corrupted.");
+
+            case GLSupport.noContext:
+                throw new GraphicsException("No OpenGL context available.");
+
+            default:
+                Logger.core.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
+            }
+        }
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glFrontFace(GL_CCW);
-        
-        //glAlphaFunc(GL_GREATER, 0);
 
         glDepthFunc(GL_LEQUAL);
         
@@ -154,53 +186,60 @@ public:
 
     void cleanup()
     {
+        foreach (uint id; mTextureIDs.values)
+            glDeleteTextures(1, &id);
 
-    }
-
-    void addRef(RID rid) nothrow
-    {
-        if (rid in mRefCount)
-            mRefCount[rid]++;
-        else
-            mRefCount[rid] = 1;
-    }
-
-    void release(RID rid) nothrow
-    {
-        if (rid !in mRefCount)
-            return;
-
-        if (--mRefCount[rid] == 0)
+        foreach (ref MeshData data; mMeshData.values)
         {
-            final switch (mRidType[rid]) with (RIDType)
-            {
-            case texture:
-                immutable uint id = mTextureIDs[rid];
-                glDeleteTextures(1, &id);
-                mTextureIDs.remove(rid);
-                break;
+            glDeleteBuffers(1, &data.vbo);
+            glDeleteBuffers(1, &data.ebo);
+            glDeleteVertexArrays(1, &data.vao);
+        }
 
-            case mesh:
-                immutable MeshData data = mMeshData[rid];
+        foreach (uint id; mFramebufferIDs.values)
+            glDeleteFramebuffers(1, &id);
+
+        foreach (uint id; mShaderIDs.values)
+            glDeleteProgram(id);
+    }
+
+    void free(RID rid) nothrow
+    {
+        final switch (rid.category) with (RIDType)
+        {
+        case texture:
+            if (uint* id = rid.id in mTextureIDs)
+            {
+                glDeleteTextures(1, id);
+                mTextureIDs.remove(rid);
+            }
+            break;
+
+        case mesh:
+            if (MeshData* data = rid.id in mMeshData)
+            {
                 glDeleteBuffers(1, &data.vbo);
                 glDeleteBuffers(1, &data.ebo);
                 glDeleteVertexArrays(1, &data.vao);
                 mMeshData.remove(rid);
-                break;
             }
-            
-            mRidType.remove(rid);
-        }
-    }
+            break;
 
-    void drawIndexed(size_t count)
-    {
-        glDrawElements(GL_TRIANGLES, cast(int) count, GL_UNSIGNED_INT, null);
-    
-        version (ZW_Profiling)
-        {
-            ++Profiler.currentWriteData.renderData.drawCalls;
-            Profiler.currentWriteData.renderData.polygonCount += count / 3;
+        case framebuffer:
+            if (uint* id = rid.id in mFramebufferIDs)
+            {
+                glDeleteFramebuffers(1, id);
+                mFramebufferIDs.remove(rid);
+            }
+            break;
+
+        case shader:
+            if (uint* id = rid.id in mShaderIDs)
+            {
+                glDeleteProgram(*id);
+                mShaderIDs.remove(rid);
+            }
+            break;
         }
     }
 
@@ -239,10 +278,8 @@ public:
 
         glBindVertexArray(0);
 
-        immutable RID rid = getNextRID();
+        immutable RID rid = getNextRID(RIDCategory.mesh);
         mMeshData[rid] = data;
-        mRidType[rid] = RIDType.mesh;
-        addRef(rid);
 
         return rid;
     }
@@ -292,10 +329,8 @@ public:
         if (properties.generateMipmaps)
             glGenerateMipmap(GL_TEXTURE_2D);
 
-        immutable RID rid = getNextRID();
-        mTextureIDs[rid] = id;
-        mRidType[rid] = RIDType.texture;
-        addRef(rid);
+        immutable RID rid = getNextRID(RIDCategory.texture);
+        mTextureIDs[rid.id] = id;
 
         return rid;
     }
@@ -344,12 +379,181 @@ public:
         if (properties.generateMipmaps)
             glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-        immutable RID rid = getNextRID();
-        mTextureIDs[rid] = id;
-        mRidType[rid] = RIDType.texture;
-        addRef(rid);
+        immutable RID rid = getNextRID(RIDCategory.texture);
+        mTextureIDs[rid.id] = id;
 
         return rid;
+    }
+
+    RID createFramebuffer(in FramebufferProperties properties)
+    {
+        uint id;
+
+        glGenFramebuffers(1, &id);
+        glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+        uint textureID;
+
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, properties.size.x, properties.size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+
+        uint rbo;
+
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, properties.size.x, properties.size.y);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+        assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        immutable RID rid = getNextRID(RIDCategory.framebuffer);
+        mFramebufferIDs[rid.id] = id;
+
+        return rid;
+    }
+
+    RID createShader(in ShaderProperties properties)
+    {
+        immutable uint programID = glCreateProgram();
+
+        foreach (ShaderProperties.ShaderType type, string source; properties.sources)
+        {
+            GLenum shaderType;
+
+            final switch (type) with (ShaderProperties.ShaderType)
+            {
+            case vertex:
+                shaderType = GL_VERTEX_SHADER;
+                break;
+
+            case fragment:
+                shaderType = GL_FRAGMENT_SHADER;
+                break;
+
+            case geometry:
+                shaderType = GL_GEOMETRY_SHADER;
+                break;
+
+            case compute:
+                shaderType = GL_COMPUTE_SHADER;
+                break;
+            }
+
+            uint shaderID = glCreateShader(shaderType);
+
+            const char* sourcePtr = cast(char*) source.ptr;
+
+            glShaderSource(shaderID, 1, &sourcePtr, null);
+            glCompileShader(shaderID);
+
+            int success;
+            glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
+
+            if (!success)
+            {
+                char[2048] infoLog;
+                GLsizei length;
+                glGetShaderInfoLog(shaderID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+                throw new GraphicsException(format!"Shader compilation failed: %s"(infoLog[0..length]));
+            }
+
+            glAttachShader(programID, shaderID);
+            glDeleteShader(shaderID);
+        }
+
+        glLinkProgram(programID);
+
+        int success;
+        glGetProgramiv(programID, GL_LINK_STATUS, &success);
+
+        if (!success)
+        {
+            char[2048] infoLog;
+            GLsizei length;
+            glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+            throw new GraphicsException(format!"Shader linking failed: %s"(infoLog[0..length]));
+        }
+
+        glValidateProgram(programID);
+        glGetProgramiv(programID, GL_VALIDATE_STATUS, &success);
+
+        if (!success)
+        {
+            char[2048] infoLog;
+            GLsizei length;
+            glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+            throw new GraphicsException(format!"Shader validation failed: %s"(infoLog[0..length]));
+        }
+
+        immutable RID rid = getNextRID(RIDCategory.shader);
+        mShaderIDs[rid.id] = programID;
+
+        return rid;
+    }
+
+    void setRenderFlag(RenderFlag flag, bool value) nothrow
+    {
+        if (mFlagValues[flag] == value)
+            return;
+
+        final switch (flag) with (RenderFlag)
+        {
+        case depthTesting:
+            if (value)
+                glEnable(GL_DEPTH_TEST);
+            else
+                glDisable(GL_DEPTH_TEST);
+            break;
+
+        case depthBufferWriting:
+            glDepthMask(value);
+            break;
+
+        case culling:
+            if (value)
+                glEnable(GL_CULL_FACE);
+            else
+                glDisable(GL_CULL_FACE);
+            break;
+
+        case stencilTesting:
+            if (value)
+                glEnable(GL_STENCIL_TEST);
+            else
+                glDisable(GL_STENCIL_TEST);
+            break;
+
+        case wireframe:
+            glPolygonMode(GL_FRONT_AND_BACK, value ? GL_LINE : GL_FILL);
+            break;
+        }
+
+        mFlagValues[flag] = value;
+    }
+
+    bool getRenderFlag(RenderFlag flag) nothrow
+    {
+        return mFlagValues[flag];
+    }
+
+    size_t getCapability(RenderCapability capability) nothrow
+    {
+        final switch (capability) with (RenderCapability)
+        {
+        case maxTextureSlots:
+            GLint result;
+            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
+            return result;
+        }
     }
 }
 
@@ -383,145 +587,3 @@ GLuint getGLWrapMode(TextureProperties.WrapMode wrapMode)
 
     return glWrapMode[wrapMode];
 }
-
-/+
-void apiInitialize()
-{
-    
-}
-
-void apiLoadLibraries()
-{
-    import loader = bindbc.loader.sharedlib;
-    import std.string : fromStringz;
-
-    if (isOpenGLLoaded())
-        return;
-
-    immutable glResult = loadOpenGL();
-    
-    if (glResult != glSupport)
-    {
-        foreach (info; loader.errors)
-            Logger.core.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
-
-        switch (glResult)
-        {
-        case GLSupport.noLibrary:
-            throw new GraphicsException("Could not find OpenGL shared library.");
-
-        case GLSupport.badLibrary:
-            throw new GraphicsException("Provided OpenGL shared is corrupted.");
-
-        case GLSupport.noContext:
-            throw new GraphicsException("No OpenGL context available.");
-
-        default:
-            Logger.core.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
-        }
-    }
-}
-
-void apiCleanup()
-{
-}
-
-void apiSetClearColor(in Color value) nothrow
-{
-    glClearColor(value.r, value.g, value.b, value.a);
-}
-
-void apiClear() nothrow
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void apiSetViewport(int x, int y, uint width, uint height) nothrow
-{
-    glViewport(x, y, cast(GLsizei) width, cast(GLsizei) height);
-}
-
-void apiDrawIndexed(size_t count) nothrow
-{
-    glDrawElements(GL_TRIANGLES, cast(int) count, GL_UNSIGNED_INT, null);
-    
-    version (ZW_Profiling)
-    {
-        ++Profiler.currentWriteData.renderData.drawCalls;
-        Profiler.currentWriteData.renderData.polygonCount += count / 3;
-    }
-}
-
-void apiPackLightConstantBuffer(ref ConstantBuffer buffer, in Renderer3D.Light[] lights) nothrow
-{
-    Vector4f[10] positions;
-    Vector4f[10] colors;
-    Vector4f[10] attenuations;
-
-    for (size_t i; i < lights.length; ++i)
-    {
-        positions[i] = Vector4f(lights[i].position, 0);
-        colors[i] = lights[i].color;
-        attenuations[i] = Vector4f(lights[i].attenuation, 0);
-    }
-
-    buffer.setData(buffer.getEntryOffset("position"), positions);
-    buffer.setData(buffer.getEntryOffset("color"), colors);
-    buffer.setData(buffer.getEntryOffset("attenuation"), attenuations);
-}
-
-bool apiGetFlag(RenderFlag flag) nothrow
-{
-    return pFlagValues[flag];
-}
-
-void apiSetFlag(RenderFlag flag, bool value) nothrow
-{
-    if (pFlagValues[flag] == value)
-        return;
-
-    final switch (flag) with (RenderFlag)
-    {
-    case depthTesting:
-        if (value)
-            glEnable(GL_DEPTH_TEST);
-        else
-            glDisable(GL_DEPTH_TEST);
-        break;
-
-    case depthBufferWriting:
-        glDepthMask(value);
-        break;
-
-    case culling:
-        if (value)
-            glEnable(GL_CULL_FACE);
-        else
-            glDisable(GL_CULL_FACE);
-        break;
-
-    case stencilTesting:
-        if (value)
-            glEnable(GL_STENCIL_TEST);
-        else
-            glDisable(GL_STENCIL_TEST);
-        break;
-
-    case wireframe:
-        glPolygonMode(GL_FRONT_AND_BACK, value ? GL_LINE : GL_FILL);
-        break;
-    }
-
-    pFlagValues[flag] = value;
-}
-
-size_t apiGetCapability(RenderCapability capability) nothrow
-{
-    final switch (capability) with (RenderCapability)
-    {
-    case maxTextureSlots:
-        GLint result;
-        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
-        return result;
-    }
-}+/

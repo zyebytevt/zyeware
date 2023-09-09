@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.mesh;
+module zyeware.rendering.mesh3d;
 
 import std.string : format;
 import std.path : extension;
@@ -16,7 +16,7 @@ import zyeware.rendering;
 import zyeware.rendering.vertex;
 
 @asset(Yes.cache)
-class Mesh3D : Renderable
+class Mesh3D
 {
 protected:
     RID mRid;
@@ -68,7 +68,7 @@ public:
 
     ~this()
     {
-        ZyeWare.graphics.api.release(mRid);
+        ZyeWare.graphics.api.free(mRid);
     }
 
     RID rid() pure const nothrow

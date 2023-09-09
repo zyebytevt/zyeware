@@ -8,6 +8,8 @@ module zyeware.rendering.sky;
 import zyeware.common;
 import zyeware.rendering;
 
+/+
+
 class Skybox : Renderable
 {
 protected:
@@ -61,4 +63,4 @@ public:
     {
         return mMaterial;
     }
-}
+}+/

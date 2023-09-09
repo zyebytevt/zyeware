@@ -15,7 +15,7 @@ struct FramebufferProperties
     bool swapChainTarget;
 }
 
-class Framebuffer : Renderable
+class Framebuffer
 {
 protected:
     RID mRid;
@@ -30,7 +30,7 @@ public:
 
     ~this()
     {
-        ZyeWare.graphics.api.release(mRid);
+        ZyeWare.graphics.api.free(mRid);
     }
 
     const(FramebufferProperties) properties() pure const nothrow
@@ -38,23 +38,3 @@ public:
         return mRid;
     }
 }
-
-/+
-interface Framebuffer
-{
-public:
-    void bind() const;
-    void unbind() const;
-    void invalidate();
-
-    const(FramebufferProperties) properties() pure const nothrow;
-    void properties(FramebufferProperties value) nothrow;
-
-    const(Texture2D) colorAttachment() const nothrow;
-    const(Texture2D) depthAttachment() const nothrow;
-
-    static Framebuffer create(in FramebufferProperties properties)
-    {
-        return GraphicsAPI.sCreateFramebufferImpl(properties);
-    }
-}+/
