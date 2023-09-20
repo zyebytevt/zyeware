@@ -18,6 +18,8 @@ import zyeware.rendering;
 
 interface Renderer2D
 {
+    void initialize();
+    void cleanup();
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix);
     void endScene();
     void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),

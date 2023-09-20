@@ -49,6 +49,8 @@ interface GraphicsAPI
     RID createFramebuffer(in FramebufferProperties properties);
     RID createShader(in ShaderProperties properties);
 
+    void setViewport(Rect2i region) nothrow;
+
     void setRenderFlag(RenderFlag flag, bool value) nothrow;
     bool getRenderFlag(RenderFlag flag) nothrow;
 

@@ -120,6 +120,32 @@ protected:
         return RID(category, nextId ? (*nextId)++ : (mNextRID[category] = 0));
     }
 
+    pragma(inline, true)
+    void freeTexture(uint id) nothrow
+    {
+        glDeleteTextures(1, &id);
+    }
+
+    pragma(inline, true)
+    void freeMesh(ref MeshData data) nothrow
+    {
+        glDeleteBuffers(1, &data.vbo);
+        glDeleteBuffers(1, &data.ebo);
+        glDeleteVertexArrays(1, &data.vao);
+    }
+
+    pragma(inline, true)
+    void freeFramebuffer(uint id) nothrow
+    {
+        glDeleteFramebuffers(1, &id);
+    }
+
+    pragma(inline, true)
+    void freeShader(uint id) nothrow
+    {
+        glDeleteProgram(id);
+    }
+
 public:
     void initialize()
     {
@@ -187,20 +213,16 @@ public:
     void cleanup()
     {
         foreach (uint id; mTextureIDs.values)
-            glDeleteTextures(1, &id);
+            freeTexture(id);
 
         foreach (ref MeshData data; mMeshData.values)
-        {
-            glDeleteBuffers(1, &data.vbo);
-            glDeleteBuffers(1, &data.ebo);
-            glDeleteVertexArrays(1, &data.vao);
-        }
+            freeMesh(data);
 
         foreach (uint id; mFramebufferIDs.values)
-            glDeleteFramebuffers(1, &id);
+            freeFramebuffer(id);
 
         foreach (uint id; mShaderIDs.values)
-            glDeleteProgram(id);
+            freeShader(id);
     }
 
     void free(RID rid) nothrow
@@ -208,37 +230,23 @@ public:
         final switch (rid.category) with (RIDType)
         {
         case texture:
-            if (uint* id = rid.id in mTextureIDs)
-            {
-                glDeleteTextures(1, id);
-                mTextureIDs.remove(rid);
-            }
+            freeTexture(mTextureIDs[rid.id]);
+            mTextureIDs.remove(rid);
             break;
 
         case mesh:
-            if (MeshData* data = rid.id in mMeshData)
-            {
-                glDeleteBuffers(1, &data.vbo);
-                glDeleteBuffers(1, &data.ebo);
-                glDeleteVertexArrays(1, &data.vao);
-                mMeshData.remove(rid);
-            }
+            freeMesh(mMeshData[rid.id]);
+            mMeshData.remove(rid);
             break;
 
         case framebuffer:
-            if (uint* id = rid.id in mFramebufferIDs)
-            {
-                glDeleteFramebuffers(1, id);
-                mFramebufferIDs.remove(rid);
-            }
+            freeFramebuffer(mFramebufferIDs[rid.id]);
+            mFramebufferIDs.remove(rid);
             break;
 
         case shader:
-            if (uint* id = rid.id in mShaderIDs)
-            {
-                glDeleteProgram(*id);
-                mShaderIDs.remove(rid);
-            }
+            freeShader(mShaderIDs[rid.id]);
+            mShaderIDs.remove(rid);
             break;
         }
     }
@@ -498,6 +506,11 @@ public:
         mShaderIDs[rid.id] = programID;
 
         return rid;
+    }
+
+    void setViewport(Rect2i region) nothrow
+    {
+        glViewport(region.position.x, region.position.y, region.size.x, region.size.y);
     }
 
     void setRenderFlag(RenderFlag flag, bool value) nothrow
