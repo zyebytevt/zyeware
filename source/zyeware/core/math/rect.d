@@ -17,29 +17,27 @@ struct Rect(T)
 {
     private alias VT = Vector!(T, 2);
 
-    /// The starting point of the rectangle.
-    VT min = VT(0);
-    /// The end point of the rectangle.
-    VT max = VT(0);
+    VT position = VT.zero;
+    VT size = VT.zero;
 
     /// Params:
-    ///     x1 = The starting x-position.
-    ///     y1 = The starting y-position.
-    ///     x2 = The end x-position.
-    ///     y2 = The end y-position.
-    this(T x1, T y1, T x2, T y2) pure nothrow const
+    ///   x =  The x coordinate of the rectangle.
+    ///   y =  The y coordinate of the rectangle.
+    ///   width = The width of the rectangle.
+    ///   height = The height of the rectangle.
+    this(T x, T y, T width, T height) pure nothrow const
     {
-        min = VT(x1, y1);
-        max = VT(x2, y2);
+        position = VT(x, y);
+        size = VT(width, height);
     }
 
     /// Params:
-    ///     min = The starting point.
-    ///     max = The end point.
-    this(VT min, VT max) pure nothrow const
+    ///     position = The position of the rectangle.
+    ///     size = The size of the rectangle.
+    this(VT position, VT size) pure nothrow const
     {
-        this.min = min;
-        this.max = max;
+        this.position = position;
+        this.size = size;
     }
 
     /// Checks if a point falls within the rectangle.
@@ -48,7 +46,8 @@ struct Rect(T)
     /// Returns: Whether the point is inside the rectangle.
     bool contains(VT v) pure nothrow const
     {
-        return v.x >= min.x && v.y >= min.y && v.x <= max.x && v.y <= max.y;
+        return v.x >= position.x && v.x <= position.x + size.x
+            && v.y >= position.y && v.y <= position.y + size.y;
     }
 
     /// Check if any of the area bounded by this rectangle is bounded by another
@@ -57,19 +56,25 @@ struct Rect(T)
     /// Returns: Whether the rectangle is overlapping.
     bool overlaps(Rect!T b) pure nothrow const
     {
-        // TODO check if this works (unit test!)
-        return min.x <= b.max.x
-            && max.x >= b.min.x
-            && min.y <= b.max.y && max.y >= b.min.y;
+        return position.x < b.position.x + b.size.x
+            && position.x + size.x > b.position.x
+            && position.y < b.position.y + b.size.y
+            && position.y + size.y > b.position.y;
     }
 
-    /// Move the rectangle so it is entirely contained with another
+    /// Move the rectangle so it is entirely contained within another
     /// If the rectangle is moved it will always be flush with a border of the given area
-    // TODO: implement this!
-    version(none)
     Rect!T constrain(Rect!T outer) const
     {
-        return Rect!T(min.clamp(outer.min, outer.min + outer.max - max),
-                max);
+        Rect!T r = this;
+        if (r.position.x < outer.position.x)
+            r.position.x = outer.position.x;
+        if (r.position.y < outer.position.y)
+            r.position.y = outer.position.y;
+        if (r.position.x + r.size.x > outer.position.x + outer.size.x)
+            r.position.x = outer.position.x + outer.size.x - r.size.x;
+        if (r.position.y + r.size.y > outer.position.y + outer.size.y)
+            r.position.y = outer.position.y + outer.size.y - r.size.y;
+        return r;
     }
 }
