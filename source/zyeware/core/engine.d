@@ -182,7 +182,7 @@ private static:
     {
         FramebufferProperties fbProps;
         fbProps.size = sMainWindow.size;
-        sMainFramebuffer = Framebuffer.create(fbProps);
+        sMainFramebuffer = new Framebuffer(fbProps);
 
         sWindowProjection = Matrix4f.orthographic(0, sMainWindow.size.x, 0, sMainWindow.size.y, -1, 1);
         sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
@@ -226,7 +226,7 @@ private static:
         sMainWindow.update();
 
         // Prepare framebuffer and render application into it.
-        GraphicsAPI.setViewport(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y);
+        GraphicsAPI.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
         sMainFramebuffer.bind();
         sApplication.draw(nextFrameTime);
 

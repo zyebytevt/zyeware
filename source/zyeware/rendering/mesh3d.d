@@ -15,8 +15,12 @@ import zyeware.rendering.api;
 import zyeware.rendering;
 import zyeware.rendering.vertex;
 
+interface Mesh : RenderResource
+{
+}
+
 @asset(Yes.cache)
-class Mesh3D
+class Mesh3D : Mesh
 {
 protected:
     RID mRid;
@@ -79,7 +83,7 @@ public:
     static Mesh load(string path)
         in (path, "Path cannot be null.")
     {
-        Mesh mesh;
+        Mesh3D mesh;
 
         switch (path.extension)
         {
@@ -116,15 +120,15 @@ public:
 
 private:
 
-Mesh loadFromOBJFile(string path)
+Mesh3D loadFromOBJFile(string path)
     in (path, "Path cannot be null.")
 {
     import std.string : splitLines, strip, startsWith, split;
     import std.conv : to;
 
     VFSFile file = VFS.getFile(path);
+    scope(exit) file.close();
     string content = file.readAll!string;
-    file.close();
 
     Vector4f[] positions;
     Vector2f[] uvs;
@@ -269,5 +273,6 @@ parseLoop:
         }
     }
 
-    return new Mesh(vertices, indices, null);
+    // TODO: Load materials someday
+    return new Mesh3D(vertices, indices, null);
 }

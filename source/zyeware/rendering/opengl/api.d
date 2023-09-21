@@ -9,7 +9,8 @@ version (ZW_OpenGL):
 package(zyeware.rendering.opengl):
 
 import std.typecons : Tuple;
-import std.string : format;
+import std.exception : assumeWontThrow;
+import std.string : format, toStringz;
 
 import bindbc.opengl;
 
@@ -17,8 +18,6 @@ import zyeware.common;
 import zyeware.rendering.vertex;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
-
-import zyeware.rendering.opengl.buffer;
 
 version (Windows)
 {
@@ -104,6 +103,12 @@ protected:
         shader
     }
 
+    struct UniformLocationKey
+    {
+        RID shader;
+        string name;
+    }
+
     bool[RenderFlag] mFlagValues;
     ushort[ushort] mNextRID;
 
@@ -111,6 +116,8 @@ protected:
     MeshData[ushort] mMeshData;
     uint[ushort] mFramebufferIDs;
     uint[ushort] mShaderIDs;
+
+    uint[UniformLocationKey] mUniformLocationCache;
 
     pragma(inline, true)
     ushort getNextRID(ushort category) pure nothrow
@@ -144,6 +151,19 @@ protected:
     void freeShader(uint id) nothrow
     {
         glDeleteProgram(id);
+    }
+
+    uint prepareShaderUniformAssignAndGetLocation(in RID rid, string name)
+    {
+        immutable uint id = mShaderIDs[rid.id];
+        glUseProgram(id);
+
+        immutable auto key = UniformLocationKey(rid, name);
+        uint location = mUniformLocationCache.get(key, uint.max).assumeWontThrow;
+        if (location == uint.max)
+            mUniformLocationCache[key] = location = glGetUniformLocation(id, name.toStringz);
+    
+        return location;
     }
 
 public:
@@ -225,7 +245,7 @@ public:
             freeShader(id);
     }
 
-    void free(RID rid) nothrow
+    void free(in RID rid) nothrow
     {
         final switch (rid.category) with (RIDType)
         {
@@ -270,7 +290,7 @@ public:
 
         // vertex positions
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.position.offsetof);
         // vertex normals
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.normal.offsetof);
@@ -506,6 +526,36 @@ public:
         mShaderIDs[rid.id] = programID;
 
         return rid;
+    }
+
+    void setShaderUniform1f(in RID shader, in string name, in float value) nothrow
+    {
+        glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
+    }
+
+    void setShaderUniform2f(in RID shader, in string name, in Vector2f value) nothrow
+    {
+        glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
+    }
+
+    void setShaderUniform3f(in RID shader, in string name, in Vector3f value) nothrow
+    {
+        glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
+    }
+
+    void setShaderUniform4f(in RID shader, in string name, in Vector4f value) nothrow
+    {
+        glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value.w);
+    }
+
+    void setShaderUniform1i(in RID shader, in string name, in int value) nothrow
+    {
+        glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
+    }
+
+    void setShaderUniformMat4f(in RID shader, in string name, in Matrix4f value) nothrow
+    {
+        glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value.value_ptr);
     }
 
     void setViewport(Rect2i region) nothrow

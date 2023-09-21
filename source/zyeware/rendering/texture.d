@@ -30,8 +30,13 @@ struct TextureProperties
     bool generateMipmaps = true;
 }
 
+interface Texture : RenderResource
+{
+    const(TextureProperties) properties() pure const nothrow;
+}
+
 @asset(Yes.cache)
-class Texture2D
+class Texture2D : Texture
 {
 protected:
     RID mRid;
@@ -66,7 +71,7 @@ public:
 }
 
 @asset(Yes.cache)
-class TextureCubeMap
+class TextureCubeMap : Texture
 {
 protected:
     RID mRid;

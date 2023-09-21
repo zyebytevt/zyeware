@@ -22,6 +22,7 @@ interface Renderer2D
     void cleanup();
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix);
     void endScene();
+    void flush();
     void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
         in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1));
     void drawString(in string text, in Font font, in Vector2f position, in Color modulate = Color.white,

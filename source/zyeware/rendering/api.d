@@ -49,10 +49,22 @@ interface GraphicsAPI
     RID createFramebuffer(in FramebufferProperties properties);
     RID createShader(in ShaderProperties properties);
 
+    void setShaderUniform1f(in RID shader, in string name, in float value) nothrow;
+    void setShaderUniform2f(in RID shader, in string name, in Vector2f value) nothrow;
+    void setShaderUniform3f(in RID shader, in string name, in Vector3f value) nothrow;
+    void setShaderUniform4f(in RID shader, in string name, in Vector4f value) nothrow;
+    void setShaderUniform1i(in RID shader, in string name, in int value) nothrow;
+    void setShaderUniformMat4f(in RID shader, in string name, in Matrix4f value) nothrow;
+
     void setViewport(Rect2i region) nothrow;
 
     void setRenderFlag(RenderFlag flag, bool value) nothrow;
     bool getRenderFlag(RenderFlag flag) nothrow;
 
     size_t getCapability(RenderCapability capability) nothrow;
+}
+
+interface RenderResource
+{
+    RID rid() pure const nothrow;
 }

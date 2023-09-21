@@ -28,12 +28,7 @@ class Material
 protected:
     union
     {
-        struct
-        {
-            Shader mShader;
-            ConstantBuffer mBuffer;
-        }
-
+        Shader mShader;
         Material mParent;
     }
 
@@ -51,16 +46,6 @@ public:
         mIsRoot = true;
 
         mTextureSlots.length = shader.textureCount;
-    }
-
-    this(Shader shader, in BufferLayout layout)
-        in (shader, "Shader cannot be null.")
-    {
-        mShader = shader;
-        mIsRoot = true;
-
-        mTextureSlots.length = shader.textureCount;
-        mBuffer = ConstantBuffer.create(layout);
     }
 
     this(Material parent)
@@ -188,11 +173,6 @@ public:
     inout(Shader) shader() inout nothrow
     {
         return root.mShader;
-    }
-
-    inout(ConstantBuffer) buffer() inout nothrow
-    {
-        return root.mBuffer;
     }
 
     static Material load(string path)

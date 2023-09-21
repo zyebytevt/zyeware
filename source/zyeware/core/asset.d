@@ -66,7 +66,7 @@ package(zyeware.core) static:
         register!Sound((path) => cast(Object) Sound.load(path));
 
         register!Image(&Image.load);
-        register!Mesh(&Mesh.load);
+        register!Mesh3D(&Mesh3D.load);
         register!Font(&Font.load);
         register!Material(&Material.load);
         register!Translation(&Translation.load);

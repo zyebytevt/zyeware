@@ -89,11 +89,9 @@ public:
         in (path, "Path cannot be null.")
     {
         VFSFile file = VFS.getFile(path);
+        scope(exit) file.close();
 
-        ubyte[] data = file.readAll!(ubyte[]);
-        file.close();
-
-        return load(data);
+        return load(file.readAll!(ubyte[]));
     }
 
     static Image load(in ubyte[] data)

@@ -11,11 +11,9 @@ import std.exception : enforce;
 import zyeware.common;
 import zyeware.rendering;
 
-debug import zyeware.rendering.renderer2d : pCurrentRenderer, CurrentRenderer;
-
 interface Renderer3D
 {
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment);
     void end();
-    void submit(Renderable renderable, in Matrix4f transform);
+    void submit(in Matrix4f transform);
 }
