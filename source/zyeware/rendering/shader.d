@@ -24,22 +24,22 @@ struct ShaderProperties
 }
 
 @asset(Yes.cache)
-class Shader : RenderResource
+class Shader : NativeObject
 {
 protected:
-    RID mRid;
+    NativeHandle mNativeHandle;
     ShaderProperties mProperties;
 
 public:
     this(in ShaderProperties properties)
     {
         mProperties = properties;
-        mRid = ZyeWare.graphics.api.createShader(properties);
+        mNativeHandle = ZyeWare.graphics.api.createShader(properties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.free(mRid);
+        ZyeWare.graphics.api.freeShader(mNativeHandle);
     }
 
     void setUniform(T)(string name, T value)
@@ -60,9 +60,9 @@ public:
             static assert(false, "Unsupported uniform type.");
     }
 
-    RID rid() pure const nothrow
+    const(NativeHandle) handle() pure const nothrow
     {
-        return mRid;
+        return mNativeHandle;
     }
 
     static Shader load(string path)

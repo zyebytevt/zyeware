@@ -30,7 +30,7 @@ struct TextureProperties
     bool generateMipmaps = true;
 }
 
-interface Texture : RenderResource
+interface Texture : NativeObject
 {
     const(TextureProperties) properties() pure const nothrow;
 }
@@ -39,19 +39,19 @@ interface Texture : RenderResource
 class Texture2D : Texture
 {
 protected:
-    RID mRid;
+    NativeHandle mNativeHandle;
     TextureProperties mProperties;
 
 public:
     this(in Image image, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mRid = ZyeWare.graphics.api.createTexture2D(image, mProperties);
+        mNativeHandle = ZyeWare.graphics.api.createTexture2D(image, mProperties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.free(mRid);
+        ZyeWare.graphics.api.freeTexture2D(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -59,9 +59,9 @@ public:
         return mProperties;
     }
 
-    RID rid() pure const nothrow
+    const(NativeHandle) handle() pure const nothrow
     {
-        return mRid;
+        return mNativeHandle;
     }
 
     static Texture2D load(string path)
@@ -74,19 +74,19 @@ public:
 class TextureCubeMap : Texture
 {
 protected:
-    RID mRid;
+    NativeHandle mNativeHandle;
     TextureProperties mProperties;
 
 public:
     this(in Image[6] images, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mRid = ZyeWare.graphics.api.createTextureCubeMap(images, properties);
+        mNativeHandle = ZyeWare.graphics.api.createTextureCubeMap(images, properties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.free(mRid);
+        ZyeWare.graphics.api.freeTextureCubeMap(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -94,9 +94,9 @@ public:
         return mProperties;
     }
 
-    RID rid() pure const nothrow
+    const(NativeHandle) handle() pure const nothrow
     {
-        return mRid;
+        return mNativeHandle;
     }
 
     static TextureCubeMap load(string path)

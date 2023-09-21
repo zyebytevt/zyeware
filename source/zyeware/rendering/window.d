@@ -15,7 +15,7 @@ struct WindowProperties
     Image icon;
 }
 
-interface Window
+interface Window : NativeObject
 {
     void update();
     void swapBuffers();
@@ -30,7 +30,7 @@ interface Window
     void vSync(bool value) nothrow;
     bool vSync() const nothrow;
 
-    inout(void*) nativeWindow() inout nothrow;
+    const(NativeHandle) handle() pure const nothrow;
 
     Vector2i position() const nothrow;
     void position(Vector2i value) nothrow;

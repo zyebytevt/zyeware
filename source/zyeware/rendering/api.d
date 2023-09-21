@@ -8,13 +8,6 @@ module zyeware.rendering.api;
 import zyeware.common;
 import zyeware.rendering;
 
-// RIDs are used to identify resources.
-struct RID
-{
-    ushort category; // The category of the resource. This is set by the API.
-    ushort id; // The ID of the resource. This is set by the API.
-}
-
 /// Used for selecting a rendering backend at the start of the engine.
 enum RenderBackend
 {
@@ -41,20 +34,24 @@ interface GraphicsAPI
     void initialize();
     void cleanup();
 
-    void free(in RID rid) nothrow;
+    NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices);
+    NativeHandle createTexture2D(in Image image, in TextureProperties properties);
+    NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties);
+    NativeHandle createFramebuffer(in FramebufferProperties properties);
+    NativeHandle createShader(in ShaderProperties properties);
 
-    RID createMesh(in Vertex3D[] vertices, in uint[] indices);
-    RID createTexture2D(in Image image, in TextureProperties properties);
-    RID createTextureCubeMap(in Image[6] images, in TextureProperties properties);
-    RID createFramebuffer(in FramebufferProperties properties);
-    RID createShader(in ShaderProperties properties);
+    void freeMesh(NativeHandle mesh) nothrow;
+    void freeTexture2D(NativeHandle texture) nothrow;
+    void freeTextureCubeMap(NativeHandle texture) nothrow;
+    void freeFramebuffer(NativeHandle framebuffer) nothrow;
+    void freeShader(NativeHandle shader) nothrow;
 
-    void setShaderUniform1f(in RID shader, in string name, in float value) nothrow;
-    void setShaderUniform2f(in RID shader, in string name, in Vector2f value) nothrow;
-    void setShaderUniform3f(in RID shader, in string name, in Vector3f value) nothrow;
-    void setShaderUniform4f(in RID shader, in string name, in Vector4f value) nothrow;
-    void setShaderUniform1i(in RID shader, in string name, in int value) nothrow;
-    void setShaderUniformMat4f(in RID shader, in string name, in Matrix4f value) nothrow;
+    void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow;
+    void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow;
+    void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow;
+    void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow;
+    void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow;
+    void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow;
 
     void setViewport(Rect2i region) nothrow;
 
@@ -62,9 +59,4 @@ interface GraphicsAPI
     bool getRenderFlag(RenderFlag flag) nothrow;
 
     size_t getCapability(RenderCapability capability) nothrow;
-}
-
-interface RenderResource
-{
-    RID rid() pure const nothrow;
 }

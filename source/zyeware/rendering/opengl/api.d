@@ -93,72 +93,35 @@ void glErrorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity,
 final class OpenGLAPI : GraphicsAPI
 {
 protected:
-    alias MeshData = Tuple!(uint, "vao", uint, "vbo", uint, "ebo");
-
-    enum RIDCategory : ushort
+    struct MeshData
     {
-        texture,
-        mesh,
-        framebuffer,
-        shader
+        uint vao;
+        uint vbo;
+        uint ibo;
     }
 
     struct UniformLocationKey
     {
-        RID shader;
+        uint id;
         string name;
     }
 
     bool[RenderFlag] mFlagValues;
-    ushort[ushort] mNextRID;
 
-    uint[ushort] mTextureIDs;
-    MeshData[ushort] mMeshData;
-    uint[ushort] mFramebufferIDs;
-    uint[ushort] mShaderIDs;
+    SequentialBuffer!uint mTexture2DIDs;
+    SequentialBuffer!uint mTextureCubeMapIDs;
+    SequentialBuffer!MeshData mMeshData;
+    SequentialBuffer!uint mFramebufferIDs;
+    SequentialBuffer!uint mShaderIDs;
 
     uint[UniformLocationKey] mUniformLocationCache;
 
-    pragma(inline, true)
-    ushort getNextRID(ushort category) pure nothrow
+    uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name)
     {
-        ushort* nextId = category in mNextRID;
-        
-        return RID(category, nextId ? (*nextId)++ : (mNextRID[category] = 0));
-    }
-
-    pragma(inline, true)
-    void freeTexture(uint id) nothrow
-    {
-        glDeleteTextures(1, &id);
-    }
-
-    pragma(inline, true)
-    void freeMesh(ref MeshData data) nothrow
-    {
-        glDeleteBuffers(1, &data.vbo);
-        glDeleteBuffers(1, &data.ebo);
-        glDeleteVertexArrays(1, &data.vao);
-    }
-
-    pragma(inline, true)
-    void freeFramebuffer(uint id) nothrow
-    {
-        glDeleteFramebuffers(1, &id);
-    }
-
-    pragma(inline, true)
-    void freeShader(uint id) nothrow
-    {
-        glDeleteProgram(id);
-    }
-
-    uint prepareShaderUniformAssignAndGetLocation(in RID rid, string name)
-    {
-        immutable uint id = mShaderIDs[rid.id];
+        immutable uint id = *(cast(uint*) shader);
         glUseProgram(id);
 
-        immutable auto key = UniformLocationKey(rid, name);
+        immutable auto key = UniformLocationKey(id, name);
         uint location = mUniformLocationCache.get(key, uint.max).assumeWontThrow;
         if (location == uint.max)
             mUniformLocationCache[key] = location = glGetUniformLocation(id, name.toStringz);
@@ -232,59 +195,36 @@ public:
 
     void cleanup()
     {
-        foreach (uint id; mTextureIDs.values)
-            freeTexture(id);
+        foreach (ref uint id; mTexture2DIDs.data)
+            freeTexture2D(cast(NativeHandle) &id);
 
-        foreach (ref MeshData data; mMeshData.values)
-            freeMesh(data);
+        foreach (ref uint id; mTextureCubeMapIDs.data)
+            freeTextureCubeMap(cast(NativeHandle) &id);
 
-        foreach (uint id; mFramebufferIDs.values)
-            freeFramebuffer(id);
+        foreach (ref MeshData data; mMeshData.data)
+            freeMesh(cast(NativeHandle) &data);
 
-        foreach (uint id; mShaderIDs.values)
-            freeShader(id);
+        foreach (ref uint id; mFramebufferIDs.data)
+            freeFramebuffer(cast(NativeHandle) &id);
+
+        foreach (ref uint id; mShaderIDs.data)
+            freeShader(cast(NativeHandle) &id);
     }
 
-    void free(in RID rid) nothrow
-    {
-        final switch (rid.category) with (RIDType)
-        {
-        case texture:
-            freeTexture(mTextureIDs[rid.id]);
-            mTextureIDs.remove(rid);
-            break;
-
-        case mesh:
-            freeMesh(mMeshData[rid.id]);
-            mMeshData.remove(rid);
-            break;
-
-        case framebuffer:
-            freeFramebuffer(mFramebufferIDs[rid.id]);
-            mFramebufferIDs.remove(rid);
-            break;
-
-        case shader:
-            freeShader(mShaderIDs[rid.id]);
-            mShaderIDs.remove(rid);
-            break;
-        }
-    }
-
-    RID createMesh(in Vertex3D[] vertices, in uint[] indices)
+    NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices)
     {
         MeshData data;
 
         glGenVertexArrays(1, &data.vao);
         glGenBuffers(1, &data.vbo);
-        glGenBuffers(1, &data.ebo);
+        glGenBuffers(1, &data.ibo);
 
         glBindVertexArray(data.vao);
         glBindBuffer(GL_ARRAY_BUFFER, data.vbo);
 
         glBufferData(GL_ARRAY_BUFFER, vertices.length * Vertex3D.sizeof, &vertices[0], GL_STATIC_DRAW);  
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, 
                     &indices[0], GL_STATIC_DRAW);
 
@@ -306,13 +246,10 @@ public:
 
         glBindVertexArray(0);
 
-        immutable RID rid = getNextRID(RIDCategory.mesh);
-        mMeshData[rid] = data;
-
-        return rid;
+        return cast(NativeHandle) mMeshData.add(data);
     }
 
-    RID createTexture2D(in Image image, in TextureProperties properties)
+    NativeHandle createTexture2D(in Image image, in TextureProperties properties)
     {
         const(ubyte)[] pixels = image.pixels;
 
@@ -357,13 +294,10 @@ public:
         if (properties.generateMipmaps)
             glGenerateMipmap(GL_TEXTURE_2D);
 
-        immutable RID rid = getNextRID(RIDCategory.texture);
-        mTextureIDs[rid.id] = id;
-
-        return rid;
+        return cast(NativeHandle) mTexture2DIDs.add(id);
     }
 
-    RID createTextureCubeMap(in Image[6] images, in TextureProperties properties)
+    NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties)
     {
         uint id;
 
@@ -407,13 +341,10 @@ public:
         if (properties.generateMipmaps)
             glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-        immutable RID rid = getNextRID(RIDCategory.texture);
-        mTextureIDs[rid.id] = id;
-
-        return rid;
+        return cast(NativeHandle) mTextureCubeMapIDs.add(id);
     }
 
-    RID createFramebuffer(in FramebufferProperties properties)
+    NativeHandle createFramebuffer(in FramebufferProperties properties)
     {
         uint id;
 
@@ -443,13 +374,10 @@ public:
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        immutable RID rid = getNextRID(RIDCategory.framebuffer);
-        mFramebufferIDs[rid.id] = id;
-
-        return rid;
+        return cast(NativeHandle) mFramebufferIDs.add(id);
     }
 
-    RID createShader(in ShaderProperties properties)
+    NativeHandle createShader(in ShaderProperties properties)
     {
         immutable uint programID = glCreateProgram();
 
@@ -522,38 +450,75 @@ public:
             throw new GraphicsException(format!"Shader validation failed: %s"(infoLog[0..length]));
         }
 
-        immutable RID rid = getNextRID(RIDCategory.shader);
-        mShaderIDs[rid.id] = programID;
-
-        return rid;
+        return cast(NativeHandle) mShaderIDs.add(programID);
     }
 
-    void setShaderUniform1f(in RID shader, in string name, in float value) nothrow
+    void freeMesh(NativeHandle mesh) nothrow
+    {
+        auto data = cast(MeshData*) mesh;
+
+        glDeleteBuffers(1, &data.vbo);
+        glDeleteBuffers(1, &data.ibo);
+        glDeleteVertexArrays(1, &data.vao);
+
+        *data = MeshData.init;
+    }
+
+    void freeTexture2D(NativeHandle texture) nothrow
+    {
+        uint* id = cast(uint*) texture;
+        
+        glDeleteTextures(1, id);
+        *id = uint.init;
+    }
+
+    void freeTextureCubeMap(NativeHandle texture) nothrow
+    {
+        freeTexture2D(texture);
+    }
+
+    void freeFramebuffer(NativeHandle framebuffer) nothrow
+    {
+        uint* id = cast(uint*) framebuffer;
+
+        glDeleteFramebuffers(1, id);
+        *id = uint.init;
+    }
+
+    void freeShader(NativeHandle shader) nothrow
+    {
+        uint* id = cast(uint*) shader;
+
+        glDeleteProgram(id);
+        *id = uint.init;
+    }
+
+    void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow
     {
         glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
     }
 
-    void setShaderUniform2f(in RID shader, in string name, in Vector2f value) nothrow
+    void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow
     {
         glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
     }
 
-    void setShaderUniform3f(in RID shader, in string name, in Vector3f value) nothrow
+    void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow
     {
         glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
     }
 
-    void setShaderUniform4f(in RID shader, in string name, in Vector4f value) nothrow
+    void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow
     {
         glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value.w);
     }
 
-    void setShaderUniform1i(in RID shader, in string name, in int value) nothrow
+    void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow
     {
         glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
     }
 
-    void setShaderUniformMat4f(in RID shader, in string name, in Matrix4f value) nothrow
+    void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow
     {
         glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value.value_ptr);
     }
@@ -649,4 +614,33 @@ GLuint getGLWrapMode(TextureProperties.WrapMode wrapMode)
         ];
 
     return glWrapMode[wrapMode];
+}
+
+struct SequentialBuffer(T)
+{
+private:
+    T[] mBuffer = new T[8];
+
+public:
+    T* add(in T value) nothrow
+    {
+        for (size_t i; i < mBuffer.length; ++i)
+        {
+            if (mBuffer[i] == T.init)
+            {
+                mBuffer[i] = value;
+                return &mBuffer[i];
+            }
+        }
+
+        size_t oldLength = mBuffer.length;
+        mBuffer.length *= 2;
+        mBuffer[oldLength] = value;
+        return &mBuffer[oldLength];
+    }
+
+    T[] data() nothrow
+    {
+        return mBuffer[0..mBuffer.length];
+    }
 }

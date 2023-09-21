@@ -15,7 +15,7 @@ import zyeware.rendering.api;
 import zyeware.rendering;
 import zyeware.rendering.vertex;
 
-interface Mesh : RenderResource
+interface Mesh : NativeObject
 {
 }
 
@@ -23,7 +23,7 @@ interface Mesh : RenderResource
 class Mesh3D : Mesh
 {
 protected:
-    RID mRid;
+    NativeHandle mNativeHandle;
 
     Material[] mMaterials;
 
@@ -66,18 +66,18 @@ public:
         in (vertices, "Vertices cannot be null.")
         in (indices, "Indices cannot be null.")
     {
-        mRid = ZyeWare.graphics.api.createMesh(vertices, indices);
+        mNativeHandle = ZyeWare.graphics.api.createMesh(vertices, indices);
         mMaterials = materials;
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.free(mRid);
+        ZyeWare.graphics.api.freeMesh(mNativeHandle);
     }
 
-    RID rid() pure const nothrow
+    const(void)* handle() const nothrow pure
     {
-        return mRid;
+        return mNativeHandle;
     }
 
     static Mesh load(string path)

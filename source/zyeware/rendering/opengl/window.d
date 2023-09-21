@@ -439,9 +439,9 @@ public:
         return mVSync;
     }
 
-    inout(void*) nativeWindow() inout nothrow
+    const(NativeHandle) handle() pure const nothrow
     {
-        return cast(inout(void*)) mHandle;
+        return cast(NativeHandle) mHandle;
     }
 
     Vector2i position() const nothrow

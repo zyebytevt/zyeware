@@ -55,7 +55,7 @@ package(zyeware.core) static:
     void initialize()
     {
         //registerDefaultLoaders();
-        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh, Font, Material, SpriteFrames, Cursor;
+        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, Font, Material, SpriteFrames, Cursor;
         import zyeware.core.translation : Translation;
         import zyeware.audio : Sound;
 

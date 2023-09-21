@@ -6,10 +6,19 @@ import zyeware.rendering.renderer3d;
 
 struct Graphics
 {
-package(zyeware):
-    GraphicsAPI api;
+package(zyeware) static:
+    GraphicsAPI sApi;
+    Renderer2D sRenderer2D;
+    Renderer3D sRenderer3D;
     
-public:
-    Renderer2D renderer2D;
-    Renderer3D renderer3D;
+public static:
+    Renderer2D renderer2D()
+    {
+        return sRenderer2D;
+    }
+
+    Renderer3D renderer3D()
+    {
+        return sRenderer3D;
+    }
 }

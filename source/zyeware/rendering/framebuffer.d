@@ -15,26 +15,31 @@ struct FramebufferProperties
     bool swapChainTarget;
 }
 
-class Framebuffer
+class Framebuffer : NativeObject
 {
 protected:
-    RID mRid;
+    NativeHandle mNativeHandle;
     FramebufferProperties mProperties;
 
 public:
     this(in FramebufferProperties properties)
     {
         mProperties = properties;
-        mRid = ZyeWare.graphics.api.createFramebuffer(mProperties);
+        mNativeHandle = ZyeWare.graphics.api.createFramebuffer(mProperties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.free(mRid);
+        ZyeWare.graphics.api.freeFramebuffer(mNativeHandle);
+    }
+
+    const(NativeHandle) handle() pure const nothrow
+    {
+        return mNativeHandle;
     }
 
     const(FramebufferProperties) properties() pure const nothrow
     {
-        return mRid;
+        return mProperties;
     }
 }
