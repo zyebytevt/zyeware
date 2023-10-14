@@ -41,7 +41,7 @@ protected:
     Parameter[string] mParameters;
 
 public:
-    alias Parameter = SumType!(void[], int, int[], float, Vector2f, Vector3f, Vector4f, Matrix4f);
+    alias Parameter = SumType!(void[], int, float, Vector2f, Vector3f, Vector4f);
 
     this(Shader shader)
         in (shader, "Shader cannot be null.")
@@ -206,62 +206,32 @@ public:
         Texture[] parsedTextures;
         // Parse all parameters first
 
-        foreach (Tag paramTag; root.maybe.namespaces["parameter"].tags)
+        foreach (const ref ZDLNode paramNode; document.root.parameters.expectValue!ZDLList)
         {
-            immutable string name = paramTag.name;
-            immutable string value = paramTag.expectAttribute!string("value");
-            immutable string type = paramTag.expectAttribute!string("type");
+            immutable string name = paramNode.name.expectValue!ZDLString;
+            immutable string type = paramNode.type.expectValue!ZDLString;
+            const(ZDLNode*) value = paramNode.value;
 
             paramOrder ~= name;
 
-            switch (type)
-            {
-            case "raw":
-                parsedParams[name] = Parameter(cast(void[]) value.to!(ubyte[]));
-                break;
-
-            case "int":
-                parsedParams[name] = Parameter(value.to!int);
-                break;
-
-            case "int[]":
-                parsedParams[name] = Parameter(value.to!(int[]));
-                break;
-
-            case "float":
-                parsedParams[name] = Parameter(value.to!float);
-                break;
-
-            case "vec2":
-                auto values = value.split(",").map!(x => x.to!float).array;
-                enforce!RenderException(values.length == 2, "Not enough arguments for vec2.");
-
-                parsedParams[name] = Parameter(Vector2f(values[0], values[1]));
-                break;
-
-            case "vec3":
-                auto values = value.split(",").map!(x => x.to!float).array;
-                enforce!RenderException(values.length == 3, "Not enough arguments for vec3.");
-
-                parsedParams[name] = Parameter(Vector3f(values[0], values[1], values[2]));
-                break;
-
-            case "vec4":
-                auto values = value.split(",").map!(x => x.to!float).array;
-                enforce!RenderException(values.length == 2, "Not enough arguments for vec4.");
-
-                parsedParams[name] = Parameter(Vector4f(values[0], values[1], values[2], values[3]));
-                break;
-
-            default:
-                throw new RenderException(format!"Unknown parameter type '%s'."(type));
-            }
+            if (value.checkValue!ZDLInteger)
+                parsedParams[name] = Parameter(value.expectValue!ZDLInteger.to!int);
+            else if (value.checkValue!ZDLFloat)
+                parsedParams[name] = Parameter(paramNode.value.expectValue!ZDLFloat.to!float);
+            else if (value.checkValue!Vector2f)
+                parsedParams[name] = Parameter(paramNode.value.expectValue!Vector2f);
+            else if (value.checkValue!Vector3f)
+                parsedParams[name] = Parameter(paramNode.value.expectValue!Vector3f);
+            else if (value.checkValue!Vector4f)
+                parsedParams[name] = Parameter(paramNode.value.expectValue!Vector4f);
+            else
+                throw new RenderException(format!"Unknown parameter type for '%s'."(name));
         }
 
-        foreach (Tag textureTag; root.tags.filter!(x => x.name == "texture"))
+        foreach (const ref ZDLNode textureNode; document.root.textures.expectValue!ZDLList)
         {
-            immutable string texPath = textureTag.expectAttribute!string("path");
-            immutable string type = textureTag.expectAttribute!string("type");
+            immutable string texPath = textureNode.path.expectValue!ZDLString;
+            immutable string type = textureNode.type.expectValue!ZDLString;
 
             switch (type)
             {
@@ -279,9 +249,9 @@ public:
         }
 
         // Check if it either inherits a material or is root
-        if (Tag shaderTag = root.getTag("shader"))
+        if (const(ZDLNode*) shaderNode = document.root.getNode("shader"))
         {
-            Shader shader = AssetManager.load!Shader(shaderTag.expectValue!string);
+            Shader shader = AssetManager.load!Shader(shaderNode.expectValue!ZDLString);
             
             BufferElement[] bufferElements;
             foreach (string name; paramOrder)
@@ -289,12 +259,10 @@ public:
                 bufferElements ~= parsedParams[name].match!(
                     (void[] x) => BufferElement(name, BufferElement.Type.none, cast(uint) x.length),
                     (int x) => BufferElement(name, BufferElement.Type.int_),
-                    //(int[] x) => BufferElement(name, BufferElement.Type.int_, cast(uint) x.length),
                     (float x) => BufferElement(name, BufferElement.Type.float_),
                     (Vector2f x) => BufferElement(name, BufferElement.Type.vec2),
                     (Vector3f x) => BufferElement(name, BufferElement.Type.vec3),
                     (Vector4f x) => BufferElement(name, BufferElement.Type.vec4),
-                    //(Matrix4f x) => BufferElement(name, BufferElement.Type.mat4),
                 );
             }
 
@@ -303,9 +271,9 @@ public:
             else
                 material = new Material(shader);
         }
-        else if (Tag extendsTag = root.getTag("extends"))
+        else if (const(ZDLNode*) extendsNode = document.root.getNode("extends"))
         {
-            material = new Material(AssetManager.load!Material(extendsTag.expectValue!string));
+            material = new Material(AssetManager.load!Material(extendsNode.expectValue!ZDLString));
             
         }
         else

@@ -44,11 +44,11 @@ package(zyeware.audio.openal):
             {
                 auto document = ZDLDocument.load(path ~ ".props");
 
-                if (const(ZDLNode*) node = document.root.getChild("loopPoint"))
+                if (const(ZDLNode*) node = document.root.getNode("loopPoint"))
                 {
-                    if (node.getChild("sample"))
+                    if (node.getNode("sample"))
                         properties.loopPoint = LoopPoint(cast(int) node.sample.expectValue!ZDLInteger);
-                    else if (node.getChild("pattern"))
+                    else if (node.getNode("pattern"))
                     {
                         properties.loopPoint = LoopPoint(ModuleLoopPoint(
                             cast(int) node.pattern.expectValue!ZDLInteger,

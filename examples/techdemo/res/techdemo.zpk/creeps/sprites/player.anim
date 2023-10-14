@@ -1,12 +1,13 @@
 animations [
-    walk {
+    {
+        name "walk"
         start 0
         end 1
         intervalMsecs 200
         loop yes
     },
-
-    up {
+    {
+        name "up"
         start 2
         end 3
         intervalMsecs 200

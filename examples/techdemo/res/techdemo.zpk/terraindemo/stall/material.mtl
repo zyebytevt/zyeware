@@ -1,9 +1,12 @@
 extends "core://materials/default.mtl"
 
-parameters {
-    type "float"
-    value "1"
-}
+parameters [
+    {
+        name "shineDamper"
+        type "float"
+        value "1"
+    }
+]
 
 textures [
     {

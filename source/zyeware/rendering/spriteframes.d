@@ -72,7 +72,7 @@ public:
             animation.startFrame = animNode.start.expectValue!ZDLInteger.to!size_t;
             animation.endFrame = animNode.end.expectValue!ZDLInteger.to!size_t;
 
-            if (const(ZDLNode*) fpsNode = animNode.getChild("fps"))
+            if (const(ZDLNode*) fpsNode = animNode.getNode("fps"))
                 animation.frameInterval = dur!"msecs"(1000 / cast(int) fpsNode.expectValue!ZDLInteger);
             else
                 animation.frameInterval = dur!"msecs"(animNode.intervalMsecs.expectValue!ZDLInteger.to!int);
@@ -81,7 +81,7 @@ public:
             animation.hFlip = animNode.getChildValue!bool("hFlip", false);
             animation.vFlip = animNode.getChildValue!bool("vFlip", false);
 
-            spriteFrames.addAnimation(animNode.nodeName, animation);
+            spriteFrames.addAnimation(animNode.name.expectValue!ZDLString, animation);
         }
 
         return spriteFrames;

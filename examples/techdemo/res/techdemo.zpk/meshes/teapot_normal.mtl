@@ -1,8 +1,9 @@
 extends "core://materials/default.mtl"
 
-parameters {
-    reflectivity {
+parameters [
+    {
+        name "reflectivity"
         type "float"
         value "1"
     }
-}
+]

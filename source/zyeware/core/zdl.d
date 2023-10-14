@@ -212,7 +212,7 @@ private:
     }
 
 public:
-    const(ZDLNode*) getChild(string name) const nothrow
+    const(ZDLNode*) getNode(string name) const nothrow
     {
         return mValue.match!(
             (const(ZDLMap) map) => name in map,
@@ -220,9 +220,9 @@ public:
         );
     }
 
-    const(ZDLNode*) expectChild(string name) const
+    const(ZDLNode*) expectNode(string name) const
     {
-        auto child = getChild(name);
+        auto child = getNode(name);
         enforce(child, format!"Expected node to have child '%s'."(name));
 
         return child;
@@ -254,7 +254,7 @@ public:
 
     const(T) getChildValue(T)(string name, T defaultValue = T.init) const
     {
-        auto node = getChild(name);
+        auto node = getNode(name);
         if (!node)
             return defaultValue;
 
@@ -268,7 +268,7 @@ public:
 
     const(ZDLNode*) opDispatch(string name)() const
     {
-        return expectChild(name);
+        return expectNode(name);
     }
 
     const(ZDLNode*) opIndex(size_t index) const
