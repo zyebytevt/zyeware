@@ -1,39 +1,12 @@
 locale "en"
 
-/*
 translations {
-    menu {
-        header "Welcome!\nPress arrow keys to move cursor, 'return' to select.\nInside a demo, press 'escape' to return here."
-        footer "Please note that this application is used for testing\nas well as providing an example of what ZyeWare is capable of.\nThank you so much for giving my engine your time of the day."
 
-        currentLocale "Current locale: "
+}
 
-        creeps "Dodge the Creeps! (Godot Tutorial)"
-        meshView "Mesh View Demo"
-        terrain "Spooky 3D Terrain Demo"
-        collision "Collision Demo"
-        gamepad "Gamepad Demo"
-        particles "Particles Demo"
-        changeLocale "Change Locale"
-        gui "GUI Demo"
-        rungc "Run Garbage Collector"
-        crash "Simulate Crash (Demonstrate crash handler)"
-        quit "Quit Application"
+remaps [
+    {
+        old "res://whatever"
+        new "res://new"
     }
-
-    creeps {
-        menutext "Press 'accept' to begin!\nPress 'cancel' to slither back to the main menu.\nArrow keys or controller to move."
-    }
-
-    meshView {
-        header "MESH VIEW DEMO\nPress 'left' and 'right' to change mesh.\nClick and drag or use left analog stick to move camera.\nScroll or use right analog stick to zoom in or out."
-    }
-
-    terrainDemo {
-        header "SPOOKY 3D TERRAIN DEMO\nPress arrow keys to move around.\nOptionally, you can use a controller!"
-    }
-
-    gamepadDemo {
-        header "GAMEPAD DEMO\nWhile holding 'accept':\n    Press 'cancel' to return to menu.\n    Press 'left' or 'right' to change current gamepad index.\n\nCurrent gamepad index: %d"
-    }
-}*/
+]

@@ -1,23 +1,20 @@
-animations [
-    {
-        name "fly"
-        start 0
-        end 1
-        intervalMsecs 333
-        loop yes
-    },
-    {
-        name "swim"
-        start 2
-        end 3
-        intervalMsecs 333
-        loop yes
-    },
-    {
-        name "walk"
-        start 4
-        end 5
-        intervalMsecs 333
-        loop yes
-    }
-]
+fly {
+    start 0
+    end 1
+    intervalMsecs 333
+    loop yes
+}
+
+swim {
+    start 2
+    end 3
+    intervalMsecs 333
+    loop yes
+}
+
+walk {
+    start 4
+    end 5
+    intervalMsecs 333
+    loop yes
+}

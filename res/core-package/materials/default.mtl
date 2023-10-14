@@ -2,19 +2,7 @@
 
 shader "core://shaders/3d/default.shd"
 
-parameters [
-    {
-        name "shineDamper"
-        type "float"
-        value "1"
-    },
-    {
-        name "reflectivity"
-        type "float"
-        value "0"
-    },
-    {
-        name "yomama"
-        
-    }
-]
+parameters {
+    shineDamper 1.0
+    reflectivity 0.0
+}

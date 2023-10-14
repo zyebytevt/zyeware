@@ -1,16 +1,13 @@
-animations [
-    {
-        name "walk"
-        start 0
-        end 1
-        intervalMsecs 200
-        loop yes
-    },
-    {
-        name "up"
-        start 2
-        end 3
-        intervalMsecs 200
-        loop yes
-    }
-]
+walk {
+    start 0
+    end 1
+    intervalMsecs 200
+    loop yes
+}
+
+up {
+    start 2
+    end 3
+    intervalMsecs 200
+    loop yes
+}

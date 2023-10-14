@@ -206,45 +206,47 @@ public:
         Texture[] parsedTextures;
         // Parse all parameters first
 
-        foreach (const ref ZDLNode paramNode; document.root.parameters.expectValue!ZDLList)
+        if (const(ZDLNode*) parameters = document.root.getNode("parameters"))
         {
-            immutable string name = paramNode.name.expectValue!ZDLString;
-            immutable string type = paramNode.type.expectValue!ZDLString;
-            const(ZDLNode*) value = paramNode.value;
+            foreach (string name, const ref ZDLNode value; parameters.expectValue!ZDLMap)
+            {
+                paramOrder ~= name;
 
-            paramOrder ~= name;
-
-            if (value.checkValue!ZDLInteger)
-                parsedParams[name] = Parameter(value.expectValue!ZDLInteger.to!int);
-            else if (value.checkValue!ZDLFloat)
-                parsedParams[name] = Parameter(paramNode.value.expectValue!ZDLFloat.to!float);
-            else if (value.checkValue!Vector2f)
-                parsedParams[name] = Parameter(paramNode.value.expectValue!Vector2f);
-            else if (value.checkValue!Vector3f)
-                parsedParams[name] = Parameter(paramNode.value.expectValue!Vector3f);
-            else if (value.checkValue!Vector4f)
-                parsedParams[name] = Parameter(paramNode.value.expectValue!Vector4f);
-            else
-                throw new RenderException(format!"Unknown parameter type for '%s'."(name));
+                if (value.checkValue!ZDLInteger)
+                    parsedParams[name] = Parameter(value.expectValue!ZDLInteger.to!int);
+                else if (value.checkValue!ZDLFloat)
+                    parsedParams[name] = Parameter(value.expectValue!ZDLFloat.to!float);
+                else if (value.checkValue!Vector2f)
+                    parsedParams[name] = Parameter(value.expectValue!Vector2f);
+                else if (value.checkValue!Vector3f)
+                    parsedParams[name] = Parameter(value.expectValue!Vector3f);
+                else if (value.checkValue!Vector4f)
+                    parsedParams[name] = Parameter(value.expectValue!Vector4f);
+                else
+                    throw new RenderException(format!"Unknown parameter type for '%s'."(name));
+            }
         }
 
-        foreach (const ref ZDLNode textureNode; document.root.textures.expectValue!ZDLList)
+        if (const(ZDLNode*) textures = document.root.getNode("textures"))
         {
-            immutable string texPath = textureNode.path.expectValue!ZDLString;
-            immutable string type = textureNode.type.expectValue!ZDLString;
-
-            switch (type)
+            foreach (const ref ZDLNode textureNode; document.root.textures.expectValue!ZDLList)
             {
-            case "2d":
-                parsedTextures ~= AssetManager.load!Texture2D(texPath);
-                break;
+                immutable string texPath = textureNode.path.expectValue!ZDLString;
+                immutable string type = textureNode.type.expectValue!ZDLString;
 
-            case "cube":
-                parsedTextures ~= AssetManager.load!TextureCubeMap(texPath);
-                break;
+                switch (type)
+                {
+                case "2d":
+                    parsedTextures ~= AssetManager.load!Texture2D(texPath);
+                    break;
 
-            default:
-                throw new RenderException(format!"Unknown texture type '%s'."(type));
+                case "cube":
+                    parsedTextures ~= AssetManager.load!TextureCubeMap(texPath);
+                    break;
+
+                default:
+                    throw new RenderException(format!"Unknown texture type '%s'."(type));
+                }
             }
         }
 

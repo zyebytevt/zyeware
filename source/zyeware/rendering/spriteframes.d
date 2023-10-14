@@ -65,7 +65,7 @@ public:
 
         auto spriteFrames = new SpriteFrames();
 
-        foreach (const ref ZDLNode animNode; document.root.animations.expectValue!ZDLList)
+        foreach (string name, const ref ZDLNode animNode; document.root.expectValue!ZDLMap)
         {
             Animation animation;
 
@@ -77,11 +77,11 @@ public:
             else
                 animation.frameInterval = dur!"msecs"(animNode.intervalMsecs.expectValue!ZDLInteger.to!int);
             
-            animation.isLooping = animNode.getChildValue!bool("loop", false);
-            animation.hFlip = animNode.getChildValue!bool("hFlip", false);
-            animation.vFlip = animNode.getChildValue!bool("vFlip", false);
+            animation.isLooping = getNodeValue!ZDLBool(animNode, "loop", false);
+            animation.hFlip = getNodeValue!ZDLBool(animNode, "hFlip", false);
+            animation.vFlip = getNodeValue!ZDLBool(animNode, "vFlip", false);
 
-            spriteFrames.addAnimation(animNode.name.expectValue!ZDLString, animation);
+            spriteFrames.addAnimation(name, animation);
         }
 
         return spriteFrames;

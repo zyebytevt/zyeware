@@ -6,7 +6,6 @@ license "LGPL-3.0"
 
 dependency "terminal" version="~>1.0.0"
 dependency "imagefmt" version="~>2.1.1"
-dependency "sdlang-d" version="~>0.10.6"
 dependency "audio-formats" version="~>2.0.2"
 dependency "bmfont" version="~>0.2.0"
 dependency "inmath" version="~>1.0.5"

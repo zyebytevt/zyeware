@@ -7,8 +7,7 @@ module zyeware.core.translation;
 
 import std.string : format, startsWith;
 import std.exception : enforce, assumeWontThrow;
-
-import sdlang;
+import std.conv : to;
 
 import zyeware.common;
 
@@ -227,41 +226,21 @@ public:
     static Translation load(string path)
         in (path, "Path cannot be null.")
     {
-        import std.algorithm : filter;
+        auto document = ZDLDocument.load(path);
 
-        VFSFile file = VFS.getFile(path);
-        Tag root = parseSource(file.readAll!string);
-        file.close();
-
-        immutable string locale = root.expectTagValue!string("locale");
+        immutable string locale = document.root.locale.expectValue!ZDLString.to!string;
         auto translation = new Translation(locale);
 
-        foreach (Tag tag; root.all.tags)
+        foreach (string name, const ref ZDLNode value; document.root.translations.expectValue!ZDLMap)
         {
-            switch (tag.name)
-            {
-            case "locale":
-                break;
+            translation.addTranslation(name, value.expectValue!ZDLString.to!string);
+        }
 
-            case "translate":
-                immutable string orig = tag.expectTag("old").expectValue!string;
-                immutable string new_ = tag.expectTag("new").expectValue!string;
-
-                translation.addTranslation(orig, new_);
-                break;
-
-            case "remap":
-                immutable string orig = tag.expectTag("old").expectValue!string;
-                immutable string new_ = tag.expectTag("new").expectValue!string;
-
-                translation.addAssetRemap(orig, new_);
-                break;
-
-            default:
-                Logger.core.log(LogLevel.warning, "%s(%d): Unknown top-level declaration '%s'.", path,
-                    tag.location.line, tag.name);
-            }
-        } 
+        foreach (const ref ZDLNode element; document.root.remaps.expectValue!ZDLList)
+        {
+            translation.addAssetRemap(element.old.expectValue!ZDLString.to!string,
+                element.expectNode("new").expectValue!ZDLString.to!string);
+        }
 
         translation.optimize();
         return translation;

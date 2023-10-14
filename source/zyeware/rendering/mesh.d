@@ -7,6 +7,7 @@ module zyeware.rendering.mesh;
 
 import std.string : format;
 import std.path : extension;
+import std.conv : to;
 
 import inmath.linalg;
 
@@ -274,7 +275,7 @@ public:
             {
                 auto document = ZDLDocument.load(path ~ ".props");
 
-                if (string materialPath = document.root.getChildValue!string("material", null))
+                if (string materialPath = getNodeValue!ZDLString(document.root, "material", null).to!string)
                     mesh.mMaterial = AssetManager.load!Material(materialPath);
             }
             catch (Exception ex)

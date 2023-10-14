@@ -220,12 +220,12 @@ public:
         );
     }
 
-    const(ZDLNode*) expectNode(string name) const
+    ref const(ZDLNode) expectNode(string name) const
     {
         auto child = getNode(name);
         enforce(child, format!"Expected node to have child '%s'."(name));
 
-        return child;
+        return *child;
     }
 
     bool checkValue(T)() const
@@ -252,31 +252,14 @@ public:
         );
     }
 
-    const(T) getChildValue(T)(string name, T defaultValue = T.init) const
-    {
-        auto node = getNode(name);
-        if (!node)
-            return defaultValue;
-
-        return node.getValue!T();
-    }
-
     string nodeName() pure const nothrow
     {
         return mName;
     }
 
-    const(ZDLNode*) opDispatch(string name)() const
+    ref const(ZDLNode) opDispatch(string name)() const
     {
         return expectNode(name);
-    }
-
-    const(ZDLNode*) opIndex(size_t index) const
-    {
-        return mValue.match!(
-            (const(ZDLList) list) => &list[index],
-            _ => throw new Exception("Cannot index on nodes other than list.")
-        );
     }
 }
 
@@ -312,15 +295,20 @@ private:
         switch (token.type) with (Tokenizer.Token.Type)
         {
         case identifier:
-            if (token.value == "true" || token.value == "yes")
+            if (token.value == "true" || token.value == "yes" || token.value == "on")
             {
                 tokenizer.get();
                 return ZDLNode(true);
             }
-            else if (token.value == "false" || token.value == "no")
+            else if (token.value == "false" || token.value == "no" || token.value == "off")
             {
                 tokenizer.get();
                 return ZDLNode(false);
+            }
+            else if (token.value == "null")
+            {
+                tokenizer.get();
+                return ZDLNode(null);
             }
             else
                 goto default;
@@ -358,9 +346,12 @@ private:
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "["),
             new ZDLException("Missing opening bracket for list literal.", tokenizer.peek()));
 
+        size_t idx;
         while (!tokenizer.isEof && !tokenizer.check(Tokenizer.Token.Type.delimiter, "]"))
         {
-            list ~= parseValue(tokenizer);
+            ZDLNode node = parseValue(tokenizer);
+            node.mName = format!"[%d]"(idx++);
+            list ~= node;
 
             if (!tokenizer.check(Tokenizer.Token.Type.delimiter, "]") && !tokenizer.consume(
                     Tokenizer.Token.Type.delimiter, ","))
@@ -476,8 +467,17 @@ public:
         return parse(file.readAll!string());
     }
 
-    const(ZDLNode*) root() const pure nothrow
+    ref const(ZDLNode) root() const pure nothrow
     {
-        return &mRoot;
+        return mRoot;
     }
+}
+
+const(T) getNodeValue(T)(const ref ZDLNode node, string name, T defaultValue = T.init) nothrow
+{
+    auto child = node.getNode(name);
+    if (!child)
+        return defaultValue;
+
+    return child.getValue!T(defaultValue);
 }

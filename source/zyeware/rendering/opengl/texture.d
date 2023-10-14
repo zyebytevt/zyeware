@@ -88,10 +88,10 @@ package(zyeware.rendering.opengl):
             {
                 auto document = ZDLDocument.load(path ~ ".props");
 
-                properties.minFilter = document.root.getChildValue!string("minFilter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = document.root.getChildValue!string("magFilter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = document.root.getChildValue!string("wrapS", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = document.root.getChildValue!string("wrapT", "repeat").to!(TextureProperties.WrapMode);
+                properties.minFilter = getNodeValue!ZDLString(document.root, "minFilter", "nearest").to!(TextureProperties.Filter);
+                properties.magFilter = getNodeValue!ZDLString(document.root, "magFilter", "nearest").to!(TextureProperties.Filter);
+                properties.wrapS = getNodeValue!ZDLString(document.root, "wrapS", "repeat").to!(TextureProperties.WrapMode);
+                properties.wrapT = getNodeValue!ZDLString(document.root, "wrapT", "repeat").to!(TextureProperties.WrapMode);
             }
             catch (Exception ex)
             {
@@ -241,10 +241,10 @@ public:
             {
                 document = ZDLDocument.load(path ~ ".props");
 
-                properties.minFilter = document.root.getChildValue!string("minFilter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = document.root.getChildValue!string("magFilter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = document.root.getChildValue!string("wrapS", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = document.root.getChildValue!string("wrapT", "repeat").to!(TextureProperties.WrapMode);
+                properties.minFilter = getNodeValue!ZDLString(document.root, "minFilter", "nearest").to!(TextureProperties.Filter);
+                properties.magFilter = getNodeValue!ZDLString(document.root, "magFilter", "nearest").to!(TextureProperties.Filter);
+                properties.wrapS = getNodeValue!ZDLString(document.root, "wrapS", "repeat").to!(TextureProperties.WrapMode);
+                properties.wrapT = getNodeValue!ZDLString(document.root, "wrapT", "repeat").to!(TextureProperties.WrapMode);
             }
             catch (Exception ex)
             {
