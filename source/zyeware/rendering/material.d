@@ -16,7 +16,6 @@ import std.string : split;
 import std.algorithm : map, filter;
 import std.array : array;
 
-import sdlang;
 import inmath.linalg;
 
 import zyeware.common;
@@ -198,9 +197,7 @@ public:
     static Material load(string path)
         in (path, "Path cannot be null.")
     {
-        VFSFile file = VFS.getFile(path);
-        Tag root = parseSource(file.readAll!string);
-        file.close();
+        auto document = ZDLDocument.load(path);
 
         Material material;
 

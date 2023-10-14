@@ -28,21 +28,12 @@ public:
     }
 
     static Cursor load(string path)
-    {
-        import std.conv : to;
-        import sdlang;
-
-        VFSFile propsFile = VFS.getFile(path);
-        Tag root = parseSource(propsFile.readAll!string);
-        propsFile.close();
-
-        Tag hotspot = root.expectTag("hotspot");
-        if (hotspot.values.length != 2)
-            throw new GraphicsException("Hotspot needs x and y values.");
+    { 
+        auto document = ZDLDocument.load(path);
 
         return new Cursor(
-            AssetManager.load!Image(root.getTagValue!string("image")),
-            Vector2i(hotspot.values[0].coerce!int, hotspot.values[1].coerce!int)
+            AssetManager.load!Image(document.root.image.expectValue!ZDLString),
+            document.root.hotspot.expectValue!Vector2i
         );
     }
 }

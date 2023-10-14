@@ -1,4 +1,4 @@
-module zyeware.core.config;
+module zyeware.core.zdl;
 
 import std.sumtype : SumType, match;
 import std.ascii : isAlpha, isAlphaNum, isWhite, isDigit;
@@ -8,6 +8,8 @@ import std.exception : enforce;
 import std.conv : to;
 
 import zyeware.common;
+
+// ZyeWare Declaration Language
 
 private:
 
@@ -107,13 +109,14 @@ private:
         else if (isDigit(mInput[mCursor]))
         {
             immutable size_t start = mCursor;
-            while (mCursor < mInput.length && (isDigit(mInput[mCursor]) || "._".indexOf(mInput[mCursor]) > -1))
+            while (mCursor < mInput.length && (isDigit(mInput[mCursor]) || "._".indexOf(
+                    mInput[mCursor]) > -1))
                 ++mCursor;
 
             mCurrent = Token(start, Token.Type.number, mInput[start .. mCursor]);
             return;
         }
-        else if ("[](){},:".indexOf(mInput[mCursor]) > -1)
+        else if ("[](){},:-+/".indexOf(mInput[mCursor]) > -1)
         {
             mCurrent = Token(mCursor, Token.Type.delimiter, mInput[mCursor .. ++mCursor]);
             return;
@@ -155,7 +158,8 @@ public:
 
     Token get() pure nothrow
     {
-        scope (exit) fetch();
+        scope (exit)
+            fetch();
         return mCurrent;
     }
 
@@ -183,33 +187,48 @@ public:
     }
 }
 
-struct ConfigValue
+public:
+
+alias ZDLList = ZDLNode[];
+alias ZDLMap = ZDLNode[string];
+alias ZDLInteger = long;
+alias ZDLFloat = double;
+alias ZDLString = string;
+alias ZDLBool = bool;
+
+struct ZDLNode
 {
 private:
-    alias InternalValue = SumType!(typeof(null), bool, long, double, string, List, Map,
-        Vector2i, Vector2f, Vector3i, Vector3f, Vector4i, Vector4f);
+    alias InternalValue = SumType!(typeof(null), ZDLBool, ZDLInteger, ZDLFloat,
+        ZDLString, ZDLList, ZDLMap, Vector2i, Vector2f, Vector3i, Vector3f,
+        Vector4i, Vector4f);
+    
+    string mName;
     InternalValue mValue;
 
-    this(InternalValue value)
-    {
-        mValue = value;
-    }
-
-public:
     this(T)(T value)
     {
         mValue = InternalValue(value);
     }
 
-    bool has(string child) const
+public:
+    const(ZDLNode*) getChild(string name) const nothrow
     {
         return mValue.match!(
-            (const(Map) map) => cast(bool) (child in map),
-            _ => false
+            (const(ZDLMap) map) => name in map,
+            _ => null
         );
     }
 
-    bool check(T)() const
+    const(ZDLNode*) expectChild(string name) const
+    {
+        auto child = getChild(name);
+        enforce(child, format!"Expected node to have child '%s'."(name));
+
+        return child;
+    }
+
+    bool checkValue(T)() const
     {
         return mValue.match!(
             (const(T) value) => true,
@@ -217,7 +236,7 @@ public:
         );
     }
 
-    const(T) get(T)(T defaultValue = T.init) const
+    const(T) getValue(T)(T defaultValue = T.init) const
     {
         return mValue.match!(
             (const(T) value) => value,
@@ -225,37 +244,43 @@ public:
         );
     }
 
-    const(T) expect(T)() const
+    const(T) expectValue(T)() const
     {
         return mValue.match!(
             (const(T) value) => value,
-            _ => throw new Exception("Expected another type.")
+            _ => throw new Exception("Expected node to have another type.")
         );
     }
 
-    ConfigValue opDispatch(string name)() const
+    const(T) getChildValue(T)(string name, T defaultValue = T.init) const
     {
-        return mValue.match!(
-            (const(Map) map) => map[name.to!string],
-            _ => throw new Exception("Cannot access keys on values other than map.")
-        );
+        auto node = getChild(name);
+        if (!node)
+            return defaultValue;
+
+        return node.getValue!T();
     }
 
-    ConfigValue opIndex(size_t index) const
+    string nodeName() pure const nothrow
+    {
+        return mName;
+    }
+
+    const(ZDLNode*) opDispatch(string name)() const
+    {
+        return expectChild(name);
+    }
+
+    const(ZDLNode*) opIndex(size_t index) const
     {
         return mValue.match!(
-            (const(List) list) => list[index],
-            _ => throw new Exception("Cannot index on values other than list.")
+            (const(ZDLList) list) => &list[index],
+            _ => throw new Exception("Cannot index on nodes other than list.")
         );
     }
 }
 
-public:
-
-alias List = ConfigValue[];
-alias Map = ConfigValue[string];
-
-class ConfigurationException : Exception
+class ZDLException : Exception
 {
 protected:
     Tokenizer.Token mToken;
@@ -275,12 +300,12 @@ public:
     }
 }
 
-struct Configuration
+struct ZDLDocument
 {
 private:
-    ConfigValue mRoot;
+    ZDLNode mRoot;
 
-    static ConfigValue parseValue(ref Tokenizer tokenizer)
+    static ZDLNode parseValue(ref Tokenizer tokenizer)
     {
         Tokenizer.Token token = tokenizer.peek();
 
@@ -290,154 +315,169 @@ private:
             if (token.value == "true" || token.value == "yes")
             {
                 tokenizer.get();
-                return ConfigValue(true);
+                return ZDLNode(true);
             }
             else if (token.value == "false" || token.value == "no")
             {
                 tokenizer.get();
-                return ConfigValue(false);
+                return ZDLNode(false);
             }
             else
                 goto default;
 
         case string_:
-            return ConfigValue(tokenizer.get().value);
+            return ZDLNode(tokenizer.get().value);
 
         case number:
-            return ConfigValue(tokenizer.get().value.to!double);
+            immutable string value = tokenizer.get().value;
+
+            if (value.indexOf('.') > -1)
+                return ZDLNode(value.to!ZDLFloat);
+            else
+                return ZDLNode(value.to!ZDLInteger);
 
         case delimiter:
             if (token.value == "{")
-                return ConfigValue(parseMap(tokenizer));
+                return ZDLNode(parseMap(tokenizer));
             else if (token.value == "[")
-                return ConfigValue(parseList(tokenizer));
+                return ZDLNode(parseList(tokenizer));
+            else if (token.value == "(")
+                return parseVector(tokenizer);
             else
-                throw new ConfigurationException(format!"Invalid symbol '%s'."(token.value), token);
+                throw new ZDLException(format!"Invalid symbol '%s'."(token.value), token);
 
         default:
-            throw new ConfigurationException(format!"Unknown type for value '%s'."(token.value), token);
+            throw new ZDLException(format!"Unknown type for value '%s'."(token.value), token);
         }
     }
 
-    static List parseList(ref Tokenizer tokenizer)
+    static ZDLList parseList(ref Tokenizer tokenizer)
     {
-        List list;
+        ZDLList list;
 
-        enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "["), 
-            new ConfigurationException("Missing opening bracket for list literal.", tokenizer.peek()));
+        enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "["),
+            new ZDLException("Missing opening bracket for list literal.", tokenizer.peek()));
 
         while (!tokenizer.isEof && !tokenizer.check(Tokenizer.Token.Type.delimiter, "]"))
         {
             list ~= parseValue(tokenizer);
 
-            if (!tokenizer.check(Tokenizer.Token.Type.delimiter, "]") && !tokenizer.consume(Tokenizer.Token.Type.delimiter, ","))
-                throw new ConfigurationException("Missing comma in list literal.", tokenizer.peek());
+            if (!tokenizer.check(Tokenizer.Token.Type.delimiter, "]") && !tokenizer.consume(
+                    Tokenizer.Token.Type.delimiter, ","))
+                throw new ZDLException("Missing comma in list literal.", tokenizer.peek());
         }
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "]"),
-            new ConfigurationException("Missing closing bracket for list literal.", tokenizer.peek()));
+            new ZDLException("Missing closing bracket for list literal.", tokenizer.peek()));
 
         return list;
     }
 
-    static Map parseMap(ref Tokenizer tokenizer, bool skipBraces = false)
+    static ZDLMap parseMap(ref Tokenizer tokenizer, bool skipBraces = false)
     {
-        Map map;
+        ZDLMap map;
 
         enforce(skipBraces || tokenizer.consume(Tokenizer.Token.Type.delimiter, "{"),
-            new ConfigurationException("Missing opening bracket for map literal.", tokenizer.peek()));
+            new ZDLException("Missing opening bracket for map literal.", tokenizer.peek()));
 
         while (!tokenizer.isEof && (skipBraces || !tokenizer.check(Tokenizer.Token.Type.delimiter, "}")))
         {
             enforce(tokenizer.check(Tokenizer.Token.Type.identifier),
-                new ConfigurationException(format!"Expected identifier as map key, got %s."(tokenizer.peek().value), tokenizer.peek()));
-            
+                new ZDLException(format!"Expected identifier as map key, got %s."(tokenizer.peek()
+                    .value), tokenizer.peek()));
+
             immutable string key = tokenizer.get().value;
 
-            enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, ":"),
-                new ConfigurationException(format!"Expected : in map, got %s."(tokenizer.peek().value), tokenizer.peek()));
-
             enforce(key !in map,
-                new ConfigurationException(format!"Duplicate key '%s' in map literal."(key), tokenizer.peek()));
-            
-            map[key] = parseValue(tokenizer);
+                new ZDLException(
+                    format!"Duplicate key '%s' in map literal."(key), tokenizer.peek()));
+
+            ZDLNode node = parseValue(tokenizer);
+            node.mName = key;
+            map[key] = node;
         }
 
         enforce(skipBraces || tokenizer.consume(Tokenizer.Token.Type.delimiter, "}"),
-            new ConfigurationException("Missing closing bracket for map literal.", tokenizer.peek()));
+            new ZDLException("Missing closing bracket for map literal.", tokenizer.peek()));
 
         return map;
     }
 
-    static ConfigValue parseVector(ref Tokenizer tokenizer)
+    static ZDLNode parseVector(ref Tokenizer tokenizer)
     {
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "("),
-            new ConfigurationException("Missing opening bracket for vector.", tokenizer.peek()));
+            new ZDLException("Missing opening bracket for vector.", tokenizer.peek()));
 
-        double[] values;
+        ZDLFloat[] values;
         bool isFloatVector;
 
         while (!tokenizer.isEof && !tokenizer.check(Tokenizer.Token.Type.delimiter, ")"))
         {
             enforce(tokenizer.check(Tokenizer.Token.Type.number),
-                new ConfigurationException(format!"Expected number in vector, got %s."(tokenizer.peek().value), tokenizer.peek()));
+                new ZDLException(format!"Expected number in vector, got %s."(tokenizer.peek()
+                    .value), tokenizer.peek()));
 
             immutable string value = tokenizer.get().value;
 
             if (value.indexOf('.') > -1)
                 isFloatVector = true;
 
-            values ~= value.to!double;
+            values ~= value.to!ZDLFloat;
         }
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, ")"),
-            new ConfigurationException("Missing closing bracket for vector.", tokenizer.peek()));
+            new ZDLException("Missing closing bracket for vector.", tokenizer.peek()));
 
         switch (values.length)
         {
         case 2:
             if (isFloatVector)
-                return ConfigValue(Vector2f(values[0], values[1]));
+                return ZDLNode(Vector2f(cast(float) values[0], cast(float) values[1]));
             else
-                return ConfigValue(Vector2i(cast(int) values[0], cast(int) values[1]));
+                return ZDLNode(Vector2i(cast(int) values[0], cast(int) values[1]));
 
         case 3:
             if (isFloatVector)
-                return ConfigValue(Vector3f(values[0], values[1], values[2]));
+                return ZDLNode(Vector3f(cast(float) values[0], cast(float) values[1], cast(
+                        float) values[2]));
             else
-                return ConfigValue(Vector3i(cast(int) values[0], cast(int) values[1], cast(int) values[2]));
+                return ZDLNode(Vector3i(cast(int) values[0], cast(int) values[1], cast(int) values[2]));
 
         case 4:
             if (isFloatVector)
-                return ConfigValue(Vector4f(values[0], values[1], values[2], values[3]));
+                return ZDLNode(Vector4f(cast(float) values[0], cast(float) values[1], cast(
+                        float) values[2], cast(float) values[3]));
             else
-                return ConfigValue(Vector4i(cast(int) values[0], cast(int) values[1], cast(int) values[2], cast(int) values[3]));
+                return ZDLNode(Vector4i(cast(int) values[0], cast(int) values[1], cast(int) values[2], cast(
+                        int) values[3]));
 
         default:
-            throw new ConfigurationException("Invalid amount of components for vector.", tokenizer.peek());
+            throw new ZDLException("Invalid amount of components for vector.", tokenizer.peek());
         }
     }
 
 public:
-    static Configuration parse(string source)
+    static ZDLDocument parse(string source)
     {
         auto tokenizer = Tokenizer(source);
 
-        ConfigValue root = parseMap(tokenizer, true);
+        ZDLNode root = parseMap(tokenizer, true);
+        root.mName = "root";
 
-        return Configuration(root);
+        return ZDLDocument(root);
     }
 
-    static Configuration parseFile(string path)
+    static ZDLDocument load(string path)
     {
         VFSFile file = VFS.getFile(path);
-        scope (exit) file.close();
+        scope (exit)
+            file.close();
 
         return parse(file.readAll!string());
     }
 
-    ConfigValue opDispatch(string name)() const
+    const(ZDLNode*) root() const pure nothrow
     {
-        return mRoot.opDispatch!name;
+        return &mRoot;
     }
 }

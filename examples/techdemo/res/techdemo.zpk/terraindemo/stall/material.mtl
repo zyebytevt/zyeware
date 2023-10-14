@@ -1,5 +1,13 @@
 extends "core://materials/default.mtl"
 
-parameter:shineDamper type="float" value="1"
+parameters {
+    type "float"
+    value "1"
+}
 
-texture type="2d" path="res://terraindemo/stall/texture.png"
+textures [
+    {
+        type "2d"
+        path "res://terraindemo/stall/texture.png"
+    }
+]

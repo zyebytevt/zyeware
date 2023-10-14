@@ -270,15 +270,11 @@ public:
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
         {
-            import sdlang;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
-            Tag root = parseSource(propsFile.readAll!string);
-            propsFile.close();
-
             try
             {
-                if (string materialPath = root.getTagValue!string("material", null))
+                auto document = ZDLDocument.load(path ~ ".props");
+
+                if (string materialPath = document.root.getChildValue!string("material", null))
                     mesh.mMaterial = AssetManager.load!Material(materialPath);
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 // ZyeWare - Default terrain shader
 // Uses multitexturing.
 
-opengl:vertex file="core://shaders/3d/glsl/terrain.vert.glsl"
-
-opengl:fragment file="core://shaders/3d/glsl/terrain.frag.glsl"
+opengl {
+    vertex "core://shaders/3d/glsl/terrain.vert.glsl"
+    fragment "core://shaders/3d/glsl/terrain.frag.glsl"
+}

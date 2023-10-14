@@ -1,20 +1,22 @@
-fly {
-    start 0
-    end 1
-    interval-msecs 333
-    loop true
-}
+animations [
+    fly {
+        start 0
+        end 1
+        intervalMsecs 333
+        loop yes
+    },
 
-swim {
-    start 2
-    end 3
-    interval-msecs 333
-    loop true
-}
+    swim {
+        start 2
+        end 3
+        intervalMsecs 333
+        loop yes
+    },
 
-walk {
-    start 4
-    end 5
-    interval-msecs 333
-    loop true
-}
+    walk {
+        start 4
+        end 5
+        intervalMsecs 333
+        loop yes
+    }
+]

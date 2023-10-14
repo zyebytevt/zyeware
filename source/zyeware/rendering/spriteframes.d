@@ -3,8 +3,6 @@ module zyeware.rendering.spriteframes;
 import std.datetime : dur, Duration;
 import std.conv : to;
 
-import sdlang;
-
 import zyeware.common;
 import zyeware.rendering;
 
@@ -63,29 +61,27 @@ public:
     static SpriteFrames load(string path)
         in (path, "Path cannot be null")
     {
-        VFSFile file = VFS.getFile(path);
-        Tag root = parseSource(file.readAll!string);
-        file.close();
+        auto document = ZDLDocument.load(path);
 
         auto spriteFrames = new SpriteFrames();
 
-        foreach (Tag animationTag; root.all.tags)
+        foreach (const ref ZDLNode animNode; document.root.animations.expectValue!ZDLList)
         {
             Animation animation;
 
-            animation.startFrame = animationTag.expectTagValue!int("start").to!size_t;
-            animation.endFrame = animationTag.expectTagValue!int("end").to!size_t;
+            animation.startFrame = animNode.start.expectValue!ZDLInteger.to!size_t;
+            animation.endFrame = animNode.end.expectValue!ZDLInteger.to!size_t;
 
-            if (Tag fpsTag = animationTag.getTag("fps"))
-                animation.frameInterval = dur!"msecs"(1000 / fpsTag.expectValue!int());
+            if (const(ZDLNode*) fpsNode = animNode.getChild("fps"))
+                animation.frameInterval = dur!"msecs"(1000 / cast(int) fpsNode.expectValue!ZDLInteger);
             else
-                animation.frameInterval = dur!"msecs"(animationTag.expectTagValue!int("interval-msecs"));
+                animation.frameInterval = dur!"msecs"(animNode.intervalMsecs.expectValue!ZDLInteger.to!int);
             
-            animation.isLooping = animationTag.getTagValue!bool("loop", false);
-            animation.hFlip = animationTag.getTagValue!bool("h-flip", false);
-            animation.vFlip = animationTag.getTagValue!bool("v-flip", false);
+            animation.isLooping = animNode.getChildValue!bool("loop", false);
+            animation.hFlip = animNode.getChildValue!bool("hFlip", false);
+            animation.vFlip = animNode.getChildValue!bool("vFlip", false);
 
-            spriteFrames.addAnimation(animationTag.name, animation);
+            spriteFrames.addAnimation(animNode.nodeName, animation);
         }
 
         return spriteFrames;
