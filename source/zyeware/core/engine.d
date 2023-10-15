@@ -457,7 +457,7 @@ public static:
         }
         
         if (Exception ex = collectException(sApplication.receive(ev)))
-            Logger.core.log(LogLevel.error, "Exception while emitting an event: %s", ex.msg);
+            Logger.core.log(LogLevel.error, "Exception while emitting an event: %s", ex.message);
 
         if (auto input = cast(InputEvent) ev)
             InputManager.receive(input).assumeWontThrow;

@@ -160,7 +160,7 @@ public:
         catch (AudioFormatsException ex)
         {
             // Copy manually managed memory to GC memory and rethrow exception.
-            string errMsg = ex.msg.dup;
+            string errMsg = ex.message.dup;
             string errFile = ex.file.dup;
             size_t errLine = ex.line;
             destroyAudioFormatException(ex);

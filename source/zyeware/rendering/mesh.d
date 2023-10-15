@@ -7,6 +7,7 @@ module zyeware.rendering.mesh;
 
 import std.string : format;
 import std.path : extension;
+import std.conv : to;
 
 import inmath.linalg;
 
@@ -270,20 +271,16 @@ public:
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
         {
-            import sdlang;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
-            Tag root = parseSource(propsFile.readAll!string);
-            propsFile.close();
-
             try
             {
-                if (string materialPath = root.getTagValue!string("material", null))
+                auto document = ZDLDocument.load(path ~ ".props");
+
+                if (string materialPath = getNodeValue!ZDLString(document.root, "material", null).to!string)
                     mesh.mMaterial = AssetManager.load!Material(materialPath);
             }
             catch (Exception ex)
             {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 

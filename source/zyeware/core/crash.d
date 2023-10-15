@@ -34,7 +34,7 @@ public:
 
         Logger.core.log(LogLevel.fatal, "==================== Unhandled throwable '%s' ====================",
             typeid(t).toString().split(".")[$-1]);
-        Logger.core.log(LogLevel.fatal, "Details: %s", t.msg);
+        Logger.core.log(LogLevel.fatal, "Details: %s", t.message);
 
         foreach (trace; t.info)
             //if (!trace.startsWith("??:?"))

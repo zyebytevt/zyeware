@@ -8,9 +8,10 @@ module zyeware.rendering.opengl.texture;
 version (ZW_OpenGL):
 package(zyeware.rendering.opengl):
 
+import std.conv : to;
+
 import bindbc.opengl;
 import imagefmt;
-import sdlang;
 
 import zyeware.common;
 import zyeware.rendering;
@@ -83,23 +84,18 @@ package(zyeware.rendering.opengl):
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
         {
-            import std.conv : to;
-            import sdlang;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
-            Tag root = parseSource(propsFile.readAll!string);
-            propsFile.close();
-
             try
             {
-                properties.minFilter = root.getTagValue!string("min-filter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = root.getTagValue!string("mag-filter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = root.getTagValue!string("wrap-s", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = root.getTagValue!string("wrap-t", "repeat").to!(TextureProperties.WrapMode);
+                auto document = ZDLDocument.load(path ~ ".props");
+
+                properties.minFilter = getNodeValue!ZDLString(document.root, "minFilter", "nearest").to!(TextureProperties.Filter);
+                properties.magFilter = getNodeValue!ZDLString(document.root, "magFilter", "nearest").to!(TextureProperties.Filter);
+                properties.wrapS = getNodeValue!ZDLString(document.root, "wrapS", "repeat").to!(TextureProperties.WrapMode);
+                properties.wrapT = getNodeValue!ZDLString(document.root, "wrapT", "repeat").to!(TextureProperties.WrapMode);
             }
             catch (Exception ex)
             {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 
@@ -228,37 +224,31 @@ public:
     {
         TextureProperties properties;
 
-        VFSFile file = VFS.getFile(path);
-        Tag root = parseSource(file.readAll!string);
-        file.close();
-
+        auto document = ZDLDocument.load(path);
+        
         Image[6] images = [
-            AssetManager.load!Image(root.expectTagValue!string("positive-x")),
-            AssetManager.load!Image(root.expectTagValue!string("negative-x")),
-            AssetManager.load!Image(root.expectTagValue!string("positive-y")),
-            AssetManager.load!Image(root.expectTagValue!string("negative-y")),
-            AssetManager.load!Image(root.expectTagValue!string("positive-z")),
-            AssetManager.load!Image(root.expectTagValue!string("negative-z")),
+            AssetManager.load!Image(document.root.x.positive.expectValue!ZDLString),
+            AssetManager.load!Image(document.root.x.negative.expectValue!ZDLString),
+            AssetManager.load!Image(document.root.y.positive.expectValue!ZDLString),
+            AssetManager.load!Image(document.root.y.negative.expectValue!ZDLString),
+            AssetManager.load!Image(document.root.z.positive.expectValue!ZDLString),
+            AssetManager.load!Image(document.root.z.negative.expectValue!ZDLString),
         ];
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
         {
-            import std.conv : to;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
-            root = parseSource(propsFile.readAll!string);
-            propsFile.close();
-
             try
             {
-                properties.minFilter = root.getTagValue!string("min-filter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = root.getTagValue!string("mag-filter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = root.getTagValue!string("wrap-s", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = root.getTagValue!string("wrap-t", "repeat").to!(TextureProperties.WrapMode);
+                document = ZDLDocument.load(path ~ ".props");
+
+                properties.minFilter = getNodeValue!ZDLString(document.root, "minFilter", "nearest").to!(TextureProperties.Filter);
+                properties.magFilter = getNodeValue!ZDLString(document.root, "magFilter", "nearest").to!(TextureProperties.Filter);
+                properties.wrapS = getNodeValue!ZDLString(document.root, "wrapS", "repeat").to!(TextureProperties.WrapMode);
+                properties.wrapT = getNodeValue!ZDLString(document.root, "wrapT", "repeat").to!(TextureProperties.WrapMode);
             }
             catch (Exception ex)
             {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 

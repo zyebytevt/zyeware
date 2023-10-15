@@ -17,7 +17,6 @@ import std.array : replaceInPlace;
 
 import bindbc.opengl;
 import inmath.linalg;
-import sdlang;
 
 import zyeware.common;
 import zyeware.rendering;
@@ -144,41 +143,33 @@ package(zyeware.rendering.opengl):
             return mutableSource.idup;
         }
 
-        VFSFile file = VFS.getFile(path);
-        immutable string source = file.readAll!string;
-        Tag root = parseSource(source);
-        file.close();
-
+        auto document = ZDLDocument.load(path);
         auto shader = new OGLShader();
 
-        void loadShader(ref Tag tag, int type)
+        void loadShader(string filePath, int type)
         {
-            if (string filePath = tag.getAttribute!string("file", null))
-            {
-                Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
-                VFSFile shaderFile = VFS.getFile(filePath);
-                shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
-                shaderFile.close();
-            }
-            else
-                shader.compileShader(parseIncludes(tag.getValue!string), type);
+            Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
+            VFSFile shaderFile = VFS.getFile(filePath);
+            scope (exit) shaderFile.close();
+
+            shader.compileShader(parseIncludes(shaderFile.readAll!string), type);
         }
 
-        foreach (ref Tag tag; root.namespaces["opengl"].tags)
+        foreach (string name, const ref ZDLNode value; document.root.opengl.expectValue!ZDLMap)
         {
-            switch (tag.name)
+            switch (name)
             {
             case "vertex":
-                loadShader(tag, GL_VERTEX_SHADER);
+                loadShader(value.expectValue!ZDLString, GL_VERTEX_SHADER);
                 break;
 
             case "fragment":
-                loadShader(tag, GL_FRAGMENT_SHADER);
+                loadShader(value.expectValue!ZDLString, GL_FRAGMENT_SHADER);
                 break;
 
             default:
-                Logger.core.log(LogLevel.warning, "'%s' %s: Unknown tag '%s'.",
-                    path, tag.location, tag.getFullName());
+                Logger.core.log(LogLevel.warning, "'%s': Unknown tag '%s'.",
+                    path, name);
             }
         }
 

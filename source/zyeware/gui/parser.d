@@ -9,11 +9,10 @@ import std.exception : enforce;
 import std.string : format;
 import std.algorithm : filter;
 
-import sdlang;
-
 import zyeware.common;
 import zyeware.gui;
 
+/*
 struct GUIParser
 {
 private static:
@@ -95,3 +94,4 @@ public static:
         return parseNode(root.tags[0], null);
     }
 }
+*/

@@ -1,5 +1,12 @@
 extends "core://materials/default.mtl"
 
-parameter:shineDamper type="float" value="10"
+parameters {
+    shineDamper 10.0
+}
 
-texture type="2d" path="res://terraindemo/grass/texture.png"
+textures [
+    {
+        type "2d"
+        path "res://terraindemo/grass/texture.png"
+    }
+]
