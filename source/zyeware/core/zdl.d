@@ -19,13 +19,27 @@ private:
     string mInput;
     size_t mCursor;
     Token mCurrent;
+    Position mCurrentPosition;
+
+    pragma(inline, true)
+    void advance() pure nothrow
+    {
+        ++mCursor;
+        ++mCurrentPosition.column;
+
+        if (mCursor < mInput.length && mInput[mCursor] == '\n')
+        {
+            ++mCurrentPosition.row;
+            mCurrentPosition.column = 1;
+        }
+    }
 
     void fetch() pure nothrow
     {
     subStart:
         if (mCursor >= mInput.length)
         {
-            mCurrent = Token(mCursor, Token.Type.endOfFile, "<eof>");
+            mCurrent = Token(mCurrentPosition, Token.Type.endOfFile, "<eof>");
             return;
         }
 
@@ -33,15 +47,15 @@ private:
         if (mCursor + 1 < mInput.length && mInput[mCursor] == '/' && mInput[mCursor + 1] == '/')
         {
             while (mCursor < mInput.length && mInput[mCursor] != '\n')
-                ++mCursor;
+                advance();
 
             goto subStart;
         }
         else if (isWhite(mInput[mCursor]))
         {
-            ++mCursor;
+            advance();
             while (mCursor < mInput.length && isWhite(mInput[mCursor]))
-                ++mCursor;
+                advance();
 
             goto subStart;
         }
@@ -50,9 +64,9 @@ private:
 
         if (mInput[mCursor] == '"')
         {
-            immutable size_t start = mCursor;
+            immutable Position startPosition = mCurrentPosition;
 
-            ++mCursor; // Skip the first quote
+            advance(); // Skip the first quote
 
             auto sb = appender!string;
 
@@ -64,7 +78,7 @@ private:
                     break loop;
 
                 case '\\':
-                    ++mCursor;
+                    advance();
 
                     switch (mInput[mCursor])
                     {
@@ -89,40 +103,46 @@ private:
                     sb ~= mInput[mCursor];
                 }
 
-                ++mCursor;
+                advance();
             }
 
-            ++mCursor;
+            advance();
 
-            mCurrent = Token(start, Token.Type.string_, sb.data);
+            mCurrent = Token(startPosition, Token.Type.string_, sb.data);
             return;
         }
         else if (isAlpha(mInput[mCursor]))
         {
             immutable size_t start = mCursor;
-            while (mCursor < mInput.length && isAlphaNum(mInput[mCursor]))
-                ++mCursor;
+            immutable Position startPosition = mCurrentPosition;
 
-            mCurrent = Token(start, Token.Type.identifier, mInput[start .. mCursor]);
+            while (mCursor < mInput.length && isAlphaNum(mInput[mCursor]))
+                advance();
+
+            mCurrent = Token(startPosition, Token.Type.identifier, mInput[start .. mCursor]);
             return;
         }
         else if (isDigit(mInput[mCursor]))
         {
             immutable size_t start = mCursor;
+            immutable Position startPosition = mCurrentPosition;
+
             while (mCursor < mInput.length && (isDigit(mInput[mCursor]) || "._".indexOf(
                     mInput[mCursor]) > -1))
-                ++mCursor;
+                advance();
 
-            mCurrent = Token(start, Token.Type.number, mInput[start .. mCursor]);
+            mCurrent = Token(startPosition, Token.Type.number, mInput[start .. mCursor]);
             return;
         }
         else if ("[](){},:-+/".indexOf(mInput[mCursor]) > -1)
         {
-            mCurrent = Token(mCursor, Token.Type.delimiter, mInput[mCursor .. ++mCursor]);
+            mCurrent = Token(mCurrentPosition, Token.Type.delimiter, mInput[mCursor .. mCursor + 1]);
+            advance();
             return;
         }
 
-        mCurrent = Token(mCursor, Token.Type.invalid, mInput[mCursor .. ++mCursor]);
+        mCurrent = Token(mCurrentPosition, Token.Type.invalid, mInput[mCursor .. mCursor + 1]);
+        advance();
     }
 
 public:
@@ -138,15 +158,23 @@ public:
             string_,
         }
 
-        size_t position;
+        Position sourcePosition;
         Type type;
         string value;
     }
 
-    this(string input)
+    struct Position
+    {
+        string file;
+        size_t row;
+        size_t column;
+    }
+
+    this(string input, string filename)
     {
         mInput = input;
         mCursor = 0;
+        mCurrentPosition = Position(filename, 1, 1);
 
         fetch();
     }
@@ -205,10 +233,12 @@ private:
     
     string mName;
     InternalValue mValue;
+    Tokenizer.Position mSourcePosition;
 
-    this(T)(T value)
+    this(T)(T value, Tokenizer.Position sourcePosition)
     {
         mValue = InternalValue(value);
+        mSourcePosition = sourcePosition;
     }
 
 public:
@@ -223,7 +253,7 @@ public:
     ref const(ZDLNode) expectNode(string name) const
     {
         auto child = getNode(name);
-        enforce(child, format!"Expected node to have child '%s'."(name));
+        enforce(child, new ZDLException(format!"Node '%s' has no child node named '%s'."(mName, name), mSourcePosition));
 
         return *child;
     }
@@ -248,7 +278,7 @@ public:
     {
         return mValue.match!(
             (const(T) value) => value,
-            _ => throw new Exception("Expected node to have another type.")
+            _ => throw new ZDLException(format!"Expected '%s' to have type '%s'."(mName, T.stringof), mSourcePosition)
         );
     }
 
@@ -266,20 +296,27 @@ public:
 class ZDLException : Exception
 {
 protected:
-    Tokenizer.Token mToken;
+    Tokenizer.Position mSourcePosition;
 
 public:
-    this(string message, Tokenizer.Token token, string file = __FILE__,
+    this(string message, Tokenizer.Position sourcePosition, string file = __FILE__,
         size_t line = __LINE__, Throwable next = null) pure nothrow
     {
         super(message, file, line, next);
 
-        mToken = token;
+        mSourcePosition = sourcePosition;
     }
 
-    Tokenizer.Token token() pure const nothrow
+    Tokenizer.Position sourcePosition() pure const nothrow
     {
-        return mToken;
+        return mSourcePosition;
+    }
+
+    override string message() nothrow @safe const
+    {
+        import std.exception : assumeWontThrow;
+
+        return format!"%s(%d, %d): %s"(mSourcePosition.file, mSourcePosition.row, mSourcePosition.column, msg).assumeWontThrow;
     }
 }
 
@@ -298,44 +335,44 @@ private:
             if (token.value == "true" || token.value == "yes" || token.value == "on")
             {
                 tokenizer.get();
-                return ZDLNode(true);
+                return ZDLNode(true, token.sourcePosition);
             }
             else if (token.value == "false" || token.value == "no" || token.value == "off")
             {
                 tokenizer.get();
-                return ZDLNode(false);
+                return ZDLNode(false, token.sourcePosition);
             }
             else if (token.value == "null")
             {
                 tokenizer.get();
-                return ZDLNode(null);
+                return ZDLNode(null, token.sourcePosition);
             }
             else
                 goto default;
 
         case string_:
-            return ZDLNode(tokenizer.get().value);
+            return ZDLNode(tokenizer.get().value, token.sourcePosition);
 
         case number:
             immutable string value = tokenizer.get().value;
 
             if (value.indexOf('.') > -1)
-                return ZDLNode(value.to!ZDLFloat);
+                return ZDLNode(value.to!ZDLFloat, token.sourcePosition);
             else
-                return ZDLNode(value.to!ZDLInteger);
+                return ZDLNode(value.to!ZDLInteger, token.sourcePosition);
 
         case delimiter:
             if (token.value == "{")
-                return ZDLNode(parseMap(tokenizer));
+                return ZDLNode(parseMap(tokenizer), token.sourcePosition);
             else if (token.value == "[")
-                return ZDLNode(parseList(tokenizer));
+                return ZDLNode(parseList(tokenizer), token.sourcePosition);
             else if (token.value == "(")
                 return parseVector(tokenizer);
             else
-                throw new ZDLException(format!"Invalid symbol '%s'."(token.value), token);
+                throw new ZDLException(format!"Invalid symbol '%s'."(token.value), token.sourcePosition);
 
         default:
-            throw new ZDLException(format!"Unknown type for value '%s'."(token.value), token);
+            throw new ZDLException(format!"Unknown type for value '%s'."(token.value), token.sourcePosition);
         }
     }
 
@@ -344,7 +381,7 @@ private:
         ZDLList list;
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "["),
-            new ZDLException("Missing opening bracket for list literal.", tokenizer.peek()));
+            new ZDLException("Missing opening bracket for list literal.", tokenizer.peek().sourcePosition));
 
         size_t idx;
         while (!tokenizer.isEof && !tokenizer.check(Tokenizer.Token.Type.delimiter, "]"))
@@ -355,11 +392,11 @@ private:
 
             if (!tokenizer.check(Tokenizer.Token.Type.delimiter, "]") && !tokenizer.consume(
                     Tokenizer.Token.Type.delimiter, ","))
-                throw new ZDLException("Missing comma in list literal.", tokenizer.peek());
+                throw new ZDLException("Missing comma in list literal.", tokenizer.peek().sourcePosition);
         }
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "]"),
-            new ZDLException("Missing closing bracket for list literal.", tokenizer.peek()));
+            new ZDLException("Missing closing bracket for list literal.", tokenizer.peek().sourcePosition));
 
         return list;
     }
@@ -369,19 +406,19 @@ private:
         ZDLMap map;
 
         enforce(skipBraces || tokenizer.consume(Tokenizer.Token.Type.delimiter, "{"),
-            new ZDLException("Missing opening bracket for map literal.", tokenizer.peek()));
+            new ZDLException("Missing opening bracket for map literal.", tokenizer.peek().sourcePosition));
 
         while (!tokenizer.isEof && (skipBraces || !tokenizer.check(Tokenizer.Token.Type.delimiter, "}")))
         {
             enforce(tokenizer.check(Tokenizer.Token.Type.identifier),
                 new ZDLException(format!"Expected identifier as map key, got %s."(tokenizer.peek()
-                    .value), tokenizer.peek()));
+                    .value), tokenizer.peek().sourcePosition));
 
             immutable string key = tokenizer.get().value;
 
             enforce(key !in map,
                 new ZDLException(
-                    format!"Duplicate key '%s' in map literal."(key), tokenizer.peek()));
+                    format!"Duplicate key '%s' in map literal."(key), tokenizer.peek().sourcePosition));
 
             ZDLNode node = parseValue(tokenizer);
             node.mName = key;
@@ -389,15 +426,17 @@ private:
         }
 
         enforce(skipBraces || tokenizer.consume(Tokenizer.Token.Type.delimiter, "}"),
-            new ZDLException("Missing closing bracket for map literal.", tokenizer.peek()));
+            new ZDLException("Missing closing bracket for map literal.", tokenizer.peek().sourcePosition));
 
         return map;
     }
 
     static ZDLNode parseVector(ref Tokenizer tokenizer)
     {
+        immutable Tokenizer.Position startPosition = tokenizer.peek().sourcePosition;
+
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "("),
-            new ZDLException("Missing opening bracket for vector.", tokenizer.peek()));
+            new ZDLException("Missing opening bracket for vector.", tokenizer.peek().sourcePosition));
 
         ZDLFloat[] values;
         bool isFloatVector;
@@ -406,7 +445,7 @@ private:
         {
             enforce(tokenizer.check(Tokenizer.Token.Type.number),
                 new ZDLException(format!"Expected number in vector, got %s."(tokenizer.peek()
-                    .value), tokenizer.peek()));
+                    .value), tokenizer.peek().sourcePosition));
 
             immutable string value = tokenizer.get().value;
 
@@ -417,42 +456,42 @@ private:
         }
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, ")"),
-            new ZDLException("Missing closing bracket for vector.", tokenizer.peek()));
+            new ZDLException("Missing closing bracket for vector.", tokenizer.peek().sourcePosition));
 
         switch (values.length)
         {
         case 2:
             if (isFloatVector)
-                return ZDLNode(Vector2f(cast(float) values[0], cast(float) values[1]));
+                return ZDLNode(Vector2f(cast(float) values[0], cast(float) values[1]), startPosition);
             else
-                return ZDLNode(Vector2i(cast(int) values[0], cast(int) values[1]));
+                return ZDLNode(Vector2i(cast(int) values[0], cast(int) values[1]), startPosition);
 
         case 3:
             if (isFloatVector)
                 return ZDLNode(Vector3f(cast(float) values[0], cast(float) values[1], cast(
-                        float) values[2]));
+                        float) values[2]), startPosition);
             else
-                return ZDLNode(Vector3i(cast(int) values[0], cast(int) values[1], cast(int) values[2]));
+                return ZDLNode(Vector3i(cast(int) values[0], cast(int) values[1], cast(int) values[2]), startPosition);
 
         case 4:
             if (isFloatVector)
                 return ZDLNode(Vector4f(cast(float) values[0], cast(float) values[1], cast(
-                        float) values[2], cast(float) values[3]));
+                        float) values[2], cast(float) values[3]), startPosition);
             else
                 return ZDLNode(Vector4i(cast(int) values[0], cast(int) values[1], cast(int) values[2], cast(
-                        int) values[3]));
+                        int) values[3]), startPosition);
 
         default:
-            throw new ZDLException("Invalid amount of components for vector.", tokenizer.peek());
+            throw new ZDLException("Invalid amount of components for vector.", tokenizer.peek().sourcePosition);
         }
     }
 
 public:
-    static ZDLDocument parse(string source)
+    static ZDLDocument parse(string source, string filename = "<stream>")
     {
-        auto tokenizer = Tokenizer(source);
+        auto tokenizer = Tokenizer(source, filename);
 
-        ZDLNode root = parseMap(tokenizer, true);
+        ZDLNode root = ZDLNode(parseMap(tokenizer, true), Tokenizer.Position(filename, 1, 1));
         root.mName = "root";
 
         return ZDLDocument(root);
@@ -464,7 +503,7 @@ public:
         scope (exit)
             file.close();
 
-        return parse(file.readAll!string());
+        return parse(file.readAll!string(), path);
     }
 
     ref const(ZDLNode) root() const pure nothrow

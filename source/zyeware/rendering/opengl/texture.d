@@ -95,7 +95,7 @@ package(zyeware.rendering.opengl):
             }
             catch (Exception ex)
             {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 
@@ -248,7 +248,7 @@ public:
             }
             catch (Exception ex)
             {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 
