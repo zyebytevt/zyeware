@@ -3,6 +3,7 @@ module zyeware.core.zdl;
 import std.sumtype : SumType, match;
 import std.ascii : isAlpha, isAlphaNum, isWhite, isDigit;
 import std.array : appender;
+import std.algorithm : find;
 import std.string : indexOf, format;
 import std.exception : enforce;
 import std.conv : to;
@@ -80,23 +81,24 @@ private:
                 case '\\':
                     advance();
 
+                    // dfmt off
                     switch (mInput[mCursor])
                     {
-                    case 'n':
-                        sb ~= '\n';
-                        break;
-
-                    case '\\':
-                        sb ~= '\\';
-                        break;
-
-                    case '"':
-                        sb ~= '"';
-                        break;
+                    case 'a': sb ~= '\a'; break;
+                    case 'b': sb ~= '\b'; break;
+                    case 'f': sb ~= '\f'; break;
+                    case 'n': sb ~= '\n'; break;
+                    case 'r': sb ~= '\r'; break;
+                    case 't': sb ~= '\t'; break;
+                    case 'v': sb ~= '\v'; break;
+                    case '\\': sb ~= '\\'; break;
+                    case '\'': sb ~= '\''; break;
+                    case '"': sb ~= '"'; break;
 
                     default:
                         break;
                     }
+                    // dfmt on
                     break;
 
                 default:
@@ -229,8 +231,8 @@ struct ZDLNode
 private:
     alias InternalValue = SumType!(typeof(null), ZDLBool, ZDLInteger, ZDLFloat,
         ZDLString, ZDLList, ZDLMap, Vector2i, Vector2f, Vector3i, Vector3f,
-        Vector4i, Vector4f);
-    
+        Vector4i, Vector4f, Matrix3f, Matrix4f);
+
     string mName;
     InternalValue mValue;
     Tokenizer.Position mSourcePosition;
@@ -278,7 +280,8 @@ public:
     {
         return mValue.match!(
             (const(T) value) => value,
-            _ => throw new ZDLException(format!"Expected '%s' to have type '%s'."(mName, T.stringof), mSourcePosition)
+            _ => throw new ZDLException(
+                format!"Expected '%s' to have type '%s'."(mName, T.stringof), mSourcePosition)
         );
     }
 
@@ -316,7 +319,8 @@ public:
     {
         import std.exception : assumeWontThrow;
 
-        return format!"%s(%d, %d): %s"(mSourcePosition.file, mSourcePosition.row, mSourcePosition.column, msg).assumeWontThrow;
+        return format!"%s(%d, %d): %s"(mSourcePosition.file, mSourcePosition.row, mSourcePosition.column, msg)
+            .assumeWontThrow;
     }
 }
 
@@ -327,17 +331,20 @@ private:
 
     static ZDLNode parseValue(ref Tokenizer tokenizer)
     {
+        immutable static string[] booleanTrueValues = ["true", "yes", "on"];
+        immutable static string[] booleanFalseValues = ["false", "no", "off"];
+
         Tokenizer.Token token = tokenizer.peek();
 
         switch (token.type) with (Tokenizer.Token.Type)
         {
         case identifier:
-            if (token.value == "true" || token.value == "yes" || token.value == "on")
+            if (booleanTrueValues.find(token.value))
             {
                 tokenizer.get();
                 return ZDLNode(true, token.sourcePosition);
             }
-            else if (token.value == "false" || token.value == "no" || token.value == "off")
+            else if (booleanFalseValues.find(token.value))
             {
                 tokenizer.get();
                 return ZDLNode(false, token.sourcePosition);
@@ -369,10 +376,12 @@ private:
             else if (token.value == "(")
                 return parseVector(tokenizer);
             else
-                throw new ZDLException(format!"Invalid symbol '%s'."(token.value), token.sourcePosition);
+                throw new ZDLException(format!"Invalid symbol '%s'."(token.value), token
+                        .sourcePosition);
 
         default:
-            throw new ZDLException(format!"Unknown type for value '%s'."(token.value), token.sourcePosition);
+            throw new ZDLException(format!"Unknown type for value '%s'."(token.value), token
+                    .sourcePosition);
         }
     }
 
@@ -381,7 +390,8 @@ private:
         ZDLList list;
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "["),
-            new ZDLException("Missing opening bracket for list literal.", tokenizer.peek().sourcePosition));
+            new ZDLException("Missing opening bracket for list literal.", tokenizer.peek()
+                .sourcePosition));
 
         size_t idx;
         while (!tokenizer.isEof && !tokenizer.check(Tokenizer.Token.Type.delimiter, "]"))
@@ -392,11 +402,13 @@ private:
 
             if (!tokenizer.check(Tokenizer.Token.Type.delimiter, "]") && !tokenizer.consume(
                     Tokenizer.Token.Type.delimiter, ","))
-                throw new ZDLException("Missing comma in list literal.", tokenizer.peek().sourcePosition);
+                throw new ZDLException("Missing comma in list literal.", tokenizer.peek()
+                        .sourcePosition);
         }
 
         enforce(tokenizer.consume(Tokenizer.Token.Type.delimiter, "]"),
-            new ZDLException("Missing closing bracket for list literal.", tokenizer.peek().sourcePosition));
+            new ZDLException("Missing closing bracket for list literal.", tokenizer.peek()
+                .sourcePosition));
 
         return list;
     }
@@ -406,7 +418,8 @@ private:
         ZDLMap map;
 
         enforce(skipBraces || tokenizer.consume(Tokenizer.Token.Type.delimiter, "{"),
-            new ZDLException("Missing opening bracket for map literal.", tokenizer.peek().sourcePosition));
+            new ZDLException("Missing opening bracket for map literal.", tokenizer.peek()
+                .sourcePosition));
 
         while (!tokenizer.isEof && (skipBraces || !tokenizer.check(Tokenizer.Token.Type.delimiter, "}")))
         {
@@ -418,7 +431,8 @@ private:
 
             enforce(key !in map,
                 new ZDLException(
-                    format!"Duplicate key '%s' in map literal."(key), tokenizer.peek().sourcePosition));
+                    format!"Duplicate key '%s' in map literal."(key), tokenizer.peek()
+                    .sourcePosition));
 
             ZDLNode node = parseValue(tokenizer);
             node.mName = key;
@@ -426,7 +440,8 @@ private:
         }
 
         enforce(skipBraces || tokenizer.consume(Tokenizer.Token.Type.delimiter, "}"),
-            new ZDLException("Missing closing bracket for map literal.", tokenizer.peek().sourcePosition));
+            new ZDLException("Missing closing bracket for map literal.", tokenizer.peek()
+                .sourcePosition));
 
         return map;
     }
@@ -481,8 +496,23 @@ private:
                 return ZDLNode(Vector4i(cast(int) values[0], cast(int) values[1], cast(int) values[2], cast(
                         int) values[3]), startPosition);
 
+        case 9:
+            enforce(isFloatVector, new ZDLException("Matricies cannot be non-float.", startPosition));
+
+            return ZDLNode(Matrix3f(cast(float) values[0], cast(float) values[1], cast(float) values[2],
+                cast(float) values[3], cast(float) values[4], cast(float) values[5],
+                cast(float) values[6], cast(float) values[7], cast(float) values[8]), startPosition);
+        
+        case 16:
+            enforce(isFloatVector, new ZDLException("Matricies cannot be non-float.", startPosition));
+        
+            return ZDLNode(Matrix4f(cast(float) values[0], cast(float) values[1], cast(float) values[2], cast(float) values[3],
+                cast(float) values[4], cast(float) values[5], cast(float) values[6], cast(float) values[7],
+                cast(float) values[8], cast(float) values[9], cast(float) values[10], cast(float) values[11],
+                cast(float) values[12], cast(float) values[13], cast(float) values[14], cast(float) values[15]), startPosition);
+
         default:
-            throw new ZDLException("Invalid amount of components for vector.", tokenizer.peek().sourcePosition);
+            throw new ZDLException("Invalid amount of components for vector.", startPosition);
         }
     }
 
