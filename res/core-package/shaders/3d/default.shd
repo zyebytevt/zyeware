@@ -1,5 +1,6 @@
 // ZyeWare - Default 3D model shader
 
-opengl:vertex file="core://shaders/3d/glsl/default.vert.glsl"
-
-opengl:fragment file="core://shaders/3d/glsl/default.frag.glsl"
+opengl {
+    vertex "core://shaders/3d/glsl/default.vert.glsl"
+    fragment "core://shaders/3d/glsl/default.frag.glsl"
+}

@@ -2,5 +2,7 @@
 
 shader "core://shaders/3d/default.shd"
 
-parameter:shineDamper type="float" value="1"
-parameter:reflectivity type="float" value="0"
+parameters {
+    shineDamper 1.0
+    reflectivity 0.0
+}

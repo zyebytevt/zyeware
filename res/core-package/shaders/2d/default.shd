@@ -1,6 +1,7 @@
 // ZyeWare - Default 2D shader
 // Used by the 2D batch renderer.
 
-opengl:vertex file="core://shaders/2d/glsl/default.vert.glsl"
-
-opengl:fragment file="core://shaders/2d/glsl/default.frag.glsl"
+opengl {
+    vertex "core://shaders/2d/glsl/default.vert.glsl"
+    fragment "core://shaders/2d/glsl/default.frag.glsl"
+}

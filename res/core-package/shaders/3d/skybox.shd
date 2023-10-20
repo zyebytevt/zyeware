@@ -2,6 +2,7 @@
 // Very similar to the unshaded shader, but only using the
 // view-projection matrix and a samplerCube.
 
-opengl:vertex file="core://shaders/3d/glsl/skybox.vert.glsl"
-
-opengl:fragment file="core://shaders/3d/glsl/skybox.frag.glsl"
+opengl {
+    vertex "core://shaders/3d/glsl/skybox.vert.glsl"
+    fragment "core://shaders/3d/glsl/skybox.frag.glsl"
+}

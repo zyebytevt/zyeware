@@ -1,1 +1,3 @@
-loop-point sample=794047
+loopPoint {
+    sample 794047
+}

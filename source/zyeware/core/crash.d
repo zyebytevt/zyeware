@@ -34,11 +34,11 @@ public:
 
         Logger.core.log(LogLevel.fatal, "==================== Unhandled throwable '%s' ====================",
             typeid(t).toString().split(".")[$-1]);
-        Logger.core.log(LogLevel.fatal, "Details: %s", t.msg);
+        Logger.core.log(LogLevel.fatal, "Details: %s", t.message);
 
         foreach (trace; t.info)
-            //if (!trace.startsWith("??:?"))
-            Logger.core.log(LogLevel.info, trace);
+            if (!trace.startsWith("??:?"))
+                Logger.core.log(LogLevel.info, trace);
         
         Logger.core.log(LogLevel.fatal, "------------------------------");
         Logger.core.log(LogLevel.fatal, "If you suspect that this is a ZyeWare issue, please leave a bug report over at https://github.com/zyebytevt/zyeware!");

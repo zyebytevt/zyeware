@@ -40,31 +40,28 @@ package(zyeware.audio.openal):
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
         {
-            import std.conv : to;
-            import sdlang;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
-            Tag root = parseSource(propsFile.readAll!string);
-            propsFile.close();
-
             try
             {
-                if (Tag loopTag = root.getTag("loop-point"))
-                {
-                    int v1, v2;
+                auto document = ZDLDocument.load(path ~ ".props");
 
-                    if ((v1 = loopTag.getAttribute!int("sample")) != int.init)
-                        properties.loopPoint = LoopPoint(v1);
-                    else if ((v1 = loopTag.getAttribute!int("pattern")) != int.init
-                        && (v2 = loopTag.getAttribute!int("row")) != int.init)
-                        properties.loopPoint = LoopPoint(ModuleLoopPoint(v1, v2));
+                if (const(ZDLNode*) node = document.root.getNode("loopPoint"))
+                {
+                    if (node.getNode("sample"))
+                        properties.loopPoint = LoopPoint(cast(int) node.sample.expectValue!ZDLInteger);
+                    else if (node.getNode("pattern"))
+                    {
+                        properties.loopPoint = LoopPoint(ModuleLoopPoint(
+                            cast(int) node.pattern.expectValue!ZDLInteger,
+                            cast(int) node.row.expectValue!ZDLInteger
+                        ));
+                    }
                     else
                         throw new Exception("Could not interpret loop point.");
                 }
             }
             catch (Exception ex)
             {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 

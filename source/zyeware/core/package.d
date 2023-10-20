@@ -14,6 +14,7 @@ public
     import zyeware.core.interpolator;
     import zyeware.core.random;
     import zyeware.core.native;
+    import zyeware.core.zdl;
 
     import zyeware.core.events;
     import zyeware.core.math;
