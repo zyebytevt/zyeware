@@ -45,19 +45,31 @@ private:
         }
 
         // Skip comments and whitespace
-        if (mCursor + 1 < mInput.length && mInput[mCursor] == '/' && mInput[mCursor + 1] == '/')
+        if (mCursor + 1 < mInput.length)
         {
-            while (mCursor < mInput.length && mInput[mCursor] != '\n')
-                advance();
+            if (mInput[mCursor] == '/' && mInput[mCursor + 1] == '/')
+            {
+                while (mCursor < mInput.length && mInput[mCursor] != '\n')
+                    advance();
 
-            goto subStart;
+                goto subStart;
+            }
+            else if (mInput[mCursor] == '/' && mInput[mCursor + 1] == '*')
+            {
+                while (mCursor + 1 < mInput.length && mInput[mCursor] != '*' && mInput[mCursor + 1] != '/')
+                    advance();
+
+                goto subStart;
+            }
         }
-        else if (isWhite(mInput[mCursor]))
+        
+        if (isWhite(mInput[mCursor]))
         {
-            advance();
-            while (mCursor < mInput.length && isWhite(mInput[mCursor]))
+            do
+            {
                 advance();
-
+            } while (mCursor < mInput.length && isWhite(mInput[mCursor]));
+            
             goto subStart;
         }
 
