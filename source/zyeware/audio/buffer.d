@@ -10,26 +10,6 @@ import std.sumtype;
 import zyeware.common;
 import zyeware.audio;
 
-deprecated("This was a joke.")
-{
-    /// Joke alias. Do not use in production.
-    alias NoiseBitties = Sound;
-    /// Joke alias. Do not use in production.
-    alias AirVibrationData = Sound;
-    /// Joke alias. Do not use in production.
-    alias EarMassager = Sound;
-    /// Joke alias. Do not use in production.
-    alias SonicStream = Sound;
-    /// Joke alias. Do not use in production.
-    alias SoundFrame = Sample;
-    /// Joke alias. Do not use in production.
-    alias EarDrumPosition = Sample;
-    /// Joke alias. Do not use in production.
-    alias AirPressure = Sample;
-    /// Joke alias. Do not use in production.
-    alias SpeakerCoilCurrent = Sample;
-}
-
 /// Contains information about a loop point for a module sound file.
 struct ModuleLoopPoint
 {

@@ -34,28 +34,28 @@ public:
     this(in ShaderProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = ZyeWare.graphics.api.createShader(properties);
+        mNativeHandle = GraphicsAPI.createShader(properties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.freeShader(mNativeHandle);
+        GraphicsAPI.freeShader(mNativeHandle);
     }
 
     void setUniform(T)(string name, T value)
     {
         static if (is(T == float))
-            ZyeWare.graphics.api.setShaderUniform1f(mRid, name, value);
+            GraphicsAPI.setShaderUniform1f(mRid, name, value);
         else static if (is(T == Vector2f))
-            ZyeWare.graphics.api.setShaderUniform2f(mRid, name, value);
+            GraphicsAPI.setShaderUniform2f(mRid, name, value);
         else static if (is(T == Vector3f))
-            ZyeWare.graphics.api.setShaderUniform3f(mRid, name, value);
+            GraphicsAPI.setShaderUniform3f(mRid, name, value);
         else static if (is(T == Vector4f))
-            ZyeWare.graphics.api.setShaderUniform4f(mRid, name, value);
+            GraphicsAPI.setShaderUniform4f(mRid, name, value);
         else static if (is(T == int))
-            ZyeWare.graphics.api.setShaderUniform1i(mRid, name, value);
+            GraphicsAPI.setShaderUniform1i(mRid, name, value);
         else static if (is(T == Matrix4f))
-            ZyeWare.graphics.api.setShaderUniformMat4f(mRid, name, value);
+            GraphicsAPI.setShaderUniformMat4f(mRid, name, value);
         else
             static assert(false, "Unsupported uniform type.");
     }

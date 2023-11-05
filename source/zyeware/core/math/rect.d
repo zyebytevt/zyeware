@@ -77,4 +77,14 @@ struct Rect(T)
             r.position.y = outer.position.y + outer.size.y - r.size.y;
         return r;
     }
+
+    VT min() pure nothrow const
+    {
+        return position;
+    }
+
+    VT max() pure nothrow const
+    {
+        return position + size;
+    }
 }

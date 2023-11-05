@@ -14,7 +14,6 @@ public
     import zyeware.rendering.environment;
     import zyeware.rendering.font;
     import zyeware.rendering.framebuffer;
-    import zyeware.rendering.graphics;
     import zyeware.rendering.image;
     import zyeware.rendering.material;
     import zyeware.rendering.mesh3d;

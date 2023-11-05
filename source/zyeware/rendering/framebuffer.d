@@ -25,12 +25,12 @@ public:
     this(in FramebufferProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = ZyeWare.graphics.api.createFramebuffer(mProperties);
+        mNativeHandle = GraphicsAPI.createFramebuffer(mProperties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.freeFramebuffer(mNativeHandle);
+        GraphicsAPI.freeFramebuffer(mNativeHandle);
     }
 
     const(NativeHandle) handle() pure const nothrow

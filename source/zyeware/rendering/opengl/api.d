@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.opengl.api;
 
+import zyeware.rendering.api;
+
 version (ZW_OpenGL):
 package(zyeware.rendering.opengl):
 
@@ -18,6 +20,63 @@ import zyeware.common;
 import zyeware.rendering.vertex;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
+
+public:
+
+GraphicsAPICallbacks getOGLAPICallbacks()
+{
+    return GraphicsAPICallbacks(
+        &initialize,
+        &cleanup,
+        &createMesh,
+        &createTexture2D,
+        &createTextureCubeMap,
+        &createFramebuffer,
+        &createShader,
+        &freeMesh,
+        &freeTexture2D,
+        &freeTextureCubeMap,
+        &freeFramebuffer,
+        &freeShader,
+        &setShaderUniform1f,
+        &setShaderUniform2f,
+        &setShaderUniform3f,
+        &setShaderUniform4f,
+        &setShaderUniform1i,
+        &setShaderUniformMat4f,
+        &setViewport,
+        &setRenderFlag,
+        &getRenderFlag,
+        &getCapability,
+        &setRenderTarget,
+        &presentToScreen
+    );
+}
+
+private:
+
+struct MeshData
+{
+    uint vao;
+    uint vbo;
+    uint ibo;
+}
+
+struct UniformLocationKey
+{
+    uint id;
+    string name;
+}
+
+bool[RenderFlag] pFlagValues;
+
+SequentialBuffer!uint pTexture2DIDs;
+SequentialBuffer!uint pTextureCubeMapIDs;
+SequentialBuffer!MeshData pMeshData;
+SequentialBuffer!uint pFramebufferIDs;
+SequentialBuffer!uint pShaderIDs;
+
+uint[UniformLocationKey] pUniformLocationCache;
 
 version (Windows)
 {
@@ -90,175 +149,199 @@ void glErrorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity,
     Logger.core.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
 }
 
-final class OpenGLAPI : GraphicsAPI
+uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name) nothrow
 {
-protected:
-    struct MeshData
-    {
-        uint vao;
-        uint vbo;
-        uint ibo;
-    }
+    immutable uint id = *(cast(uint*) shader);
+    glUseProgram(id);
 
-    struct UniformLocationKey
-    {
-        uint id;
-        string name;
-    }
+    immutable auto key = UniformLocationKey(id, name);
+    uint location = pUniformLocationCache.get(key, uint.max).assumeWontThrow;
+    if (location == uint.max)
+        pUniformLocationCache[key] = location = glGetUniformLocation(id, name.toStringz);
 
-    bool[RenderFlag] mFlagValues;
+    return location;
+}
 
-    SequentialBuffer!uint mTexture2DIDs;
-    SequentialBuffer!uint mTextureCubeMapIDs;
-    SequentialBuffer!MeshData mMeshData;
-    SequentialBuffer!uint mFramebufferIDs;
-    SequentialBuffer!uint mShaderIDs;
+void initialize()
+{
+    import loader = bindbc.loader.sharedlib;
+    import std.string : fromStringz;
 
-    uint[UniformLocationKey] mUniformLocationCache;
+    if (isOpenGLLoaded())
+        return;
 
-    uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name)
-    {
-        immutable uint id = *(cast(uint*) shader);
-        glUseProgram(id);
-
-        immutable auto key = UniformLocationKey(id, name);
-        uint location = mUniformLocationCache.get(key, uint.max).assumeWontThrow;
-        if (location == uint.max)
-            mUniformLocationCache[key] = location = glGetUniformLocation(id, name.toStringz);
+    immutable glResult = loadOpenGL();
     
-        return location;
-    }
-
-public:
-    void initialize()
+    if (glResult != glSupport)
     {
-        import loader = bindbc.loader.sharedlib;
-        import std.string : fromStringz;
+        foreach (info; loader.errors)
+            Logger.core.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
 
-        if (isOpenGLLoaded())
-            return;
-
-        immutable glResult = loadOpenGL();
-        
-        if (glResult != glSupport)
+        switch (glResult)
         {
-            foreach (info; loader.errors)
-                Logger.core.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
+        case GLSupport.noLibrary:
+            throw new GraphicsException("Could not find OpenGL shared library.");
 
-            switch (glResult)
-            {
-            case GLSupport.noLibrary:
-                throw new GraphicsException("Could not find OpenGL shared library.");
+        case GLSupport.badLibrary:
+            throw new GraphicsException("Provided OpenGL shared is corrupted.");
 
-            case GLSupport.badLibrary:
-                throw new GraphicsException("Provided OpenGL shared is corrupted.");
+        case GLSupport.noContext:
+            throw new GraphicsException("No OpenGL context available.");
 
-            case GLSupport.noContext:
-                throw new GraphicsException("No OpenGL context available.");
-
-            default:
-                Logger.core.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
-            }
-        }
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-
-        glDepthFunc(GL_LEQUAL);
-        
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(&glErrorCallback, null);
-
-        glLineWidth(2);
-        glPointSize(4);
-
-        {
-            GLboolean resultBool;
-            GLint resultInt;
-
-            glGetBooleanv(GL_DEPTH_TEST, &resultBool);
-            pFlagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
-            glGetBooleanv(GL_DEPTH_WRITEMASK, &resultBool);
-            pFlagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
-            glGetBooleanv(GL_CULL_FACE, &resultBool);
-            pFlagValues[RenderFlag.culling] = cast(bool) resultBool;
-            glGetBooleanv(GL_STENCIL_TEST, &resultBool);
-            pFlagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
-            glGetIntegerv(GL_POLYGON_MODE, &resultInt);
-            pFlagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
+        default:
+            Logger.core.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
         }
     }
 
-    void cleanup()
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    glDepthFunc(GL_LEQUAL);
+    
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(&glErrorCallback, null);
+
+    glLineWidth(2);
+    glPointSize(4);
+
     {
-        foreach (ref uint id; mTexture2DIDs.data)
-            freeTexture2D(cast(NativeHandle) &id);
+        GLboolean resultBool;
+        GLint resultInt;
 
-        foreach (ref uint id; mTextureCubeMapIDs.data)
-            freeTextureCubeMap(cast(NativeHandle) &id);
+        glGetBooleanv(GL_DEPTH_TEST, &resultBool);
+        pFlagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &resultBool);
+        pFlagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
+        glGetBooleanv(GL_CULL_FACE, &resultBool);
+        pFlagValues[RenderFlag.culling] = cast(bool) resultBool;
+        glGetBooleanv(GL_STENCIL_TEST, &resultBool);
+        pFlagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
+        glGetIntegerv(GL_POLYGON_MODE, &resultInt);
+        pFlagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
+    }
+}
 
-        foreach (ref MeshData data; mMeshData.data)
-            freeMesh(cast(NativeHandle) &data);
+void cleanup()
+{
+    foreach (ref uint id; pTexture2DIDs.data)
+        freeTexture2D(cast(NativeHandle) &id);
 
-        foreach (ref uint id; mFramebufferIDs.data)
-            freeFramebuffer(cast(NativeHandle) &id);
+    foreach (ref uint id; pTextureCubeMapIDs.data)
+        freeTextureCubeMap(cast(NativeHandle) &id);
 
-        foreach (ref uint id; mShaderIDs.data)
-            freeShader(cast(NativeHandle) &id);
+    foreach (ref MeshData data; pMeshData.data)
+        freeMesh(cast(NativeHandle) &data);
+
+    foreach (ref uint id; pFramebufferIDs.data)
+        freeFramebuffer(cast(NativeHandle) &id);
+
+    foreach (ref uint id; pShaderIDs.data)
+        freeShader(cast(NativeHandle) &id);
+}
+
+NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices)
+{
+    MeshData data;
+
+    glGenVertexArrays(1, &data.vao);
+    glGenBuffers(1, &data.vbo);
+    glGenBuffers(1, &data.ibo);
+
+    glBindVertexArray(data.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, data.vbo);
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.length * Vertex3D.sizeof, &vertices[0], GL_STATIC_DRAW);  
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, 
+                &indices[0], GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.position.offsetof);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.normal.offsetof);
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.uv.offsetof);
+    // vertex color
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.color.offsetof);
+    // vertex material index
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.materialIdx.offsetof);
+
+    glBindVertexArray(0);
+
+    return cast(NativeHandle) pMeshData.add(data);
+}
+
+NativeHandle createTexture2D(in Image image, in TextureProperties properties)
+{
+    const(ubyte)[] pixels = image.pixels;
+
+    assert(pixels.length <= image.size.x * image.size.y * image.channels,
+        "Too much pixel data for texture size.");
+
+    GLenum internalFormat, srcFormat;
+
+    final switch (image.channels)
+    {
+    case 1:
+    case 2:
+        internalFormat = GL_ALPHA;
+        srcFormat = GL_ALPHA;
+        break;
+
+    case 3:
+        internalFormat = GL_RGB8;
+        srcFormat = GL_RGB;
+        break;
+
+    case 4:
+        internalFormat = GL_RGBA8;
+        srcFormat = GL_RGBA;
+        break;
     }
 
-    NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices)
+    uint id;
+
+    glGenTextures(1, &id);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
+
+    if (properties.generateMipmaps)
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+    return cast(NativeHandle) pTexture2DIDs.add(id);
+}
+
+NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties)
+{
+    uint id;
+
+    glGenTextures(1, &id);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
+    for (size_t i; i < 6; ++i)
     {
-        MeshData data;
-
-        glGenVertexArrays(1, &data.vao);
-        glGenBuffers(1, &data.vbo);
-        glGenBuffers(1, &data.ibo);
-
-        glBindVertexArray(data.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, data.vbo);
-
-        glBufferData(GL_ARRAY_BUFFER, vertices.length * Vertex3D.sizeof, &vertices[0], GL_STATIC_DRAW);  
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof, 
-                    &indices[0], GL_STATIC_DRAW);
-
-        // vertex positions
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.position.offsetof);
-        // vertex normals
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.normal.offsetof);
-        // vertex texture coords
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.uv.offsetof);
-        // vertex color
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.color.offsetof);
-        // vertex material index
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_FALSE, Vertex.sizeof, cast(void*) Vertex.materialIdx.offsetof);
-
-        glBindVertexArray(0);
-
-        return cast(NativeHandle) mMeshData.add(data);
-    }
-
-    NativeHandle createTexture2D(in Image image, in TextureProperties properties)
-    {
-        const(ubyte)[] pixels = image.pixels;
-
-        assert(pixels.length <= image.size.x * image.size.y * image.channels,
-            "Too much pixel data for texture size.");
-
         GLenum internalFormat, srcFormat;
 
-        final switch (image.channels)
+        final switch (images[i].channels)
         {
         case 1:
         case 2:
@@ -277,315 +360,273 @@ public:
             break;
         }
 
-        uint id;
-
-        glGenTextures(1, &id);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, id);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, mSize.x, mSize.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
-
-        if (properties.generateMipmaps)
-            glGenerateMipmap(GL_TEXTURE_2D);
-
-        return cast(NativeHandle) mTexture2DIDs.add(id);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cast(int) i, 0, internalFormat, images[i].size.x, images[i].size.y, 0, srcFormat,
+            GL_UNSIGNED_BYTE, images[i].pixels.ptr);
     }
 
-    NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties)
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
+
+    if (properties.generateMipmaps)
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+    return cast(NativeHandle) pTextureCubeMapIDs.add(id);
+}
+
+NativeHandle createFramebuffer(in FramebufferProperties properties)
+{
+    uint id;
+
+    glGenFramebuffers(1, &id);
+    glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+    uint colorRBO, depthRBO;
+
+    glGenRenderbuffers(1, &colorRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, colorRBO);
+
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, properties.size.x, properties.size.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRBO);
+
+    glGenRenderbuffers(1, &depthRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
+
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, properties.size.x, properties.size.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return cast(NativeHandle) pFramebufferIDs.add(id);
+}
+
+NativeHandle createShader(in ShaderProperties properties)
+{
+    immutable uint programID = glCreateProgram();
+
+    foreach (ShaderProperties.ShaderType type, string source; properties.sources)
     {
-        uint id;
+        GLenum shaderType;
 
-        glGenTextures(1, &id);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-
-        for (size_t i; i < 6; ++i)
+        final switch (type) with (ShaderProperties.ShaderType)
         {
-            GLenum internalFormat, srcFormat;
+        case vertex:
+            shaderType = GL_VERTEX_SHADER;
+            break;
 
-            final switch (images[i].channels)
-            {
-            case 1:
-            case 2:
-                internalFormat = GL_ALPHA;
-                srcFormat = GL_ALPHA;
-                break;
+        case fragment:
+            shaderType = GL_FRAGMENT_SHADER;
+            break;
 
-            case 3:
-                internalFormat = GL_RGB8;
-                srcFormat = GL_RGB;
-                break;
+        case geometry:
+            shaderType = GL_GEOMETRY_SHADER;
+            break;
 
-            case 4:
-                internalFormat = GL_RGBA8;
-                srcFormat = GL_RGBA;
-                break;
-            }
-
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cast(int) i, 0, internalFormat, images[i].size.x, images[i].size.y, 0, srcFormat,
-                GL_UNSIGNED_BYTE, images[i].pixels.ptr);
+        case compute:
+        //    shaderType = GL_COMPUTE_SHADER;
+            break;
         }
 
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
+        uint shaderID = glCreateShader(shaderType);
 
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
+        const char* sourcePtr = cast(char*) source.ptr;
 
-        if (properties.generateMipmaps)
-            glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
-        return cast(NativeHandle) mTextureCubeMapIDs.add(id);
-    }
-
-    NativeHandle createFramebuffer(in FramebufferProperties properties)
-    {
-        uint id;
-
-        glGenFramebuffers(1, &id);
-        glBindFramebuffer(GL_FRAMEBUFFER, id);
-
-        uint textureID;
-
-        glGenTextures(1, &textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, properties.size.x, properties.size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
-
-        uint rbo;
-
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, properties.size.x, properties.size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-        assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        return cast(NativeHandle) mFramebufferIDs.add(id);
-    }
-
-    NativeHandle createShader(in ShaderProperties properties)
-    {
-        immutable uint programID = glCreateProgram();
-
-        foreach (ShaderProperties.ShaderType type, string source; properties.sources)
-        {
-            GLenum shaderType;
-
-            final switch (type) with (ShaderProperties.ShaderType)
-            {
-            case vertex:
-                shaderType = GL_VERTEX_SHADER;
-                break;
-
-            case fragment:
-                shaderType = GL_FRAGMENT_SHADER;
-                break;
-
-            case geometry:
-                shaderType = GL_GEOMETRY_SHADER;
-                break;
-
-            case compute:
-                shaderType = GL_COMPUTE_SHADER;
-                break;
-            }
-
-            uint shaderID = glCreateShader(shaderType);
-
-            const char* sourcePtr = cast(char*) source.ptr;
-
-            glShaderSource(shaderID, 1, &sourcePtr, null);
-            glCompileShader(shaderID);
-
-            int success;
-            glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
-
-            if (!success)
-            {
-                char[2048] infoLog;
-                GLsizei length;
-                glGetShaderInfoLog(shaderID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
-                throw new GraphicsException(format!"Shader compilation failed: %s"(infoLog[0..length]));
-            }
-
-            glAttachShader(programID, shaderID);
-            glDeleteShader(shaderID);
-        }
-
-        glLinkProgram(programID);
+        glShaderSource(shaderID, 1, &sourcePtr, null);
+        glCompileShader(shaderID);
 
         int success;
-        glGetProgramiv(programID, GL_LINK_STATUS, &success);
+        glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
 
         if (!success)
         {
             char[2048] infoLog;
             GLsizei length;
-            glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
-            throw new GraphicsException(format!"Shader linking failed: %s"(infoLog[0..length]));
+            glGetShaderInfoLog(shaderID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+            throw new GraphicsException(format!"Shader compilation failed: %s"(infoLog[0..length]));
         }
 
-        glValidateProgram(programID);
-        glGetProgramiv(programID, GL_VALIDATE_STATUS, &success);
-
-        if (!success)
-        {
-            char[2048] infoLog;
-            GLsizei length;
-            glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
-            throw new GraphicsException(format!"Shader validation failed: %s"(infoLog[0..length]));
-        }
-
-        return cast(NativeHandle) mShaderIDs.add(programID);
+        glAttachShader(programID, shaderID);
+        glDeleteShader(shaderID);
     }
 
-    void freeMesh(NativeHandle mesh) nothrow
+    glLinkProgram(programID);
+
+    int success;
+    glGetProgramiv(programID, GL_LINK_STATUS, &success);
+
+    if (!success)
     {
-        auto data = cast(MeshData*) mesh;
-
-        glDeleteBuffers(1, &data.vbo);
-        glDeleteBuffers(1, &data.ibo);
-        glDeleteVertexArrays(1, &data.vao);
-
-        *data = MeshData.init;
+        char[2048] infoLog;
+        GLsizei length;
+        glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+        throw new GraphicsException(format!"Shader linking failed: %s"(infoLog[0..length]));
     }
 
-    void freeTexture2D(NativeHandle texture) nothrow
+    glValidateProgram(programID);
+    glGetProgramiv(programID, GL_VALIDATE_STATUS, &success);
+
+    if (!success)
     {
-        uint* id = cast(uint*) texture;
-        
-        glDeleteTextures(1, id);
-        *id = uint.init;
+        char[2048] infoLog;
+        GLsizei length;
+        glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+        throw new GraphicsException(format!"Shader validation failed: %s"(infoLog[0..length]));
     }
 
-    void freeTextureCubeMap(NativeHandle texture) nothrow
+    return cast(NativeHandle) pShaderIDs.add(programID);
+}
+
+void freeMesh(NativeHandle mesh) nothrow
+{
+    auto data = cast(MeshData*) mesh;
+
+    glDeleteBuffers(1, &data.vbo);
+    glDeleteBuffers(1, &data.ibo);
+    glDeleteVertexArrays(1, &data.vao);
+
+    *data = MeshData.init;
+}
+
+void freeTexture2D(NativeHandle texture) nothrow
+{
+    uint* id = cast(uint*) texture;
+    
+    glDeleteTextures(1, id);
+    *id = uint.init;
+}
+
+void freeTextureCubeMap(NativeHandle texture) nothrow
+{
+    freeTexture2D(texture);
+}
+
+void freeFramebuffer(NativeHandle framebuffer) nothrow
+{
+    uint* id = cast(uint*) framebuffer;
+
+    glDeleteFramebuffers(1, id);
+    *id = uint.init;
+}
+
+void freeShader(NativeHandle shader) nothrow
+{
+    uint* id = cast(uint*) shader;
+
+    glDeleteProgram(*id);
+    *id = uint.init;
+}
+
+void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow
+{
+    glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
+}
+
+void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow
+{
+    glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
+}
+
+void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow
+{
+    glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
+}
+
+void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow
+{
+    glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value.w);
+}
+
+void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow
+{
+    glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
+}
+
+void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow
+{
+    glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value.ptr);
+}
+
+void setViewport(Rect2i region) nothrow
+{
+    glViewport(region.position.x, region.position.y, region.size.x, region.size.y);
+}
+
+void setRenderFlag(RenderFlag flag, bool value) nothrow
+{
+    if (pFlagValues[flag] == value)
+        return;
+
+    final switch (flag) with (RenderFlag)
     {
-        freeTexture2D(texture);
+    case depthTesting:
+        if (value)
+            glEnable(GL_DEPTH_TEST);
+        else
+            glDisable(GL_DEPTH_TEST);
+        break;
+
+    case depthBufferWriting:
+        glDepthMask(value);
+        break;
+
+    case culling:
+        if (value)
+            glEnable(GL_CULL_FACE);
+        else
+            glDisable(GL_CULL_FACE);
+        break;
+
+    case stencilTesting:
+        if (value)
+            glEnable(GL_STENCIL_TEST);
+        else
+            glDisable(GL_STENCIL_TEST);
+        break;
+
+    case wireframe:
+        glPolygonMode(GL_FRONT_AND_BACK, value ? GL_LINE : GL_FILL);
+        break;
     }
 
-    void freeFramebuffer(NativeHandle framebuffer) nothrow
+    pFlagValues[flag] = value;
+}
+
+bool getRenderFlag(RenderFlag flag) nothrow
+{
+    return pFlagValues[flag];
+}
+
+size_t getCapability(RenderCapability capability) nothrow
+{
+    final switch (capability) with (RenderCapability)
     {
-        uint* id = cast(uint*) framebuffer;
-
-        glDeleteFramebuffers(1, id);
-        *id = uint.init;
-    }
-
-    void freeShader(NativeHandle shader) nothrow
-    {
-        uint* id = cast(uint*) shader;
-
-        glDeleteProgram(id);
-        *id = uint.init;
-    }
-
-    void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow
-    {
-        glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
-    }
-
-    void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow
-    {
-        glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
-    }
-
-    void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow
-    {
-        glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
-    }
-
-    void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow
-    {
-        glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value.w);
-    }
-
-    void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow
-    {
-        glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
-    }
-
-    void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow
-    {
-        glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value.value_ptr);
-    }
-
-    void setViewport(Rect2i region) nothrow
-    {
-        glViewport(region.position.x, region.position.y, region.size.x, region.size.y);
-    }
-
-    void setRenderFlag(RenderFlag flag, bool value) nothrow
-    {
-        if (mFlagValues[flag] == value)
-            return;
-
-        final switch (flag) with (RenderFlag)
-        {
-        case depthTesting:
-            if (value)
-                glEnable(GL_DEPTH_TEST);
-            else
-                glDisable(GL_DEPTH_TEST);
-            break;
-
-        case depthBufferWriting:
-            glDepthMask(value);
-            break;
-
-        case culling:
-            if (value)
-                glEnable(GL_CULL_FACE);
-            else
-                glDisable(GL_CULL_FACE);
-            break;
-
-        case stencilTesting:
-            if (value)
-                glEnable(GL_STENCIL_TEST);
-            else
-                glDisable(GL_STENCIL_TEST);
-            break;
-
-        case wireframe:
-            glPolygonMode(GL_FRONT_AND_BACK, value ? GL_LINE : GL_FILL);
-            break;
-        }
-
-        mFlagValues[flag] = value;
-    }
-
-    bool getRenderFlag(RenderFlag flag) nothrow
-    {
-        return mFlagValues[flag];
-    }
-
-    size_t getCapability(RenderCapability capability) nothrow
-    {
-        final switch (capability) with (RenderCapability)
-        {
-        case maxTextureSlots:
-            GLint result;
-            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
-            return result;
-        }
+    case maxTextureSlots:
+        GLint result;
+        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
+        return result;
     }
 }
 
-private:
+void setRenderTarget(in NativeHandle target) nothrow
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, target ? *(cast(uint*) target) : 0);
+}
+
+void presentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, *(cast(uint*) framebuffer));
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBlitFramebuffer(srcRegion.position.x, srcRegion.position.y, srcRegion.size.x, srcRegion.size.y, dstRegion.position.x, dstRegion.position.y,
+        dstRegion.size.x, dstRegion.size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+}
 
 GLuint getGLFilter(TextureProperties.Filter filter)
 {

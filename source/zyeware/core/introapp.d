@@ -68,8 +68,8 @@ public:
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        GraphicsAPI.setClearColor(mBackgroundGradient.interpolate(seconds));
-        GraphicsAPI.clear();
+        //GraphicsAPI.setClearColor(mBackgroundGradient.interpolate(seconds));
+        //GraphicsAPI.clear();
 
         immutable float scale = mScaleInterpolator.interpolate(seconds);
         Vector2f min = Vector2f(-0.9, -0.35) * scale;
@@ -77,14 +77,14 @@ public:
 
         immutable float alpha = mAlphaInterpolator.interpolate(seconds);
 
-        Renderer2D.begin(mCamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
 
-        Renderer2D.drawRect(Rect2f(min, max), Matrix4f.identity,
+        Renderer2D.drawRectangle(Rect2f(min, max), Matrix4f.identity,
             Color(1, 1, 1, alpha), mEngineLogo);
 
         Renderer2D.drawString(mVersionString, mInternalFont, Vector2f(-1, -1), Color(1, 1, 1, alpha),
             Font.Alignment.left | Font.Alignment.bottom);
         
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 }

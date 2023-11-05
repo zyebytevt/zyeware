@@ -11,9 +11,35 @@ import std.exception : enforce;
 import zyeware.common;
 import zyeware.rendering;
 
-interface Renderer3D
+struct Renderer3DCallbacks
 {
-    void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment);
-    void end();
-    void submit(in Matrix4f transform);
+public:
+    void function(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment) beginScene;
+    void function() end;
+    void function(in Matrix4f transform) submit;
+}
+
+struct Renderer3D
+{
+    @disable this();
+    @disable this(this);
+
+package(zyeware) static:
+    Renderer3DCallbacks sCallbacks;
+
+public static:
+    void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
+    {
+        sCallbacks.beginScene(projectionMatrix, viewMatrix, environment);
+    }
+
+    void end()
+    {
+        sCallbacks.end();
+    }
+
+    void submit(in Matrix4f transform)
+    {
+        sCallbacks.submit(transform);
+    }
 }

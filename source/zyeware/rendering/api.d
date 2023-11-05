@@ -29,34 +29,154 @@ enum RenderCapability
     maxTextureSlots /// How many texture slots are available to use.
 }
 
-interface GraphicsAPI
+struct GraphicsAPICallbacks
 {
-    void initialize();
-    void cleanup();
+public:
+    void function() initialize;
+    void function() cleanup;
 
-    NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices);
-    NativeHandle createTexture2D(in Image image, in TextureProperties properties);
-    NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties);
-    NativeHandle createFramebuffer(in FramebufferProperties properties);
-    NativeHandle createShader(in ShaderProperties properties);
+    NativeHandle function(in Vertex3D[] vertices, in uint[] indices) createMesh;
+    NativeHandle function(in Image image, in TextureProperties properties) createTexture2D;
+    NativeHandle function(in Image[6] images, in TextureProperties properties) createTextureCubeMap;
+    NativeHandle function(in FramebufferProperties properties) createFramebuffer;
+    NativeHandle function(in ShaderProperties properties) createShader;
 
-    void freeMesh(NativeHandle mesh) nothrow;
-    void freeTexture2D(NativeHandle texture) nothrow;
-    void freeTextureCubeMap(NativeHandle texture) nothrow;
-    void freeFramebuffer(NativeHandle framebuffer) nothrow;
-    void freeShader(NativeHandle shader) nothrow;
+    void function(NativeHandle mesh) nothrow freeMesh;
+    void function(NativeHandle texture) nothrow freeTexture2D;
+    void function(NativeHandle texture) nothrow freeTextureCubeMap;
+    void function(NativeHandle framebuffer) nothrow freeFramebuffer;
+    void function(NativeHandle shader) nothrow freeShader;
 
-    void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow;
-    void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow;
-    void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow;
-    void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow;
-    void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow;
-    void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow;
+    void function(in NativeHandle shader, in string name, in float value) nothrow setShaderUniform1f;
+    void function(in NativeHandle shader, in string name, in Vector2f value) nothrow setShaderUniform2f;
+    void function(in NativeHandle shader, in string name, in Vector3f value) nothrow setShaderUniform3f;
+    void function(in NativeHandle shader, in string name, in Vector4f value) nothrow setShaderUniform4f;
+    void function(in NativeHandle shader, in string name, in int value) nothrow setShaderUniform1i;
+    void function(in NativeHandle shader, in string name, in Matrix4f value) nothrow setShaderUniformMat4f;
 
-    void setViewport(Rect2i region) nothrow;
+    void function(Rect2i region) nothrow setViewport;
+    void function(RenderFlag flag, bool value) nothrow setRenderFlag;
+    bool function(RenderFlag flag) nothrow getRenderFlag;
+    size_t function(RenderCapability capability) nothrow getCapability;
 
-    void setRenderFlag(RenderFlag flag, bool value) nothrow;
-    bool getRenderFlag(RenderFlag flag) nothrow;
+    void function(in NativeHandle target) nothrow setRenderTarget;
+    void function(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow presentToScreen;
+}
 
-    size_t getCapability(RenderCapability capability) nothrow;
+struct GraphicsAPI
+{
+    @disable this();
+    @disable this(this);
+    
+package(zyeware) static:
+    GraphicsAPICallbacks sCallbacks;
+
+public static:
+    void initialize()
+    {
+        sCallbacks.initialize();
+    }
+
+    void cleanup()
+    {
+        sCallbacks.cleanup();
+    }
+
+    NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices)
+    {
+        return sCallbacks.createMesh(vertices, indices);
+    }
+
+    NativeHandle createTexture2D(in Image image, in TextureProperties properties)
+    {
+        return sCallbacks.createTexture2D(image, properties);
+    }
+
+    NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties)
+    {
+        return sCallbacks.createTextureCubeMap(images, properties);
+    }
+
+    NativeHandle createFramebuffer(in FramebufferProperties properties)
+    {
+        return sCallbacks.createFramebuffer(properties);
+    }   
+
+    NativeHandle createShader(in ShaderProperties properties)
+    {
+        return sCallbacks.createShader(properties);
+    }
+
+    void freeMesh(NativeHandle mesh) nothrow
+    {
+        sCallbacks.freeMesh(mesh);
+    }
+
+    void freeTexture2D(NativeHandle texture) nothrow
+    {
+        sCallbacks.freeTexture2D(texture);
+    }
+
+    void freeTextureCubeMap(NativeHandle texture) nothrow
+    {
+        sCallbacks.freeTextureCubeMap(texture);
+    }
+
+    void freeFramebuffer(NativeHandle framebuffer) nothrow
+    {
+        sCallbacks.freeFramebuffer(framebuffer);
+    }
+
+    void freeShader(NativeHandle shader) nothrow
+    {
+        sCallbacks.freeShader(shader);
+    }
+
+    void setShaderUniform(T)(in NativeHandler shader, in string name, in T value) nothrow
+    {
+        static if (is(T == float))
+            sCallbacks.setShaderUniform1f(shader, name, value);
+        else static if (is(T == Vector2f))
+            sCallbacks.setShaderUniform2f(shader, name, value);
+        else static if (is(T == Vector3f))
+            sCallbacks.setShaderUniform3f(shader, name, value);
+        else static if (is(T == Vector4f))
+            sCallbacks.setShaderUniform4f(shader, name, value);
+        else static if (is(T == int))
+            sCallbacks.setShaderUniform1i(shader, name, value);
+        else static if (is(T == Matrix4f))
+            sCallbacks.setShaderUniformMat4f(shader, name, value);
+        else
+            static assert(false, "Unsupported type " ~ T.stringof ~ " for setShaderUniform");
+    }
+
+    void setViewport(Rect2i region) nothrow
+    {
+        sCallbacks.setViewport(region);
+    }
+
+    void setRenderFlag(RenderFlag flag, bool value) nothrow
+    {
+        sCallbacks.setRenderFlag(flag, value);
+    }
+
+    bool getRenderFlag(RenderFlag flag) nothrow
+    {
+        return sCallbacks.getRenderFlag(flag);
+    }
+
+    size_t getCapability(RenderCapability capability) nothrow
+    {
+        return sCallbacks.getCapability(capability);
+    }
+
+    void renderTarget(in NativeHandle target) nothrow
+    {
+        sCallbacks.setRenderTarget(target);
+    }
+
+    void presentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow
+    {
+        sCallbacks.presentToScreen(framebuffer, srcRegion, dstRegion);
+    }
 }

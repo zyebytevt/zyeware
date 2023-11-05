@@ -62,17 +62,17 @@ protected:
     }
 
 public:
-    this(in Vertex3D[] vertices, in uint[] indices, in Material[] materials)
+    this(in Vertex3D[] vertices, in uint[] indices, Material[] materials)
         in (vertices, "Vertices cannot be null.")
         in (indices, "Indices cannot be null.")
     {
-        mNativeHandle = ZyeWare.graphics.api.createMesh(vertices, indices);
+        mNativeHandle = GraphicsAPI.createMesh(vertices, indices);
         mMaterials = materials;
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.freeMesh(mNativeHandle);
+        GraphicsAPI.freeMesh(mNativeHandle);
     }
 
     const(void)* handle() const nothrow pure
@@ -80,7 +80,7 @@ public:
         return mNativeHandle;
     }
 
-    static Mesh load(string path)
+    static Mesh3D load(string path)
         in (path, "Path cannot be null.")
     {
         Mesh3D mesh;
@@ -97,9 +97,7 @@ public:
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
         {
-            import sdlang;
-
-            VFSFile propsFile = VFS.getFile(path ~ ".props");
+            /*VFSFile propsFile = VFS.getFile(path ~ ".props");
             Tag root = parseSource(propsFile.readAll!string);
             propsFile.close();
 
@@ -111,7 +109,7 @@ public:
             catch (Exception ex)
             {
                 Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
-            }
+            }*/
         }
 
         return mesh;
@@ -251,7 +249,7 @@ parseLoop:
                     indices ~= cast(uint) *vertexIdx;
                 else
                 {
-                    Mesh.Vertex v;
+                    Vertex3D v;
 
                     v.position = positions[posIdx].xyz;
 

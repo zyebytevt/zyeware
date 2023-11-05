@@ -44,7 +44,7 @@ public:
         mShader = shader;
         mIsRoot = true;
 
-        mTextureSlots.length = shader.textureCount;
+        //mTextureSlots.length = shader.textureCount;
     }
 
     this(Material parent)
@@ -53,7 +53,7 @@ public:
         mParent = parent;
         mIsRoot = false;
 
-        mTextureSlots.length = shader.textureCount;
+        //mTextureSlots.length = shader.textureCount;
     }
 
     void setParameter(T)(string name, T value)
@@ -114,14 +114,14 @@ public:
 
     void bind()
     {
-        shader.bind();
+        //shader.bind();
 
         // Bind constant buffer, if it exists
-        ConstantBuffer bindBuffer = buffer;
+        //ConstantBuffer bindBuffer = buffer;
 
-        if (bindBuffer)
+        //if (bindBuffer)
         {
-            foreach (string entry; buffer.entries)
+            /*foreach (string entry; buffer.entries)
             {
                 Parameter* parameter = getParameter(entry);
 
@@ -138,17 +138,17 @@ public:
                     (Vector3f x) => bindBuffer.setData(offset, x.vector),
                     (Vector4f x) => bindBuffer.setData(offset, x.vector),
                 );
-            }
+            }*/
 
-            bindBuffer.bind(ConstantBuffer.Slot.modelVariables);
+            //bindBuffer.bind(ConstantBuffer.Slot.modelVariables);
         }
 
         // Bind textures
         for (size_t i; i < mTextureSlots.length; ++i)
         {
             auto tex = getTexture(i);
-            if (tex)
-                tex.bind(cast(uint) i);
+            //if (tex)
+            //    tex.bind(cast(uint) i);
         }
     }
 
@@ -235,7 +235,7 @@ public:
         {
             Shader shader = AssetManager.load!Shader(shaderNode.expectValue!ZDLString);
             
-            BufferElement[] bufferElements;
+            /*BufferElement[] bufferElements;
             foreach (string name; paramOrder)
             {
                 bufferElements ~= parsedParams[name].match!(
@@ -251,7 +251,7 @@ public:
             if (bufferElements.length > 0)
                 material = new Material(shader, BufferLayout(bufferElements));
             else
-                material = new Material(shader);
+                material = new Material(shader);*/
         }
         else if (const(ZDLNode*) extendsNode = document.root.getNode("extends"))
         {

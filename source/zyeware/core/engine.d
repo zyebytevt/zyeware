@@ -25,7 +25,6 @@ import zyeware.audio.thread;
 import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
-import zyeware.rendering.graphics;
 
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
@@ -71,6 +70,13 @@ struct Version
     }
 }
 
+struct GraphicsBackendCallbacks
+{
+    GraphicsAPICallbacks api;
+    Renderer2DCallbacks renderer2D;
+    Renderer3DCallbacks renderer3D;
+}
+
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
 struct ZyeWare
 {
@@ -91,7 +97,7 @@ private static:
     Framebuffer sMainFramebuffer;
     Matrix4f sFramebufferProjection;
     Matrix4f sWindowProjection;
-    Rect2f sFramebufferArea;
+    Rect2i sFramebufferArea;
     ScaleMode sScaleMode;
 
     ProjectProperties sProjectProperties;
@@ -195,30 +201,30 @@ private static:
         immutable Vector2i winSize = sMainWindow.size;
         immutable Vector2i gameSize = sMainFramebuffer.properties.size;
 
-        Vector2f finalPos, finalSize;
+        Vector2i finalPos, finalSize;
 
         final switch (sScaleMode) with (ScaleMode)
         {
         case center:
-            finalPos = Vector2f(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
-            finalSize = Vector2f(gameSize);
+            finalPos = Vector2i(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
+            finalSize = Vector2i(gameSize);
             break;
 
         case keepAspect:
             immutable float scale = min(cast(float) winSize.x / gameSize.x, cast(float) winSize.y / gameSize.y);
 
-            finalSize = Vector2f(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
-            finalPos = Vector2f(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
+            finalSize = Vector2i(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
+            finalPos = Vector2i(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
             break;
 
         case fill:
         case changeWindowSize:
-            finalPos = Vector2f(0);
-            finalSize = Vector2f(winSize);
+            finalPos = Vector2i(0);
+            finalSize = Vector2i(winSize);
             break;
         }
 
-        sFramebufferArea = Rect2f(finalPos, finalPos + finalSize);
+        sFramebufferArea = Rect2i(finalPos, finalPos + finalSize);
     }
 
     void drawFramebuffer(in FrameTime nextFrameTime)
@@ -227,26 +233,16 @@ private static:
 
         // Prepare framebuffer and render application into it.
         GraphicsAPI.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
-        sMainFramebuffer.bind();
+        
+        GraphicsAPI.renderTarget = sMainFramebuffer.handle;
         sApplication.draw(nextFrameTime);
+        GraphicsAPI.renderTarget = null;
 
-        sMainFramebuffer.unbind();
+        immutable bool oldWireframe = GraphicsAPI.getRenderFlag(RenderFlag.wireframe);
+        immutable bool oldCulling = GraphicsAPI.getRenderFlag(RenderFlag.culling);
 
-        immutable bool oldWireframe = GraphicsAPI.getFlag(RenderFlag.wireframe);
-        immutable bool oldCulling = GraphicsAPI.getFlag(RenderFlag.culling);
-
-        // Prepare window space to render framebuffer into.
-        GraphicsAPI.setFlag(RenderFlag.culling, false);
-        GraphicsAPI.setFlag(RenderFlag.wireframe, false);
-
-        GraphicsAPI.setViewport(0, 0, sMainWindow.size.x, sMainWindow.size.y);
-        GraphicsAPI.clear();
-        Renderer2D.begin(sWindowProjection, Matrix4f.identity);
-        Renderer2D.drawRect(sFramebufferArea, Matrix4f.identity, Color.white, sMainFramebuffer.colorAttachment);
-        Renderer2D.end();
-
-        GraphicsAPI.setFlag(RenderFlag.culling, oldCulling);
-        GraphicsAPI.setFlag(RenderFlag.wireframe, oldWireframe);
+        GraphicsAPI.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
+            sFramebufferArea);
 
         sMainWindow.swapBuffers();
     }
@@ -291,7 +287,7 @@ private static:
 
     void loadBackends(const ProjectProperties properties)
     {
-        import zyeware.rendering.opengl.impl;
+        /*import zyeware.rendering.opengl.impl;
         import zyeware.audio.openal.impl;
 
         switch (properties.renderBackend) with (RenderBackend)
@@ -316,7 +312,7 @@ private static:
                 break;
             }
             else throw new CoreException("ZyeWare has not been compiled with OpenAL support.");
-        }
+        }*/
     }
 
 package(zyeware.core) static:
@@ -363,7 +359,7 @@ package(zyeware.core) static:
         AudioThread.initialize();
         GraphicsAPI.initialize();
         Renderer2D.initialize();
-        Renderer3D.initialize();
+        //Renderer3D.initialize();
 
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
@@ -378,7 +374,7 @@ package(zyeware.core) static:
         sCleanupTimer.stop();
         sMainWindow.destroy();
         sApplication.cleanup();
-        Renderer3D.cleanup();
+        //Renderer3D.cleanup();
         Renderer2D.cleanup();
         GraphicsAPI.cleanup();
         AudioThread.cleanup();
@@ -401,9 +397,6 @@ package(zyeware.core) static:
 public static:
     /// The current version of the engine.
     immutable Version engineVersion = Version(0, 5, 0, "alpha");
-
-    /// TODO: The currently active graphics?
-    Graphics graphics;
 
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
@@ -449,7 +442,7 @@ public static:
             recalculateFramebufferArea();
 
             // TODO: Move this to pre-frame with flag.
-            if (sScaleMode == ScaleMode.changeWindowSize)
+            /*if (sScaleMode == ScaleMode.changeWindowSize)
             {
                 FramebufferProperties fbProps = sMainFramebuffer.properties;
                 fbProps.size = wev.size;
@@ -457,7 +450,7 @@ public static:
 
                 import std.exception : assumeWontThrow;
                 sMainFramebuffer.invalidate().assumeWontThrow;
-            }
+            }*/
         }
         
         if (Exception ex = collectException(sApplication.receive(ev)))
@@ -584,8 +577,8 @@ public static:
     {
         FramebufferProperties fbProps = sMainFramebuffer.properties;
         fbProps.size = newSize;
-        sMainFramebuffer.properties = fbProps;
-        sMainFramebuffer.invalidate();
+        //sMainFramebuffer.properties = fbProps;
+        //sMainFramebuffer.invalidate();
 
         sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
         recalculateFramebufferArea();

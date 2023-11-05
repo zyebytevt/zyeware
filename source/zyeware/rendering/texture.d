@@ -46,12 +46,12 @@ public:
     this(in Image image, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mNativeHandle = ZyeWare.graphics.api.createTexture2D(image, mProperties);
+        mNativeHandle = GraphicsAPI.createTexture2D(image, mProperties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.freeTexture2D(mNativeHandle);
+        GraphicsAPI.freeTexture2D(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -81,12 +81,12 @@ public:
     this(in Image[6] images, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mNativeHandle = ZyeWare.graphics.api.createTextureCubeMap(images, properties);
+        mNativeHandle = GraphicsAPI.createTextureCubeMap(images, properties);
     }
 
     ~this()
     {
-        ZyeWare.graphics.api.freeTextureCubeMap(mNativeHandle);
+        GraphicsAPI.freeTextureCubeMap(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
