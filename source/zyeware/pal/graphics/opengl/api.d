@@ -5,8 +5,6 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.opengl.api;
 
-import zyeware.rendering.api;
-
 version (ZW_OpenGL):
 package(zyeware.rendering.opengl):
 
@@ -23,9 +21,9 @@ import zyeware.rendering;
 
 public:
 
-GraphicsAPICallbacks getOGLAPICallbacks()
+PAL.graphicsCallbacks getOGLAPICallbacks()
 {
-    return GraphicsAPICallbacks(
+    return PAL.graphicsCallbacks(
         &initialize,
         &cleanup,
         &createMesh,

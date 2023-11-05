@@ -45,7 +45,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        GraphicsAPI.clear();
+        PAL.graphics.clear();
 
         Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
 
@@ -56,11 +56,11 @@ public:
             .format(mCurrentGamepadIndex), mFont, Vector2f(4));
 
         for (GamepadButton b = GamepadButton.min; b <= GamepadButton.max; ++b)
-            Renderer2D.drawString(format!"%s: %s"(b, ZyeWare.mainWindow.isGamepadButtonPressed(mCurrentGamepadIndex, b)),
+            Renderer2D.drawString(format!"%s: %s"(b, ZyeWare.mainDisplay.isGamepadButtonPressed(mCurrentGamepadIndex, b)),
                 mFont, Vector2f(40, 140 + b * 16));
 
         for (GamepadAxis a = GamepadAxis.min; a <= GamepadAxis.max; ++a)
-            Renderer2D.drawString(format!"%s: %.3f"(a, ZyeWare.mainWindow.getGamepadAxisValue(mCurrentGamepadIndex, a)),
+            Renderer2D.drawString(format!"%s: %.3f"(a, ZyeWare.mainDisplay.getGamepadAxisValue(mCurrentGamepadIndex, a)),
                 mFont, Vector2f(300, 140 + a * 16));
 
         Renderer2D.end();

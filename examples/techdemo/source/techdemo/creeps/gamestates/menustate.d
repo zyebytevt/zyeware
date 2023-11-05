@@ -33,7 +33,7 @@ public:
                 application.pushState(new CreepsPlayState(application));
             else if (InputManager.isActionJustPressed("ui_cancel"))
             {
-                ZyeWare.changeWindowSize(Vector2i(640, 480));
+                ZyeWare.changeDisplaySize(Vector2i(640, 480));
                 application.popState();
             }
         }
@@ -62,7 +62,7 @@ public:
             mCamera = new OrthographicCamera(0, 480, 720, 0);
             mFont = AssetManager.load!Font("core://fonts/internal.fnt");
 
-            ZyeWare.changeWindowSize(screenSize);
+            ZyeWare.changeDisplaySize(screenSize);
         }
 
         mIgnoreInputFrames = 5;

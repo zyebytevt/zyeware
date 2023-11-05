@@ -34,28 +34,28 @@ public:
     this(in ShaderProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = GraphicsAPI.createShader(properties);
+        mNativeHandle = PAL.graphics.createShader(properties);
     }
 
     ~this()
     {
-        GraphicsAPI.freeShader(mNativeHandle);
+        PAL.graphics.freeShader(mNativeHandle);
     }
 
     void setUniform(T)(string name, T value)
     {
         static if (is(T == float))
-            GraphicsAPI.setShaderUniform1f(mRid, name, value);
+            PAL.graphics.setShaderUniform1f(mRid, name, value);
         else static if (is(T == Vector2f))
-            GraphicsAPI.setShaderUniform2f(mRid, name, value);
+            PAL.graphics.setShaderUniform2f(mRid, name, value);
         else static if (is(T == Vector3f))
-            GraphicsAPI.setShaderUniform3f(mRid, name, value);
+            PAL.graphics.setShaderUniform3f(mRid, name, value);
         else static if (is(T == Vector4f))
-            GraphicsAPI.setShaderUniform4f(mRid, name, value);
+            PAL.graphics.setShaderUniform4f(mRid, name, value);
         else static if (is(T == int))
-            GraphicsAPI.setShaderUniform1i(mRid, name, value);
+            PAL.graphics.setShaderUniform1i(mRid, name, value);
         else static if (is(T == Matrix4f))
-            GraphicsAPI.setShaderUniformMat4f(mRid, name, value);
+            PAL.graphics.setShaderUniformMat4f(mRid, name, value);
         else
             static assert(false, "Unsupported uniform type.");
     }

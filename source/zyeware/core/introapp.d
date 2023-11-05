@@ -68,8 +68,8 @@ public:
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        //GraphicsAPI.setClearColor(mBackgroundGradient.interpolate(seconds));
-        //GraphicsAPI.clear();
+        //PAL.graphics.setClearColor(mBackgroundGradient.interpolate(seconds));
+        //PAL.graphics.clear();
 
         immutable float scale = mScaleInterpolator.interpolate(seconds);
         Vector2f min = Vector2f(-0.9, -0.35) * scale;

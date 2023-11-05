@@ -12,7 +12,7 @@ extern(C) ProjectProperties getProjectProperties()
 		authorName: "ZyeByte",
 		projectName: "ZyeWare Sandbox",
 
-		mainWindowProperties: {
+		mainDisplayProperties: {
 			title: "ZyeWare Tech Demo",
 			size: Vector2i(640, 480),
 			icon: Image.load(cast(ubyte[]) import("icon.png"))
@@ -79,7 +79,7 @@ public:
 			.addInput(new InputEventKey(KeyCode.enter))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.a));
 
-		ZyeWare.mainWindow.cursor = AssetManager.load!Cursor("core://cursors/arrow.cursor");
+		ZyeWare.mainDisplay.cursor = AssetManager.load!Cursor("core://cursors/arrow.cursor");
 
         changeState(new DemoMenu(this));
 	}

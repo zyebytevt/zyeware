@@ -25,12 +25,12 @@ public:
     this(in FramebufferProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = GraphicsAPI.createFramebuffer(mProperties);
+        mNativeHandle = PAL.graphics.createFramebuffer(mProperties);
     }
 
     ~this()
     {
-        GraphicsAPI.freeFramebuffer(mNativeHandle);
+        PAL.graphics.freeFramebuffer(mNativeHandle);
     }
 
     const(NativeHandle) handle() pure const nothrow

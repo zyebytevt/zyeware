@@ -155,7 +155,7 @@ public:
 }
 
 /// Represents a sink to write a message into. This can be either a file, a console,
-/// a in-game window, etc.
+/// a in-game display, etc.
 abstract class LogSink
 {
 public:

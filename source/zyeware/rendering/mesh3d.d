@@ -11,7 +11,6 @@ import std.path : extension;
 import inmath.linalg;
 
 import zyeware.common;
-import zyeware.rendering.api;
 import zyeware.rendering;
 import zyeware.rendering.vertex;
 
@@ -66,13 +65,13 @@ public:
         in (vertices, "Vertices cannot be null.")
         in (indices, "Indices cannot be null.")
     {
-        mNativeHandle = GraphicsAPI.createMesh(vertices, indices);
+        mNativeHandle = PAL.graphics.createMesh(vertices, indices);
         mMaterials = materials;
     }
 
     ~this()
     {
-        GraphicsAPI.freeMesh(mNativeHandle);
+        PAL.graphics.freeMesh(mNativeHandle);
     }
 
     const(void)* handle() const nothrow pure

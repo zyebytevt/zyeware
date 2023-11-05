@@ -176,7 +176,7 @@ package(zyeware.rendering.opengl):
         
         if (sWindowCount == 0)
         {
-            GraphicsAPI.loadLibraries();
+            PAL.graphics.loadLibraries();
 
             Logger.core.log(LogLevel.info, "Initialized OpenGL Context:");
             Logger.core.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);

@@ -54,9 +54,9 @@ public:
 
         // Implement controller movement of camera
         {
-            immutable float leftX = ZyeWare.mainWindow.getGamepadAxisValue(0, GamepadAxis.leftX) * 0.1f;
-            immutable float leftY = ZyeWare.mainWindow.getGamepadAxisValue(0, GamepadAxis.leftY) * 0.1f;
-            immutable float rightY = ZyeWare.mainWindow.getGamepadAxisValue(0, GamepadAxis.rightY) * 0.2f;
+            immutable float leftX = ZyeWare.mainDisplay.getGamepadAxisValue(0, GamepadAxis.leftX) * 0.1f;
+            immutable float leftY = ZyeWare.mainDisplay.getGamepadAxisValue(0, GamepadAxis.leftY) * 0.1f;
+            immutable float rightY = ZyeWare.mainDisplay.getGamepadAxisValue(0, GamepadAxis.rightY) * 0.2f;
             enum deadZone = 0.01f;
 
             moveCamera(
@@ -90,7 +90,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        GraphicsAPI.clear();
+        PAL.graphics.clear();
 
         Material material = mCurrentMesh.material;
         if (!material)

@@ -41,7 +41,7 @@ struct ProjectProperties
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
-    WindowProperties mainWindowProperties; /// The properties of the main window.
+    DisplayProperties mainDisplayProperties; /// The properties of the main display.
 
     uint audioBufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
     uint audioBufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
@@ -72,7 +72,7 @@ struct Version
 
 struct GraphicsBackendCallbacks
 {
-    GraphicsAPICallbacks api;
+    PAL.graphicsCallbacks api;
     Renderer2DCallbacks renderer2D;
     Renderer3DCallbacks renderer3D;
 }
@@ -86,7 +86,7 @@ struct ZyeWare
 private static:
     alias DeferFunc = void delegate();
 
-    Window sMainWindow;
+    Display sMainDisplay;
     Application sApplication;
 
     Duration sFrameTime;
@@ -96,7 +96,7 @@ private static:
 
     Framebuffer sMainFramebuffer;
     Matrix4f sFramebufferProjection;
-    Matrix4f sWindowProjection;
+    Matrix4f sDisplayProjection;
     Rect2i sFramebufferArea;
     ScaleMode sScaleMode;
 
@@ -187,10 +187,10 @@ private static:
     void createFramebuffer()
     {
         FramebufferProperties fbProps;
-        fbProps.size = sMainWindow.size;
+        fbProps.size = sMainDisplay.size;
         sMainFramebuffer = new Framebuffer(fbProps);
 
-        sWindowProjection = Matrix4f.orthographic(0, sMainWindow.size.x, 0, sMainWindow.size.y, -1, 1);
+        sDisplayProjection = Matrix4f.orthographic(0, sMainDisplay.size.x, 0, sMainDisplay.size.y, -1, 1);
         sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
 
         recalculateFramebufferArea();
@@ -198,7 +198,7 @@ private static:
 
     void recalculateFramebufferArea() nothrow
     {
-        immutable Vector2i winSize = sMainWindow.size;
+        immutable Vector2i winSize = sMainDisplay.size;
         immutable Vector2i gameSize = sMainFramebuffer.properties.size;
 
         Vector2i finalPos, finalSize;
@@ -218,7 +218,7 @@ private static:
             break;
 
         case fill:
-        case changeWindowSize:
+        case changeDisplaySize:
             finalPos = Vector2i(0);
             finalSize = Vector2i(winSize);
             break;
@@ -229,22 +229,22 @@ private static:
 
     void drawFramebuffer(in FrameTime nextFrameTime)
     {
-        sMainWindow.update();
+        sMainDisplay.update();
 
         // Prepare framebuffer and render application into it.
-        GraphicsAPI.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
+        PAL.graphics.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
         
-        GraphicsAPI.renderTarget = sMainFramebuffer.handle;
+        PAL.graphics.renderTarget = sMainFramebuffer.handle;
         sApplication.draw(nextFrameTime);
-        GraphicsAPI.renderTarget = null;
+        PAL.graphics.renderTarget = null;
 
-        immutable bool oldWireframe = GraphicsAPI.getRenderFlag(RenderFlag.wireframe);
-        immutable bool oldCulling = GraphicsAPI.getRenderFlag(RenderFlag.culling);
+        immutable bool oldWireframe = PAL.graphics.getRenderFlag(RenderFlag.wireframe);
+        immutable bool oldCulling = PAL.graphics.getRenderFlag(RenderFlag.culling);
 
-        GraphicsAPI.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
+        PAL.graphics.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
             sFramebufferArea);
 
-        sMainWindow.swapBuffers();
+        sMainDisplay.swapBuffers();
     }
 
     void parseCmdArgs(string[] args, ref ProjectProperties properties)
@@ -347,9 +347,9 @@ package(zyeware.core) static:
                 crashHandler = new DefaultCrashHandler();
         }
         
-        // Creates a new window and render context.
-        sMainWindow = Window.create(properties.mainWindowProperties);
-        enforce!CoreException(sMainWindow, "Main window creation failed.");
+        // Creates a new display and render context.
+        sMainDisplay = new Display(properties.mainDisplayProperties);
+        enforce!CoreException(sMainDisplay, "Main display creation failed.");
         createFramebuffer();
 
         // Initialize all other sub-systems.
@@ -357,7 +357,7 @@ package(zyeware.core) static:
         AssetManager.initialize();
         AudioAPI.initialize();
         AudioThread.initialize();
-        GraphicsAPI.initialize();
+        PAL.graphics.initialize();
         Renderer2D.initialize();
         //Renderer3D.initialize();
 
@@ -372,11 +372,11 @@ package(zyeware.core) static:
     void cleanup()
     {
         sCleanupTimer.stop();
-        sMainWindow.destroy();
+        sMainDisplay.destroy();
         sApplication.cleanup();
         //Renderer3D.cleanup();
         Renderer2D.cleanup();
-        GraphicsAPI.cleanup();
+        PAL.graphics.cleanup();
         AudioThread.cleanup();
         AudioAPI.cleanup();
 
@@ -401,10 +401,10 @@ public static:
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
     {
-        center, /// Keep the original size at the center of the window.
-        keepAspect, /// Scale with window, but keep the aspect.
-        fill, /// Fill the window completely.
-        changeWindowSize /// Resize the framebuffer itself.
+        center, /// Keep the original size at the center of the display.
+        keepAspect, /// Scale with display, but keep the aspect.
+        fill, /// Fill the display completely.
+        changeDisplaySize /// Resize the framebuffer itself.
     }
 
     /// Stops the main loop and quits the engine.
@@ -436,13 +436,13 @@ public static:
             scope (exit) sIsEmittingEvent = false;
         }
 
-        if (auto wev = cast(WindowResizedEvent) ev)
+        if (auto wev = cast(DisplayResizedEvent) ev)
         {
-            sWindowProjection = Matrix4f.orthographic(0, wev.size.x, 0, wev.size.y, -1, 1);
+            sDisplayProjection = Matrix4f.orthographic(0, wev.size.x, 0, wev.size.y, -1, 1);
             recalculateFramebufferArea();
 
             // TODO: Move this to pre-frame with flag.
-            /*if (sScaleMode == ScaleMode.changeWindowSize)
+            /*if (sScaleMode == ScaleMode.changeDisplaySize)
             {
                 FramebufferProperties fbProps = sMainFramebuffer.properties;
                 fbProps.size = wev.size;
@@ -480,14 +480,14 @@ public static:
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 
-    /// Changes the window size, respecting various window states with it (e.g. full screen, minimised etc.)
+    /// Changes the display size, respecting various display states with it (e.g. full screen, minimised etc.)
     /// Params:
-    ///   size = The new size of the window.
-    void changeWindowSize(Vector2i size)
+    ///   size = The new size of the display.
+    void changeDisplaySize(Vector2i size)
         in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
     {
-        if (!sMainWindow.isMaximized && !sMainWindow.isMinimized)
-            sMainWindow.size = Vector2i(size);
+        if (!sMainDisplay.isMaximized && !sMainDisplay.isMinimized)
+            sMainDisplay.size = Vector2i(size);
         
         framebufferSize = Vector2i(size);
     }
@@ -559,10 +559,10 @@ public static:
         return sRandom;
     }
 
-    /// The main window of the engine.
-    Window mainWindow() nothrow
+    /// The main display of the engine.
+    Display mainDisplay() nothrow
     {
-        return sMainWindow;
+        return sMainDisplay;
     }
 
     /// The size of the main framebuffer.
@@ -584,13 +584,13 @@ public static:
         recalculateFramebufferArea();
     }
 
-    /// Converts the given window-relative position to the main framebuffer location.
+    /// Converts the given display-relative position to the main framebuffer location.
     /// Use this method whenever you have to e.g. convert mouse pointer coordinates.
     /// 
     /// Params:
-    ///     location = The window relative position.
+    ///     location = The display relative position.
     /// Returns: The converted framebuffer position.
-    Vector2f convertWindowToFramebufferLocation(Vector2f location) nothrow
+    Vector2f convertDisplayToFramebufferLocation(Vector2f location) nothrow
     {
         float fbActualWidth = sFramebufferArea.max.x - sFramebufferArea.min.x;
         float fbActualHeight = sFramebufferArea.max.y - sFramebufferArea.min.y;
@@ -601,7 +601,7 @@ public static:
         return Vector2f(x, y);
     }
 
-    /// Determines how the displayed framebuffer will be scaled according to the window size and shape.
+    /// Determines how the displayed framebuffer will be scaled according to the display size and shape.
     ScaleMode scaleMode() nothrow
     {
         return sScaleMode;

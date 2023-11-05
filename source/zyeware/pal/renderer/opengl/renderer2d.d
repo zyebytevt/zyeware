@@ -186,16 +186,16 @@ void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
 {
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
-    GraphicsAPI.setRenderFlag(RenderFlag.depthTesting, false);
-    pOldCullingValue = GraphicsAPI.getRenderFlag(RenderFlag.culling);
-    GraphicsAPI.setRenderFlag(RenderFlag.culling, false);
+    PAL.graphics.setRenderFlag(RenderFlag.depthTesting, false);
+    pOldCullingValue = PAL.graphics.getRenderFlag(RenderFlag.culling);
+    PAL.graphics.setRenderFlag(RenderFlag.culling, false);
 }
 
 void endScene()
 {
     flush();
 
-    GraphicsAPI.setRenderFlag(RenderFlag.culling, pOldCullingValue);
+    PAL.graphics.setRenderFlag(RenderFlag.culling, pOldCullingValue);
 }
 
 void flush()

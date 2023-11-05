@@ -3,50 +3,50 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.core.events.window;
+module zyeware.core.events.display;
 
 import std.string : format;
 
 import zyeware.common;
 import zyeware.core.events.event;
-import zyeware.rendering.window;
+import zyeware.rendering.display;
 
-/// WindowEvents are sent when something happens regarding windows.
-abstract class WindowEvent : Event
+/// DisplayEvents are sent when something happens regarding displays.
+abstract class DisplayEvent : Event
 {
 protected:
-    Window mWindow;
+    Display mDisplay;
 
     /// Params:
-    ///     window = The window this event was sent from.
-    this(Window window) pure nothrow
+    ///     display = The display this event was sent from.
+    this(Display display) pure nothrow
     {
-        mWindow = window;
+        mDisplay = display;
     }
 
 public:
-    /// The window this event was sent from.
-    final inout(Window) window() inout pure nothrow
+    /// The display this event was sent from.
+    final inout(Display) display() inout pure nothrow
     {
-        return mWindow;
+        return mDisplay;
     }
 }
 
-/// This event is sent when a window has been resized.
+/// This event is sent when a display has been resized.
 /// Often times, this actually refers to the resizing of the <i>framebuffer</i>, and
-/// not necessarily of the window itself.
-class WindowResizedEvent : WindowEvent
+/// not necessarily of the display itself.
+class DisplayResizedEvent : DisplayEvent
 {
 protected:
     Vector2i mSize;
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     size = The size after resizing.
-    this(Window window, Vector2i size) pure nothrow
+    this(Display display, Vector2i size) pure nothrow
     {
-        super(window);
+        super(display);
         mSize = size;
     }
 
@@ -58,23 +58,23 @@ public:
 
     override string toString() const
     {
-        return format!"WindowResizedEvent(size: %s)"(mSize);
+        return format!"DisplayResizedEvent(size: %s)"(mSize);
     }
 }
 
-/// This event is sent when a window has been moved.
-class WindowMovedEvent : WindowEvent
+/// This event is sent when a display has been moved.
+class DisplayMovedEvent : DisplayEvent
 {
 protected:
     Vector2i mPosition;
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     position = The position after moving.
-    this(Window window, Vector2i position) pure nothrow
+    this(Display display, Vector2i position) pure nothrow
     {
-        super(window);
+        super(display);
         mPosition = position;
     }
 
@@ -86,6 +86,6 @@ public:
 
     override string toString() const
     {
-        return format!"WindowMovedEvent(position: %s)"(mPosition);
+        return format!"DisplayMovedEvent(position: %s)"(mPosition);
     }
 }

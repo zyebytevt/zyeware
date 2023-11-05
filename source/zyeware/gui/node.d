@@ -58,7 +58,7 @@ protected:
         {
             if (!mIsPressedDown)
             {
-                Vector2f position = ZyeWare.convertWindowToFramebufferLocation(cMotion.position);
+                Vector2f position = ZyeWare.convertDisplayToFramebufferLocation(cMotion.position);
                 immutable bool hovering = mArea.contains(position);
 
                 if (hovering && !mIsCursorHovering)
@@ -78,7 +78,7 @@ protected:
             // TODO: Why specifically buttonLeft?
             if (cButton.button == MouseCode.buttonLeft)
             {
-                Vector2f position = ZyeWare.convertWindowToFramebufferLocation(ZyeWare.mainWindow.cursorPosition);
+                Vector2f position = ZyeWare.convertDisplayToFramebufferLocation(ZyeWare.mainDisplay.cursorPosition);
                 immutable bool hovering = mArea.contains(position);
 
                 if (cButton.isPressed() && hovering)

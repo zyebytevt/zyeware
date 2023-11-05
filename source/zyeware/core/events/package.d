@@ -9,7 +9,7 @@ public
 {
     import zyeware.core.events.event;
     import zyeware.core.events.input;
-    import zyeware.core.events.window;
+    import zyeware.core.events.display;
     import zyeware.core.events.application;
     import zyeware.core.events.gui;
 }

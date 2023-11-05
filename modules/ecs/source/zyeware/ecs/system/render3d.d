@@ -57,7 +57,7 @@ public:
             }
         }
 
-        GraphicsAPI.clear();
+        PAL.graphics.clear();
 
         if (!foundCamera || !environment)
         {

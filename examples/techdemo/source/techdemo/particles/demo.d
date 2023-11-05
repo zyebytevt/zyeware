@@ -24,7 +24,7 @@ public:
 
     override void tick(in FrameTime frameTime)
     {
-        auto position = ZyeWare.convertWindowToFramebufferLocation(ZyeWare.mainWindow.cursorPosition);
+        auto position = ZyeWare.convertDisplayToFramebufferLocation(ZyeWare.mainDisplay.cursorPosition);
 
         if (InputManager.isActionPressed("ui_down"))
             mParticles.emit(mStarParticlesId, position, 500);
@@ -38,7 +38,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        GraphicsAPI.clear();
+        PAL.graphics.clear();
 
         Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, Vector2f(4), Color.white);

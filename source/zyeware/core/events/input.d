@@ -10,7 +10,7 @@ import std.string : format;
 import zyeware.common;
 import zyeware.core.events.event;
 import zyeware.utils.codes;
-import zyeware.rendering.window;
+import zyeware.rendering.display;
 
 /// InputEvents are sent when the user makes some kind of input. They are also used
 /// as templates to register actions within the `InputManager`.
@@ -25,25 +25,25 @@ public:
     abstract bool matchInputTemplate(in InputEvent ev, float deadzone, out bool pressed, out float strength) const nothrow;
 }
 
-/// Like InputEvent, but sent from a Window.
+/// Like InputEvent, but sent from a Display.
 /// See_Also: InputEvent
-abstract class InputEventFromWindow : InputEvent
+abstract class InputEventFromDisplay : InputEvent
 {
 protected:
-    Window mWindow;
+    Display mDisplay;
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
-    this(Window window) pure nothrow
+    ///     display = The display this event was sent from.
+    this(Display display) pure nothrow
     {
-        mWindow = window;
+        mDisplay = display;
     }
 
-    /// The window this event was sent from.
-    final inout(Window) window() pure inout nothrow
+    /// The display this event was sent from.
+    final inout(Display) display() pure inout nothrow
     {
-        return mWindow;
+        return mDisplay;
     }
 }
 
@@ -102,7 +102,7 @@ public:
 // =============================================
 
 /// This event is sent when the user activates a key on a physical keyboard.
-class InputEventKey : InputEventFromWindow
+class InputEventKey : InputEventFromDisplay
 {
 protected:
     KeyCode mKeycode;
@@ -110,12 +110,12 @@ protected:
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     keycode = The key code of the activated key.
     ///     isPressed = Whether the key is pressed or not.
-    this(Window window, KeyCode keycode, bool isPressed) pure nothrow
+    this(Display display, KeyCode keycode, bool isPressed) pure nothrow
     {
-        super(window);
+        super(display);
 
         mKeycode = keycode;
         mIsPressed = isPressed;
@@ -160,25 +160,25 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventKey(window: %s, keycode: %d, isPressed: %s)"(mWindow, mKeycode, mIsPressed);
+        return format!"InputEventKey(display: %s, keycode: %d, isPressed: %s)"(mDisplay, mKeycode, mIsPressed);
     }
 }
 
 /// This event is sent when the user types some text. This handles unicode,
 /// so use this instead of `InputEventKey` when reading text.
 /// See_Also: InputEventKey
-class InputEventText : InputEventFromWindow
+class InputEventText : InputEventFromDisplay
 {
 protected:
     dchar mCodepoint;
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     codepoint = The unicode code point of the sent character.
-    this(Window window, dchar codepoint) pure nothrow
+    this(Display display, dchar codepoint) pure nothrow
     {
-        super(window);
+        super(display);
 
         mCodepoint = codepoint;
     }
@@ -196,14 +196,14 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventText(window: %s, codepoint: %d)"(mWindow, mCodepoint);
+        return format!"InputEventText(display: %s, codepoint: %d)"(mDisplay, mCodepoint);
     }
 }
 
 // =============================================
 
-/// This event is sent when the user activates a mouse button inside a window.
-class InputEventMouseButton : InputEventFromWindow
+/// This event is sent when the user activates a mouse button inside a display.
+class InputEventMouseButton : InputEventFromDisplay
 {
 protected:
     MouseCode mButton;
@@ -212,12 +212,12 @@ protected:
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     button = The mouse code of the button that was activated.
     ///     isPressed = Whether the button was pressed or not.
-    this(Window window, MouseCode button, bool isPressed, size_t clickCount) pure nothrow
+    this(Display display, MouseCode button, bool isPressed, size_t clickCount) pure nothrow
     {
-        super(window);
+        super(display);
 
         mButton = button;
         mIsPressed = isPressed;
@@ -268,23 +268,23 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventMouseButton(window: %s, button: %d, isPressed: %s)"(mWindow, mButton, mIsPressed);
+        return format!"InputEventMouseButton(display: %s, button: %d, isPressed: %s)"(mDisplay, mButton, mIsPressed);
     }
 }
 
-/// This event is sent when the user scrolls the mouse wheel inside a window.
-class InputEventMouseScroll : InputEventFromWindow
+/// This event is sent when the user scrolls the mouse wheel inside a display.
+class InputEventMouseScroll : InputEventFromDisplay
 {
 protected:
     Vector2f mOffset;
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     offset = The amount the mouse wheel was scrolled.
-    this(Window window, Vector2f offset) pure nothrow
+    this(Display display, Vector2f offset) pure nothrow
     {
-        super(window);
+        super(display);
 
         mOffset = offset;
     }
@@ -320,12 +320,12 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventMouseScroll(window: %s, offset: %s)"(mWindow, mOffset);
+        return format!"InputEventMouseScroll(display: %s, offset: %s)"(mDisplay, mOffset);
     }
 }
 
-/// This event is sent when the user moves the cursor inside a window.
-class InputEventMouseMotion : InputEventFromWindow
+/// This event is sent when the user moves the cursor inside a display.
+class InputEventMouseMotion : InputEventFromDisplay
 {
 protected:
     Vector2f mPosition;
@@ -333,12 +333,12 @@ protected:
 
 public:
     /// Params:
-    ///     window = The window this event was sent from.
+    ///     display = The display this event was sent from.
     ///     position = The current cursor position.
     ///     relative = The relative motion of the cursor.
-    this(Window window, Vector2f position, Vector2f relative) pure nothrow
+    this(Display display, Vector2f position, Vector2f relative) pure nothrow
     {
-        super(window);
+        super(display);
 
         mPosition = position;
         mRelative = relative;

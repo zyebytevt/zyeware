@@ -46,12 +46,12 @@ public:
     this(in Image image, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mNativeHandle = GraphicsAPI.createTexture2D(image, mProperties);
+        mNativeHandle = PAL.graphics.createTexture2D(image, mProperties);
     }
 
     ~this()
     {
-        GraphicsAPI.freeTexture2D(mNativeHandle);
+        PAL.graphics.freeTexture2D(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -81,12 +81,12 @@ public:
     this(in Image[6] images, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mNativeHandle = GraphicsAPI.createTextureCubeMap(images, properties);
+        mNativeHandle = PAL.graphics.createTextureCubeMap(images, properties);
     }
 
     ~this()
     {
-        GraphicsAPI.freeTextureCubeMap(mNativeHandle);
+        PAL.graphics.freeTextureCubeMap(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -166,12 +166,12 @@ interface Texture2D : Texture
 
     static Texture2D create(in Image image, in TextureProperties properties)
     {
-        return GraphicsAPI.sCreateTexture2DImpl(image, properties);
+        return PAL.graphics.sCreateTexture2DImpl(image, properties);
     }
 
     static Texture2D load(string path)
     {
-        return GraphicsAPI.sLoadTexture2DImpl(path);
+        return PAL.graphics.sLoadTexture2DImpl(path);
     }
 }
 
@@ -185,11 +185,11 @@ interface TextureCubeMap : Texture
 
     static TextureCubeMap create(in Image[6] images, in TextureProperties properties)
     {
-        return GraphicsAPI.sCreateTextureCubeMapImpl(images, properties);
+        return PAL.graphics.sCreateTextureCubeMapImpl(images, properties);
     }
 
     static TextureCubeMap load(string path)
     {
-        return GraphicsAPI.sLoadTextureCubeMapImpl(path);
+        return PAL.graphics.sLoadTextureCubeMapImpl(path);
     }
 }+/

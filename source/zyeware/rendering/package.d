@@ -7,7 +7,6 @@ module zyeware.rendering;
 
 public
 {
-    import zyeware.rendering.api;
     import zyeware.rendering.camera;
     import zyeware.rendering.color;
     import zyeware.rendering.cursor;
@@ -27,5 +26,5 @@ public
     import zyeware.rendering.texatlas;
     import zyeware.rendering.texture;
     import zyeware.rendering.vertex;
-    import zyeware.rendering.window;
+    import zyeware.rendering.display;
 }
