@@ -1,4 +1,4 @@
-module zyeware.rendering.opengl.renderer2d;
+module zyeware.pal.renderer.opengl.renderer2d;
 
 import std.traits : isSomeString;
 import std.string : lineSplitter;
@@ -9,7 +9,26 @@ import bmfont : BMFont = Font;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal.renderer.callbacks;
 import zyeware.pal;
+import zyeware.pal.graphics.callbacks;
+
+public:
+
+Renderer2DCallbacks generateRenderer2DPALCallbacks()
+{
+    return Renderer2DCallbacks(
+        &initialize,
+        &cleanup,
+        &beginScene,
+        &endScene,
+        &flush,
+        &drawRectangle,
+        &drawString,
+        &drawWString,
+        &drawDString
+    );
+}
 
 private:
 
@@ -192,17 +211,20 @@ void flush()
     glBindVertexArray(activeBuffer.vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, activeBuffer.vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, pCurrentQuadCount * QuadVertex.sizeof * 4, cast(void*)pBatchVertices.ptr);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, pCurrentQuadCount * QuadVertex.sizeof * 4, cast(void*) pBatchVertices.ptr);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, activeBuffer.ibo);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, pCurrentQuadCount * uint.sizeof * 6, cast(void*)pBatchIndices.ptr);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, pCurrentQuadCount * uint.sizeof * 6, cast(void*) pBatchIndices.ptr);
 
-    //pDefaultShader.bind();
-    //pDefaultShader.setUniform("iProjectionView", pProjectionViewMatrix);
-    //pDefaultShader.setUniform("iTextureCount", pNextFreeTexture);
+    glUseProgram(*(cast(uint*) pDefaultShader.handle));
+    pDefaultShader.setUniform("iProjectionView", pProjectionViewMatrix);
+    pDefaultShader.setUniform("iTextureCount", cast(int) pNextFreeTexture);
 
-    //for (size_t i; i < pNextFreeTexture; ++i)
-    //    pBatchTextures[i].bind(i);
+    for (uint i; i < pNextFreeTexture; ++i)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, *(cast(uint*) pBatchTextures[i].handle));
+    }
 
     glDrawElements(GL_TRIANGLES, cast(int) pCurrentQuadCount * 6, GL_UNSIGNED_INT, null);
 

@@ -1,4 +1,4 @@
-#version 410 core
+#version 420 core
 
 // ===== OUTPUTS =====
 layout(location = 0) out vec4 oColor;

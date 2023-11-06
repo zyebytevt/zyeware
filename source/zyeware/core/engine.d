@@ -26,6 +26,8 @@ import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
 import zyeware.pal;
+import zyeware.pal.graphics.opengl.api;
+import zyeware.pal.graphics.callbacks;
 
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
@@ -229,9 +231,7 @@ private static:
         sApplication.draw(nextFrameTime);
         PAL.graphics.setRenderTarget(null);
 
-        immutable bool oldWireframe = PAL.graphics.getRenderFlag(RenderFlag.wireframe);
-        immutable bool oldCulling = PAL.graphics.getRenderFlag(RenderFlag.culling);
-
+        PAL.graphics.clearScreen(Color.black);
         PAL.graphics.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
             sFramebufferArea);
 
@@ -274,7 +274,16 @@ private static:
 
     void loadBackends(const ProjectProperties properties)
     {
-        
+        import zyeware.pal.display.opengl.display : generateDisplayPALCallbacks;
+        import zyeware.pal.graphics.opengl.api : generateGraphicsPALCallbacks;
+        import zyeware.pal.renderer.opengl.renderer2d : generateRenderer2DPALCallbacks;
+        import zyeware.audio.openal.impl;
+
+        loadOpenALBackend();
+
+        PAL.sDisplayCallbacks = generateDisplayPALCallbacks();
+        PAL.sGraphicsCallbacks = generateGraphicsPALCallbacks();
+        PAL.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();
     }
 
 package(zyeware.core) static:

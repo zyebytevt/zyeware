@@ -11,28 +11,26 @@ import std.exception : enforce;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal.renderer.callbacks;
+import zyeware.pal;
 
 struct Renderer3D
 {
     @disable this();
     @disable this(this);
 
-package(zyeware) static:
-    Renderer3DCallbacks sCallbacks;
-
 public static:
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
     {
-        sCallbacks.beginScene(projectionMatrix, viewMatrix, environment);
+        PAL.renderer3D.beginScene(projectionMatrix, viewMatrix, environment);
     }
 
     void end()
     {
-        sCallbacks.end();
+        PAL.renderer3D.end();
     }
 
     void submit(in Matrix4f transform)
     {
-        sCallbacks.submit(transform);
+        PAL.renderer3D.submit(transform);
     }
 }

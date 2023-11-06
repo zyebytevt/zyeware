@@ -1,4 +1,4 @@
-#version 410 core
+#version 420 core
 
 // ===== ATTRIBUTES =====
 layout(location = 0) in vec3 aPosition;

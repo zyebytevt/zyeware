@@ -24,7 +24,58 @@ import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal.display.callbacks;
 import zyeware.pal;
+
+public:
+
+// TODO: Temp
+DisplayPALCallbacks generateDisplayPALCallbacks()
+{
+    return DisplayPALCallbacks(
+        &createDisplay,
+        &destroyDisplay,
+        &update,
+        &swapBuffers,
+        &isKeyPressed,
+        &isMouseButtonPressed,
+        &isGamepadButtonPressed,
+        &getGamepadAxisValue,
+        &getCursorPosition,
+        &setVSyncEnabled,
+        &isVSyncEnabled,
+        &setPosition,
+        &getPosition,
+        &setSize,
+        &getSize,
+        &setFullscreen,
+        &isFullscreen,
+        &setResizable,
+        &isResizable,
+        &setDecorated,
+        &isDecorated,
+        &setFocused,
+        &isFocused,
+        &setVisible,
+        &isVisible,
+        &setMinimized,
+        &isMinimized,
+        &setMaximized,
+        &isMaximized,
+        &setIcon,
+        &getIcon,
+        &setCursor,
+        &getCursor,
+        &setTitle,
+        &getTitle,
+        &setMouseCursorVisible,
+        &isMouseCursorVisible,
+        &setMouseCursorCaptured,
+        &isMouseCursorCaptured,
+        &setClipboardString,
+        &getClipboardString,
+    );
+}
 
 private:
 
@@ -433,11 +484,11 @@ float getGamepadAxisValue(in NativeHandle handle, size_t gamepadIdx, GamepadAxis
     return SDL_GameControllerGetAxis(pad, sdlAxis) / 32_768f;
 }
 
-Vector2f getCursorPosition(in NativeHandle handle) nothrow
+Vector2i getCursorPosition(in NativeHandle handle) nothrow
 {
     int x, y;
     SDL_GetMouseState(&x, &y);
-    return Vector2f(x, y);
+    return Vector2i(x, y);
 }
 
 void setVSyncEnabled(in NativeHandle handle, bool value) nothrow

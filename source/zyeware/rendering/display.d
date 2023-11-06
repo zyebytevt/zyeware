@@ -28,7 +28,7 @@ public:
     this(DisplayProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = PAL.display.createDisplay(properties);
+        mNativeHandle = PAL.display.createDisplay(properties, this);
     }
 
     ~this()

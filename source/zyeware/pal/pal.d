@@ -1,6 +1,8 @@
 module zyeware.pal.pal;
 
-import zyeware.pal;
+import zyeware.pal.graphics.callbacks;
+import zyeware.pal.display.callbacks;
+import zyeware.pal.renderer.callbacks;
 
 struct PAL
 {

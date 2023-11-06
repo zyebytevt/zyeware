@@ -2,7 +2,7 @@ module zyeware.pal.graphics.callbacks;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.graphics;
+import zyeware.pal.graphics.callbacks;
 
 enum RenderFlag
 {
@@ -37,6 +37,7 @@ public:
     void function(NativeHandle framebuffer) nothrow freeFramebuffer;
     void function(NativeHandle shader) nothrow freeShader;
 
+    void function(in NativeHandle shader) nothrow setActiveShader;
     void function(in NativeHandle shader, in string name, in float value) nothrow setShaderUniform1f;
     void function(in NativeHandle shader, in string name, in Vector2f value) nothrow setShaderUniform2f;
     void function(in NativeHandle shader, in string name, in Vector3f value) nothrow setShaderUniform3f;
@@ -48,6 +49,7 @@ public:
     void function(RenderFlag flag, bool value) nothrow setRenderFlag;
     bool function(RenderFlag flag) nothrow getRenderFlag;
     size_t function(RenderCapability capability) nothrow getCapability;
+    void function(Color clearColor) nothrow clearScreen;
 
     void function(in NativeHandle target) nothrow setRenderTarget;
     void function(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow presentToScreen;

@@ -6,7 +6,7 @@ import zyeware.rendering;
 struct DisplayPALCallbacks
 {
 public:
-    NativeHandle function(in DisplayProperties properties) createDisplay;
+    NativeHandle function(in DisplayProperties properties, in Display container) createDisplay;
     void function(in NativeHandle handle) destroyDisplay;
 
     void function(in NativeHandle handle) update;

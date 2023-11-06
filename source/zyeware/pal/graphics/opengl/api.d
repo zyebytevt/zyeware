@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.pal.graphics.opengl.api;
 
+import zyeware.pal.graphics.callbacks;
+
 version (ZW_OpenGL):
 
 import std.typecons : Tuple;
@@ -16,6 +18,41 @@ import bindbc.opengl;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
+
+public:
+
+GraphicsPALCallbacks generateGraphicsPALCallbacks()
+{
+    return GraphicsPALCallbacks(
+        &initialize,
+        &loadLibraries,
+        &cleanup,
+        &createMesh,
+        &createTexture2D,
+        &createTextureCubeMap,
+        &createFramebuffer,
+        &createShader,
+        &freeMesh,
+        &freeTexture2D,
+        &freeTextureCubeMap,
+        &freeFramebuffer,
+        &freeShader,
+        &setActiveShader,
+        &setShaderUniform1f,
+        &setShaderUniform2f,
+        &setShaderUniform3f,
+        &setShaderUniform4f,
+        &setShaderUniform1i,
+        &setShaderUniformMat4f,
+        &setViewport,
+        &setRenderFlag,
+        &getRenderFlag,
+        &getCapability,
+        &clearScreen,
+        &setRenderTarget,
+        &presentToScreen,
+    );
+}
 
 private:
 
@@ -128,6 +165,45 @@ uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string nam
 
 void initialize()
 {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    glDepthFunc(GL_LEQUAL);
+    
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(&glErrorCallback, null);
+
+    glLineWidth(2);
+    glPointSize(4);
+
+    {
+        import std.traits : EnumMembers;
+
+        foreach (flag; EnumMembers!RenderFlag)
+            pFlagValues[flag] = false;
+
+        GLboolean resultBool;
+        GLint resultInt;
+
+        glGetBooleanv(GL_DEPTH_TEST, &resultBool);
+        pFlagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &resultBool);
+        pFlagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
+        glGetBooleanv(GL_CULL_FACE, &resultBool);
+        pFlagValues[RenderFlag.culling] = cast(bool) resultBool;
+        glGetBooleanv(GL_STENCIL_TEST, &resultBool);
+        pFlagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
+        glGetIntegerv(GL_POLYGON_MODE, &resultInt);
+        pFlagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
+    }
+}
+
+void loadLibraries()
+{
     import loader = bindbc.loader.sharedlib;
     import std.string : fromStringz;
 
@@ -155,37 +231,6 @@ void initialize()
         default:
             Logger.core.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
         }
-    }
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-
-    glDepthFunc(GL_LEQUAL);
-    
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(&glErrorCallback, null);
-
-    glLineWidth(2);
-    glPointSize(4);
-
-    {
-        GLboolean resultBool;
-        GLint resultInt;
-
-        glGetBooleanv(GL_DEPTH_TEST, &resultBool);
-        pFlagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
-        glGetBooleanv(GL_DEPTH_WRITEMASK, &resultBool);
-        pFlagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
-        glGetBooleanv(GL_CULL_FACE, &resultBool);
-        pFlagValues[RenderFlag.culling] = cast(bool) resultBool;
-        glGetBooleanv(GL_STENCIL_TEST, &resultBool);
-        pFlagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
-        glGetIntegerv(GL_POLYGON_MODE, &resultInt);
-        pFlagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
     }
 }
 
@@ -486,6 +531,11 @@ void freeShader(NativeHandle shader) nothrow
     *id = uint.init;
 }
 
+void setActiveShader(in NativeHandle shader) nothrow
+{
+    glUseProgram(shader ? *(cast(uint*) shader) : 0);
+}
+
 void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow
 {
     glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
@@ -575,6 +625,12 @@ size_t getCapability(RenderCapability capability) nothrow
         glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
         return result;
     }
+}
+
+void clearScreen(Color clearColor) nothrow
+{
+    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void setRenderTarget(in NativeHandle target) nothrow

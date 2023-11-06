@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/skeleton
+skeleton.so
+skeleton.dylib
+skeleton.dll
+skeleton.a
+skeleton.lib
+skeleton-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
