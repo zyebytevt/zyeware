@@ -219,6 +219,7 @@ void flush()
     glUseProgram(*(cast(uint*) pDefaultShader.handle));
     pDefaultShader.setUniform("iProjectionView", pProjectionViewMatrix);
     pDefaultShader.setUniform("iTextureCount", cast(int) pNextFreeTexture);
+    pDefaultShader.setUniform("iTime", ZyeWare.upTime.toFloatSeconds);
 
     for (uint i; i < pNextFreeTexture; ++i)
     {
