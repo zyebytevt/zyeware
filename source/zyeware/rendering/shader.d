@@ -8,6 +8,7 @@ module zyeware.rendering.shader;
 import std.exception : enforce;
 import std.regex : ctRegex, matchAll;
 import std.typecons : Tuple;
+import std.array : replaceInPlace;
 
 import inmath.linalg;
 
@@ -112,50 +113,34 @@ public:
             return mutableSource.idup;
         }
 
-        VFSFile file = VFS.getFile(path);
-        immutable string source = file.readAll!string;
-        Tag root = parseSource(source);
-        file.close();
+        auto document = ZDLDocument.load(path);
 
         ShaderProperties properties;
 
-        void loadShader(ref Tag tag, ShaderProperties.ShaderType type)
+        void loadShader(string filePath, ShaderProperties.ShaderType type)
         {
-            if (string filePath = tag.getAttribute!string("file", null))
-            {
-                Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
-                VFSFile shaderFile = VFS.getFile(filePath);
-                scope(exit) shaderFile.close();
+            Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
+            VFSFile shaderFile = VFS.getFile(filePath);
+            scope(exit) shaderFile.close();
 
-                properties.sources[type] = parseIncludes(shaderFile.readAll!string);
-            }
-            else
-                properties.sources[type] = parseIncludes(tag.getValue!string);
+            properties.sources[type] = parseIncludes(shaderFile.readAll!string);
         }
 
-        foreach (ref Tag tag; root.all.tags)
+        foreach (string name, const ref ZDLNode value; document.root.opengl.expectValue!ZDLMap)
         {
-            switch (tag.name)
+            switch (name)
             {
             case "vertex":
-                loadShader(tag, ShaderProperties.ShaderType.vertex);
+                loadShader(value.expectValue!ZDLString, ShaderProperties.ShaderType.vertex);
                 break;
 
             case "fragment":
-                loadShader(tag, ShaderProperties.ShaderType.fragment);
-                break;
-
-            case "geometry":
-                loadShader(tag, ShaderProperties.ShaderType.geometry);
-                break;
-
-            case "compute":
-                loadShader(tag, ShaderProperties.ShaderType.compute);
+                loadShader(value.expectValue!ZDLString, ShaderProperties.ShaderType.fragment);
                 break;
 
             default:
-                Logger.core.log(LogLevel.warning, "'%s' %s: Unknown tag '%s'.",
-                    path, tag.location, tag.getFullName());
+                Logger.core.log(LogLevel.warning, "'%s': Unknown node '%s'.",
+                    path, name);
             }
         }
 

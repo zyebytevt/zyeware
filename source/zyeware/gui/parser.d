@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.gui.parser;
 
+version(none):
+
 import std.exception : enforce;
 import std.string : format;
 import std.algorithm : filter;

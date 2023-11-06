@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.events.gui;
 
+version(none):
+
 import std.format : format;
 
 import zyeware.common;

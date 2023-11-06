@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.gui;
 
+version(none):
+
 public
 {
     import zyeware.gui.node;

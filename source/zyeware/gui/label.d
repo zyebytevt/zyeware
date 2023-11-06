@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.gui.label;
 
+version(none):
+
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.gui;

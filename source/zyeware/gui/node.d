@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.gui.node;
 
+version(none):
+
 import std.algorithm : countUntil, remove;
 import std.typecons : Tuple;
 
