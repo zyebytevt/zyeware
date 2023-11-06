@@ -12,7 +12,7 @@ import inmath.linalg;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.rendering.vertex;
+import zyeware.pal;
 
 interface Mesh : NativeObject
 {

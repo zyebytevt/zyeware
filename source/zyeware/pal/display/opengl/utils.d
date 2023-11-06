@@ -1,14 +1,18 @@
-module zyeware.rendering.opengl.utils;
+// This file is part of the ZyeWare Game Engine, and subject to the terms
+// and conditions defined in the file 'LICENSE.txt', which is part
+// of this source code package.
+//
+// Copyright 2021 ZyeByte
+module zyeware.pal.display.opengl.utils;
 
 version (ZW_OpenGL):
-package(zyeware.rendering.opengl):
 
 import bindbc.sdl;
 
 import zyeware.common;
 import zyeware.rendering;
 
-SDL_Surface* createSurfaceFromImage(const Image image) nothrow
+SDL_Surface* createSurfaceFromImage(in Image image) nothrow
 {
     uint rmask, gmask, bmask, amask;
     version (BigEndian)

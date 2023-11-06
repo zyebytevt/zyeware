@@ -15,6 +15,7 @@ import bmfont : BMFont = Font;
 import zyeware.common;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
+import zyeware.pal.renderer.callbacks;
 
 struct Renderer2D
 {

@@ -7,6 +7,7 @@ module zyeware.rendering.framebuffer;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal;
 
 struct FramebufferProperties
 {

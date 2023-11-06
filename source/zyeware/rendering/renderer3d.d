@@ -10,6 +10,7 @@ import std.exception : enforce;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal.renderer.callbacks;
 
 struct Renderer3D
 {

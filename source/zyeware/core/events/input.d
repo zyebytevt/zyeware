@@ -6,6 +6,7 @@
 module zyeware.core.events.input;
 
 import std.string : format;
+import std.typecons : Rebindable;
 
 import zyeware.common;
 import zyeware.core.events.event;
@@ -30,18 +31,18 @@ public:
 abstract class InputEventFromDisplay : InputEvent
 {
 protected:
-    Display mDisplay;
+    Rebindable!(const Display) mDisplay;
 
 public:
     /// Params:
     ///     display = The display this event was sent from.
-    this(Display display) pure nothrow
+    this(in Display display) pure nothrow
     {
         mDisplay = display;
     }
 
     /// The display this event was sent from.
-    final inout(Display) display() pure inout nothrow
+    final const(Display) display() pure const nothrow
     {
         return mDisplay;
     }
@@ -113,7 +114,7 @@ public:
     ///     display = The display this event was sent from.
     ///     keycode = The key code of the activated key.
     ///     isPressed = Whether the key is pressed or not.
-    this(Display display, KeyCode keycode, bool isPressed) pure nothrow
+    this(in Display display, KeyCode keycode, bool isPressed) pure nothrow
     {
         super(display);
 
@@ -160,7 +161,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventKey(display: %s, keycode: %d, isPressed: %s)"(mDisplay, mKeycode, mIsPressed);
+        return "InputEventKey(display: %s, keycode: %d, isPressed: %s)".format(mDisplay, mKeycode, mIsPressed);
     }
 }
 
@@ -176,7 +177,7 @@ public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     codepoint = The unicode code point of the sent character.
-    this(Display display, dchar codepoint) pure nothrow
+    this(in Display display, dchar codepoint) pure nothrow
     {
         super(display);
 
@@ -196,7 +197,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventText(display: %s, codepoint: %d)"(mDisplay, mCodepoint);
+        return "InputEventText(display: %s, codepoint: %d)".format(mDisplay, mCodepoint);
     }
 }
 
@@ -215,7 +216,7 @@ public:
     ///     display = The display this event was sent from.
     ///     button = The mouse code of the button that was activated.
     ///     isPressed = Whether the button was pressed or not.
-    this(Display display, MouseCode button, bool isPressed, size_t clickCount) pure nothrow
+    this(in Display display, MouseCode button, bool isPressed, size_t clickCount) pure nothrow
     {
         super(display);
 
@@ -268,7 +269,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventMouseButton(display: %s, button: %d, isPressed: %s)"(mDisplay, mButton, mIsPressed);
+        return "InputEventMouseButton(display: %s, button: %d, isPressed: %s)".format(mDisplay, mButton, mIsPressed);
     }
 }
 
@@ -282,7 +283,7 @@ public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     offset = The amount the mouse wheel was scrolled.
-    this(Display display, Vector2f offset) pure nothrow
+    this(in Display display, Vector2f offset) pure nothrow
     {
         super(display);
 
@@ -320,7 +321,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventMouseScroll(display: %s, offset: %s)"(mDisplay, mOffset);
+        return "InputEventMouseScroll(display: %s, offset: %s)".format(mDisplay, mOffset);
     }
 }
 
@@ -336,7 +337,7 @@ public:
     ///     display = The display this event was sent from.
     ///     position = The current cursor position.
     ///     relative = The relative motion of the cursor.
-    this(Display display, Vector2f position, Vector2f relative) pure nothrow
+    this(in Display display, Vector2f position, Vector2f relative) pure nothrow
     {
         super(display);
 
@@ -363,7 +364,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventMouseMotion(position: %s, relative: %s)"(mPosition, mRelative);
+        return "InputEventMouseMotion(position: %s, relative: %s)".format(mPosition, mRelative);
     }
 }
 
@@ -447,7 +448,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventGamepadButton(gamepad: #%d, button: %s, isPressed: %s)"(mGamepadIndex, mButton, mIsPressed);
+        return "InputEventGamepadButton(gamepad: #%d, button: %s, isPressed: %s)".format(mGamepadIndex, mButton, mIsPressed);
     }
 }
 
@@ -516,7 +517,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventGamepadAxisMotion(gamepad: #%d, axis: %s, value: %.4f)"(mGamepadIndex, mAxis, mValue);
+        return "InputEventGamepadAxisMotion(gamepad: #%d, axis: %s, value: %.4f)".format(mGamepadIndex, mAxis, mValue);
     }
 }
 
@@ -537,7 +538,7 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventGamepadAdded(gamepad: #%d)"(mGamepadIndex);
+        return "InputEventGamepadAdded(gamepad: #%d)".format(mGamepadIndex);
     }
 }
 
@@ -558,6 +559,6 @@ public:
 
     override string toString() const
     {
-        return format!"InputEventGamepadRemoved(gamepad: #%d)"(mGamepadIndex);
+        return "InputEventGamepadRemoved(gamepad: #%d)".format(mGamepadIndex);
     }
 }

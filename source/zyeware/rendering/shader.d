@@ -5,10 +5,15 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.shader;
 
+import std.exception : enforce;
+import std.regex : ctRegex, matchAll;
+import std.typecons : Tuple;
+
 import inmath.linalg;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal;
 
 struct ShaderProperties
 {
@@ -31,7 +36,7 @@ protected:
     ShaderProperties mProperties;
 
 public:
-    this(in ShaderProperties properties)
+    this(ShaderProperties properties)
     {
         mProperties = properties;
         mNativeHandle = PAL.graphics.createShader(properties);

@@ -6,6 +6,7 @@
 module zyeware.core.events.display;
 
 import std.string : format;
+import std.typecons : Rebindable;
 
 import zyeware.common;
 import zyeware.core.events.event;
@@ -15,18 +16,18 @@ import zyeware.rendering.display;
 abstract class DisplayEvent : Event
 {
 protected:
-    Display mDisplay;
+    Rebindable!(const Display) mDisplay;
 
     /// Params:
     ///     display = The display this event was sent from.
-    this(Display display) pure nothrow
+    this(in Display display) pure nothrow
     {
         mDisplay = display;
     }
 
 public:
     /// The display this event was sent from.
-    final inout(Display) display() inout pure nothrow
+    final const(Display) display() const pure nothrow
     {
         return mDisplay;
     }
@@ -44,7 +45,7 @@ public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     size = The size after resizing.
-    this(Display display, Vector2i size) pure nothrow
+    this(in Display display, Vector2i size) pure nothrow
     {
         super(display);
         mSize = size;
@@ -72,7 +73,7 @@ public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     position = The position after moving.
-    this(Display display, Vector2i position) pure nothrow
+    this(in Display display, Vector2i position) pure nothrow
     {
         super(display);
         mPosition = position;

@@ -3,10 +3,9 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.opengl.api;
+module zyeware.pal.graphics.opengl.api;
 
 version (ZW_OpenGL):
-package(zyeware.rendering.opengl):
 
 import std.typecons : Tuple;
 import std.exception : assumeWontThrow;
@@ -15,41 +14,8 @@ import std.string : format, toStringz;
 import bindbc.opengl;
 
 import zyeware.common;
-import zyeware.rendering.vertex;
-import zyeware.core.debugging.profiler;
 import zyeware.rendering;
-
-public:
-
-PAL.graphicsCallbacks getOGLAPICallbacks()
-{
-    return PAL.graphicsCallbacks(
-        &initialize,
-        &cleanup,
-        &createMesh,
-        &createTexture2D,
-        &createTextureCubeMap,
-        &createFramebuffer,
-        &createShader,
-        &freeMesh,
-        &freeTexture2D,
-        &freeTextureCubeMap,
-        &freeFramebuffer,
-        &freeShader,
-        &setShaderUniform1f,
-        &setShaderUniform2f,
-        &setShaderUniform3f,
-        &setShaderUniform4f,
-        &setShaderUniform1i,
-        &setShaderUniformMat4f,
-        &setViewport,
-        &setRenderFlag,
-        &getRenderFlag,
-        &getCapability,
-        &setRenderTarget,
-        &presentToScreen
-    );
-}
+import zyeware.pal;
 
 private:
 

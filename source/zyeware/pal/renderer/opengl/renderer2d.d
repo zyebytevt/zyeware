@@ -5,26 +5,11 @@ import std.string : lineSplitter;
 import std.typecons : Rebindable;
 
 import bindbc.opengl;
+import bmfont : BMFont = Font;
 
 import zyeware.common;
 import zyeware.rendering;
-
-public:
-
-Renderer2DCallbacks getOGLR2DCallbacks()
-{
-    return Renderer2DCallbacks(
-        &initialize,
-        &cleanup,
-        &beginScene,
-        &endScene,
-        &flush,
-        &drawRectangle,
-        &drawString,
-        &drawWString,
-        &drawDString
-    );
-}
+import zyeware.pal;
 
 private:
 
@@ -97,6 +82,7 @@ void createBuffer(ref Buffer buffer)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxIndicesPerBatch * uint.sizeof, null, GL_DYNAMIC_DRAW);
 }
 
+// TODO: Font rendering needs to be improved.
 pragma(inline, true)
 void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color modulate, ubyte alignment)
     if (isSomeString!T)
@@ -140,7 +126,7 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
                     immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
                         cast(float) (c.x + c.width) / size.x, cast(float) (c.y + c.height) / size.y);
 
-                    drawRect(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
+                    drawRectangle(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
                         modulate, pageTexture, region);
 
                     cursor.x += c.xadvance + kerning;
@@ -256,7 +242,7 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
     quadUVs[3] = Vector2f(region.position.x, region.position.y + region.size.y);
 
     for (size_t i; i < 4; ++i)
-        pBatchVertices[pCurrentQuad * 4 + i] = QuadVertex(transform * quadPositions[i], modulate,
+        pBatchVertices[pCurrentQuadCount * 4 + i] = QuadVertex(transform * quadPositions[i], modulate,
             quadUVs[i], texIdx);
 
     immutable uint currentQuadIndex = cast(uint) pCurrentQuadCount * 4;

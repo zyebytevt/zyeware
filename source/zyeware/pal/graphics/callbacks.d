@@ -22,6 +22,7 @@ struct GraphicsPALCallbacks
 {
 public:
     void function() initialize;
+    void function() loadLibraries;
     void function() cleanup;
 
     NativeHandle function(in Vertex3D[] vertices, in uint[] indices) createMesh;

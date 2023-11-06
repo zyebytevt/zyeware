@@ -7,6 +7,7 @@ module zyeware.rendering.texture;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal;
 
 struct TextureProperties
 {
@@ -41,11 +42,13 @@ class Texture2D : Texture
 protected:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
+    Vector2i mSize;
 
 public:
     this(in Image image, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
+        mSize = image.size;
         mNativeHandle = PAL.graphics.createTexture2D(image, mProperties);
     }
 
@@ -64,6 +67,12 @@ public:
         return mNativeHandle;
     }
 
+    const(Vector2i) size() pure const nothrow
+    {
+        return mSize;
+    }
+
+    // TODO: Implement ZDL loading of texture properties
     static Texture2D load(string path)
     {
         return new Texture2D(AssetManager.load!Image(path));
@@ -99,11 +108,12 @@ public:
         return mNativeHandle;
     }
 
+    // TODO: Implement ZDL loading of images
     static TextureCubeMap load(string path)
     {
         TextureProperties properties;
 
-        VFSFile file = VFS.getFile(path);
+        /*VFSFile file = VFS.getFile(path);
         scope (exit) file.close();
         Tag root = parseSource(file.readAll!string);
 
@@ -135,9 +145,9 @@ public:
             {
                 Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.msg);
             }
-        }
+        }*/
 
-        return new TextureCubeMap(images, properties);
+        return new TextureCubeMap([null, null, null, null, null, null], properties);
     }
 }
 

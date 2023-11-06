@@ -25,6 +25,7 @@ import zyeware.audio.thread;
 import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
+import zyeware.pal;
 
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
@@ -35,9 +36,6 @@ struct ProjectProperties
 
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
-
-    RenderBackend renderBackend = RenderBackend.openGl; /// Determines the rendering backend used.
-    AudioBackend audioBackend = AudioBackend.openAl; /// Determines the audio backend used.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
@@ -68,13 +66,6 @@ struct Version
     {
         return format!"%d.%d.%d%s"(major, minor, patch, prerelease ? "-" ~ prerelease : "");
     }
-}
-
-struct GraphicsBackendCallbacks
-{
-    PAL.graphicsCallbacks api;
-    Renderer2DCallbacks renderer2D;
-    Renderer3DCallbacks renderer3D;
 }
 
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
@@ -234,9 +225,9 @@ private static:
         // Prepare framebuffer and render application into it.
         PAL.graphics.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
         
-        PAL.graphics.renderTarget = sMainFramebuffer.handle;
+        PAL.graphics.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw(nextFrameTime);
-        PAL.graphics.renderTarget = null;
+        PAL.graphics.setRenderTarget(null);
 
         immutable bool oldWireframe = PAL.graphics.getRenderFlag(RenderFlag.wireframe);
         immutable bool oldCulling = PAL.graphics.getRenderFlag(RenderFlag.culling);
@@ -258,8 +249,6 @@ private static:
         {
             auto helpInfo = getopt(args,
                 config.passThrough,
-                "render-backend", "The rendering backend to use.", &properties.renderBackend,
-                "audio-backend", "The audio backend to use.", &properties.audioBackend,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
                 "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
@@ -272,8 +261,6 @@ private static:
                 writeln("All arguments not understood by the engine are passed through to the game.");
                 writeln("------------------------------------------");
                 writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
-                writefln("Available rendering backends: %(%s, %)", [EnumMembers!RenderBackend]);
-                writefln("Available audio backends: %(%s, %)", [EnumMembers!AudioBackend]);
                 exit(0);
             }
         }
@@ -287,32 +274,7 @@ private static:
 
     void loadBackends(const ProjectProperties properties)
     {
-        /*import zyeware.rendering.opengl.impl;
-        import zyeware.audio.openal.impl;
-
-        switch (properties.renderBackend) with (RenderBackend)
-        {
-        case openGl:
-        default:
-            version (ZW_OpenGL)
-            {
-                loadOpenGLBackend();
-                break;
-            }
-            else throw new CoreException("ZyeWare has not been compiled with OpenGL support.");
-        }
-
-        switch (properties.audioBackend) with (AudioBackend)
-        {
-        case openAl:
-        default:
-            version (ZW_OpenAL)
-            {
-                loadOpenALBackend();
-                break;
-            }
-            else throw new CoreException("ZyeWare has not been compiled with OpenAL support.");
-        }*/
+        
     }
 
 package(zyeware.core) static:

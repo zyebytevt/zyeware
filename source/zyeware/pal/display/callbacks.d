@@ -42,6 +42,12 @@ public:
     void function(in NativeHandle handle, bool value) setVisible;
     bool function(in NativeHandle handle) nothrow isVisible;
 
+    void function(in NativeHandle handle, bool value) setMinimized;
+    bool function(in NativeHandle handle) nothrow isMinimized;
+
+    void function(in NativeHandle handle, bool value) setMaximized;
+    bool function(in NativeHandle handle) nothrow isMaximized;
+
     void function(in NativeHandle handle, in Image image) setIcon;
     const(Image) function(in NativeHandle handle) nothrow getIcon;
 
