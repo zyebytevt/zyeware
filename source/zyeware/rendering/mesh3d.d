@@ -25,7 +25,7 @@ class Mesh3D : Mesh
 protected:
     NativeHandle mNativeHandle;
 
-    Material[] mMaterials;
+    Material mMaterial;
 
     pragma(inline, true)
     static Vector3f calculateSurfaceNormal(Vector3f p1, Vector3f p2, Vector3f p3) nothrow pure
@@ -62,12 +62,12 @@ protected:
     }
 
 public:
-    this(in Vertex3D[] vertices, in uint[] indices, Material[] materials)
+    this(in Vertex3D[] vertices, in uint[] indices, Material material)
         in (vertices, "Vertices cannot be null.")
         in (indices, "Indices cannot be null.")
     {
         mNativeHandle = PAL.graphics.createMesh(vertices, indices);
-        mMaterials = materials;
+        mMaterial = material;
     }
 
     ~this()
@@ -102,7 +102,7 @@ public:
                 auto document = ZDLDocument.load(path ~ ".props");
 
                 if (string materialPath = getNodeValue!ZDLString(document.root, "material", null).to!string)
-                    mesh.mMaterials ~= AssetManager.load!Material(materialPath);
+                    mesh.mMaterial = AssetManager.load!Material(materialPath);
             }
             catch (Exception ex)
             {

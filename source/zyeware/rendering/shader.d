@@ -48,24 +48,6 @@ public:
         PAL.graphics.freeShader(mNativeHandle);
     }
 
-    void setUniform(T)(string name, T value)
-    {
-        static if (is(T == float))
-            PAL.graphics.setShaderUniform1f(mNativeHandle, name, value);
-        else static if (is(T == Vector2f))
-            PAL.graphics.setShaderUniform2f(mNativeHandle, name, value);
-        else static if (is(T == Vector3f))
-            PAL.graphics.setShaderUniform3f(mNativeHandle, name, value);
-        else static if (is(T == Vector4f))
-            PAL.graphics.setShaderUniform4f(mNativeHandle, name, value);
-        else static if (is(T == int))
-            PAL.graphics.setShaderUniform1i(mNativeHandle, name, value);
-        else static if (is(T == Matrix4f))
-            PAL.graphics.setShaderUniformMat4f(mNativeHandle, name, value);
-        else
-            static assert(false, "Unsupported uniform type " ~ T.stringof ~ ".");
-    }
-
     const(NativeHandle) handle() pure const nothrow
     {
         return mNativeHandle;

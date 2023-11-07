@@ -10,25 +10,9 @@ import bmfont : BMFont = Font;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal.renderer.callbacks;
-import zyeware.pal;
 import zyeware.pal.graphics.callbacks;
-
-public:
-
-Renderer2DCallbacks generateRenderer2DPALCallbacks()
-{
-    return Renderer2DCallbacks(
-        &initialize,
-        &cleanup,
-        &beginScene,
-        &endScene,
-        &flush,
-        &drawRectangle,
-        &drawString,
-        &drawWString,
-        &drawDString
-    );
-}
+import zyeware.pal.graphics.opengl;
+import zyeware.pal.graphics.types;
 
 private:
 
@@ -191,16 +175,16 @@ void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
 {
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
-    PAL.graphics.setRenderFlag(RenderFlag.depthTesting, false);
-    pOldCullingValue = PAL.graphics.getRenderFlag(RenderFlag.culling);
-    PAL.graphics.setRenderFlag(RenderFlag.culling, false);
+    palGlSetRenderFlag(RenderFlag.depthTesting, false);
+    pOldCullingValue = palGlGetRenderFlag(RenderFlag.culling);
+    palGlSetRenderFlag(RenderFlag.culling, false);
 }
 
 void endScene()
 {
     flush();
 
-    PAL.graphics.setRenderFlag(RenderFlag.culling, pOldCullingValue);
+    palGlSetRenderFlag(RenderFlag.culling, pOldCullingValue);
 }
 
 void flush()
@@ -217,9 +201,9 @@ void flush()
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, pCurrentQuadCount * uint.sizeof * 6, cast(void*) pBatchIndices.ptr);
 
     glUseProgram(*(cast(uint*) pDefaultShader.handle));
-    pDefaultShader.setUniform("iProjectionView", pProjectionViewMatrix);
-    pDefaultShader.setUniform("iTextureCount", cast(int) pNextFreeTexture);
-    pDefaultShader.setUniform("iTime", ZyeWare.upTime.toFloatSeconds);
+    palGlSetShaderUniformMat4f(pDefaultShader.handle, "iProjectionView", pProjectionViewMatrix);
+    palGlSetShaderUniform1i(pDefaultShader.handle, "iTextureCount", cast(int) pNextFreeTexture);
+    palGlSetShaderUniform1f(pDefaultShader.handle, "iTime", ZyeWare.upTime.toFloatSeconds);
 
     for (uint i; i < pNextFreeTexture; ++i)
     {
@@ -299,4 +283,21 @@ void drawDString(in dstring text, in Font font, in Vector2f position, in Color m
     ubyte alignment = Font.Alignment.left | Font.Alignment.top)
 {
     drawStringImpl!dstring(text, font, position, modulate, alignment);
+}
+
+public:
+
+Renderer2DCallbacks generateRenderer2DPALCallbacks()
+{
+    return Renderer2DCallbacks(
+        &initialize,
+        &cleanup,
+        &beginScene,
+        &endScene,
+        &flush,
+        &drawRectangle,
+        &drawString,
+        &drawWString,
+        &drawDString
+    );
 }

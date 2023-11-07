@@ -2,21 +2,7 @@ module zyeware.pal.graphics.callbacks;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.graphics.callbacks;
-
-enum RenderFlag
-{
-    depthTesting, /// Whether to use depth testing or not.
-    depthBufferWriting, /// Whether to write to the depth buffer when drawing.
-    culling, /// Whether culling is enabled or not.
-    stencilTesting, /// Whether to use stencil testing or not.
-    wireframe /// Whether to render in wireframe or not.
-}
-
-enum RenderCapability
-{
-    maxTextureSlots /// How many texture slots are available to use. 
-}
+import zyeware.pal.graphics.types;
 
 struct GraphicsPALCallbacks
 {
@@ -37,7 +23,6 @@ public:
     void function(NativeHandle framebuffer) nothrow freeFramebuffer;
     void function(NativeHandle shader) nothrow freeShader;
 
-    void function(in NativeHandle shader) nothrow setActiveShader;
     void function(in NativeHandle shader, in string name, in float value) nothrow setShaderUniform1f;
     void function(in NativeHandle shader, in string name, in Vector2f value) nothrow setShaderUniform2f;
     void function(in NativeHandle shader, in string name, in Vector3f value) nothrow setShaderUniform3f;

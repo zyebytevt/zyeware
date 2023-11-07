@@ -38,13 +38,13 @@ protected:
 public:
     alias Parameter = SumType!(void[], int, float, Vector2f, Vector3f, Vector4f);
 
-    this(Shader shader)
+    this(Shader shader, size_t textureSlots = 1)
         in (shader, "Shader cannot be null.")
     {
         mShader = shader;
         mIsRoot = true;
 
-        //mTextureSlots.length = shader.textureCount;
+        mTextureSlots.length = textureSlots;
     }
 
     this(Material parent)
@@ -53,13 +53,18 @@ public:
         mParent = parent;
         mIsRoot = false;
 
-        //mTextureSlots.length = shader.textureCount;
+        mTextureSlots.length = parent.mTextureSlots.length;
+    }
+
+    void setParameter(string name, Parameter value)
+    {
+        mParameters[name] = value;
     }
 
     void setParameter(T)(string name, T value)
         in (name, "Parameter name cannot be null.")
     {
-        mParameters[name] = Parameter(value);
+        setParameter(Parameter(value));
     }
 
     Parameter* getParameter(string name)
@@ -112,46 +117,6 @@ public:
         mTextureSlots[idx] = null;
     }
 
-    void bind()
-    {
-        //shader.bind();
-
-        // Bind constant buffer, if it exists
-        //ConstantBuffer bindBuffer = buffer;
-
-        //if (bindBuffer)
-        {
-            /*foreach (string entry; buffer.entries)
-            {
-                Parameter* parameter = getParameter(entry);
-
-                if (!parameter)
-                    continue;
-
-                immutable size_t offset = bindBuffer.getEntryOffset(entry);
-
-                (*parameter).match!(
-                    (void[] x) => bindBuffer.setData(offset, x),
-                    (int x) => bindBuffer.setData(offset, [x]),
-                    (float x) => bindBuffer.setData(offset, [x]),
-                    (Vector2f x) => bindBuffer.setData(offset, x.vector),
-                    (Vector3f x) => bindBuffer.setData(offset, x.vector),
-                    (Vector4f x) => bindBuffer.setData(offset, x.vector),
-                );
-            }*/
-
-            //bindBuffer.bind(ConstantBuffer.Slot.modelVariables);
-        }
-
-        // Bind textures
-        for (size_t i; i < mTextureSlots.length; ++i)
-        {
-            auto tex = getTexture(i);
-            //if (tex)
-            //    tex.bind(cast(uint) i);
-        }
-    }
-
     inout(Material) parent() inout nothrow
     {
         if (mIsRoot)
@@ -181,47 +146,47 @@ public:
 
         Material material;
 
-        Parameter[string] parsedParams;
-        string[] paramOrder;
-        Texture[] parsedTextures;
+        Parameter[string] parameters;
+        Texture[] textures;
         // Parse all parameters first
 
-        if (const(ZDLNode*) parameters = document.root.getNode("parameters"))
+        if (const(ZDLNode*) parametersNode = document.root.getNode("parameters"))
         {
-            foreach (string name, const ref ZDLNode value; parameters.expectValue!ZDLMap)
+            foreach (string name, const ref ZDLNode value; parametersNode.expectValue!ZDLMap)
             {
-                paramOrder ~= name;
-
                 if (value.checkValue!ZDLInteger)
-                    parsedParams[name] = Parameter(value.expectValue!ZDLInteger.to!int);
+                    parameters[name] = Parameter(value.expectValue!ZDLInteger.to!int);
                 else if (value.checkValue!ZDLFloat)
-                    parsedParams[name] = Parameter(value.expectValue!ZDLFloat.to!float);
+                    parameters[name] = Parameter(value.expectValue!ZDLFloat.to!float);
                 else if (value.checkValue!Vector2f)
-                    parsedParams[name] = Parameter(value.expectValue!Vector2f);
+                    parameters[name] = Parameter(value.expectValue!Vector2f);
                 else if (value.checkValue!Vector3f)
-                    parsedParams[name] = Parameter(value.expectValue!Vector3f);
+                    parameters[name] = Parameter(value.expectValue!Vector3f);
                 else if (value.checkValue!Vector4f)
-                    parsedParams[name] = Parameter(value.expectValue!Vector4f);
+                    parameters[name] = Parameter(value.expectValue!Vector4f);
                 else
                     throw new RenderException(format!"Unknown parameter type for '%s'."(name));
             }
         }
 
-        if (const(ZDLNode*) textures = document.root.getNode("textures"))
+        if (const(ZDLNode*) texturesNode = document.root.getNode("textures"))
         {
-            foreach (const ref ZDLNode textureNode; document.root.textures.expectValue!ZDLList)
+            foreach (const ref ZDLNode textureNode; texturesNode.expectValue!ZDLList)
             {
-                immutable string texPath = textureNode.path.expectValue!ZDLString;
-                immutable string type = textureNode.type.expectValue!ZDLString;
+                immutable string type = textureNode.type.expectValue!ZDLString.to!string;
 
                 switch (type)
                 {
                 case "2d":
-                    parsedTextures ~= AssetManager.load!Texture2D(texPath);
+                    textures ~= AssetManager.load!Texture2D(textureNode.path.expectValue!ZDLString.to!string);
                     break;
 
                 case "cube":
-                    parsedTextures ~= AssetManager.load!TextureCubeMap(texPath);
+                    textures ~= AssetManager.load!TextureCubeMap(textureNode.path.expectValue!ZDLString.to!string);
+                    break;
+
+                case "null":
+                    textures ~= null;
                     break;
 
                 default:
@@ -233,36 +198,17 @@ public:
         // Check if it either inherits a material or is root
         if (const(ZDLNode*) shaderNode = document.root.getNode("shader"))
         {
-            Shader shader = AssetManager.load!Shader(shaderNode.expectValue!ZDLString);
-            
-            /*BufferElement[] bufferElements;
-            foreach (string name; paramOrder)
-            {
-                bufferElements ~= parsedParams[name].match!(
-                    (void[] x) => BufferElement(name, BufferElement.Type.none, cast(uint) x.length),
-                    (int x) => BufferElement(name, BufferElement.Type.int_),
-                    (float x) => BufferElement(name, BufferElement.Type.float_),
-                    (Vector2f x) => BufferElement(name, BufferElement.Type.vec2),
-                    (Vector3f x) => BufferElement(name, BufferElement.Type.vec3),
-                    (Vector4f x) => BufferElement(name, BufferElement.Type.vec4),
-                );
-            }
-
-            if (bufferElements.length > 0)
-                material = new Material(shader, BufferLayout(bufferElements));
-            else
-                material = new Material(shader);*/
+            material = new Material(AssetManager.load!Shader(shaderNode.path.expectValue!ZDLString.to!string), textures.length);
         }
         else if (const(ZDLNode*) extendsNode = document.root.getNode("extends"))
         {
-            material = new Material(AssetManager.load!Material(extendsNode.expectValue!ZDLString));
-            
+            material = new Material(AssetManager.load!Material(extendsNode.expectValue!ZDLString.to!string));
         }
         else
             throw new RenderException(format!"Material '%s': Need either 'shader' or 'extends'."(path));
 
-        material.mParameters = parsedParams;
-        foreach (size_t index, Texture texture; parsedTextures)
+        material.mParameters = parameters;
+        foreach (size_t index, Texture texture; textures)
             material.setTexture(cast(uint) index, texture);
 
         return material;
