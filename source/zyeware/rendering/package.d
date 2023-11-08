@@ -15,6 +15,7 @@ public
     import zyeware.rendering.framebuffer;
     import zyeware.rendering.image;
     import zyeware.rendering.material;
+    import zyeware.rendering.mesh2d;
     import zyeware.rendering.mesh3d;
     import zyeware.rendering.particles2d;
     import zyeware.rendering.renderer2d;

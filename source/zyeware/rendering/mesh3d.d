@@ -15,12 +15,12 @@ import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
 
-interface Mesh : NativeObject
+interface Mesh
 {
 }
 
 @asset(Yes.cache)
-class Mesh3D : Mesh
+class Mesh3D : Mesh, NativeObject
 {
 protected:
     NativeHandle mNativeHandle;
@@ -62,7 +62,7 @@ protected:
     }
 
 public:
-    this(in Vertex3D[] vertices, in uint[] indices, Material material)
+    this(in Vertex3D[] vertices, in uint[] indices, in Material material)
         in (vertices, "Vertices cannot be null.")
         in (indices, "Indices cannot be null.")
     {

@@ -288,9 +288,6 @@ NativeHandle palGlCreateMesh(in Vertex3D[] vertices, in uint[] indices)
     // vertex color
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.color.offsetof);
-    // vertex material index
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.materialIdx.offsetof);
 
     glBindVertexArray(0);
 

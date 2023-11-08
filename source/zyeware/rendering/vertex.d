@@ -16,5 +16,4 @@ struct Vertex3D
     Vector3f normal = Vector3f.zero;
     Vector2f uv = Vector2f.zero;
     Color color = Color.white;
-    ubyte materialIdx = 0;
 }
