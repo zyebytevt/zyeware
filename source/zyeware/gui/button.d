@@ -18,7 +18,7 @@ protected:
 
     override void customDraw(in FrameTime nextFrameTime) const
     {
-        Renderer2D.drawRect(mArea, Matrix4f.identity, mColor);
+        Renderer2D.drawRectangle(mArea, Matrix4f.identity, mColor);
     }
 
     override void onCursorEnter() nothrow

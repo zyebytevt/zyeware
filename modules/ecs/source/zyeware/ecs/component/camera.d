@@ -18,6 +18,6 @@ import zyeware.ecs;
 struct CameraComponent
 {
 	Camera camera; /// The camera used for rendering.
-	Environment environment; /// The environment for this camera.
+	//Environment environment; /// The environment for this camera.
 	Flag!"active" active; /// If this camera is currently the active one.
 }

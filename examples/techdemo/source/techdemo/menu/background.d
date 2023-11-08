@@ -171,7 +171,7 @@ public:
     void draw()
     {
         immutable float upTime = ZyeWare.upTime.toFloatSeconds;
-        Renderer2D.drawRect(Rect2f(-10, -10, 660, 500), Vector2f(cos(upTime * 0.5f) * 10f, sin(upTime) * 10f),
+        Renderer2D.drawRectangle(Rect2f(-10, -10, 660, 500), Vector2f(cos(upTime * 0.5f) * 10f, sin(upTime) * 10f),
             Vector2f(1), Color.white, mBackdrop);
 
         foreach (size_t starIndex; mActiveStars)
@@ -179,7 +179,7 @@ public:
             immutable float lifeTimeSecs = mStars[starIndex].lifeTime.toFloatSeconds;
             immutable float alpha = 1 - lifeTimeSecs / 10f;
 
-            Renderer2D.drawRect(Rect2f(-4, -4, 4, 4), mStars[starIndex].position, Vector2f(1),
+            Renderer2D.drawRectangle(Rect2f(-4, -4, 4, 4), mStars[starIndex].position, Vector2f(1),
                 Color(fmod(lifeTimeSecs, 1), 1, 1, alpha).toRGB(), mStarTexture);
         }
     }

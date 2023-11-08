@@ -16,7 +16,7 @@ class GUITexture : GUINode
 protected:
     override void customDraw(in FrameTime nextFrameTime) const
     {
-        Renderer2D.drawRect(mArea, Matrix4f.identity, modulate, texture, region);
+        Renderer2D.drawRectangle(mArea, Matrix4f.identity, modulate, texture, region);
     }
 
 public:

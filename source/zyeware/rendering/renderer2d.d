@@ -23,7 +23,7 @@ struct Renderer2D
     @disable this();
     @disable this(this);
 
-public static:
+package(zyeware) static:
     void initialize()
     {
         PAL.renderer2D.initialize();
@@ -34,27 +34,92 @@ public static:
         PAL.renderer2D.cleanup();
     }
 
+public static:
+    /// Starts batching render commands. Must be called before any rendering is done.
+    ///
+    /// Params:
+    ///     projectionMatrix = The projection matrix to use.
+    ///     viewMatrix = The view matrix to use.
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
     {
         PAL.renderer2D.beginScene(projectionMatrix, viewMatrix);
     }
 
+    /// Ends batching render commands. Calling this results in all render commands being flushed to the GPU.
     void endScene()
     {
         PAL.renderer2D.endScene();
     }
 
+    /// Flushes all render commands to the GPU.
     void flush()
     {
         PAL.renderer2D.flush();
     }
 
+    /// Draws a rectangle.
+    ///
+    /// Params:
+    ///     dimensions = The dimensions of the rectangle to draw.
+    ///     position = 2D position where to draw the rectangle to.
+    ///     scale = How much to scale the dimensions.
+    ///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
+    ///     texture = The texture to use. If `null`, draws a blank rectangle.
+    ///     material = The material to use. If `null`, uses the default material.
+    ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
+    pragma(inline, true)
+    void drawRectangle(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Color.white,
+        in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+    {
+        PAL.renderer2D.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
+            * Matrix4f.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
+    }
+
+    /// Draws a rectangle.
+    ///
+    /// Params:
+    ///     dimensions = The dimensions of the rectangle to draw.
+    ///     position = 2D position where to draw the rectangle to.
+    ///     scale = How much to scale the dimensions.
+    ///     rotation = The rotation of the rectangle, in radians.
+    ///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
+    ///     texture = The texture to use. If `null`, draws a blank rectangle.
+    ///     material = The material to use. If `null`, uses the default material.
+    ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
+    pragma(inline, true)
+    void drawRectangle(in Rect2f dimensions, in Vector2f position, in Vector2f scale, float rotation, in Color modulate = Vector4f(1),
+        in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+    {
+        PAL.renderer2D.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
+            * Matrix4f.rotation(rotation, Vector3f(0, 0, 1)) * Matrix4f.scaling(scale.x, scale.y, 1),
+            modulate, texture, material, region);
+    }
+
+    /// Draws a rectangle.
+    ///
+    /// Params:
+    ///     dimensions = The dimensions of the rectangle to draw.
+    ///     transform = A 4x4 matrix used for transformation of the rectangle.
+    ///     modulate = The color of the rectangle. If a texture is suppliedW, it will be tinted in this color.
+    ///     texture = The texture to use. If `null`, draws a blank rectangle.
+    ///     material = The material to use. If `null`, uses the default material.
+    ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
         PAL.renderer2D.drawRectangle(dimensions, transform, modulate, texture, material, region);
     }
 
+    /// Draws text to the screen.
+    ///
+    /// Params:
+    ///     T = The type of string to draw.
+    ///     text = The text to draw.
+    ///     font = The font to use.
+    ///     position = The position to draw the text to.
+    ///     modulate = The color of the text.
+    ///     alignment = The alignment of the text.
+    ///     material = The material to use. If `null`, uses the default material.
     void drawString(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
         ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
         if (isSomeString!T)

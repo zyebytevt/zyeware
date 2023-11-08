@@ -10,6 +10,7 @@ import std.datetime : Duration;
 import zyeware.common;
 import zyeware.ecs;
 import zyeware.rendering;
+import zyeware.pal;
 
 /// This system is responsible for rendering all entities with `SpriteComponent`s to
 /// the screen. It also updates these components if they are set to animate.
@@ -71,15 +72,15 @@ public:
             }
         }
 
-        PAL.graphics.clear();
+        PAL.graphics.clearScreen(Color.black);
 
         if (!foundCamera)
         {
-            Render3DSystem.drawNoCameraSprite();
+            //Render3DSystem.drawNoCameraSprite();
             return;
         }
 
-        Renderer2D.begin(projectionMatrix, cameraTransform.globalMatrix.inverse);
+        Renderer2D.beginScene(projectionMatrix, cameraTransform.globalMatrix.inverse);
 
         foreach (Entity entity, Transform2DComponent* transform, SpriteComponent* sprite;
             entities.entitiesWith!(Transform2DComponent, SpriteComponent))
@@ -105,10 +106,10 @@ public:
                 y2 *= -1;
             }
 
-            Renderer2D.drawRect(Rect2f(x1, y1, x2, y2), transform.globalMatrix,
-                sprite.modulate, sprite.atlas.texture, sprite.atlas.region);
+            Renderer2D.drawRectangle(Rect2f(x1, y1, x2, y2), transform.globalMatrix,
+                sprite.modulate, sprite.atlas.texture, sprite.material, sprite.atlas.region);
         }
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 }

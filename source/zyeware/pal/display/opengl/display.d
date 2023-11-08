@@ -26,6 +26,7 @@ import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal.display.callbacks;
 import zyeware.pal;
+import std.numeric;
 
 public:
 
@@ -89,8 +90,6 @@ public:
     bool isVSyncEnabled;
     bool isCursorCaptured;
 
-    // TODO: Maybe surface can be freed after set; check this afterwards
-    SDL_Surface* iconSurface;
     Rebindable!(const Image) icon;
     Rebindable!(const Cursor) cursor;
 
@@ -222,12 +221,12 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     if (properties.resizable)
         windowFlags |= SDL_WINDOW_RESIZABLE;
     
-    data.handle = SDL_CreateWindow(properties.title.toStringz, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    data.handle = SDL_CreateWindow(properties.title.toStringz, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         cast(int) properties.size.x, cast(int) properties.size.y, windowFlags);
     enforce!GraphicsException(data.handle, format!"Failed to create SDL Window: %s!"(SDL_GetError().fromStringz));
 
     if (properties.icon)
-        setIcon(data.handle, properties.icon);
+        setIcon(data, properties.icon);
 
     data.glContext = SDL_GL_CreateContext(data.handle);
     enforce!GraphicsException(data.glContext, format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
@@ -264,15 +263,12 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     return data;
 }
 
-void destroyDisplay(in NativeHandle handle)
+void destroyDisplay(NativeHandle handle)
 {
     WindowData* data = cast(WindowData*) handle;
 
     SDL_DestroyWindow(data.handle);
     SDL_GL_DeleteContext(data.glContext);
-
-    if (data.iconSurface)
-        SDL_FreeSurface(data.iconSurface);
 
     foreach (SDL_Cursor* cursor; data.sdlCursors.values)
         SDL_FreeCursor(cursor);
@@ -281,7 +277,7 @@ void destroyDisplay(in NativeHandle handle)
         SDL_Quit();
 }
 
-void update(in NativeHandle handle)
+void update(NativeHandle handle)
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -405,7 +401,7 @@ void update(in NativeHandle handle)
     }
 }
 
-void swapBuffers(in NativeHandle handle)
+void swapBuffers(NativeHandle handle)
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -491,7 +487,7 @@ Vector2i getCursorPosition(in NativeHandle handle) nothrow
     return Vector2i(x, y);
 }
 
-void setVSyncEnabled(in NativeHandle handle, bool value) nothrow
+void setVSyncEnabled(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -531,7 +527,7 @@ Vector2i getPosition(in NativeHandle handle) nothrow
     return data.position;
 }
 
-void setPosition(in NativeHandle handle, Vector2i value) nothrow
+void setPosition(NativeHandle handle, Vector2i value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -545,7 +541,7 @@ Vector2i getSize(in NativeHandle handle) nothrow
     return data.size;
 }
 
-void setSize(in NativeHandle handle, Vector2i value) nothrow
+void setSize(NativeHandle handle, Vector2i value) nothrow
     in (value.x > 0 && value.y > 0, "Window size cannot be negative.")
 {
     WindowData* data = cast(WindowData*) handle;
@@ -553,7 +549,7 @@ void setSize(in NativeHandle handle, Vector2i value) nothrow
     SDL_SetWindowSize(data.handle, value.x, value.y);
 }
 
-void setFullscreen(in NativeHandle handle, bool value) nothrow
+void setFullscreen(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -568,7 +564,7 @@ bool isFullscreen(in NativeHandle handle) nothrow
     return data.isFullscreen;
 }
 
-void setResizable(in NativeHandle handle, bool value) nothrow
+void setResizable(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -582,7 +578,7 @@ bool isResizable(in NativeHandle handle) nothrow
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_RESIZABLE) != 0;
 }
 
-void setDecorated(in NativeHandle handle, bool value) nothrow
+void setDecorated(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -596,7 +592,7 @@ bool isDecorated(in NativeHandle handle) nothrow
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_BORDERLESS) == 0;
 }
 
-void setFocused(in NativeHandle handle, bool value) nothrow
+void setFocused(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -611,7 +607,7 @@ bool isFocused(in NativeHandle handle) nothrow
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_INPUT_FOCUS) != 0;
 }
 
-void setVisible(in NativeHandle handle, bool value) nothrow
+void setVisible(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -628,7 +624,7 @@ bool isVisible(in NativeHandle handle) nothrow
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_SHOWN) != 0;
 }
 
-void setMinimized(in NativeHandle handle, bool value) nothrow
+void setMinimized(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -645,7 +641,7 @@ bool isMinimized(in NativeHandle handle) nothrow
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_MINIMIZED) != 0;
 }
 
-void setMaximized(in NativeHandle handle, bool value) nothrow
+void setMaximized(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -662,17 +658,15 @@ bool isMaximized(in NativeHandle handle) nothrow
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_MAXIMIZED) != 0;
 }
 
-void setIcon(in NativeHandle handle, in Image image)
+void setIcon(NativeHandle handle, in Image image)
 {
     WindowData* data = cast(WindowData*) handle;
 
-    if (data.iconSurface)
-        SDL_FreeSurface(data.iconSurface);
-
-    data.iconSurface = createSurfaceFromImage(image);
     data.icon = image;
+    SDL_Surface* iconSurface = createSurfaceFromImage(image);
 
-    SDL_SetWindowIcon(data.handle, data.iconSurface);
+    SDL_SetWindowIcon(data.handle, iconSurface);
+    SDL_FreeSurface(iconSurface);
 }
 
 const(Image) getIcon(in NativeHandle handle) nothrow
@@ -682,7 +676,7 @@ const(Image) getIcon(in NativeHandle handle) nothrow
     return data.icon;
 }
 
-void setCursor(in NativeHandle handle, in Cursor cursor)
+void setCursor(NativeHandle handle, in Cursor cursor)
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -690,8 +684,8 @@ void setCursor(in NativeHandle handle, in Cursor cursor)
     if (!sdlCursor)
     {
         SDL_Surface* surface = createSurfaceFromImage(cursor.image);
+        scope(exit) SDL_FreeSurface(surface);
         SDL_Cursor* newCursor = SDL_CreateColorCursor(surface, cursor.hotspot.x, cursor.hotspot.y);
-        SDL_FreeSurface(surface);
 
         data.sdlCursors[cursor] = newCursor;
         sdlCursor = cursor in data.sdlCursors;
@@ -707,7 +701,7 @@ const(Cursor) getCursor(in NativeHandle handle) nothrow
     return data.cursor;
 }
 
-void setTitle(in NativeHandle handle, in string value)
+void setTitle(NativeHandle handle, in string value)
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -722,7 +716,7 @@ string getTitle(in NativeHandle handle) nothrow
     return data.title;
 }
 
-void setMouseCursorVisible(in NativeHandle handle, bool value) nothrow
+void setMouseCursorVisible(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -743,7 +737,7 @@ bool isMouseCursorCaptured(in NativeHandle handle) nothrow
     return data.isCursorCaptured;
 }
 
-void setMouseCursorCaptured(in NativeHandle handle, bool value) nothrow
+void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
@@ -769,7 +763,7 @@ void setMouseCursorCaptured(in NativeHandle handle, bool value) nothrow
     }
 }
 
-void setClipboardString(in NativeHandle handle, in string value) nothrow
+void setClipboardString(NativeHandle handle, in string value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 

@@ -14,15 +14,6 @@ import zyeware.common;
 import zyeware.ecs;
 import zyeware.rendering;
 
-/// The `Render3DComponent` holds a reference to a `Renderable` object.
-///
-/// See_Also: Renderable
-@component
-struct Render3DComponent
-{
-    Renderable renderable; /// The renderable object.
-}
-
 /// The `SpriteComponent` gives an entity the ability to represent itself
 /// with a `Texture2D` with the given parameters.
 ///
@@ -34,6 +25,7 @@ struct SpriteComponent
     Vector2f offset; /// The offset of the sprite.
     TextureAtlas atlas; /// The texture atlas used for sprite rendering.
     Color modulate = Color.white; /// The modulation of this sprite.
+    Material material = null; /// The material to use for rendering.
     Flag!"hFlip" hFlip; /// If the sprite is horizontally flipped.
     Flag!"vFlip" vFlip; /// If the sprite is vertically flipped.
 }

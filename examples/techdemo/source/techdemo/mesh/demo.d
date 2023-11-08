@@ -9,6 +9,8 @@ import std.algorithm : clamp;
 import zyeware.common;
 import zyeware.rendering;
 
+version(none):
+
 class MeshDemo : GameState
 {
 protected:
@@ -102,11 +104,11 @@ public:
         Renderer3D.submit(mCurrentMesh.bufferGroup, material, Matrix4f.identity);
         Renderer3D.end();
 
-        Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawString(tr("MESH VIEW DEMO\nPress 'left' and 'right' to change mesh.\nClick and drag or use left analog stick to move camera.\nScroll or use right analog stick to zoom in or out."),
             mFont, Vector2f(4));
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
     
     override void onAttach(bool firstTime)

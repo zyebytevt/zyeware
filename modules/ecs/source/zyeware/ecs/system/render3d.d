@@ -9,6 +9,8 @@ import zyeware.common;
 import zyeware.ecs;
 import zyeware.rendering;
 
+version(none):
+
 /// This system is responsible for rendering all entities with `RenderComponent`s
 /// to the screen.
 ///
@@ -28,10 +30,10 @@ package:
             texture = AssetManager.load!Texture2D("core://textures/no-camera.png");
         }
 
-        Renderer2D.begin(camera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(camera.projectionMatrix, Matrix4f.identity);
         if ((ZyeWare.upTime.total!"hnsecs" / 5_000_000) % 2 == 0)
-            Renderer2D.drawRect(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), Vector2f(0), Vector2f(1), Color.white, texture);
-        Renderer2D.end();
+            Renderer2D.drawRectangle(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), Vector2f(0), Vector2f(1), Color.white, texture);
+        Renderer2D.endScene();
     }
 
 public:

@@ -11,6 +11,8 @@ import zyeware.audio;
 import techdemo.terrain.gui;
 import techdemo.terrain.camera;
 
+version(none):
+
 class TerrainDemo : ECSGameState
 {
 protected:

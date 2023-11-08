@@ -7,6 +7,8 @@ import zyeware.rendering;
 import zyeware.common;
 import zyeware.core.debugging.profiler;
 
+version(none):
+
 class GUISystem : System
 {
 protected:
@@ -22,7 +24,7 @@ public:
 
     override void draw(EntityManager entities, in FrameTime nextFrameTime)
     {
-        Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawString(tr("SPOOKY 3D TERRAIN DEMO\nPress arrow keys to move around.\nOptionally, you can use a controller!"),
             mFont, Vector2f(4));
 
@@ -34,6 +36,6 @@ public:
                 mFont, Vector2f(640, 0), Color.white, Font.Alignment.right);
         }
         
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 }

@@ -6,6 +6,8 @@ import zyeware.common;
 import zyeware.ecs;
 import zyeware.rendering;
 
+version(none):
+
 class Particles2DSystem : System
 {
 protected:

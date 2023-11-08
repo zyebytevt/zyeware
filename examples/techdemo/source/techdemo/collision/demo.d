@@ -6,6 +6,7 @@ import zyeware.common;
 import zyeware.core.gamestate;
 import zyeware.ecs;
 import zyeware.rendering;
+import zyeware.pal;
 
 import techdemo.menu.menu;
 
@@ -61,19 +62,19 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        PAL.graphics.clear();
+        PAL.graphics.clearScreen(Color.black);
 
         auto r = Rect2f(-50, -50, 50, 50);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);
         Color c = collision.isColliding ? Color(0, 1, 0, 1) : Color(1, 0, 0, 1);
 
-        Renderer2D.begin(mCamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
 
         DemoMenu.background.draw();
 
-        Renderer2D.drawRect(r, mFirstTransform.globalMatrix, c, mCircleTexture);
-        Renderer2D.drawRect(r, mSecondTransform.globalMatrix, c);
+        Renderer2D.drawRectangle(r, mFirstTransform.globalMatrix, c, mCircleTexture);
+        Renderer2D.drawRectangle(r, mSecondTransform.globalMatrix, c);
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 }

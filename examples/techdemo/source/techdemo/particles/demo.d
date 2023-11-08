@@ -8,6 +8,8 @@ import zyeware.common;
 import zyeware.rendering;
 import zyeware.core.debugging.profiler;
 
+version(none):
+
 class ParticlesDemo : GameState
 {
 protected:
@@ -40,11 +42,11 @@ public:
     {
         PAL.graphics.clear();
 
-        Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, Vector2f(4), Color.white);
         Renderer2D.drawString(format!"Draw calls: %d"(Profiler.currentReadData.renderData.drawCalls), mFont, Vector2f(4, 20), Color.white);
         mParticles.draw(nextFrameTime);
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
     
     override void onAttach(bool firstTime)

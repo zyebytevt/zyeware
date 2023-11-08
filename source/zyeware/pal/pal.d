@@ -15,24 +15,28 @@ package(zyeware) static:
     Renderer2DCallbacks sRenderer2DCallbacks;
     Renderer3DCallbacks sRenderer3DCallbacks;
 
-public static:
-    ref GraphicsPALCallbacks graphics() nothrow
-    {
-        return sGraphicsCallbacks;
-    }
-
-    ref DisplayPALCallbacks display() nothrow
-    {
-        return sDisplayCallbacks;
-    }
-
+    pragma(inline, true)
     ref Renderer2DCallbacks renderer2D() nothrow
     {
         return sRenderer2DCallbacks;
     }
 
+    pragma(inline, true)
     ref Renderer3DCallbacks renderer3D() nothrow
     {
         return sRenderer3DCallbacks;
+    }
+
+public static:
+    pragma(inline, true)
+    ref GraphicsPALCallbacks graphics() nothrow
+    {
+        return sGraphicsCallbacks;
+    }
+
+    pragma(inline, true)
+    ref DisplayPALCallbacks display() nothrow
+    {
+        return sDisplayCallbacks;
     }
 }

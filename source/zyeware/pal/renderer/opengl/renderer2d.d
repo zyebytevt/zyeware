@@ -194,7 +194,7 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
                     immutable Vector2f size = pageTexture.size;
 
                     immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
-                        cast(float) (c.x + c.width) / size.x, cast(float) (c.y + c.height) / size.y);
+                        cast(float) c.width / size.x, cast(float) c.height / size.y);
 
                     drawRectangle(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
                         modulate, pageTexture, material, region);

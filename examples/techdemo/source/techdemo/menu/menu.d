@@ -59,8 +59,8 @@ public:
                 ZyeWare.callDeferred(() => application.pushState(new CreepsMenuState(application)));
             }),
 
-            VerticalMenu.Entry(tr("Mesh View Demo"), false, () {
-                ZyeWare.callDeferred(() => application.pushState(new MeshDemo(application)));
+            VerticalMenu.Entry(tr("Mesh View Demo"), true, () {
+                //ZyeWare.callDeferred(() => application.pushState(new MeshDemo(application)));
             }),
 
             VerticalMenu.Entry(tr("Spooky 3D Terrain Demo"), true, () {
@@ -75,12 +75,12 @@ public:
                 ZyeWare.callDeferred(() => application.pushState(new GamepadDemo(application)));
             }),
 
-            VerticalMenu.Entry(tr("Particles Demo"), false, () {
-                ZyeWare.callDeferred(() => application.pushState(new ParticlesDemo(application)));
+            VerticalMenu.Entry(tr("Particles Demo"), true, () {
+                //ZyeWare.callDeferred(() => application.pushState(new ParticlesDemo(application)));
             }),
 
-            VerticalMenu.Entry(tr("GUI Demo"), false, () {
-                ZyeWare.callDeferred(() => application.pushState(new GUIDemo(application)));
+            VerticalMenu.Entry(tr("GUI Demo"), true, () {
+                //ZyeWare.callDeferred(() => application.pushState(new GUIDemo(application)));
             }),
 
             VerticalMenu.Entry(tr("Simulate Crash (Demonstrate crash handler)"), false, () {
@@ -113,13 +113,13 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
 
         sBackground.draw();
 
         immutable float logoYOffset = sin(ZyeWare.upTime.toFloatSeconds * 1.5f) * 8f;
 
-        Renderer2D.drawRect(Rect2f(120.95, 70 + logoYOffset, 120.95 + 398.1, 70 + 115.2 + logoYOffset),
+        Renderer2D.drawRectangle(Rect2f(120.95, 70 + logoYOffset, 398.1, 115.2),
             Matrix4f.identity, Color.white, mLogoTexture);
         
         mMainMenu.draw(Vector2f(320, 200));
@@ -136,7 +136,7 @@ public:
         Renderer2D.drawString(tr("Music by YukieVT!"), mFont, Vector2f(640, 480), Color.gray,
             Font.Alignment.right | Font.Alignment.bottom);
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 
     override void receive(in Event event)

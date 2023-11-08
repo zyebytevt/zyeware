@@ -5,6 +5,7 @@ import std.string : format;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal;
 
 import techdemo.menu.menu;
 
@@ -45,9 +46,9 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        PAL.graphics.clear();
+        PAL.graphics.clearScreen(Color.black);
 
-        Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
 
         DemoMenu.background.draw();
 
@@ -63,7 +64,7 @@ public:
             Renderer2D.drawString(format!"%s: %.3f"(a, ZyeWare.mainDisplay.getGamepadAxisValue(mCurrentGamepadIndex, a)),
                 mFont, Vector2f(300, 140 + a * 16));
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
     
     override void onAttach(bool firstTime)

@@ -43,15 +43,15 @@ public:
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        Renderer2D.begin(mCamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
 
-        Renderer2D.drawRect(Rect2f(0, 0, 480, 720), Vector2f(0), Vector2f(1), Color(0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
-        Renderer2D.drawRect(Rect2f(0, 0, 480, 149), Vector2f(0, 250 + sin(seconds) * 30f), Vector2f(1), Color.white, mTitleTexture);
+        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 720), Vector2f(0), Vector2f(1), Color(0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
+        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 149), Vector2f(0, 250 + sin(seconds) * 30f), Vector2f(1), Color.white, mTitleTexture);
 
         Renderer2D.drawString(tr("Press 'accept' to begin!\nPress 'cancel' to slither back to the main menu.\nArrow keys or controller to move."),
             mFont, Vector2f(240, 600), Color.white, Font.Alignment.center);
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 
     override void onAttach(bool firstTime)

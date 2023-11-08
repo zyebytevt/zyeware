@@ -96,7 +96,7 @@ public:
                 if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b) || isNaN(color.a))
                     color = Color.white;
 
-                Renderer2D.drawRect(dimensions, position, Vector2f(particles.sizes[i]), particles.rotations[i],
+                Renderer2D.drawRectangle(dimensions, position, Vector2f(particles.sizes[i]), particles.rotations[i],
                     color, particles.type.texture);
             }
         }

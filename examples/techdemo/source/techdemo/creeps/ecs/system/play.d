@@ -75,7 +75,7 @@ protected:
 
         Entity camera = mPlayState.entities.create();
         camera.register!Transform2DComponent(Vector2f(0));
-        camera.register!CameraComponent(new OrthographicCamera(0, 480, 720, 0), null, Yes.active);
+        camera.register!CameraComponent(new OrthographicCamera(0, 480, 720, 0), Yes.active);
 
         mSpawnTimer.start();
         mScoreTimer.start();

@@ -6,6 +6,8 @@ import zyeware.ecs;
 import zyeware.rendering;
 import zyeware.common;
 
+version(none):
+
 class CameraSystem : System
 {
 protected:

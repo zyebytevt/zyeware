@@ -9,6 +9,8 @@ import zyeware.rendering;
 import zyeware.core.debugging.profiler;
 import zyeware.gui;
 
+version(none):
+
 class GUIDemo : GameState
 {
 protected:
@@ -33,11 +35,11 @@ public:
     {
         PAL.graphics.clear();
 
-        Renderer2D.begin(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
 
         mRoot.draw(nextFrameTime);
 
-        Renderer2D.end();
+        Renderer2D.endScene();
     }
 
     override void receive(in Event event)
