@@ -91,7 +91,7 @@ private static:
     Matrix4f sFramebufferProjection;
     Matrix4f sDisplayProjection;
     Rect2i sFramebufferArea;
-    ScaleMode sScaleMode = ScaleMode.keepAspect;
+    ScaleMode sScaleMode;
 
     ProjectProperties sProjectProperties;
     string[] sCmdArgs;

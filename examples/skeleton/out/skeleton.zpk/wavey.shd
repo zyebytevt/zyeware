@@ -1,0 +1,4 @@
+opengl {
+    vertex "res://wavey.vert.glsl"
+    fragment "res://wavey.frag.glsl"
+}

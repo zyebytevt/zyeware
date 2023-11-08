@@ -1,0 +1,5 @@
+extends "res://wavey.mtl"
+
+parameters {
+    waveStrength (2.0 1.0)
+}

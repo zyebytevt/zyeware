@@ -113,7 +113,6 @@ GlBuffer[2] pRenderBuffers;
 Batch[maxMaterialsPerDrawCall] pBatches;
 size_t currentMaterialCount = 0;
 
-bool pOldCullingValue;
 Matrix4f pProjectionViewMatrix;
 Texture2D pWhiteTexture;
 Material pDefaultMaterial;
@@ -155,7 +154,6 @@ void createBuffer(ref GlBuffer buffer)
 }
 
 // TODO: Font rendering needs to be improved.
-pragma(inline, true)
 void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color modulate, ubyte alignment, in Material material)
     if (isSomeString!T)
 {
@@ -239,6 +237,13 @@ void cleanup()
 {
     destroy(pWhiteTexture);
 
+    for (size_t i; i < pBatches.length; ++i)
+    {
+        destroy(pBatches[i].vertices);
+        destroy(pBatches[i].indices);
+        destroy(pBatches[i].textures);
+    }
+
     for (size_t i; i < pRenderBuffers.length; ++i)
     {
         glDeleteVertexArrays(1, &pRenderBuffers[i].vao);
@@ -251,16 +256,12 @@ void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
 {
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
-    palGlSetRenderFlag(RenderFlag.depthTesting, false);
-    pOldCullingValue = palGlGetRenderFlag(RenderFlag.culling);
     palGlSetRenderFlag(RenderFlag.culling, false);
 }
 
 void endScene()
 {
     flush();
-
-    palGlSetRenderFlag(RenderFlag.culling, pOldCullingValue);
 }
 
 void flush()
