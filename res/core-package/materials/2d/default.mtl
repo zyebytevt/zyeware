@@ -1,0 +1,3 @@
+// Default 2D batch renderer material
+
+shader "core://shaders/2d/default.shd"

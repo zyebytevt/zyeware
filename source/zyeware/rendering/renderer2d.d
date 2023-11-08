@@ -50,21 +50,21 @@ public static:
     }
 
     void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
-        in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+        in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        PAL.renderer2D.drawRectangle(dimensions, transform, modulate, texture, region);
+        PAL.renderer2D.drawRectangle(dimensions, transform, modulate, texture, material, region);
     }
 
     void drawString(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
-        ubyte alignment = Font.Alignment.left | Font.Alignment.top)
+        ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
         if (isSomeString!T)
     {
         static if (is(T == string))
-            PAL.renderer2D.drawString(text, font, position, modulate, alignment);
+            PAL.renderer2D.drawString(text, font, position, modulate, alignment, material);
         else static if (is(T == wstring))
-            PAL.renderer2D.drawWString(text, font, position, modulate, alignment);
+            PAL.renderer2D.drawWString(text, font, position, modulate, alignment, material);
         else static if (is(T == dstring))
-            PAL.renderer2D.drawDString(text, font, position, modulate, alignment);
+            PAL.renderer2D.drawDString(text, font, position, modulate, alignment, material);
         else
             static assert(false, "Unsupported string type for rendering");
     }

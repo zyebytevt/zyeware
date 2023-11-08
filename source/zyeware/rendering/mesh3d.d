@@ -8,6 +8,7 @@ module zyeware.rendering.mesh3d;
 import std.string : format;
 import std.path : extension;
 import std.conv : to;
+import std.typecons : Rebindable;
 
 import inmath.linalg;
 
@@ -25,7 +26,7 @@ class Mesh3D : Mesh, NativeObject
 protected:
     NativeHandle mNativeHandle;
 
-    Material mMaterial;
+    Rebindable!(const(Material)) mMaterial;
 
     pragma(inline, true)
     static Vector3f calculateSurfaceNormal(Vector3f p1, Vector3f p2, Vector3f p3) nothrow pure

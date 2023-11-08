@@ -16,11 +16,12 @@ import zyeware.pal.graphics.types;
 
 private:
 
-enum maxQuadsPerBatch = 5000;
-enum maxVerticesPerBatch = maxQuadsPerBatch * 4;
-enum maxIndicesPerBatch = maxQuadsPerBatch * 6;
+enum maxMaterialsPerDrawCall = 8;
+enum maxMaterialsPerBatch = 8;
+enum maxVerticesPerBatch = 20000;
+enum maxIndicesPerBatch = 30000;
 
-struct QuadVertex
+struct BatchVertex2D
 {
     Vector4f position;
     Color color;
@@ -28,57 +29,125 @@ struct QuadVertex
     float textureIndex;
 }
 
-struct Buffer
+struct GlBuffer
 {
     uint vao;
     uint vbo;
     uint ibo;
 }
 
-Buffer[2] pBuffers;
-size_t pActiveBuffer = 0;
-
-QuadVertex[maxVerticesPerBatch] pBatchVertices;
-uint[maxIndicesPerBatch] pBatchIndices;
-size_t pCurrentQuadCount = 0;
-
-Rebindable!(const Texture2D)[] pBatchTextures;
-size_t pNextFreeTexture = 1; // because 0 is the white texture
-bool pOldCullingValue;
-
-Shader pDefaultShader;
-Matrix4f pProjectionViewMatrix;
-
-size_t getIndexForTexture(in Texture2D texture) nothrow
+struct Batch
 {
-    for (size_t i = 1; i < pNextFreeTexture; ++i)
-        if (texture is pBatchTextures[i])
-            return i;
+    Rebindable!(const Material) material;
 
-    if (pNextFreeTexture == pBatchTextures.length)
-        return size_t.max;
+    BatchVertex2D[] vertices;
+    uint[] indices;
+    Rebindable!(const Texture2D)[] textures;
 
-    pBatchTextures[pNextFreeTexture++] = texture;
-    return pNextFreeTexture - 1;
+    size_t currentVertexCount = 0;
+    size_t currentIndexCount = 0;
+    size_t currentTextureCount = 1; // because 0 is the white texture
+
+    size_t getIndexForTexture(in Texture2D texture) nothrow
+    {
+        for (size_t i = 1; i < currentTextureCount; ++i)
+            if (texture is textures[i])
+                return i;
+
+        if (currentTextureCount == textures.length)
+            return size_t.max;
+
+        textures[currentTextureCount++] = texture;
+        return currentTextureCount - 1;
+    }
+
+    void flush(in GlBuffer buffer)
+    {
+        glBindVertexArray(buffer.vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, currentVertexCount * BatchVertex2D.sizeof, cast(void*) vertices.ptr);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, currentIndexCount * uint.sizeof, cast(void*) indices.ptr);
+
+        auto shader = material.shader;
+
+        glUseProgram(*(cast(uint*) shader.handle));
+        palGlSetShaderUniformMat4f(shader.handle, "iProjectionView", pProjectionViewMatrix);
+        palGlSetShaderUniform1i(shader.handle, "iTextureCount", cast(int) currentTextureCount);
+        palGlSetShaderUniform1f(shader.handle, "iTime", ZyeWare.upTime.toFloatSeconds);
+
+        foreach (string parameter; material.parameterList)
+        {
+            import std.sumtype : match;
+
+            material.getParameter(parameter).match!(
+                (const(void[]) value) {},
+                (int value) { palGlSetShaderUniform1i(shader.handle, parameter, value); },
+                (float value) { palGlSetShaderUniform1f(shader.handle, parameter, value); },
+                (Vector2f value) { palGlSetShaderUniform2f(shader.handle, parameter, value); },
+                (Vector3f value) { palGlSetShaderUniform3f(shader.handle, parameter, value); },
+                (Vector4f value) { palGlSetShaderUniform4f(shader.handle, parameter, value); }
+            );
+        }
+
+        for (uint i; i < currentTextureCount; ++i)
+        {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, *(cast(uint*) textures[i].handle));
+        }
+
+        glDrawElements(GL_TRIANGLES, cast(int) currentIndexCount, GL_UNSIGNED_INT, null);
+
+        material = null;
+
+        currentVertexCount = 0;
+        currentIndexCount = 0;
+        currentTextureCount = 1;
+    }
 }
 
-void createBuffer(ref Buffer buffer)
+// Buffers important for rendering
+GlBuffer[2] pRenderBuffers;
+Batch[maxMaterialsPerDrawCall] pBatches;
+size_t currentMaterialCount = 0;
+
+bool pOldCullingValue;
+Matrix4f pProjectionViewMatrix;
+Texture2D pWhiteTexture;
+Material pDefaultMaterial;
+
+size_t getIndexForMaterial(in Material material) nothrow
+{
+    for (size_t i = 0; i < currentMaterialCount; ++i)
+        if (material is pBatches[i].material)
+            return i;
+
+    if (currentMaterialCount == pBatches.length)
+        return size_t.max;
+
+    pBatches[currentMaterialCount++].material = material;
+    return currentMaterialCount - 1;
+}
+
+void createBuffer(ref GlBuffer buffer)
 {
     glGenVertexArrays(1, &buffer.vao);
     glBindVertexArray(buffer.vao);
 
     glGenBuffers(1, &buffer.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-    glBufferData(GL_ARRAY_BUFFER, maxVerticesPerBatch * QuadVertex.sizeof, null, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maxVerticesPerBatch * BatchVertex2D.sizeof, null, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, QuadVertex.sizeof, cast(void*)QuadVertex.position.offsetof);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.position.offsetof);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, QuadVertex.sizeof, cast(void*)QuadVertex.color.offsetof);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.color.offsetof);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, QuadVertex.sizeof, cast(void*)QuadVertex.uv.offsetof);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.uv.offsetof);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, QuadVertex.sizeof, cast(void*)QuadVertex.textureIndex.offsetof);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.textureIndex.offsetof);
     
     glGenBuffers(1, &buffer.ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
@@ -87,7 +156,7 @@ void createBuffer(ref Buffer buffer)
 
 // TODO: Font rendering needs to be improved.
 pragma(inline, true)
-void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color modulate, ubyte alignment)
+void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color modulate, ubyte alignment, in Material material)
     if (isSomeString!T)
 {
     Vector2f cursor = Vector2f.zero;
@@ -130,7 +199,7 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
                         cast(float) (c.x + c.width) / size.x, cast(float) (c.y + c.height) / size.y);
 
                     drawRectangle(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
-                        modulate, pageTexture, region);
+                        modulate, pageTexture, material, region);
 
                     cursor.x += c.xadvance + kerning;
             }
@@ -143,31 +212,38 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
 /// Initializes the renderer.
 void initialize()
 {
-    pBatchTextures = new Rebindable!(const Texture2D)[8];
-
-    for (size_t i; i < pBuffers.length; ++i)
-        createBuffer(pBuffers[i]);
+    for (size_t i; i < pRenderBuffers.length; ++i)
+        createBuffer(pRenderBuffers[i]);
 
     // To circumvent a bug in MacOS builds that require a VAO to be bound before validating a
     // shader program in OpenGL. Due to Renderer2D being initialized early during the
     // engines lifetime, this should fix all further shader loadings.
-    glBindVertexArray(pBuffers[0].vao);
-
-    pDefaultShader = AssetManager.load!Shader("core://shaders/2d/default.shd");
+    glBindVertexArray(pRenderBuffers[0].vao);
 
     static ubyte[3] pixels = [255, 255, 255];
-    pBatchTextures[0] = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
+    pWhiteTexture = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
+
+    for (size_t i; i < pBatches.length; ++i)
+    {
+        pBatches[i].vertices = new BatchVertex2D[maxVerticesPerBatch + 2000];
+        pBatches[i].indices = new uint[maxIndicesPerBatch + 3000];
+        pBatches[i].textures = new Rebindable!(const Texture2D)[maxMaterialsPerBatch];
+
+        pBatches[i].textures[0] = pWhiteTexture;
+    }
+
+    pDefaultMaterial = AssetManager.load!Material("core://materials/2d/default.mtl");
 }
 
 void cleanup()
 {
-    destroy(pBatchTextures[0]);
+    destroy(pWhiteTexture);
 
-    for (size_t i; i < pBuffers.length; ++i)
+    for (size_t i; i < pRenderBuffers.length; ++i)
     {
-        glDeleteVertexArrays(1, &pBuffers[i].vao);
-        glDeleteBuffers(1, &pBuffers[i].vbo);
-        glDeleteBuffers(1, &pBuffers[i].ibo);
+        glDeleteVertexArrays(1, &pRenderBuffers[i].vao);
+        glDeleteBuffers(1, &pRenderBuffers[i].vbo);
+        glDeleteBuffers(1, &pRenderBuffers[i].ibo);
     }
 }
 
@@ -189,48 +265,49 @@ void endScene()
 
 void flush()
 {
-    Buffer* activeBuffer = &pBuffers[pActiveBuffer++];
-    pActiveBuffer %= pBuffers.length;
+    if (currentMaterialCount == 0)
+        return;
 
-    glBindVertexArray(activeBuffer.vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, activeBuffer.vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, pCurrentQuadCount * QuadVertex.sizeof * 4, cast(void*) pBatchVertices.ptr);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, activeBuffer.ibo);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, pCurrentQuadCount * uint.sizeof * 6, cast(void*) pBatchIndices.ptr);
-
-    glUseProgram(*(cast(uint*) pDefaultShader.handle));
-    palGlSetShaderUniformMat4f(pDefaultShader.handle, "iProjectionView", pProjectionViewMatrix);
-    palGlSetShaderUniform1i(pDefaultShader.handle, "iTextureCount", cast(int) pNextFreeTexture);
-    palGlSetShaderUniform1f(pDefaultShader.handle, "iTime", ZyeWare.upTime.toFloatSeconds);
-
-    for (uint i; i < pNextFreeTexture; ++i)
+    size_t currentBufferIndex = 0;
+    for (size_t i; i < currentMaterialCount; ++i)
     {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, *(cast(uint*) pBatchTextures[i].handle));
+        if (pBatches[i].currentVertexCount == 0)
+            continue;
+        
+        pBatches[i].flush(pRenderBuffers[currentBufferIndex]);
+        currentBufferIndex = (currentBufferIndex + 1) % 2;
     }
 
-    glDrawElements(GL_TRIANGLES, cast(int) pCurrentQuadCount * 6, GL_UNSIGNED_INT, null);
-
-    pCurrentQuadCount = 0;
-    pNextFreeTexture = 1;
+    currentMaterialCount = 0;
 }
 
 void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
-    in Texture2D texture = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+    in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
 {
-    if (pCurrentQuadCount == maxQuadsPerBatch)
+    const(Material) mat = material ? material : pDefaultMaterial;
+
+    size_t batchIndex = getIndexForMaterial(mat);
+    if (batchIndex == size_t.max)
+    {
+        flush();
+        batchIndex = getIndexForMaterial(mat);
+    }
+    
+    Batch* batch = &pBatches[batchIndex];
+    if (batch.material !is mat)
+        batch.material = mat;
+
+    if (batch.currentVertexCount >= maxVerticesPerBatch)
         flush();
 
     float texIdx;
     if (texture)
     {
-        size_t idx = getIndexForTexture(texture);
+        size_t idx = batch.getIndexForTexture(texture);
         if (idx == size_t.max) // No more room for new textures
         {
             flush();
-            idx = getIndexForTexture(texture);
+            idx = batch.getIndexForTexture(texture);
         }
 
         texIdx = cast(float) idx;
@@ -249,40 +326,38 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
     quadUVs[3] = Vector2f(region.position.x, region.position.y + region.size.y);
 
     for (size_t i; i < 4; ++i)
-        pBatchVertices[pCurrentQuadCount * 4 + i] = QuadVertex(transform * quadPositions[i], modulate,
+        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * quadPositions[i], modulate,
             quadUVs[i], texIdx);
 
-    immutable uint currentQuadIndex = cast(uint) pCurrentQuadCount * 4;
-    immutable size_t baseIndex = pCurrentQuadCount * 6;
+    batch.indices[batch.currentIndexCount + 0] = cast(uint) batch.currentVertexCount + 2;
+    batch.indices[batch.currentIndexCount + 1] = cast(uint) batch.currentVertexCount + 1;
+    batch.indices[batch.currentIndexCount + 2] = cast(uint) batch.currentVertexCount + 0;
+    batch.indices[batch.currentIndexCount + 3] = cast(uint) batch.currentVertexCount + 0;
+    batch.indices[batch.currentIndexCount + 4] = cast(uint) batch.currentVertexCount + 3;
+    batch.indices[batch.currentIndexCount + 5] = cast(uint) batch.currentVertexCount + 2;
 
-    pBatchIndices[baseIndex + 0] = currentQuadIndex + 2;
-    pBatchIndices[baseIndex + 1] = currentQuadIndex + 1;
-    pBatchIndices[baseIndex + 2] = currentQuadIndex + 0;
-    pBatchIndices[baseIndex + 3] = currentQuadIndex + 0;
-    pBatchIndices[baseIndex + 4] = currentQuadIndex + 3;
-    pBatchIndices[baseIndex + 5] = currentQuadIndex + 2;
-
-    ++pCurrentQuadCount;
+    batch.currentIndexCount += 6;
+    batch.currentVertexCount += 4;
 
     // TODO: Add to profiler rect count
 }
 
 void drawString(in string text, in Font font, in Vector2f position, in Color modulate = Color.white,
-    ubyte alignment = Font.Alignment.left | Font.Alignment.top)
+    ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
 {
-    drawStringImpl!string(text, font, position, modulate, alignment);
+    drawStringImpl!string(text, font, position, modulate, alignment, material);
 }
 
 void drawWString(in wstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
-    ubyte alignment = Font.Alignment.left | Font.Alignment.top)
+    ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
 {
-    drawStringImpl!wstring(text, font, position, modulate, alignment);
+    drawStringImpl!wstring(text, font, position, modulate, alignment, material);
 }
 
 void drawDString(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
-    ubyte alignment = Font.Alignment.left | Font.Alignment.top)
+    ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
 {
-    drawStringImpl!dstring(text, font, position, modulate, alignment);
+    drawStringImpl!dstring(text, font, position, modulate, alignment, material);
 }
 
 public:

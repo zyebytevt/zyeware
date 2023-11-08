@@ -5,15 +5,13 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.material;
 
-//import std.variant : Algebraic, visit;
 import std.sumtype : SumType, match;
-//import std.sumtype;
 import std.string : format, startsWith;
 import std.exception : enforce;
 import std.typecons : Rebindable;
 import std.conv : to;
 import std.string : split;
-import std.algorithm : map, filter;
+import std.algorithm : map, filter, sort, uniq;
 import std.array : array;
 
 import inmath.linalg;
@@ -67,17 +65,17 @@ public:
         setParameter(Parameter(value));
     }
 
-    Parameter* getParameter(string name)
+    ref inout(Parameter) getParameter(string name) inout
         in (name, "Parameter name cannot be null.")
     {
         auto parameter = name in mParameters;
         if (parameter)
-            return parameter;
+            return *parameter;
 
         if (!mIsRoot)
             return mParent.getParameter(name);
 
-        return null;
+        assert(false, "Trying to get non-existant parameter.");
     }
 
     bool removeParameter(string name) nothrow
@@ -115,6 +113,24 @@ public:
             format!"Invalid texture slot '%d'. (Max %d slots)"(idx, mTextureSlots.length));
 
         mTextureSlots[idx] = null;
+    }
+
+    string[] parameterList() const nothrow
+    {
+        string[] list;
+
+        Material current = cast(Material) this;
+
+        while (true)
+        {
+            list ~= current.mParameters.keys;
+            if (current.mIsRoot)
+                break;
+
+            current = current.mParent;
+        }
+
+        return list.sort.uniq.array;
     }
 
     inout(Material) parent() inout nothrow
@@ -198,7 +214,7 @@ public:
         // Check if it either inherits a material or is root
         if (const(ZDLNode*) shaderNode = document.root.getNode("shader"))
         {
-            material = new Material(AssetManager.load!Shader(shaderNode.path.expectValue!ZDLString.to!string), textures.length);
+            material = new Material(AssetManager.load!Shader(shaderNode.expectValue!ZDLString.to!string), textures.length);
         }
         else if (const(ZDLNode*) extendsNode = document.root.getNode("extends"))
         {
