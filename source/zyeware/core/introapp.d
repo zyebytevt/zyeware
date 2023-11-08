@@ -2,6 +2,7 @@ module zyeware.core.introapp;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.pal;
 
 package(zyeware.core)
 final class IntroApplication : Application
@@ -61,25 +62,24 @@ public:
     override void tick(in FrameTime frameTime)
     {
         if (ZyeWare.upTime.toFloatSeconds > 2.5f)
-            ZyeWare.application = mMainApplication;
+            defer(() { ZyeWare.application = mMainApplication; });
     }
 
     override void draw(in FrameTime nextFrameTime)
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        //PAL.graphics.setClearColor(mBackgroundGradient.interpolate(seconds));
-        //PAL.graphics.clear();
+        PAL.graphics.clearScreen(mBackgroundGradient.interpolate(seconds));
 
         immutable float scale = mScaleInterpolator.interpolate(seconds);
-        Vector2f min = Vector2f(-0.9, -0.35) * scale;
-        Vector2f max = Vector2f(0.9, 0.35) * scale;
+        Vector2f position = Vector2f(-0.9, -0.35) * scale;
+        Vector2f size = Vector2f(1.8, 0.7) * scale;
 
         immutable float alpha = mAlphaInterpolator.interpolate(seconds);
 
         Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
 
-        Renderer2D.drawRectangle(Rect2f(min, max), Matrix4f.identity,
+        Renderer2D.drawRectangle(Rect2f(position, size), Matrix4f.identity,
             Color(1, 1, 1, alpha), mEngineLogo);
 
         Renderer2D.drawString(mVersionString, mInternalFont, Vector2f(-1, -1), Color(1, 1, 1, alpha),

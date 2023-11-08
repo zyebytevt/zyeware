@@ -29,6 +29,8 @@ import zyeware.pal;
 import zyeware.pal.graphics.opengl.api;
 import zyeware.pal.graphics.callbacks;
 
+alias defer = ZyeWare.callDeferred;
+
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
 struct ProjectProperties
@@ -561,7 +563,7 @@ public static:
     /// Params:
     ///     location = The display relative position.
     /// Returns: The converted framebuffer position.
-    Vector2f convertDisplayToFramebufferLocation(Vector2f location) nothrow
+    Vector2f convertDisplayToFramebufferLocation(Vector2i location) nothrow
     {
         float fbActualWidth = sFramebufferArea.max.x - sFramebufferArea.min.x;
         float fbActualHeight = sFramebufferArea.max.y - sFramebufferArea.min.y;

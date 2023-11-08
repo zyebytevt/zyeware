@@ -64,7 +64,7 @@ public:
     {
         PAL.graphics.clearScreen(Color.black);
 
-        auto r = Rect2f(-50, -50, 50, 50);
+        auto r = Rect2f(-50, -50, 100, 100);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);
         Color c = collision.isColliding ? Color(0, 1, 0, 1) : Color(1, 0, 0, 1);
 

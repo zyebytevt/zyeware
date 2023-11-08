@@ -7,8 +7,7 @@ import std.string : format;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.core.debugging.profiler;
-
-version(none):
+import zyeware.pal;
 
 class ParticlesDemo : GameState
 {
@@ -30,7 +29,6 @@ public:
 
         if (InputManager.isActionPressed("ui_down"))
             mParticles.emit(mStarParticlesId, position, 500);
-            
         
         mParticles.tick(frameTime);
 
@@ -40,7 +38,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        PAL.graphics.clear();
+        PAL.graphics.clearScreen(Color.black);
 
         Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, Vector2f(4), Color.white);

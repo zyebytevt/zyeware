@@ -13,7 +13,6 @@ import std.string : format;
 import zyeware.common;
 import zyeware.rendering;
 
-/+
 alias ParticleRegistrationID = size_t;
 
 class Particles2D
@@ -64,8 +63,8 @@ public:
                 {
                     particles.remove(i);
 
-                    //if (particles.type.typeOnDeath > ParticleRegistrationID.init)
-                    //    emit(particles.type.typeOnDeath, particles.positions[particleIdx], 1);
+                    if (particles.type.typeOnDeath > ParticleRegistrationID.init)
+                        emit(particles.type.typeOnDeath, particles.positions[i], 1);
 
                     --i;
                     continue;
@@ -193,4 +192,4 @@ private struct ParticleContainer
 
         --activeParticlesCount;
     }
-}+/
+}

@@ -75,8 +75,8 @@ public:
                 ZyeWare.callDeferred(() => application.pushState(new GamepadDemo(application)));
             }),
 
-            VerticalMenu.Entry(tr("Particles Demo"), true, () {
-                //ZyeWare.callDeferred(() => application.pushState(new ParticlesDemo(application)));
+            VerticalMenu.Entry(tr("Particles Demo"), false, () {
+                ZyeWare.callDeferred(() => application.pushState(new ParticlesDemo(application)));
             }),
 
             VerticalMenu.Entry(tr("GUI Demo"), true, () {

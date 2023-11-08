@@ -179,7 +179,7 @@ public:
             immutable float lifeTimeSecs = mStars[starIndex].lifeTime.toFloatSeconds;
             immutable float alpha = 1 - lifeTimeSecs / 10f;
 
-            Renderer2D.drawRectangle(Rect2f(-4, -4, 4, 4), mStars[starIndex].position, Vector2f(1),
+            Renderer2D.drawRectangle(Rect2f(-4, -4, 8, 8), mStars[starIndex].position, Vector2f(1),
                 Color(fmod(lifeTimeSecs, 1), 1, 1, alpha).toRGB(), mStarTexture);
         }
     }
