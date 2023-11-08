@@ -548,8 +548,8 @@ public static:
     {
         FramebufferProperties fbProps = sMainFramebuffer.properties;
         fbProps.size = newSize;
-        //sMainFramebuffer.properties = fbProps;
-        //sMainFramebuffer.invalidate();
+
+        sMainFramebuffer.recreate(fbProps);
 
         sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
         recalculateFramebufferArea();

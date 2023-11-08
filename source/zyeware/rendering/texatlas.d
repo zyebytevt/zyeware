@@ -59,8 +59,8 @@ public:
         mRegion = Rect2f(
             x1,
             y1,
-            x1 + 1.0f / mHFrames,
-            y1 + 1.0f / mVFrames
+            1.0f / mHFrames,
+            1.0f / mVFrames
         );
     }
 

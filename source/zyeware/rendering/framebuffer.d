@@ -34,6 +34,13 @@ public:
         PAL.graphics.freeFramebuffer(mNativeHandle);
     }
 
+    void recreate(in FramebufferProperties properties)
+    {
+        mProperties = properties;
+        PAL.graphics.freeFramebuffer(mNativeHandle);
+        mNativeHandle = PAL.graphics.createFramebuffer(mProperties);
+    }
+
     const(NativeHandle) handle() pure const nothrow
     {
         return mNativeHandle;

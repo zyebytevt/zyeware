@@ -85,14 +85,10 @@ public:
         foreach (Entity entity, Transform2DComponent* transform, SpriteComponent* sprite;
             entities.entitiesWith!(Transform2DComponent, SpriteComponent))
         {
-            //immutable Vector2f p1 = Vector2f(sprite.hFlip ? sprite.offset.x : -sprite.offset.x,
-            //    sprite.vFlip ? sprite.offset.y : -sprite.offset.y);
-            //immutable Vector2f p2 = Vector2f(sprite.hFlip ? );
-
             float x1 = -sprite.offset.x;
             float y1 = -sprite.offset.y;
-            float x2 = sprite.size.x - sprite.offset.x;
-            float y2 = sprite.size.y - sprite.offset.y;
+            float x2 = sprite.size.x;
+            float y2 = sprite.size.y;
 
             if (sprite.hFlip)
             {
