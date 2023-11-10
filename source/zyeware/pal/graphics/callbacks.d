@@ -38,4 +38,5 @@ public:
 
     void function(in NativeHandle target) nothrow setRenderTarget;
     void function(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow presentToScreen;
+    NativeHandle function(in NativeHandle framebuffer) nothrow getTextureFromFramebuffer;
 }

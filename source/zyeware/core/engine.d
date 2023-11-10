@@ -346,6 +346,7 @@ package(zyeware.core) static:
     {
         sCleanupTimer.stop();
         sMainDisplay.destroy();
+        sMainFramebuffer.destroy();
         sApplication.cleanup();
         //Renderer3D.cleanup();
         Renderer2D.cleanup();

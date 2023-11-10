@@ -60,12 +60,19 @@ struct MeshData
     uint ibo;
 }
 
+struct FramebufferData
+{
+    uint id;
+    uint colorAttachmentId;
+    uint depthAttachmentId;
+}
+
 bool[RenderFlag] pFlagValues;
 
 SequentialBuffer!uint pTexture2DIDs;
 SequentialBuffer!uint pTextureCubeMapIDs;
 SequentialBuffer!MeshData pMeshData;
-SequentialBuffer!uint pFramebufferIDs;
+SequentialBuffer!FramebufferData pFramebufferData;
 SequentialBuffer!uint pShaderIDs;
 
 version (Windows)
@@ -250,7 +257,7 @@ void palGlCleanup()
     foreach (ref MeshData data; pMeshData.data)
         palGlFreeMesh(cast(NativeHandle) &data);
 
-    foreach (ref uint id; pFramebufferIDs.data)
+    foreach (ref FramebufferData id; pFramebufferData.data)
         palGlFreeFramebuffer(cast(NativeHandle) &id);
 
     foreach (ref uint id; pShaderIDs.data)
@@ -391,24 +398,37 @@ NativeHandle palGlCreateTextureCubeMap(in Image[6] images, in TextureProperties 
 
 NativeHandle palGlCreateFramebuffer(in FramebufferProperties properties)
 {
-    uint id;
+    FramebufferData framebuffer;
 
-    glGenFramebuffers(1, &id);
-    glBindFramebuffer(GL_FRAMEBUFFER, id);
+    glGenFramebuffers(1, &framebuffer.id);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.id);
 
-    uint colorRBO, depthRBO;
+    // Create the color attachment based on the properties.
+    final switch (properties.usageType) with (FramebufferProperties.UsageType)
+    {
+    case swapChainTarget:
+        glGenRenderbuffers(1, &framebuffer.colorAttachmentId);
+        glBindRenderbuffer(GL_RENDERBUFFER, framebuffer.colorAttachmentId);
 
-    glGenRenderbuffers(1, &colorRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, colorRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, properties.size.x, properties.size.y);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, framebuffer.colorAttachmentId);
+        break;
 
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, properties.size.x, properties.size.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRBO);
+    case texture:
+        glGenTextures(1, &framebuffer.colorAttachmentId);
+        glBindTexture(GL_TEXTURE_2D, framebuffer.colorAttachmentId);
 
-    glGenRenderbuffers(1, &depthRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, properties.size.x, properties.size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffer.colorAttachmentId, 0);
+        break;
+    }
+
+    // Now generate the depth buffer, which will always be a renderbuffer.
+    glGenRenderbuffers(1, &framebuffer.depthAttachmentId);
+    glBindRenderbuffer(GL_RENDERBUFFER, framebuffer.depthAttachmentId);
 
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, properties.size.x, properties.size.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer.depthAttachmentId);
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -416,7 +436,7 @@ NativeHandle palGlCreateFramebuffer(in FramebufferProperties properties)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    return cast(NativeHandle) pFramebufferIDs.add(id);
+    return cast(NativeHandle) pFramebufferData.add(framebuffer);
 }
 
 NativeHandle palGlCreateShader(in ShaderProperties properties)
@@ -521,10 +541,21 @@ void palGlFreeTextureCubeMap(NativeHandle texture) nothrow
 
 void palGlFreeFramebuffer(NativeHandle framebuffer) nothrow
 {
-    uint* id = cast(uint*) framebuffer;
+    FramebufferData* data = cast(FramebufferData*) framebuffer;
 
-    glDeleteFramebuffers(1, id);
-    *id = uint.init;
+    glDeleteFramebuffers(1, &data.id);
+
+    // Order is important, as a renderbuffer is also a texture.
+    if (glIsRenderbuffer(data.colorAttachmentId))
+        glDeleteRenderbuffers(1, &data.colorAttachmentId);
+    else if (glIsTexture(data.colorAttachmentId))
+        glDeleteTextures(1, &data.colorAttachmentId);
+    else
+        assert(false, "Cannot free unknown framebuffer color attachment.");
+
+    glDeleteRenderbuffers(1, &data.depthAttachmentId);
+
+    *data = FramebufferData.init;
 }
 
 void palGlFreeShader(NativeHandle shader) nothrow
@@ -617,6 +648,15 @@ void palGlPresentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i 
         dstRegion.size.x, dstRegion.size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
+NativeHandle palGlGetTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
+{
+    FramebufferData* data = cast(FramebufferData*) framebuffer;
+
+    assert(glIsTexture(data.colorAttachmentId), "Framebuffer color attachment is not a texture.");
+
+    return cast(NativeHandle) &data.colorAttachmentId;
+}
+
 public:
 
 GraphicsPALCallbacks palGlGenerateCallbacks()
@@ -648,5 +688,6 @@ GraphicsPALCallbacks palGlGenerateCallbacks()
         &palGlClearScreen,
         &palGlSetRenderTarget,
         &palGlPresentToScreen,
+        &palGlGetTextureFromFramebuffer,
     );
 }

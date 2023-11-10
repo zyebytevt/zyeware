@@ -46,6 +46,15 @@ protected:
     TextureProperties mProperties;
     Vector2i mSize;
 
+package(zyeware):
+    /// Careful: This will take ownership of the given handle.
+    this(NativeHandle handle, in Vector2i size, in TextureProperties properties = TextureProperties.init) nothrow
+    {
+        mProperties = properties;
+        mSize = size;
+        mNativeHandle = handle;
+    }
+
 public:
     this(in Image image, in TextureProperties properties = TextureProperties.init)
     {
