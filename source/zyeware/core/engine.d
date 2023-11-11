@@ -566,11 +566,8 @@ public static:
     /// Returns: The converted framebuffer position.
     Vector2f convertDisplayToFramebufferLocation(Vector2i location) nothrow
     {
-        float fbActualWidth = sFramebufferArea.max.x - sFramebufferArea.min.x;
-        float fbActualHeight = sFramebufferArea.max.y - sFramebufferArea.min.y;
-
-        float x = ((location.x - sFramebufferArea.min.x) / fbActualWidth) * sMainFramebuffer.properties.size.x;
-        float y = ((location.y - sFramebufferArea.min.y) / fbActualHeight) * sMainFramebuffer.properties.size.y;
+        float x = ((location.x - sFramebufferArea.position.x) / sFramebufferArea.size.x) * sMainFramebuffer.properties.size.x;
+        float y = ((location.y - sFramebufferArea.position.y) / sFramebufferArea.size.y) * sMainFramebuffer.properties.size.y;
 
         return Vector2f(x, y);
     }

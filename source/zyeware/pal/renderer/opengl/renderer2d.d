@@ -17,7 +17,7 @@ import zyeware.pal.graphics.types;
 private:
 
 enum maxMaterialsPerDrawCall = 8;
-enum maxMaterialsPerBatch = 8;
+enum maxTexturesPerBatch = 8;
 enum maxVerticesPerBatch = 20000;
 enum maxIndicesPerBatch = 30000;
 
@@ -110,7 +110,7 @@ struct Batch
 
 // Buffers important for rendering
 GlBuffer[2] pRenderBuffers;
-Batch[maxMaterialsPerDrawCall] pBatches;
+Batch[] pBatches;
 size_t currentMaterialCount = 0;
 
 Matrix4f pProjectionViewMatrix;
@@ -190,14 +190,17 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
 
                     immutable int kerning = i > 0 ? font.bmFont.getKerning(line[i - 1], line[i]) : 1;
 
-                    const(Texture2D) pageTexture = font.getPageTexture(c.page);
-                    immutable Vector2f size = pageTexture.size;
+                    if (c.width > 0 && c.height > 0)
+                    {
+                        const(Texture2D) pageTexture = font.getPageTexture(c.page);
+                        immutable Vector2f size = pageTexture.size;
 
-                    immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
-                        cast(float) c.width / size.x, cast(float) c.height / size.y);
+                        immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
+                            cast(float) c.width / size.x, cast(float) c.height / size.y);
 
-                    drawRectangle(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
-                        modulate, pageTexture, material, region);
+                        drawRectangle(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
+                            modulate, pageTexture, material, region);
+                    }
 
                     cursor.x += c.xadvance + kerning;
             }
@@ -205,6 +208,15 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
 
         cursor.y += font.bmFont.common.lineHeight;
     }
+}
+
+void initializeBatch(ref Batch batch)
+{
+    batch.vertices = new BatchVertex2D[maxVerticesPerBatch + 2000];
+    batch.indices = new uint[maxIndicesPerBatch + 3000];
+    batch.textures = new Rebindable!(const Texture2D)[maxTexturesPerBatch];
+
+    batch.textures[0] = pWhiteTexture;
 }
 
 /// Initializes the renderer.
@@ -221,14 +233,8 @@ void initialize()
     static ubyte[3] pixels = [255, 255, 255];
     pWhiteTexture = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
 
-    for (size_t i; i < pBatches.length; ++i)
-    {
-        pBatches[i].vertices = new BatchVertex2D[maxVerticesPerBatch];
-        pBatches[i].indices = new uint[maxIndicesPerBatch];
-        pBatches[i].textures = new Rebindable!(const Texture2D)[maxMaterialsPerBatch];
-
-        pBatches[i].textures[0] = pWhiteTexture;
-    }
+    pBatches.length = 1;
+    initializeBatch(pBatches[0]);
 
     pDefaultMaterial = AssetManager.load!Material("core://materials/2d/default.mtl");
 }
@@ -290,16 +296,26 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in Matrix4f transfo
     size_t batchIndex = getIndexForMaterial(mat);
     if (batchIndex == size_t.max)
     {
-        flush();
-        batchIndex = 0;
+        if (pBatches.length < maxMaterialsPerDrawCall)
+        {
+            pBatches.length += 1;
+            initializeBatch(pBatches[pBatches.length - 1]);
+            batchIndex = pBatches.length - 1;
+        }
+        else
+        {
+            flush();
+            batchIndex = 0;
+        }
     }
 
     Batch* batch = &pBatches[batchIndex];
+    
+    if (batch.currentVertexCount >= maxVerticesPerBatch)
+        flush();
+    
     if (batch.material !is mat)
         batch.material = mat;
-
-    if (batch.currentVertexCount + vertices.length >= maxVerticesPerBatch)
-        flush();
 
     float texIdx;
     if (texture)
