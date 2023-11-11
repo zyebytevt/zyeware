@@ -24,8 +24,8 @@ enum maxIndicesPerBatch = 30000;
 struct BatchVertex2D
 {
     Vector4f position;
-    Color color;
     Vector2f uv;
+    Color color;
     float textureIndex;
 }
 
@@ -142,9 +142,9 @@ void createBuffer(ref GlBuffer buffer)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.position.offsetof);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.color.offsetof);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.uv.offsetof);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.uv.offsetof);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.color.offsetof);
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.textureIndex.offsetof);
     
@@ -223,8 +223,8 @@ void initialize()
 
     for (size_t i; i < pBatches.length; ++i)
     {
-        pBatches[i].vertices = new BatchVertex2D[maxVerticesPerBatch + 2000];
-        pBatches[i].indices = new uint[maxIndicesPerBatch + 3000];
+        pBatches[i].vertices = new BatchVertex2D[maxVerticesPerBatch];
+        pBatches[i].indices = new uint[maxIndicesPerBatch];
         pBatches[i].textures = new Rebindable!(const Texture2D)[maxMaterialsPerBatch];
 
         pBatches[i].textures[0] = pWhiteTexture;
@@ -282,8 +282,8 @@ void flush()
     currentMaterialCount = 0;
 }
 
-void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
-    in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+void drawVertices(in Vertex2D[] vertices, in uint[] indices, in Matrix4f transform,
+    in Texture2D texture = null, in Material material = null)
 {
     const(Material) mat = material ? material : pDefaultMaterial;
 
@@ -291,14 +291,14 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
     if (batchIndex == size_t.max)
     {
         flush();
-        batchIndex = getIndexForMaterial(mat);
+        batchIndex = 0;
     }
-    
+
     Batch* batch = &pBatches[batchIndex];
     if (batch.material !is mat)
         batch.material = mat;
 
-    if (batch.currentVertexCount >= maxVerticesPerBatch)
+    if (batch.currentVertexCount + vertices.length >= maxVerticesPerBatch)
         flush();
 
     float texIdx;
@@ -314,11 +314,24 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
         texIdx = cast(float) idx;
     }
 
-    static Vector4f[4] quadPositions;
-    quadPositions[0] = Vector4f(dimensions.position.x, dimensions.position.y, 0, 1);
-    quadPositions[1] = Vector4f(dimensions.position.x + dimensions.size.x, dimensions.position.y, 0, 1);
-    quadPositions[2] = Vector4f(dimensions.position.x + dimensions.size.x, dimensions.position.y + dimensions.size.y, 0, 1);
-    quadPositions[3] = Vector4f(dimensions.position.x, dimensions.position.y + dimensions.size.y, 0, 1);
+    foreach (size_t i, const Vertex2D vertex; vertices)
+        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * Vector4f(vertex.position, 0, 1), vertex.uv, vertex.color, texIdx);
+
+    foreach (size_t i, uint index; indices)
+        batch.indices[batch.currentIndexCount + i] = cast(uint) batch.currentVertexCount + index;
+
+    batch.currentVertexCount += vertices.length;
+    batch.currentIndexCount += indices.length;
+}
+
+void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
+    in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+{
+    static Vector2f[4] quadPositions;
+    quadPositions[0] = Vector2f(dimensions.position.x, dimensions.position.y);
+    quadPositions[1] = Vector2f(dimensions.position.x + dimensions.size.x, dimensions.position.y);
+    quadPositions[2] = Vector2f(dimensions.position.x + dimensions.size.x, dimensions.position.y + dimensions.size.y);
+    quadPositions[3] = Vector2f(dimensions.position.x, dimensions.position.y + dimensions.size.y);
 
     static Vector2f[4] quadUVs;
     quadUVs[0] = Vector2f(region.position.x, region.position.y);
@@ -326,21 +339,20 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
     quadUVs[2] = Vector2f(region.position.x + region.size.x, region.position.y + region.size.y);
     quadUVs[3] = Vector2f(region.position.x, region.position.y + region.size.y);
 
+    static Vertex2D[4] vertices;
+    static uint[6] indices;
+
     for (size_t i; i < 4; ++i)
-        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * quadPositions[i], modulate,
-            quadUVs[i], texIdx);
+        vertices[i] = Vertex2D(quadPositions[i], quadUVs[i], modulate);
 
-    batch.indices[batch.currentIndexCount + 0] = cast(uint) batch.currentVertexCount + 2;
-    batch.indices[batch.currentIndexCount + 1] = cast(uint) batch.currentVertexCount + 1;
-    batch.indices[batch.currentIndexCount + 2] = cast(uint) batch.currentVertexCount + 0;
-    batch.indices[batch.currentIndexCount + 3] = cast(uint) batch.currentVertexCount + 0;
-    batch.indices[batch.currentIndexCount + 4] = cast(uint) batch.currentVertexCount + 3;
-    batch.indices[batch.currentIndexCount + 5] = cast(uint) batch.currentVertexCount + 2;
+    indices[0] = 2;
+    indices[1] = 1;
+    indices[2] = 0;
+    indices[3] = 0;
+    indices[4] = 3;
+    indices[5] = 2;
 
-    batch.currentIndexCount += 6;
-    batch.currentVertexCount += 4;
-
-    // TODO: Add to profiler rect count
+    drawVertices(vertices, indices, transform, texture, material);
 }
 
 void drawString(in string text, in Font font, in Vector2f position, in Color modulate = Color.white,
@@ -371,6 +383,7 @@ Renderer2DCallbacks generateRenderer2DPALCallbacks()
         &beginScene,
         &endScene,
         &flush,
+        &drawVertices,
         &drawRectangle,
         &drawString,
         &drawWString,

@@ -57,6 +57,16 @@ public static:
         PAL.renderer2D.flush();
     }
 
+    /// Draws a mesh.
+    ///
+    /// Params:
+    ///     mesh = The mesh to draw.
+    ///     position = 2D transform where to draw the mesh to.
+    void drawMesh(in Mesh2D mesh, in Matrix4f transform)
+    {
+        PAL.renderer2D.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh.material);
+    }
+
     /// Draws a rectangle.
     ///
     /// Params:
