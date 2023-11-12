@@ -69,12 +69,6 @@ struct FramebufferData
 
 bool[RenderFlag] pFlagValues;
 
-SequentialBuffer!uint pTexture2DIDs;
-SequentialBuffer!uint pTextureCubeMapIDs;
-SequentialBuffer!MeshData pMeshData;
-SequentialBuffer!FramebufferData pFramebufferData;
-SequentialBuffer!uint pShaderIDs;
-
 version (Windows)
 {
     extern(Windows) static void palGlErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
@@ -248,27 +242,13 @@ void palGlLoadLibs()
 
 void palGlCleanup()
 {
-    foreach (ref uint id; pTexture2DIDs.data)
-        palGlFreeTexture2D(cast(NativeHandle) &id);
-
-    foreach (ref uint id; pTextureCubeMapIDs.data)
-        palGlFreeTextureCubeMap(cast(NativeHandle) &id);
-
-    foreach (ref MeshData data; pMeshData.data)
-        palGlFreeMesh(cast(NativeHandle) &data);
-
-    foreach (ref FramebufferData id; pFramebufferData.data)
-        palGlFreeFramebuffer(cast(NativeHandle) &id);
-
-    foreach (ref uint id; pShaderIDs.data)
-        palGlFreeShader(cast(NativeHandle) &id);
 }
 
 package(zyeware.pal):
 
 NativeHandle palGlCreateMesh(in Vertex3D[] vertices, in uint[] indices)
 {
-    MeshData data;
+    auto data = new MeshData;
 
     glGenVertexArrays(1, &data.vao);
     glGenBuffers(1, &data.vbo);
@@ -298,7 +278,7 @@ NativeHandle palGlCreateMesh(in Vertex3D[] vertices, in uint[] indices)
 
     glBindVertexArray(0);
 
-    return cast(NativeHandle) pMeshData.add(data);
+    return cast(NativeHandle) data;
 }
 
 NativeHandle palGlCreateTexture2D(in Image image, in TextureProperties properties)
@@ -329,11 +309,11 @@ NativeHandle palGlCreateTexture2D(in Image image, in TextureProperties propertie
         break;
     }
 
-    uint id;
+    auto id = new uint;
 
-    glGenTextures(1, &id);
+    glGenTextures(1, id);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTexture(GL_TEXTURE_2D, *id);
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
@@ -346,16 +326,16 @@ NativeHandle palGlCreateTexture2D(in Image image, in TextureProperties propertie
     if (properties.generateMipmaps)
         glGenerateMipmap(GL_TEXTURE_2D);
 
-    return cast(NativeHandle) pTexture2DIDs.add(id);
+    return cast(NativeHandle) id;
 }
 
 NativeHandle palGlCreateTextureCubeMap(in Image[6] images, in TextureProperties properties)
 {
-    uint id;
+    auto id = new uint;
 
-    glGenTextures(1, &id);
+    glGenTextures(1, id);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *id);
 
     for (size_t i; i < 6; ++i)
     {
@@ -393,12 +373,12 @@ NativeHandle palGlCreateTextureCubeMap(in Image[6] images, in TextureProperties 
     if (properties.generateMipmaps)
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-    return cast(NativeHandle) pTextureCubeMapIDs.add(id);
+    return cast(NativeHandle) id;
 }
 
 NativeHandle palGlCreateFramebuffer(in FramebufferProperties properties)
 {
-    FramebufferData framebuffer;
+    auto framebuffer = new FramebufferData;
 
     glGenFramebuffers(1, &framebuffer.id);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.id);
@@ -436,12 +416,13 @@ NativeHandle palGlCreateFramebuffer(in FramebufferProperties properties)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    return cast(NativeHandle) pFramebufferData.add(framebuffer);
+    return cast(NativeHandle) framebuffer;
 }
 
 NativeHandle palGlCreateShader(in ShaderProperties properties)
 {
-    immutable uint programID = glCreateProgram();
+    auto id = new uint;
+    *id = glCreateProgram();
 
     foreach (ShaderProperties.ShaderType type, string source; properties.sources)
     {
@@ -484,35 +465,35 @@ NativeHandle palGlCreateShader(in ShaderProperties properties)
             throw new GraphicsException(format!"Shader compilation failed: %s"(infoLog[0..length]));
         }
 
-        glAttachShader(programID, shaderID);
+        glAttachShader(*id, shaderID);
         glDeleteShader(shaderID);
     }
 
-    glLinkProgram(programID);
+    glLinkProgram(*id);
 
     int success;
-    glGetProgramiv(programID, GL_LINK_STATUS, &success);
+    glGetProgramiv(*id, GL_LINK_STATUS, &success);
 
     if (!success)
     {
         char[2048] infoLog;
         GLsizei length;
-        glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+        glGetProgramInfoLog(*id, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
         throw new GraphicsException(format!"Shader linking failed: %s"(infoLog[0..length]));
     }
 
-    glValidateProgram(programID);
-    glGetProgramiv(programID, GL_VALIDATE_STATUS, &success);
+    glValidateProgram(*id);
+    glGetProgramiv(*id, GL_VALIDATE_STATUS, &success);
 
     if (!success)
     {
         char[2048] infoLog;
         GLsizei length;
-        glGetProgramInfoLog(programID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
+        glGetProgramInfoLog(*id, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
         throw new GraphicsException(format!"Shader validation failed: %s"(infoLog[0..length]));
     }
 
-    return cast(NativeHandle) pShaderIDs.add(programID);
+    return cast(NativeHandle) id;
 }
 
 void palGlFreeMesh(NativeHandle mesh) nothrow
@@ -523,15 +504,16 @@ void palGlFreeMesh(NativeHandle mesh) nothrow
     glDeleteBuffers(1, &data.ibo);
     glDeleteVertexArrays(1, &data.vao);
 
-    *data = MeshData.init;
+    destroy(data);
 }
 
 void palGlFreeTexture2D(NativeHandle texture) nothrow
 {
-    uint* id = cast(uint*) texture;
+    auto id = cast(uint*) texture;
     
     glDeleteTextures(1, id);
-    *id = uint.init;
+    
+    destroy(id);
 }
 
 void palGlFreeTextureCubeMap(NativeHandle texture) nothrow
@@ -541,7 +523,7 @@ void palGlFreeTextureCubeMap(NativeHandle texture) nothrow
 
 void palGlFreeFramebuffer(NativeHandle framebuffer) nothrow
 {
-    FramebufferData* data = cast(FramebufferData*) framebuffer;
+    auto data = cast(FramebufferData*) framebuffer;
 
     glDeleteFramebuffers(1, &data.id);
 
@@ -555,15 +537,16 @@ void palGlFreeFramebuffer(NativeHandle framebuffer) nothrow
 
     glDeleteRenderbuffers(1, &data.depthAttachmentId);
 
-    *data = FramebufferData.init;
+    destroy(data);
 }
 
 void palGlFreeShader(NativeHandle shader) nothrow
 {
-    uint* id = cast(uint*) shader;
+    auto id = cast(uint*) shader;
 
     glDeleteProgram(*id);
-    *id = uint.init;
+    
+    destroy(id);
 }
 
 void palGlSetViewport(Rect2i region) nothrow
