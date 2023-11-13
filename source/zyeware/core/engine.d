@@ -279,13 +279,12 @@ private static:
         import zyeware.pal.display.opengl.display : generateDisplayPALCallbacks;
         import zyeware.pal.graphics.opengl.api : palGlGenerateCallbacks;
         import zyeware.pal.renderer.opengl.renderer2d : generateRenderer2DPALCallbacks;
-        import zyeware.audio.openal.impl;
-
-        loadOpenALBackend();
+        import zyeware.pal.audio.openal.api : palAlGenerateCallbacks;
 
         PAL.sDisplayCallbacks = generateDisplayPALCallbacks();
         PAL.sGraphicsCallbacks = palGlGenerateCallbacks();
         PAL.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();
+        PAL.sAudioCallbacks = palAlGenerateCallbacks();
     }
 
 package(zyeware.core) static:
@@ -328,7 +327,7 @@ package(zyeware.core) static:
         // Initialize all other sub-systems.
         VFS.initialize();
         AssetManager.initialize();
-        AudioAPI.initialize();
+        PAL.audio.initialize();
         AudioThread.initialize();
         PAL.graphics.initialize();
         Renderer2D.initialize();
@@ -352,7 +351,7 @@ package(zyeware.core) static:
         Renderer2D.cleanup();
         PAL.graphics.cleanup();
         AudioThread.cleanup();
-        AudioAPI.cleanup();
+        PAL.audio.cleanup();
 
         VFS.cleanup();
 

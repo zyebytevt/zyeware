@@ -3,6 +3,7 @@ module zyeware.pal.pal;
 import zyeware.pal.graphics.callbacks;
 import zyeware.pal.display.callbacks;
 import zyeware.pal.renderer.callbacks;
+import zyeware.pal.audio.callbacks;
 
 struct PAL
 {
@@ -14,6 +15,7 @@ package(zyeware) static:
     DisplayPALCallbacks sDisplayCallbacks;
     Renderer2DCallbacks sRenderer2DCallbacks;
     Renderer3DCallbacks sRenderer3DCallbacks;
+    AudioPALCallbacks sAudioCallbacks;
 
     pragma(inline, true)
     ref Renderer2DCallbacks renderer2D() nothrow
@@ -38,5 +40,11 @@ public static:
     ref DisplayPALCallbacks display() nothrow
     {
         return sDisplayCallbacks;
+    }
+
+    pragma(inline, true)
+    ref AudioPALCallbacks audio() nothrow
+    {
+        return sAudioCallbacks;
     }
 }

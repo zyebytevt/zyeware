@@ -57,13 +57,13 @@ package(zyeware.core) static:
         //registerDefaultLoaders();
         import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, Font, Material, SpriteFrames, Cursor;
         import zyeware.core.translation : Translation;
-        import zyeware.audio : Sound;
+        import zyeware.audio : AudioBuffer;
 
         register!Shader((path) => cast(Object) Shader.load(path));
         register!Texture2D((path) => cast(Object) Texture2D.load(path));
         register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
 
-        register!Sound((path) => cast(Object) Sound.load(path));
+        register!AudioBuffer((path) => cast(Object) AudioBuffer.load(path));
 
         register!Image(&Image.load);
         register!Mesh3D(&Mesh3D.load);

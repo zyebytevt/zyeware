@@ -8,21 +8,27 @@ module zyeware.audio.bus;
 import std.algorithm : clamp;
 
 import zyeware.common;
-import zyeware.audio.thread;
+import zyeware.pal;
 
 /// Controls the mixing of various sounds which are assigned to this audio bus, 
-class AudioBus
+class AudioBus : NativeObject
 {
 protected:
     string mName;
-    float mVolume = 1;
+    NativeHandle mNativeHandle;
 
 public:
     /// Params:
     ///   name = The name of this audio bus.
-    this(string name) pure nothrow
+    this(string name)
     {
         mName = name;
+        mNativeHandle = PAL.audio.createBus(name);
+    }
+
+    ~this()
+    {
+        PAL.audio.freeBus(mNativeHandle);
     }
     
     /// The name of this audio bus, as registered in the audio subsystem.
@@ -34,13 +40,17 @@ public:
     /// The volume of this audio bus, ranging from 0 to 1.
     float volume() const nothrow
     {
-        return mVolume;
+        return PAL.audio.getBusVolume(mNativeHandle);
     }
 
     /// ditto
     void volume(float value)
     {
-        mVolume = clamp(value, 0.0f, 1.0f);
-        AudioThread.updateVolumeForSources();
+        PAL.audio.setBusVolume(mNativeHandle, clamp(value, 0.0f, 1.0f));
+    }
+
+    const(NativeHandle) handle() pure const nothrow
+    {
+        return mNativeHandle;
     }
 }

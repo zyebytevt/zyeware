@@ -7,66 +7,100 @@ module zyeware.audio.source;
 
 import zyeware.common;
 import zyeware.audio;
+import zyeware.pal;
+import zyeware.pal.audio.types;
 
 /// Represents an individual source that can play sounds. Only one sound
 /// can play at a time.
-interface AudioSource
+class AudioSource : NativeObject
 {
+protected:
+    NativeHandle mNativeHandle;
+    AudioBuffer mBuffer;
+
 public:
-    /// Represents what state the `AudioSource` is currently in.
-    enum State
+    this(in AudioBus bus)
     {
-        stopped, /// Currently no playback.
-        paused, /// Playback was paused, `play()` resumes.
-        playing /// Currently playing audio.
+        mNativeHandle = PAL.audio.createSource(bus.handle);
     }
 
     /// Starts playback, or resumes if the source has been paused previously.
-    void play();
+    void play()
+    {
+        PAL.audio.playSource(mNativeHandle);
+    }
+
     /// Pauses playback. If playback wasn't started, nothing happens.
-    void pause();
+    void pause()
+    {
+        PAL.audio.pauseSource(mNativeHandle);
+    }
+
     /// Stops playback completely. If playback wasn't started, nothing happens.
-    void stop();
+    void stop()
+    {
+        PAL.audio.stopSource(mNativeHandle);
+    }
 
     /// The `Sound` instance assigned to this source.
-    inout(Sound) sound() inout;
+    inout(AudioBuffer) buffer() inout
+    {
+        return mBuffer;
+    }
     
     /// ditto
-    void sound(Sound value);
+    void buffer(AudioBuffer value)
+    {
+        mBuffer = value;
+        PAL.audio.setSourceBuffer(mNativeHandle, value.handle);
+    }
 
     /// Determines whether the source is looping it's sound. The loop point is defined by
     /// the assigned `Sound`.
-    bool looping() pure const nothrow;
+    bool looping() const nothrow
+    {
+        return PAL.audio.isSourceLooping(mNativeHandle);
+    }
 
     /// ditto
-    void looping(bool value) pure nothrow;
+    void looping(bool value)
+    {
+        PAL.audio.setSourceLooping(mNativeHandle, value);
+    }
 
     /// The volume of this source, ranging from 0 to 1.
-    float volume() pure const nothrow;
+    float volume() const nothrow
+    {
+        return PAL.audio.getSourceVolume(mNativeHandle);
+    }
 
     /// ditto
-    void volume(float value) nothrow;
+    void volume(float value)
+    {
+        PAL.audio.setSourceVolume(mNativeHandle, value);
+    }
 
     /// The pitch of this source, ranging from 0 to 1.
     /// This controls pitch as well as speed.
-    float pitch() pure const nothrow;
+    float pitch() const nothrow
+    {
+        return PAL.audio.getSourcePitch(mNativeHandle);
+    }
 
     /// ditto
-    void pitch(float value) nothrow;
+    void pitch(float value)
+    {
+        PAL.audio.setSourcePitch(mNativeHandle, value);
+    }
 
     /// The state this source is currently in.
-    State state() pure const nothrow;
-
-    /// ZyeWare internal call, do not use!
-    void updateBuffers();
-    /// ZyeWare internal call, do not use!
-    void updateVolume();
-
-    /// Creates a new audio source.
-    /// Params:
-    ///   bus = The audio bus this source belongs to.
-    static AudioSource create(AudioBus bus = null)
+    SourceState state() const nothrow
     {
-        return AudioAPI.sCreateAudioSourceImpl(bus);
+        return PAL.audio.getSourceState(mNativeHandle);
+    }
+
+    const(NativeHandle) handle() pure const nothrow
+    {
+        return mNativeHandle;
     }
 }

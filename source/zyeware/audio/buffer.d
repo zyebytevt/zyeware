@@ -5,53 +5,45 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.buffer;
 
-import std.sumtype;
-
 import zyeware.common;
 import zyeware.audio;
-
-/// Contains information about a loop point for a module sound file.
-struct ModuleLoopPoint
-{
-    int pattern; /// The pattern to loop from.
-    int row; /// The row to loop from.
-}
-
-/// Represents an audio sample position.
-alias Sample = int;
-
-/// A SumType for a loop point, containing either a sample position (`int`) or
-/// pattern and row (`ModuleLoopPoint`).
-alias LoopPoint = SumType!(Sample, ModuleLoopPoint);
-
-/// Contains various data for Sound initialisation.
-struct AudioProperties
-{
-    LoopPoint loopPoint = LoopPoint(0); /// The point to loop at. It differentiates between a sample or pattern & row (for modules)
-}
+import zyeware.pal;
+import zyeware.pal.audio.types;
 
 /// Contains an encoded audio segment, plus various information like
 /// loop point etc.
 @asset(Yes.cache)
-interface Sound
+class AudioBuffer : NativeObject
 {
+protected:
+    NativeHandle mNativeHandle;
+
 public:
+    this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
+    {
+        mNativeHandle = PAL.audio.createBuffer(encodedMemory, properties);
+    }
+
+    ~this()
+    {
+        PAL.audio.freeBuffer(mNativeHandle);
+    }
+
     /// The point where this sound should loop, if played through an `AudioSource`.
-    LoopPoint loopPoint() pure const nothrow;
+    LoopPoint loopPoint() const nothrow
+    {
+        return PAL.audio.getBufferLoopPoint(mNativeHandle);
+    }
 
     /// ditto
-    void loopPoint(LoopPoint value) pure nothrow;
-
-    /// The encoded audio data.
-    const(ubyte)[] encodedMemory() pure nothrow;
-
-    /// Creates a new sound buffer with the given data.
-    /// Params:
-    ///   encodedMemory = An array of unsigned bytes that contains the encoded audio data.
-    ///   properties = Instance of an `AudioProperties` struct to initialize the Sound with.
-    static Sound create(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
+    void loopPoint(LoopPoint value)
     {
-        return AudioAPI.sCreateSoundImpl(encodedMemory, properties);
+        PAL.audio.setBufferLoopPoint(mNativeHandle, value);
+    }
+
+    const(NativeHandle) handle() pure const nothrow
+    {
+        return mNativeHandle;
     }
 
     /// Loads a sound from a given VFS path.
@@ -59,8 +51,45 @@ public:
     ///   path = The path inside the VFS.
     /// Returns: A newly created `Sound` instance.
     /// Throws: `VFSException` if the given file can't be loaded.
-    static Sound load(string path)
+    static AudioBuffer load(string path)
     {
-        return AudioAPI.sLoadSoundImpl(path);
+        // The daemons are the best community!
+
+        VFSFile source = VFS.getFile(path);
+        ubyte[] rawFileData = source.readAll!(ubyte[])();
+        source.close();
+
+        AudioProperties properties;
+
+        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+        {
+            try
+            {
+                auto document = ZDLDocument.load(path ~ ".props");
+
+                if (const(ZDLNode*) node = document.root.getNode("loopPoint"))
+                {
+                    if (node.getNode("sample"))
+                        properties.loopPoint = LoopPoint(cast(int) node.sample.expectValue!ZDLInteger);
+                    else if (node.getNode("pattern"))
+                    {
+                        properties.loopPoint = LoopPoint(ModuleLoopPoint(
+                            cast(int) node.pattern.expectValue!ZDLInteger,
+                            cast(int) node.row.expectValue!ZDLInteger
+                        ));
+                    }
+                    else
+                        throw new Exception("Could not interpret loop point.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
+            }
+        }
+
+        Logger.core.log(LogLevel.debug_, "Loaded file '%s' into memory for streaming.", path);
+
+        return new AudioBuffer(rawFileData, properties);
     }
 }
