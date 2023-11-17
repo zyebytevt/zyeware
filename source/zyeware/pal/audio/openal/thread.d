@@ -9,7 +9,6 @@ class AudioThread : Thread
 {
 protected:
     bool mIsRunning;
-    SourceData*[] mSources;
 
     void run()
     {
@@ -28,15 +27,8 @@ protected:
 
         while (mIsRunning)
         {
-            synchronized (this)
-            {
-                // TODO: Move the update logic from the statuc AudioThread into here.
-                // I tried to make this thread have access to the __gshared sources
-                // from the Audio API, but I don't think that's a good idea.
-                // Instead, this should still do manual (de)registration of sources,
-                // which definitely need to be synchronized. Thanks to this being
-                // non-static, we can use the synchronized keyword on this instance.
-            }
+            foreach (SourceData* sourceData; pSources)
+                palAlUpdateSourceBuffers(sourceData);
 
             Thread.sleep(waitTime);
         }

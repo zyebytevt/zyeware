@@ -138,7 +138,7 @@ public:
         {
             mAmbienceSource = AudioSource.create(null);
             //mAmbienceSource.loop = true;
-            mAmbienceSource.sound = AssetManager.load!Sound("res://terraindemo/ambience.ogg");
+            mAmbienceSource.sound = AssetManager.load!AudioBuffer("res://terraindemo/ambience.ogg");
         }
 
         InputManager.addAction("pl_forward", 0.25f)

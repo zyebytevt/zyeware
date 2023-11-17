@@ -9,6 +9,7 @@ import std.datetime : Duration, dur;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.audio;
+import zyeware.pal.audio.types;
 
 import techdemo.menu.vmenu;
 import techdemo.menu.background;
@@ -43,8 +44,8 @@ public:
 
         mUICamera = new OrthographicCamera(0, 640, 480, 0);
         mFont = AssetManager.load!Font("core://fonts/internal.fnt");
-        mBackSoundSource = AudioSource.create();
-        mBackSoundSource.sound = AssetManager.load!Sound("res://menu/back.ogg");
+        mBackSoundSource = new AudioSource(AudioBus.get("master"));
+        mBackSoundSource.buffer = AssetManager.load!AudioBuffer("res://menu/back.ogg");
         mLogoTexture = AssetManager.load!Texture2D("core://textures/engine-logo.png");
 
         if (!sBackground)
@@ -154,14 +155,14 @@ public:
         {
             mBackSoundSource.play();
 
-            if (mBGM.state == AudioSource.State.paused)
+            if (mBGM.state == SourceState.paused)
                 mBGM.play();
         }
         else
         {
-            mBGM = AudioSource.create();
+            mBGM = new AudioSource(AudioBus.get("master"));
             mBGM.volume = 0.4f;
-            mBGM.sound = AssetManager.load!Sound("res://pixels-bgm.ogg");
+            mBGM.buffer = AssetManager.load!AudioBuffer("res://pixels-bgm.ogg");
             mBGM.looping = true;
             mBGM.play();
         }

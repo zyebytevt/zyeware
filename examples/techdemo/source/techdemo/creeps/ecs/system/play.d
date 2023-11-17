@@ -19,7 +19,7 @@ class PlaySystem : System, IReceiver!PlayerDestroyedEvent
 {
 protected:
     CreepsPlayState mPlayState;
-    Sound mMusic, mGameOverSound;
+    AudioBuffer mMusic, mGameOverSound;
     AudioSource mAudioSource;
     Timer mSpawnTimer;
     Timer mScoreTimer;
@@ -80,7 +80,7 @@ protected:
         mSpawnTimer.start();
         mScoreTimer.start();
 
-        mAudioSource.sound = mMusic;
+        mAudioSource.buffer = mMusic;
         mAudioSource.play();
     }
 
@@ -90,9 +90,9 @@ public:
     {
         mPlayState = playState;
 
-        mMusic = AssetManager.load!Sound("res://creeps/audio/music.ogg");
-        mGameOverSound = AssetManager.load!Sound("res://creeps/audio/gameover.ogg");
-        mAudioSource = AudioSource.create(null);
+        mMusic = AssetManager.load!AudioBuffer("res://creeps/audio/music.ogg");
+        mGameOverSound = AssetManager.load!AudioBuffer("res://creeps/audio/gameover.ogg");
+        mAudioSource = new AudioSource(AudioBus.get("master"));
 
         mScore = 0;
 
@@ -121,7 +121,7 @@ public:
         mSpawnTimer.stop();
         Logger.client.log(LogLevel.info, "Final score: %d", mScore);
 
-        mAudioSource.sound = mGameOverSound;
+        mAudioSource.buffer = mGameOverSound;
         //mAudioSource.loop = false;
         mAudioSource.play();
 

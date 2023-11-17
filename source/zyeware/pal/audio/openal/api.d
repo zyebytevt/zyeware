@@ -10,13 +10,14 @@ import audioformats;
 import zyeware.common;
 import zyeware.pal.audio.types;
 import zyeware.pal.audio.callbacks;
+import zyeware.pal.audio.openal.thread;
 
 private:
 
 ALCdevice* pDevice;
 ALCcontext* pContext;
 BusData[string] pBusses;
-__gshared SourceData*[] pSources;
+AudioThread pAudioThread;
 
 // This function is essentially noGC, but it's not marked as such because the array
 // is initialized the first time the function is called.
@@ -46,6 +47,8 @@ void palAlUpdateSourcesWithBus(in BusData* bus)
 }
 
 package(zyeware.pal):
+
+__gshared SourceData*[] pSources;
 
 struct BufferData
 {
@@ -81,12 +84,13 @@ void palAlInitialize()
 {
     palAlLoadLibraries();
 
-    palAlCreateBus("master");
-
     enforce!AudioException(pDevice = alcOpenDevice(null), "Failed to create audio device.");
     enforce!AudioException(pContext = alcCreateContext(pDevice, null), "Failed to create audio context.");
 
     enforce!AudioException(alcMakeContextCurrent(pContext), "Failed to make audio context current.");
+
+    pAudioThread = new AudioThread();
+    pAudioThread.start();
 }
 
 void palAlLoadLibraries()
@@ -119,6 +123,9 @@ void palAlLoadLibraries()
 
 void palAlCleanup()
 {
+    pAudioThread.stop();
+    pAudioThread.join();
+    
     alcCloseDevice(pDevice);
 }
 
@@ -176,15 +183,15 @@ void palAlFreeBuffer(NativeHandle handle)
 
 NativeHandle palAlCreateBus(string name)
 {
-    auto bus = new BusData();
-    bus.name = name;
-
-    return cast(NativeHandle) bus;
+    pBusses[name] = BusData(name);
+    return cast(NativeHandle) (name in pBusses);
 }
 
 void palAlFreeBus(NativeHandle handle)
 {
-    destroy(handle);
+    auto bus = cast(BusData*) handle;
+    pBusses.remove(bus.name);
+    destroy(bus);
 }
 
 void palAlSetBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint)

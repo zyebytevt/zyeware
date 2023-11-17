@@ -13,22 +13,25 @@ import zyeware.pal;
 /// Controls the mixing of various sounds which are assigned to this audio bus, 
 class AudioBus : NativeObject
 {
-protected:
-    string mName;
-    NativeHandle mNativeHandle;
+private:
+    static AudioBus[string] sAudioBuses;
 
-public:
-    /// Params:
-    ///   name = The name of this audio bus.
     this(string name)
     {
         mName = name;
         mNativeHandle = PAL.audio.createBus(name);
     }
 
+protected:
+    string mName;
+    NativeHandle mNativeHandle;
+
+public:
     ~this()
     {
         PAL.audio.freeBus(mNativeHandle);
+
+        sAudioBuses.remove(mName);
     }
     
     /// The name of this audio bus, as registered in the audio subsystem.
@@ -52,5 +55,26 @@ public:
     const(NativeHandle) handle() pure const nothrow
     {
         return mNativeHandle;
+    }
+
+    static AudioBus create(string name)
+    {
+        return sAudioBuses[name] = new AudioBus(name);
+    }
+
+    static void remove(string name)
+    {
+        auto bus = name in sAudioBuses;
+        if (bus)
+        {
+            sAudioBuses.remove(name);
+            destroy(*bus);
+        }
+    }
+
+    static AudioBus get(string name) nothrow
+    {
+        auto bus = name in sAudioBuses;
+        return bus ? *bus : null;
     }
 }

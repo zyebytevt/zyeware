@@ -21,7 +21,6 @@ import zyeware.core.application;
 import zyeware.core.debugging;
 import zyeware.rendering;
 import zyeware.audio;
-import zyeware.audio.thread;
 import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
@@ -328,7 +327,8 @@ package(zyeware.core) static:
         VFS.initialize();
         AssetManager.initialize();
         PAL.audio.initialize();
-        AudioThread.initialize();
+        AudioBus.create("master");
+
         PAL.graphics.initialize();
         Renderer2D.initialize();
         //Renderer3D.initialize();
@@ -350,7 +350,6 @@ package(zyeware.core) static:
         //Renderer3D.cleanup();
         Renderer2D.cleanup();
         PAL.graphics.cleanup();
-        AudioThread.cleanup();
         PAL.audio.cleanup();
 
         VFS.cleanup();

@@ -20,6 +20,7 @@ protected:
 
 public:
     this(in AudioBus bus)
+        in (bus, "Audio bus must be valid.")
     {
         mNativeHandle = PAL.audio.createSource(bus.handle);
     }

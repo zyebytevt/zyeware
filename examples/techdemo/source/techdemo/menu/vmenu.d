@@ -13,7 +13,7 @@ protected:
     Entry[] mEntries;
     int mCursor;
 
-    Sound mCursorUp, mCursorDown, mAccept;
+    AudioBuffer mCursorUp, mCursorDown, mAccept;
     AudioSource mSource;
 
 public:
@@ -32,11 +32,11 @@ public:
         mEntries = entries;
         mFont = font;
 
-        mCursorUp = AssetManager.load!Sound("res://menu/up.ogg");
-        mCursorDown = AssetManager.load!Sound("res://menu/down.ogg");
-        mAccept = AssetManager.load!Sound("res://menu/accept.ogg");
+        mCursorUp = AssetManager.load!AudioBuffer("res://menu/up.ogg");
+        mCursorDown = AssetManager.load!AudioBuffer("res://menu/down.ogg");
+        mAccept = AssetManager.load!AudioBuffer("res://menu/accept.ogg");
 
-        mSource = AudioSource.create(null);
+        mSource = new AudioSource(AudioBus.get("master"));
     }
 
     void handleActionEvent(InputEventAction action)
@@ -55,7 +55,7 @@ public:
             if (mEntries[mCursor].onSelected)
                 mEntries[mCursor].onSelected();
 
-            mSource.sound = mCursorUp;
+            mSource.buffer = mCursorUp;
             mSource.play();
             break;
 
@@ -71,7 +71,7 @@ public:
             if (mEntries[mCursor].onSelected)
                 mEntries[mCursor].onSelected();
 
-            mSource.sound = mCursorDown;
+            mSource.buffer = mCursorDown;
             mSource.play();
             break;
 
@@ -79,7 +79,7 @@ public:
             if (mEntries[mCursor].onActivated)
                 mEntries[mCursor].onActivated();
 
-            mSource.sound = mAccept;
+            mSource.buffer = mAccept;
             mSource.play();
             break;
 
