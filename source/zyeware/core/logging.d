@@ -49,15 +49,16 @@ private:
     dstring mName;
     
     __gshared LogSink sDefaultLogSink;
-    __gshared Logger sCoreLogger, sClientLogger;
+    __gshared Logger sCoreLogger, sClientLogger, sPalLogger;
 
 package(zyeware):
-    static void initialize(LogLevel coreLevel, LogLevel clientLevel)
+    static void initialize(LogLevel coreLevel, LogLevel clientLevel, LogLevel palLevel)
     {
         sDefaultLogSink = new TerminalLogSink(new Terminal());
 
         sCoreLogger = new Logger(sDefaultLogSink, coreLevel, "Core");
         sClientLogger = new Logger(sDefaultLogSink, clientLevel, "Client");
+        sPalLogger = new Logger(sDefaultLogSink, palLevel, "PAL");
     }
 
     static Logger core() nothrow
@@ -139,6 +140,13 @@ public:
     {
         foreach (LogSink sink; mSinks)
             sink.flush();
+    }
+
+    
+    /// The default PAL logger.
+    static Logger pal() nothrow
+    {
+        return sPalLogger;
     }
 
     /// The default client logger.

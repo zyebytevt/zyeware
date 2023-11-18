@@ -1,9 +1,10 @@
-module zyeware.pal.audio.openal.thread;
+module thread;
 
 import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
 import zyeware.common;
-import zyeware.pal.audio.openal.api;
+
+import api;
 
 class AudioThread : Thread
 {
@@ -28,7 +29,7 @@ protected:
         while (mIsRunning)
         {
             foreach (SourceData* sourceData; pSources)
-                palAlUpdateSourceBuffers(sourceData);
+                palUpdateSourceBuffers(sourceData);
 
             Thread.sleep(waitTime);
         }

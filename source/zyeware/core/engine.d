@@ -39,6 +39,7 @@ struct ProjectProperties
 
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
+    LogLevel palLogLevel = LogLevel.verbose; /// The log level for the PAL logger.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
@@ -252,6 +253,7 @@ private static:
                 config.passThrough,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
+                "loglevel-pal", "The minimum log level for PAL logs to be displayed.", &properties.palLogLevel,
                 "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
             );
 
@@ -278,12 +280,10 @@ private static:
         import zyeware.pal.display.opengl.display : generateDisplayPALCallbacks;
         import zyeware.pal.graphics.opengl.api : palGlGenerateCallbacks;
         import zyeware.pal.renderer.opengl.renderer2d : generateRenderer2DPALCallbacks;
-        import zyeware.pal.audio.openal.api : palAlGenerateCallbacks;
 
         PAL.sDisplayCallbacks = generateDisplayPALCallbacks();
         PAL.sGraphicsCallbacks = palGlGenerateCallbacks();
         PAL.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();
-        PAL.sAudioCallbacks = palAlGenerateCallbacks();
     }
 
 package(zyeware.core) static:
@@ -303,7 +303,7 @@ package(zyeware.core) static:
 
         // Initialize profiler and logger before anything else.
         version (ZW_Profiling) Profiler.initialize();
-        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
+        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel, properties.palLogLevel);
 
         // Initialize crash handler afterwards because it relies on the logger.
         if (properties.crashHandler)
