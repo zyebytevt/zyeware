@@ -4,7 +4,7 @@ import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal.graphics.types;
 
-struct GraphicsPALCallbacks
+struct GraphicsPal
 {
 public:
     void function() initialize;

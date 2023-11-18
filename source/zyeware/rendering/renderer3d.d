@@ -21,16 +21,16 @@ struct Renderer3D
 public static:
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
     {
-        PAL.renderer3D.beginScene(projectionMatrix, viewMatrix, environment);
+        Pal.renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
     }
 
     void end()
     {
-        PAL.renderer3D.end();
+        Pal.renderer3d.end();
     }
 
     void submit(in Matrix4f transform)
     {
-        PAL.renderer3D.submit(transform);
+        Pal.renderer3d.submit(transform);
     }
 }

@@ -19,7 +19,7 @@ private:
     this(string name)
     {
         mName = name;
-        mNativeHandle = PAL.audio.createBus(name);
+        mNativeHandle = Pal.audio.createBus(name);
     }
 
 protected:
@@ -29,7 +29,7 @@ protected:
 public:
     ~this()
     {
-        PAL.audio.freeBus(mNativeHandle);
+        Pal.audio.freeBus(mNativeHandle);
 
         sAudioBuses.remove(mName);
     }
@@ -43,13 +43,13 @@ public:
     /// The volume of this audio bus, ranging from 0 to 1.
     float volume() const nothrow
     {
-        return PAL.audio.getBusVolume(mNativeHandle);
+        return Pal.audio.getBusVolume(mNativeHandle);
     }
 
     /// ditto
     void volume(float value)
     {
-        PAL.audio.setBusVolume(mNativeHandle, clamp(value, 0.0f, 1.0f));
+        Pal.audio.setBusVolume(mNativeHandle, clamp(value, 0.0f, 1.0f));
     }
 
     const(NativeHandle) handle() pure const nothrow

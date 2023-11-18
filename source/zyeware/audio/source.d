@@ -22,25 +22,25 @@ public:
     this(in AudioBus bus)
         in (bus, "Audio bus must be valid.")
     {
-        mNativeHandle = PAL.audio.createSource(bus.handle);
+        mNativeHandle = Pal.audio.createSource(bus.handle);
     }
 
     /// Starts playback, or resumes if the source has been paused previously.
     void play()
     {
-        PAL.audio.playSource(mNativeHandle);
+        Pal.audio.playSource(mNativeHandle);
     }
 
     /// Pauses playback. If playback wasn't started, nothing happens.
     void pause()
     {
-        PAL.audio.pauseSource(mNativeHandle);
+        Pal.audio.pauseSource(mNativeHandle);
     }
 
     /// Stops playback completely. If playback wasn't started, nothing happens.
     void stop()
     {
-        PAL.audio.stopSource(mNativeHandle);
+        Pal.audio.stopSource(mNativeHandle);
     }
 
     /// The `Sound` instance assigned to this source.
@@ -53,51 +53,51 @@ public:
     void buffer(AudioBuffer value)
     {
         mBuffer = value;
-        PAL.audio.setSourceBuffer(mNativeHandle, value.handle);
+        Pal.audio.setSourceBuffer(mNativeHandle, value.handle);
     }
 
     /// Determines whether the source is looping it's sound. The loop point is defined by
     /// the assigned `Sound`.
     bool looping() const nothrow
     {
-        return PAL.audio.isSourceLooping(mNativeHandle);
+        return Pal.audio.isSourceLooping(mNativeHandle);
     }
 
     /// ditto
     void looping(bool value)
     {
-        PAL.audio.setSourceLooping(mNativeHandle, value);
+        Pal.audio.setSourceLooping(mNativeHandle, value);
     }
 
     /// The volume of this source, ranging from 0 to 1.
     float volume() const nothrow
     {
-        return PAL.audio.getSourceVolume(mNativeHandle);
+        return Pal.audio.getSourceVolume(mNativeHandle);
     }
 
     /// ditto
     void volume(float value)
     {
-        PAL.audio.setSourceVolume(mNativeHandle, value);
+        Pal.audio.setSourceVolume(mNativeHandle, value);
     }
 
     /// The pitch of this source, ranging from 0 to 1.
     /// This controls pitch as well as speed.
     float pitch() const nothrow
     {
-        return PAL.audio.getSourcePitch(mNativeHandle);
+        return Pal.audio.getSourcePitch(mNativeHandle);
     }
 
     /// ditto
     void pitch(float value)
     {
-        PAL.audio.setSourcePitch(mNativeHandle, value);
+        Pal.audio.setSourcePitch(mNativeHandle, value);
     }
 
     /// The state this source is currently in.
     SourceState state() const nothrow
     {
-        return PAL.audio.getSourceState(mNativeHandle);
+        return Pal.audio.getSourceState(mNativeHandle);
     }
 
     const(NativeHandle) handle() pure const nothrow

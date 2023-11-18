@@ -391,9 +391,9 @@ void drawDString(in dstring text, in Font font, in Vector2f position, in Color m
 
 public:
 
-Renderer2DCallbacks generateRenderer2DPALCallbacks()
+Renderer2dPal generateRenderer2DPALCallbacks()
 {
-    return Renderer2DCallbacks(
+    return Renderer2dPal(
         &initialize,
         &cleanup,
         &beginScene,

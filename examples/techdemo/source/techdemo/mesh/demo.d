@@ -92,7 +92,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        PAL.graphics.clear();
+        Pal.graphics.clear();
 
         Material material = mCurrentMesh.material;
         if (!material)

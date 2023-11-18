@@ -1,4 +1,4 @@
-module api;
+module zyeware.pal.audio.api;
 
 import std.sumtype : match;
 import std.exception : enforce;
@@ -11,8 +11,7 @@ import audioformats;
 import zyeware.common;
 import zyeware.pal.audio.types;
 import zyeware.pal.audio.callbacks;
-
-import thread;
+import zyeware.pal.audio.thread;
 
 public:
 
@@ -427,9 +426,9 @@ float palGetBusVolume(in NativeHandle handle) nothrow
     return bus.volume;
 }
 
-AudioPALCallbacks palGenerateCallbacks()
+AudioPal palGenerateCallbacks()
 {
-    return AudioPALCallbacks(
+    return AudioPal(
         &palInitialize,
         &palLoadLibraries,
         &palCleanup,
@@ -462,5 +461,5 @@ AudioPALCallbacks palGenerateCallbacks()
 shared static this()
 {
     import std.stdio;
-    writeln("Shared static this loaded!");
+    writeln("OpenAL Pal initialized lol.");
 }

@@ -28,57 +28,57 @@ public:
     this(DisplayProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = PAL.display.createDisplay(properties, this);
+        mNativeHandle = Pal.display.createDisplay(properties, this);
     }
 
     ~this()
     {
-        PAL.display.destroyDisplay(mNativeHandle);
+        Pal.display.destroyDisplay(mNativeHandle);
     }
 
     void update()
     {
-        PAL.display.update(mNativeHandle);
+        Pal.display.update(mNativeHandle);
     }
 
     void swapBuffers()
     {
-        PAL.display.swapBuffers(mNativeHandle);
+        Pal.display.swapBuffers(mNativeHandle);
     }
 
     bool isKeyPressed(KeyCode code) nothrow
     {
-        return PAL.display.isKeyPressed(mNativeHandle, code);
+        return Pal.display.isKeyPressed(mNativeHandle, code);
     }
 
     bool isMouseButtonPressed(MouseCode code) nothrow
     {
-        return PAL.display.isMouseButtonPressed(mNativeHandle, code);
+        return Pal.display.isMouseButtonPressed(mNativeHandle, code);
     }
 
     bool isGamepadButtonPressed(size_t gamepadIdx, GamepadButton button) nothrow
     {
-        return PAL.display.isGamepadButtonPressed(mNativeHandle, gamepadIdx, button);
+        return Pal.display.isGamepadButtonPressed(mNativeHandle, gamepadIdx, button);
     }
 
     float getGamepadAxisValue(size_t gamepadIdx, GamepadAxis axis) nothrow
     {
-        return PAL.display.getGamepadAxisValue(mNativeHandle, gamepadIdx, axis);
+        return Pal.display.getGamepadAxisValue(mNativeHandle, gamepadIdx, axis);
     }
 
     Vector2i cursorPosition() const nothrow
     {
-        return PAL.display.getCursorPosition(mNativeHandle);
+        return Pal.display.getCursorPosition(mNativeHandle);
     }
 
     void isVSyncEnabled(bool value)
     {
-        PAL.display.setVSyncEnabled(mNativeHandle, value);
+        Pal.display.setVSyncEnabled(mNativeHandle, value);
     }
 
     bool isVSyncEnabled() const nothrow
     {
-        return PAL.display.isVSyncEnabled(mNativeHandle);
+        return Pal.display.isVSyncEnabled(mNativeHandle);
     }
 
     const(NativeHandle) handle() pure const nothrow
@@ -88,151 +88,151 @@ public:
 
     Vector2i position() const nothrow
     {
-        return PAL.display.getPosition(mNativeHandle);
+        return Pal.display.getPosition(mNativeHandle);
     }
 
     void position(Vector2i value)
     {
-        PAL.display.setPosition(mNativeHandle, value);
+        Pal.display.setPosition(mNativeHandle, value);
     }
 
     Vector2i size() const nothrow
     {
-        return PAL.display.getSize(mNativeHandle);
+        return Pal.display.getSize(mNativeHandle);
     }
 
     void size(Vector2i value)
     {
-        PAL.display.setSize(mNativeHandle, value);
+        Pal.display.setSize(mNativeHandle, value);
     }
 
     bool isFullscreen() const nothrow
     {
-        return PAL.display.isFullscreen(mNativeHandle);
+        return Pal.display.isFullscreen(mNativeHandle);
     }
 
     void isFullscreen(bool value)
     {
-        PAL.display.setFullscreen(mNativeHandle, value);
+        Pal.display.setFullscreen(mNativeHandle, value);
     }
 
     bool isResizable() const nothrow
     {
-        return PAL.display.isResizable(mNativeHandle);
+        return Pal.display.isResizable(mNativeHandle);
     }
 
     void isResizable(bool value)
     {
-        PAL.display.setResizable(mNativeHandle, value);
+        Pal.display.setResizable(mNativeHandle, value);
     }
 
     bool isDecorated() const nothrow
     {
-        return PAL.display.isDecorated(mNativeHandle);
+        return Pal.display.isDecorated(mNativeHandle);
     }
 
     void isDecorated(bool value)
     {
-        PAL.display.setDecorated(mNativeHandle, value);
+        Pal.display.setDecorated(mNativeHandle, value);
     }
 
     bool isFocused() const nothrow
     {
-        return PAL.display.isFocused(mNativeHandle);
+        return Pal.display.isFocused(mNativeHandle);
     }
 
     void isFocused(bool value)
     {
-        PAL.display.setFocused(mNativeHandle, value);
+        Pal.display.setFocused(mNativeHandle, value);
     }
 
     bool isVisible() const nothrow
     {
-        return PAL.display.isVisible(mNativeHandle);
+        return Pal.display.isVisible(mNativeHandle);
     }
 
     void isVisible(bool value)
     {
-        PAL.display.setVisible(mNativeHandle, value);
+        Pal.display.setVisible(mNativeHandle, value);
     }
 
     bool isMinimized() const nothrow
     {
-        return PAL.display.isMinimized(mNativeHandle);
+        return Pal.display.isMinimized(mNativeHandle);
     }
 
     void isMinimized(bool value)
     {
-        PAL.display.setMinimized(mNativeHandle, value);
+        Pal.display.setMinimized(mNativeHandle, value);
     }
 
     bool isMaximized() const nothrow
     {
-        return PAL.display.isMaximized(mNativeHandle);
+        return Pal.display.isMaximized(mNativeHandle);
     }
 
     void isMaximized(bool value)
     {
-        PAL.display.setMaximized(mNativeHandle, value);
+        Pal.display.setMaximized(mNativeHandle, value);
     }
 
     bool isMouseCursorVisible() const nothrow
     {
-        return PAL.display.isMouseCursorVisible(mNativeHandle);
+        return Pal.display.isMouseCursorVisible(mNativeHandle);
     }
 
     void isMouseCursorVisible(bool value)
     {
-        PAL.display.setMouseCursorVisible(mNativeHandle, value);
+        Pal.display.setMouseCursorVisible(mNativeHandle, value);
     }
 
     string title() const nothrow
     {
-        return PAL.display.getTitle(mNativeHandle);
+        return Pal.display.getTitle(mNativeHandle);
     }
 
     void title(string value)
     {
-        PAL.display.setTitle(mNativeHandle, value);
+        Pal.display.setTitle(mNativeHandle, value);
     }
 
     bool isMouseCursorCaptured() const nothrow
     {
-        return PAL.display.isMouseCursorCaptured(mNativeHandle);
+        return Pal.display.isMouseCursorCaptured(mNativeHandle);
     }
 
     void isMouseCursorCaptured(bool value)
     {
-        PAL.display.setMouseCursorCaptured(mNativeHandle, value);
+        Pal.display.setMouseCursorCaptured(mNativeHandle, value);
     }
 
     const(Image) icon() const nothrow
     {
-        return PAL.display.getIcon(mNativeHandle);
+        return Pal.display.getIcon(mNativeHandle);
     }
 
     void icon(in Image value)
     {
-        PAL.display.setIcon(mNativeHandle, value);
+        Pal.display.setIcon(mNativeHandle, value);
     }
 
     string clipboardString()
     {
-        return PAL.display.getClipboardString(mNativeHandle);
+        return Pal.display.getClipboardString(mNativeHandle);
     }
 
     void clipboardString(string value)
     {
-        PAL.display.setClipboardString(mNativeHandle, value);
+        Pal.display.setClipboardString(mNativeHandle, value);
     }
 
     void cursor(in Cursor value)
     {
-        PAL.display.setCursor(mNativeHandle, value);
+        Pal.display.setCursor(mNativeHandle, value);
     }
 
     const(Cursor) cursor() const
     {
-        return PAL.display.getCursor(mNativeHandle);
+        return Pal.display.getCursor(mNativeHandle);
     }
 }

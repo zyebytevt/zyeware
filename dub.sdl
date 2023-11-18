@@ -21,10 +21,12 @@ configuration "sdl-opengl" {
 	platforms "posix" "windows"
 	dependency "bindbc-opengl" version="~>1.0.0"
 	dependency "bindbc-sdl" version="~>1.0.1"
+	dependency "zyeware:pal-audio-openal" version="*"
 	targetType "library"
 	versions "GL_41" "SDL_205" "GL_KHR_debug" "ZW_OpenGL" "ZW_OpenAL"
 }
 
 buildType "interface" {
-	dflags "-H"
+	targetType "none"
+	dflags "-H" "-Hd=out/headers"
 }

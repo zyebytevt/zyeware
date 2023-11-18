@@ -48,7 +48,7 @@ public:
 
 	override void draw(in FrameTime nextFrameTime)
 	{
-		PAL.graphics.clearScreen(Color.lime);
+		Pal.graphics.clearScreen(Color.lime);
 
 		Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
 		Renderer2D.drawRectangle(Rect2f(60, 60, 100, 100), Matrix4f.identity, Color.white, mSprite);

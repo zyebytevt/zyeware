@@ -642,9 +642,9 @@ NativeHandle palGlGetTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
 
 public:
 
-GraphicsPALCallbacks palGlGenerateCallbacks()
+GraphicsPal palGlGenerateCallbacks()
 {
-    return GraphicsPALCallbacks(
+    return GraphicsPal(
         &palGlInitialize,
         &palGlLoadLibs,
         &palGlCleanup,

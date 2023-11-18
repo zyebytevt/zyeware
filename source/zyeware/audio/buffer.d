@@ -21,24 +21,24 @@ protected:
 public:
     this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
     {
-        mNativeHandle = PAL.audio.createBuffer(encodedMemory, properties);
+        mNativeHandle = Pal.audio.createBuffer(encodedMemory, properties);
     }
 
     ~this()
     {
-        PAL.audio.freeBuffer(mNativeHandle);
+        Pal.audio.freeBuffer(mNativeHandle);
     }
 
     /// The point where this sound should loop, if played through an `AudioSource`.
     LoopPoint loopPoint() const nothrow
     {
-        return PAL.audio.getBufferLoopPoint(mNativeHandle);
+        return Pal.audio.getBufferLoopPoint(mNativeHandle);
     }
 
     /// ditto
     void loopPoint(LoopPoint value)
     {
-        PAL.audio.setBufferLoopPoint(mNativeHandle, value);
+        Pal.audio.setBufferLoopPoint(mNativeHandle, value);
     }
 
     const(NativeHandle) handle() pure const nothrow

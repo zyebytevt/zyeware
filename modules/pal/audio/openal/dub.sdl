@@ -1,10 +1,9 @@
 name "pal-audio-openal"
-description "OpenAL Audio PAL implementation."
+description "OpenAL Audio Pal implementation."
 authors "ZyeByte"
 copyright "Copyright © 2023, ZyeByte"
 license "LGPL-3.0"
-targetType "staticLibrary"
+targetType "sourceLibrary"
 
-dependency "zyeware" version="*"
 dependency "bindbc-openal" version="~>1.0.0"
 dependency "audio-formats" version="~>3.0.1"

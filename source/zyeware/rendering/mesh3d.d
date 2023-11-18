@@ -67,13 +67,13 @@ public:
         in (vertices, "Vertices cannot be null.")
         in (indices, "Indices cannot be null.")
     {
-        mNativeHandle = PAL.graphics.createMesh(vertices, indices);
+        mNativeHandle = Pal.graphics.createMesh(vertices, indices);
         mMaterial = material;
     }
 
     ~this()
     {
-        PAL.graphics.freeMesh(mNativeHandle);
+        Pal.graphics.freeMesh(mNativeHandle);
     }
 
     const(void)* handle() const nothrow pure

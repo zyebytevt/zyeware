@@ -31,9 +31,9 @@ import std.numeric;
 public:
 
 // TODO: Temp
-DisplayPALCallbacks generateDisplayPALCallbacks()
+DisplayPal generateDisplayPALCallbacks()
 {
-    return DisplayPALCallbacks(
+    return DisplayPal(
         &createDisplay,
         &destroyDisplay,
         &update,
@@ -241,7 +241,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
 
     if (pWindowCount == 0)
     {
-        PAL.graphics.loadLibraries();
+        Pal.graphics.loadLibraries();
 
         Logger.core.log(LogLevel.info, "Initialized OpenGL Context:");
         Logger.core.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);

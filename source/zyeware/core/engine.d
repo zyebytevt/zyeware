@@ -39,7 +39,7 @@ struct ProjectProperties
 
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
-    LogLevel palLogLevel = LogLevel.verbose; /// The log level for the PAL logger.
+    LogLevel palLogLevel = LogLevel.verbose; /// The log level for the Pal logger.
 
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
@@ -227,14 +227,14 @@ private static:
         sMainDisplay.update();
 
         // Prepare framebuffer and render application into it.
-        PAL.graphics.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
+        Pal.graphics.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
         
-        PAL.graphics.setRenderTarget(sMainFramebuffer.handle);
+        Pal.graphics.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw(nextFrameTime);
-        PAL.graphics.setRenderTarget(null);
+        Pal.graphics.setRenderTarget(null);
 
-        PAL.graphics.clearScreen(Color.black);
-        PAL.graphics.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
+        Pal.graphics.clearScreen(Color.black);
+        Pal.graphics.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
             sFramebufferArea);
 
         sMainDisplay.swapBuffers();
@@ -253,7 +253,7 @@ private static:
                 config.passThrough,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
-                "loglevel-pal", "The minimum log level for PAL logs to be displayed.", &properties.palLogLevel,
+                "loglevel-pal", "The minimum log level for Pal logs to be displayed.", &properties.palLogLevel,
                 "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
             );
 
@@ -281,9 +281,9 @@ private static:
         import zyeware.pal.graphics.opengl.api : palGlGenerateCallbacks;
         import zyeware.pal.renderer.opengl.renderer2d : generateRenderer2DPALCallbacks;
 
-        PAL.sDisplayCallbacks = generateDisplayPALCallbacks();
-        PAL.sGraphicsCallbacks = palGlGenerateCallbacks();
-        PAL.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();
+        Pal.sDisplayCallbacks = generateDisplayPALCallbacks();
+        Pal.sGraphicsCallbacks = palGlGenerateCallbacks();
+        Pal.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();
     }
 
 package(zyeware.core) static:
@@ -326,10 +326,10 @@ package(zyeware.core) static:
         // Initialize all other sub-systems.
         VFS.initialize();
         AssetManager.initialize();
-        PAL.audio.initialize();
+        Pal.audio.initialize();
         AudioBus.create("master");
 
-        PAL.graphics.initialize();
+        Pal.graphics.initialize();
         Renderer2D.initialize();
         //Renderer3D.initialize();
 
@@ -349,8 +349,8 @@ package(zyeware.core) static:
         sApplication.cleanup();
         //Renderer3D.cleanup();
         Renderer2D.cleanup();
-        PAL.graphics.cleanup();
-        PAL.audio.cleanup();
+        Pal.graphics.cleanup();
+        Pal.audio.cleanup();
 
         VFS.cleanup();
 

@@ -69,7 +69,7 @@ public:
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        PAL.graphics.clearScreen(mBackgroundGradient.interpolate(seconds));
+        Pal.graphics.clearScreen(mBackgroundGradient.interpolate(seconds));
 
         immutable float scale = mScaleInterpolator.interpolate(seconds);
         Vector2f position = Vector2f(-0.9, -0.35) * scale;

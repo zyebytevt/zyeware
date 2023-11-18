@@ -1,10 +1,9 @@
-module thread;
+module zyeware.pal.audio.thread;
 
 import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
 import zyeware.common;
-
-import api;
+import zyeware.pal.audio.api;
 
 class AudioThread : Thread
 {

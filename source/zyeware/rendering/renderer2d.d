@@ -26,12 +26,12 @@ struct Renderer2D
 package(zyeware) static:
     void initialize()
     {
-        PAL.renderer2D.initialize();
+        Pal.renderer2d.initialize();
     }
 
     void cleanup()
     {
-        PAL.renderer2D.cleanup();
+        Pal.renderer2d.cleanup();
     }
 
 public static:
@@ -42,19 +42,19 @@ public static:
     ///     viewMatrix = The view matrix to use.
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
     {
-        PAL.renderer2D.beginScene(projectionMatrix, viewMatrix);
+        Pal.renderer2d.beginScene(projectionMatrix, viewMatrix);
     }
 
     /// Ends batching render commands. Calling this results in all render commands being flushed to the GPU.
     void endScene()
     {
-        PAL.renderer2D.endScene();
+        Pal.renderer2d.endScene();
     }
 
     /// Flushes all render commands to the GPU.
     void flush()
     {
-        PAL.renderer2D.flush();
+        Pal.renderer2d.flush();
     }
 
     /// Draws a mesh.
@@ -64,7 +64,7 @@ public static:
     ///     position = 2D transform where to draw the mesh to.
     void drawMesh(in Mesh2D mesh, in Matrix4f transform)
     {
-        PAL.renderer2D.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh.material);
+        Pal.renderer2d.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh.material);
     }
 
     /// Draws a rectangle.
@@ -81,7 +81,7 @@ public static:
     void drawRectangle(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Color.white,
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        PAL.renderer2D.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
+        Pal.renderer2d.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
             * Matrix4f.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
     }
 
@@ -100,7 +100,7 @@ public static:
     void drawRectangle(in Rect2f dimensions, in Vector2f position, in Vector2f scale, float rotation, in Color modulate = Vector4f(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        PAL.renderer2D.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
+        Pal.renderer2d.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
             * Matrix4f.rotation(rotation, Vector3f(0, 0, 1)) * Matrix4f.scaling(scale.x, scale.y, 1),
             modulate, texture, material, region);
     }
@@ -117,7 +117,7 @@ public static:
     void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        PAL.renderer2D.drawRectangle(dimensions, transform, modulate, texture, material, region);
+        Pal.renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
     }
 
     /// Draws text to the screen.
@@ -135,11 +135,11 @@ public static:
         if (isSomeString!T)
     {
         static if (is(T == string))
-            PAL.renderer2D.drawString(text, font, position, modulate, alignment, material);
+            Pal.renderer2d.drawString(text, font, position, modulate, alignment, material);
         else static if (is(T == wstring))
-            PAL.renderer2D.drawWString(text, font, position, modulate, alignment, material);
+            Pal.renderer2d.drawWString(text, font, position, modulate, alignment, material);
         else static if (is(T == dstring))
-            PAL.renderer2D.drawDString(text, font, position, modulate, alignment, material);
+            Pal.renderer2d.drawDString(text, font, position, modulate, alignment, material);
         else
             static assert(false, "Unsupported string type for rendering");
     }

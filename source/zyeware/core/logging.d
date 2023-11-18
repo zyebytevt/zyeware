@@ -58,7 +58,7 @@ package(zyeware):
 
         sCoreLogger = new Logger(sDefaultLogSink, coreLevel, "Core");
         sClientLogger = new Logger(sDefaultLogSink, clientLevel, "Client");
-        sPalLogger = new Logger(sDefaultLogSink, palLevel, "PAL");
+        sPalLogger = new Logger(sDefaultLogSink, palLevel, "Pal");
     }
 
     static Logger core() nothrow
@@ -143,7 +143,7 @@ public:
     }
 
     
-    /// The default PAL logger.
+    /// The default Pal logger.
     static Logger pal() nothrow
     {
         return sPalLogger;

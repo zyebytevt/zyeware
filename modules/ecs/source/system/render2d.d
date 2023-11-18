@@ -72,7 +72,7 @@ public:
             }
         }
 
-        PAL.graphics.clearScreen(Color.black);
+        Pal.graphics.clearScreen(Color.black);
 
         if (!foundCamera)
         {
