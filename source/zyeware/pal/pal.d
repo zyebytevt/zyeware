@@ -23,7 +23,7 @@ private static:
     Renderer3dPalLoader[string] sRenderer3dLoaders;
     AudioPalLoader[string] sAudioLoaders;
 
-package(zyeware) static:
+package(zyeware.pal) static:
     alias GraphicsPalLoader = GraphicsPal function() nothrow;
     alias DisplayPalLoader = DisplayPal function() nothrow;
     alias Renderer2dPalLoader = Renderer2dPal function() nothrow;
@@ -50,11 +50,12 @@ package(zyeware) static:
         sRenderer3dLoaders[name] = callbacksGenerator;
     }
 
-    void registerAudioPAL(string name, AudioPalLoader callbacksGenerator) nothrow
+    void registerAudio(string name, AudioPalLoader callbacksGenerator) nothrow
     {
         sAudioLoaders[name] = callbacksGenerator;
     }
 
+package(zyeware) static:
     void loadGraphics(string name) nothrow
         in (name in sGraphicsLoaders, "GraphicsPal " ~ name ~ " not registered")
     {

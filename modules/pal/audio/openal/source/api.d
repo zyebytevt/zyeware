@@ -9,8 +9,7 @@ import bindbc.openal;
 import audioformats;
 
 import zyeware.common;
-import zyeware.pal.audio.types;
-import zyeware.pal.audio.callbacks;
+import zyeware.pal;
 import zyeware.pal.audio.thread;
 
 public:
@@ -426,9 +425,11 @@ float palGetBusVolume(in NativeHandle handle) nothrow
     return bus.volume;
 }
 
-AudioPal palGenerateCallbacks()
+shared static this()
 {
-    return AudioPal(
+    import zyeware.pal.audio.callbacks;
+
+    Pal.registerAudio("openal", () => AudioPal(
         &palInitialize,
         &palLoadLibraries,
         &palCleanup,
@@ -455,11 +456,5 @@ AudioPal palGenerateCallbacks()
         &palSetBusVolume,
         &palGetBusVolume,
         &palUpdateSourceBuffers,
-    );
-}
-
-shared static this()
-{
-    import std.stdio;
-    writeln("OpenAL Pal initialized lol.");
+    ));
 }

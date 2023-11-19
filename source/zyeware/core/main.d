@@ -6,6 +6,8 @@
 module zyeware.core.main;
 
 import core.stdc.stdlib;
+import core.runtime : Runtime;
+import core.thread : rt_moduleTlsCtor, rt_moduleTlsDtor;
 
 import std.stdio : stderr;
 
@@ -25,6 +27,11 @@ else
     {
         try
         {
+            import std.stdio;
+            import zyeware.pal;
+
+            writeln(Pal.registeredAudio);
+            
             ZyeWare.initialize(args, getProjectProperties());
             ZyeWare.start();
             ZyeWare.cleanup();

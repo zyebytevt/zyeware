@@ -275,15 +275,17 @@ private static:
         }
     }
 
-    void loadBackends(const ProjectProperties properties)
+    void loadBackends()
     {
-        import zyeware.pal.display.opengl.display : generateDisplayPALCallbacks;
+        /*import zyeware.pal.display.opengl.display : generateDisplayPALCallbacks;
         import zyeware.pal.graphics.opengl.api : palGlGenerateCallbacks;
         import zyeware.pal.renderer.opengl.renderer2d : generateRenderer2DPALCallbacks;
 
         Pal.sDisplayCallbacks = generateDisplayPALCallbacks();
         Pal.sGraphicsCallbacks = palGlGenerateCallbacks();
-        Pal.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();
+        Pal.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();*/
+
+        Pal.loadAudio("openal");
     }
 
 package(zyeware.core) static:
@@ -294,7 +296,6 @@ package(zyeware.core) static:
         GC.disable();
 
         parseCmdArgs(args, properties);
-        loadBackends(properties);
 
         sCmdArgs = args;
         sProjectProperties = properties;
@@ -304,6 +305,8 @@ package(zyeware.core) static:
         // Initialize profiler and logger before anything else.
         version (ZW_Profiling) Profiler.initialize();
         Logger.initialize(properties.coreLogLevel, properties.clientLogLevel, properties.palLogLevel);
+
+        loadBackends();
 
         // Initialize crash handler afterwards because it relies on the logger.
         if (properties.crashHandler)
