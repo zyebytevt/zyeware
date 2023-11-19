@@ -11,11 +11,10 @@ import core.thread : rt_moduleTlsCtor, rt_moduleTlsDtor;
 
 import std.stdio : stderr;
 
+import bindbc.loader;
+
 import zyeware.common;
 import zyeware.core.application;
-
-/// Implement this function to return a valid ZyeWare application.
-extern(C) ProjectProperties getProjectProperties();
 
 version (unittest)
 {
@@ -23,16 +22,11 @@ version (unittest)
 }
 else
 {
-    export int main(string[] args)
+    int main(string[] args)
     {
         try
         {
-            import std.stdio;
-            import zyeware.pal;
-
-            writeln(Pal.registeredAudio);
-            
-            ZyeWare.initialize(args, getProjectProperties());
+            ZyeWare.initialize(args);
             ZyeWare.start();
             ZyeWare.cleanup();
             return 0;

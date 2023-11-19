@@ -7,6 +7,8 @@ license "LGPL-3.0"
 dependency "imagefmt" version="~>2.1.2"
 dependency "bmfont" version="~>0.2.0"
 dependency "terminal" version="~>1.0.0"
+dependency "audio-formats" version="~>3.0.1"
+dependency "bindbc-loader" version="~>1.1.3"
 dependency "inmath" version="~>1.0.5"
 
 targetType "executable"
@@ -16,6 +18,7 @@ subPackage "modules/ecs"
 subPackage "examples/techdemo"
 subPackage "tools/zpklink"
 subPackage "modules/pal/audio/openal"
+subPackage "interface"
 
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
@@ -25,7 +28,11 @@ configuration "sdl-opengl" {
 	versions "GL_41" "SDL_205" "GL_KHR_debug" "ZW_OpenGL" "ZW_OpenAL"
 }
 
-buildType "interface" {
-	targetType "none"
-	dflags "-H" "-Hd=out/headers"
+buildType "generate-interface" {
+	buildOptions "syntaxOnly"
+	buildRequirements "silenceDeprecations"
+	targetType "executable"
+	dflags "-H" "-Hd=interface" "-op" "-allinst"
 }
+
+versions "ZW_Profiling"
