@@ -5,6 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.engine;
 
+import core.runtime : Runtime;
 import core.time : MonoTime;
 import core.thread : Thread;
 import core.memory;
@@ -14,6 +15,8 @@ import std.string : format, fromStringz, toStringz;
 import std.typecons : scoped;
 import std.datetime : Duration, dur;
 import std.algorithm : min;
+
+import bindbc.loader;
 
 import zyeware.common;
 import zyeware.core.events;
@@ -80,6 +83,7 @@ struct ZyeWare
 private static:
     alias DeferFunc = void delegate();
 
+    SharedLib sApplicationLibrary;
     Display sMainDisplay;
     Application sApplication;
 
@@ -107,6 +111,27 @@ private static:
     {
         bool sIsProcessingDeferred;
         bool sIsEmittingEvent;
+    }
+
+    ProjectProperties loadApplication()
+    {
+        version (linux)
+            enum libName = "./libapp.so";
+        else version (Windows)
+            enum libName = ".\\app.dll";
+        else version (OSX)
+            enum libName = "./libapp.dylib";
+        else
+            static assert(false, "Cannot compile for this platform.");
+
+        sApplicationLibrary = load(libName);
+        enforce!CoreException(sApplicationLibrary != invalidHandle, format!"Could not load application library '%s'."(libName));
+        ProjectProperties function() getProjectProperties;
+
+        sApplicationLibrary.bindSymbol(cast(void**) &getProjectProperties, "getProjectProperties");
+        enforce!CoreException(getProjectProperties, "Could not find getProjectProperties function in application library.");
+
+        return getProjectProperties();
     }
 
     void runMainLoop()
@@ -289,13 +314,13 @@ private static:
 package(zyeware.core) static:
     CrashHandler crashHandler;
 
-    void initialize(string[] args, ProjectProperties properties)
+    void initialize(string[] args)
     {
         GC.disable();
 
-        parseCmdArgs(args, properties);
-        loadBackends(properties);
+        ProjectProperties properties = loadApplication();
 
+        parseCmdArgs(args, properties);
         sCmdArgs = args;
         sProjectProperties = properties;
         targetFrameRate = properties.targetFrameRate;
@@ -304,7 +329,7 @@ package(zyeware.core) static:
         // Initialize profiler and logger before anything else.
         version (ZW_Profiling) Profiler.initialize();
         Logger.initialize(properties.coreLogLevel, properties.clientLogLevel);
-
+        
         // Initialize crash handler afterwards because it relies on the logger.
         if (properties.crashHandler)
             crashHandler = properties.crashHandler;
@@ -317,6 +342,9 @@ package(zyeware.core) static:
             else
                 crashHandler = new DefaultCrashHandler();
         }
+
+        enforce!CoreException(properties.mainApplication, "Main application cannot be null.");
+        loadBackends(properties);
         
         // Creates a new display and render context.
         sMainDisplay = new Display(properties.mainDisplayProperties);
@@ -335,8 +363,7 @@ package(zyeware.core) static:
 
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
-        else 
-        sApplication = new IntroApplication(properties.mainApplication);
+        else sApplication = new IntroApplication(properties.mainApplication);
 
         sApplication.initialize();
     }
@@ -353,6 +380,8 @@ package(zyeware.core) static:
         PAL.audio.cleanup();
 
         VFS.cleanup();
+
+        sApplicationLibrary.unload();
 
         collect();
     }

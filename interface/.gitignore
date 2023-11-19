@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/interface
+interface.so
+interface.dylib
+interface.dll
+interface.a
+interface.lib
+interface-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

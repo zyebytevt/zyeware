@@ -217,9 +217,10 @@ void palAlSetSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandl
 
     source.bufferData = cast(BufferData*) bufferHandle;
 
+        source.decoder.openFromMemory(source.bufferData.encodedMemory);
+    /*
     try
     {
-        source.decoder.openFromMemory(source.bufferData.encodedMemory);
     }
     catch (AudioFormatsException ex)
     {
@@ -230,7 +231,7 @@ void palAlSetSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandl
         destroyAudioFormatException(ex);
 
         throw new AudioException(errMsg, errFile, errLine, null);
-    }
+    }*/
 }
 
 void palAlSetSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle)
