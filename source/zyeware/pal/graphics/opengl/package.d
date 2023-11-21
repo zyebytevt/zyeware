@@ -1,7 +1,7 @@
-module zyeware.pal.graphics.opengl;
+module zyeware.pal.graphicsDriver.opengl;
 
 public
 {
-    import zyeware.pal.graphics.opengl.api;
-    import zyeware.pal.graphics.opengl.shader;
+    import zyeware.pal.graphicsDriver.opengl.api;
+    import zyeware.pal.graphicsDriver.opengl.shader;
 }

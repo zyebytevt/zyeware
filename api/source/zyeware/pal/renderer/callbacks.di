@@ -2,7 +2,7 @@
 module zyeware.pal.renderer.callbacks;
 import zyeware.common;
 import zyeware.rendering;
-struct Renderer2DCallbacks
+struct Renderer2dDriver
 {
 	public
 	{
@@ -18,7 +18,7 @@ struct Renderer2DCallbacks
 		void function(in dstring text, in Font font, in Vector2f position, in Color modulate, ubyte alignment, in Material material) drawDString;
 	}
 }
-struct Renderer3DCallbacks
+struct Renderer3dDriver
 {
 	public
 	{

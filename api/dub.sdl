@@ -1,5 +1,5 @@
-name "interface"
-description "Public ZyeWare interface."
+name "api"
+description "Public ZyeWare API."
 authors "ZyeByte"
 copyright "Copyright © 2023, ZyeByte"
 license "LGPL-3.0"

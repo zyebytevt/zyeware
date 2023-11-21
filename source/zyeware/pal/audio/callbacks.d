@@ -3,7 +3,7 @@ module zyeware.pal.audio.callbacks;
 import zyeware.common;
 import zyeware.pal.audio.types;
 
-struct AudioPal
+struct AudioDriver
 {
 public:
     void function() initialize;

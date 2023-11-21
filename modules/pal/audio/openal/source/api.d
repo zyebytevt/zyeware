@@ -429,7 +429,7 @@ shared static this()
 {
     import zyeware.pal.audio.callbacks;
 
-    Pal.registerAudio("openal", () => AudioPal(
+    Pal.registerAudio("openal", () => AudioDriver(
         &palInitialize,
         &palLoadLibraries,
         &palCleanup,

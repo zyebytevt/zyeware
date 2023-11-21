@@ -3,7 +3,7 @@ module zyeware.pal.display.callbacks;
 import zyeware.common;
 import zyeware.rendering;
 
-struct DisplayPal
+struct DisplayDriver
 {
 public:
     NativeHandle function(in DisplayProperties properties, in Display container) createDisplay;

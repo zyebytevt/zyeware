@@ -59,7 +59,7 @@ public:
             }
         }
 
-        Pal.graphics.clear();
+        Pal.graphicsDriver.clear();
 
         if (!foundCamera || !environment)
         {

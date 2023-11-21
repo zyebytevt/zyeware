@@ -3,9 +3,9 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.graphics.opengl.api;
+module zyeware.pal.graphicsDriver.opengl.api;
 
-import zyeware.pal.graphics.callbacks;
+import zyeware.pal.graphicsDriver.callbacks;
 
 version (ZW_OpenGL):
 
@@ -19,8 +19,8 @@ import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
 
-import zyeware.pal.graphics.opengl.shader;
-import zyeware.pal.graphics.types;
+import zyeware.pal.graphicsDriver.opengl.shader;
+import zyeware.pal.graphicsDriver.types;
 
 private:
 
@@ -642,9 +642,9 @@ NativeHandle palGlGetTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
 
 public:
 
-GraphicsPal palGlGenerateCallbacks()
+GraphicsDriver palGlGenerateCallbacks()
 {
-    return GraphicsPal(
+    return GraphicsDriver(
         &palGlInitialize,
         &palGlLoadLibs,
         &palGlCleanup,

@@ -10,9 +10,9 @@ import bmfont : BMFont = Font;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal.renderer.callbacks;
-import zyeware.pal.graphics.callbacks;
-import zyeware.pal.graphics.opengl;
-import zyeware.pal.graphics.types;
+import zyeware.pal.graphicsDriver.callbacks;
+import zyeware.pal.graphicsDriver.opengl;
+import zyeware.pal.graphicsDriver.types;
 
 private:
 
@@ -391,9 +391,9 @@ void drawDString(in dstring text, in Font font, in Vector2f position, in Color m
 
 public:
 
-Renderer2dPal generateRenderer2DPALCallbacks()
+Renderer2dDriver generateRenderer2DPALCallbacks()
 {
-    return Renderer2dPal(
+    return Renderer2dDriver(
         &initialize,
         &cleanup,
         &beginScene,

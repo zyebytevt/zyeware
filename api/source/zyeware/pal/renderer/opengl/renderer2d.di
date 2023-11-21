@@ -110,5 +110,5 @@ private
 	void drawString(in string text, in Font font, in Vector2f position, in Color modulate = Color.white, ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null);
 	void drawWString(in wstring text, in Font font, in Vector2f position, in Color modulate = Color.white, ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null);
 	void drawDString(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white, ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null);
-	public Renderer2DCallbacks generateRenderer2DPALCallbacks();
+	public Renderer2dDriver generateRenderer2DPALCallbacks();
 }

@@ -1,10 +1,10 @@
-module zyeware.pal.graphics.callbacks;
+module zyeware.pal.graphicsDriver.callbacks;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.graphics.types;
+import zyeware.pal.graphicsDriver.types;
 
-struct GraphicsPal
+struct GraphicsDriver
 {
 public:
     void function() initialize;

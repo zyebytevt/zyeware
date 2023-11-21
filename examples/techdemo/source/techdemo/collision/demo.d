@@ -62,7 +62,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Pal.graphics.clearScreen(Color.black);
+        Pal.graphicsDriver.clearScreen(Color.black);
 
         auto r = Rect2f(-50, -50, 100, 100);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);

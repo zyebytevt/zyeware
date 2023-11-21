@@ -33,7 +33,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Pal.graphics.clear();
+        Pal.graphicsDriver.clear();
 
         Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
 

@@ -3,7 +3,7 @@ module zyeware.pal.renderer.callbacks;
 import zyeware.common;
 import zyeware.rendering;
 
-struct Renderer2dPal
+struct Renderer2dDriver
 {
 public:
     void function() initialize;
@@ -18,7 +18,7 @@ public:
     void function(in dstring text, in Font font, in Vector2f position, in Color modulate, ubyte alignment, in Material material) drawDString;
 }
 
-struct Renderer3dPal
+struct Renderer3dDriver
 {
 public:
     void function(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment) beginScene;

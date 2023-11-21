@@ -2,7 +2,7 @@
 module zyeware.pal.display.callbacks;
 import zyeware.common;
 import zyeware.rendering;
-struct DisplayPALCallbacks
+struct DisplayDriver
 {
 	public
 	{

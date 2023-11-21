@@ -1,4 +1,4 @@
-module zyeware.pal.graphics.opengl.shader;
+module zyeware.pal.graphicsDriver.opengl.shader;
 
 import std.string : toStringz;
 import std.exception : assumeWontThrow;

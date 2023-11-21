@@ -31,9 +31,10 @@ final class Logger
 		__gshared LogSink sDefaultLogSink;
 		__gshared Logger sCoreLogger;
 		__gshared Logger sClientLogger;
+		__gshared Logger sPalLogger;
 		package(zyeware)
 		{
-			static void initialize(LogLevel coreLevel, LogLevel clientLevel);
+			static void initialize(LogLevel coreLevel, LogLevel clientLevel, LogLevel palLevel);
 			static nothrow Logger core();
 			public
 			{
@@ -61,6 +62,7 @@ final class Logger
 					}
 				}
 				void flush();
+				static nothrow Logger pal();
 				static nothrow Logger client();
 				static nothrow LogSink defaultLogSink();
 			}

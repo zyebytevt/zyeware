@@ -152,7 +152,7 @@ version (ZW_OpenGL)
 			nothrow void palGlSetRenderTarget(in NativeHandle target);
 			nothrow void palGlPresentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion);
 			nothrow NativeHandle palGlGetTextureFromFramebuffer(in NativeHandle framebuffer);
-			public GraphicsPALCallbacks palGlGenerateCallbacks();
+			public GraphicsDriver palGlGenerateCallbacks();
 		}
 	}
 }

@@ -20,7 +20,7 @@ version (ZW_OpenGL)
 	import std.numeric;
 	public
 	{
-		DisplayPALCallbacks generateDisplayPALCallbacks();
+		DisplayDriver generateDisplayPALCallbacks();
 		private
 		{
 			struct WindowData

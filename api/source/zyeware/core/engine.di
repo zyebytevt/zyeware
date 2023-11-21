@@ -1,5 +1,6 @@
 // D import file generated from 'source/zyeware/core/engine.d'
 module zyeware.core.engine;
+import core.runtime : Runtime;
 import core.time : MonoTime;
 import core.thread : Thread;
 import core.memory;
@@ -8,6 +9,7 @@ import std.string : format, fromStringz, toStringz;
 import std.typecons : scoped;
 import std.datetime : Duration, dur;
 import std.algorithm : min;
+import bindbc.loader;
 import zyeware.common;
 import zyeware.core.events;
 import zyeware.core.application;
@@ -27,6 +29,7 @@ struct ProjectProperties
 	string projectName = "ZyeWare Project";
 	LogLevel coreLogLevel = LogLevel.verbose;
 	LogLevel clientLogLevel = LogLevel.verbose;
+	LogLevel palLogLevel = LogLevel.verbose;
 	Application mainApplication;
 	CrashHandler crashHandler;
 	DisplayProperties mainDisplayProperties;
@@ -54,6 +57,7 @@ struct ZyeWare
 	private static
 	{
 		alias DeferFunc = void delegate();
+		SharedLib sApplicationLibrary;
 		Display sMainDisplay;
 		Application sApplication;
 		Duration sFrameTime;
@@ -76,16 +80,17 @@ struct ZyeWare
 			bool sIsProcessingDeferred;
 			bool sIsEmittingEvent;
 		}
+		ProjectProperties loadApplication();
 		void runMainLoop();
 		void createFramebuffer();
 		nothrow void recalculateFramebufferArea();
 		void drawFramebuffer(in FrameTime nextFrameTime);
 		void parseCmdArgs(string[] args, ref ProjectProperties properties);
-		void loadBackends(const ProjectProperties properties);
+		void loadBackends();
 		package(zyeware.core) static
 		{
 			CrashHandler crashHandler;
-			void initialize(string[] args, ProjectProperties properties);
+			void initialize(string[] args);
 			void cleanup();
 			void start();
 			public static

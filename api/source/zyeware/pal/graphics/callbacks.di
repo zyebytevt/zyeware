@@ -3,7 +3,7 @@ module zyeware.pal.graphics.callbacks;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal.graphics.types;
-struct GraphicsPALCallbacks
+struct GraphicsDriver
 {
 	public
 	{
