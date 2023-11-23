@@ -57,7 +57,7 @@ void initialize()
 {
     loadLibraries();
 
-    Logger.pal.log(LogLevel.info, "OpenAL initialized:");
+    Logger.pal.log(LogLevel.info, "Initialized OpenAL:");
     Logger.pal.log(LogLevel.info, "    Version: %s", alGetString(AL_VERSION).fromStringz);
     Logger.pal.log(LogLevel.info, "    Vendor: %s", alGetString(AL_VENDOR).fromStringz);
     Logger.pal.log(LogLevel.info, "    Renderer: %s", alGetString(AL_RENDERER).fromStringz);

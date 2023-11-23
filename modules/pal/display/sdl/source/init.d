@@ -14,7 +14,7 @@ public:
 
 shared static this()
 {
-    Pal.registerDisplayDriver("sdl-opengl", () => DisplayDriver(
+    Pal.registerDisplayDriver("sdl", () => DisplayDriver(
         &createDisplay,
         &destroyDisplay,
         &update,

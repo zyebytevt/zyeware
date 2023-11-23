@@ -72,7 +72,7 @@ public:
             }
         }
 
-        Pal.graphicsDriver.clearScreen(Color.black);
+        Renderer2D.clearScreen(Color.black);
 
         if (!foundCamera)
         {

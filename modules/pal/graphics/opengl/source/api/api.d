@@ -7,7 +7,7 @@ module zyeware.pal.graphics.opengl.api.api;
 
 import std.typecons : Tuple;
 import std.exception : assumeWontThrow;
-import std.string : format, toStringz;
+import std.string : format, toStringz, fromStringz;
 
 import bindbc.opengl;
 
@@ -112,6 +112,36 @@ static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum seve
 
 void initialize()
 {
+    import loader = bindbc.loader.sharedlib;
+
+    if (isOpenGLLoaded())
+        return;
+
+    immutable glResult = loadOpenGL();
+    
+    if (glResult != glSupport)
+    {
+        foreach (info; loader.errors)
+            Logger.pal.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
+
+        switch (glResult)
+        {
+        case GLSupport.noLibrary:
+            throw new GraphicsException("Could not find OpenGL shared library.");
+
+        case GLSupport.badLibrary:
+            throw new GraphicsException("Provided OpenGL shared is corrupted.");
+
+        case GLSupport.noContext:
+            throw new GraphicsException("No OpenGL context available.");
+
+        default:
+            Logger.pal.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
+        }
+    }
+
+    Logger.pal.log(LogLevel.debug_, "OpenGL dynamic library loaded.");
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -142,38 +172,13 @@ void initialize()
         glGetIntegerv(GL_POLYGON_MODE, &resultInt);
         pFlagValues[cast(size_t) RenderFlag.wireframe] = resultInt == GL_LINE;
     }
-}
 
-void loadLibs()
-{
-    import loader = bindbc.loader.sharedlib;
-    import std.string : fromStringz;
-
-    if (isOpenGLLoaded())
-        return;
-
-    immutable glResult = loadOpenGL();
-    
-    if (glResult != glSupport)
-    {
-        foreach (info; loader.errors)
-            Logger.pal.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
-
-        switch (glResult)
-        {
-        case GLSupport.noLibrary:
-            throw new GraphicsException("Could not find OpenGL shared library.");
-
-        case GLSupport.badLibrary:
-            throw new GraphicsException("Provided OpenGL shared is corrupted.");
-
-        case GLSupport.noContext:
-            throw new GraphicsException("No OpenGL context available.");
-
-        default:
-            Logger.pal.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
-        }
-    }
+    Logger.pal.log(LogLevel.info, "Initialized OpenGL:");
+    Logger.pal.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
+    Logger.pal.log(LogLevel.info, "    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
+    Logger.pal.log(LogLevel.info, "    Version: %s", glGetString(GL_VERSION).fromStringz);
+    Logger.pal.log(LogLevel.info, "    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
+    Logger.pal.log(LogLevel.info, "    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
 }
 
 void cleanup()
@@ -466,8 +471,6 @@ void freeFramebuffer(NativeHandle framebuffer) nothrow
         glDeleteRenderbuffers(1, &data.colorAttachmentId);
     else if (glIsTexture(data.colorAttachmentId))
         glDeleteTextures(1, &data.colorAttachmentId);
-    else
-        assert(false, "Cannot free unknown framebuffer color attachment.");
 
     glDeleteRenderbuffers(1, &data.depthAttachmentId);
 
@@ -533,7 +536,7 @@ bool getRenderFlag(RenderFlag flag) nothrow
     return pFlagValues[cast(size_t) flag];
 }
 
-size_t getRenderCapability(RenderCapability capability) nothrow
+size_t getCapability(RenderCapability capability) nothrow
 {
     final switch (capability) with (RenderCapability)
     {

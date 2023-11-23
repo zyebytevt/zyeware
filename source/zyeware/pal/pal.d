@@ -1,5 +1,6 @@
 module zyeware.pal.pal;
 
+import zyeware.common;
 import zyeware.pal.graphics.driver;
 import zyeware.pal.display.driver;
 import zyeware.pal.audio.driver;
@@ -43,18 +44,21 @@ package(zyeware) static:
         in (name in sGraphicsLoaders, "GraphicsDriver " ~ name ~ " not registered")
     {
         sGraphics = sGraphicsLoaders[name]();
+        Logger.core.log(LogLevel.info, "Loaded graphics driver: " ~ name);
     }
 
     void loadDisplayDriver(string name) nothrow
         in (name in sDisplayLoaders, "DisplayDriver " ~ name ~ " not registered")
     {
         sDisplay = sDisplayLoaders[name]();
+        Logger.core.log(LogLevel.info, "Loaded display driver: " ~ name);
     }
 
     void loadAudioDriver(string name) nothrow
         in (name in sAudioLoaders, "AudioDriver " ~ name ~ " not registered")
     {
         sAudio = sAudioLoaders[name]();
+        Logger.core.log(LogLevel.info, "Loaded audio driver: " ~ name);
     }
 
     string[] registeredGraphicsDrivers() nothrow

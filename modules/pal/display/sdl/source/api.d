@@ -121,7 +121,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
 
     if (pWindowCount == 0)
     {
-        enforce!GraphicsException(loadSDL() == sdlSupport, "Failed to load SDL!");
+        loadLibraries();
         enforce!GraphicsException(SDL_Init(SDL_INIT_EVERYTHING) == 0,
             format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
 
@@ -152,22 +152,14 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     data.glContext = SDL_GL_CreateContext(data.handle);
     enforce!GraphicsException(data.glContext, format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
 
+    Logger.pal.log(LogLevel.debug_, "OpenGL context created.");
+
     data.isVSyncEnabled = SDL_GL_GetSwapInterval() != 0;
 
     {
         int length;
         ubyte* state = SDL_GetKeyboardState(&length);
         data.keyboardState = state[0 .. length];
-    }
-
-    if (pWindowCount == 0)
-    {
-        // TODO: Add re-init context?
-
-        Logger.pal.log(LogLevel.info, "Initialized OpenGL Context:");
-        Logger.pal.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
-        Logger.pal.log(LogLevel.info, "    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
-        Logger.pal.log(LogLevel.info, "    Version: %s", glGetString(GL_VERSION).fromStringz);
     }
 
     {
@@ -182,6 +174,29 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     ++pWindowCount;
 
     return data;
+}
+
+void loadLibraries()
+{
+    import loader = bindbc.loader.sharedlib;
+    import std.string : fromStringz;
+
+    if (isSDLLoaded())
+        return;
+
+    immutable sdlResult = loadSDL();
+    if (sdlResult != sdlSupport)
+    {
+        foreach (info; loader.errors)
+            Logger.pal.log(LogLevel.warning, "SDL loader: %s", info.message.fromStringz);
+
+        if (sdlResult == SDLSupport.noLibrary)
+            throw new GraphicsException("Could not find SDL shared library.");
+        else if (sdlResult == SDLSupport.badLibrary)
+            throw new GraphicsException("Provided SDL shared is corrupted.");
+        else
+            Logger.pal.log(LogLevel.warning, "Got older SDL version than expected. This might lead to errors.");
+    }
 }
 
 void destroyDisplay(NativeHandle handle)

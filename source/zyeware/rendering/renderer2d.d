@@ -22,17 +22,6 @@ struct Renderer2D
     @disable this();
     @disable this(this);
 
-package(zyeware) static:
-    void initialize()
-    {
-        Pal.graphics.renderer2d.initialize();
-    }
-
-    void cleanup()
-    {
-        Pal.graphics.renderer2d.cleanup();
-    }
-
 public static:
     /// Clears the screen.
     ///

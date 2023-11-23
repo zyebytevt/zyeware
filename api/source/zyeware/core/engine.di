@@ -25,9 +25,6 @@ struct ProjectProperties
 {
 	string authorName = "Anonymous";
 	string projectName = "ZyeWare Project";
-	LogLevel coreLogLevel = LogLevel.verbose;
-	LogLevel clientLogLevel = LogLevel.verbose;
-	LogLevel palLogLevel = LogLevel.verbose;
 	Application mainApplication;
 	CrashHandler crashHandler;
 	DisplayProperties mainDisplayProperties;
@@ -39,6 +36,16 @@ struct FrameTime
 {
 	Duration deltaTime;
 	Duration unscaledDeltaTime;
+}
+struct ParsedArgs
+{
+	string applicationFile;
+	LogLevel coreLogLevel = LogLevel.verbose;
+	LogLevel clientLogLevel = LogLevel.verbose;
+	LogLevel palLogLevel = LogLevel.verbose;
+	string graphicsDriver = "opengl";
+	string audioDriver = "openal";
+	string displayDriver = "sdl";
 }
 struct Version
 {
@@ -68,7 +75,6 @@ struct ZyeWare
 		Rect2i sFramebufferArea;
 		ScaleMode sScaleMode;
 		ProjectProperties sProjectProperties;
-		string[] sCmdArgs;
 		DeferFunc[16] sDeferredFunctions;
 		size_t sDeferredFunctionsCount;
 		bool sRunning;
@@ -78,13 +84,12 @@ struct ZyeWare
 			bool sIsProcessingDeferred;
 			bool sIsEmittingEvent;
 		}
-		ProjectProperties loadApplication();
+		ProjectProperties loadApplication(string library);
 		void runMainLoop();
 		void createFramebuffer();
 		nothrow void recalculateFramebufferArea();
 		void drawFramebuffer(in FrameTime nextFrameTime);
-		void parseCmdArgs(string[] args, ref ProjectProperties properties);
-		void loadBackends();
+		ParsedArgs parseCmdArgs(string[] args);
 		package(zyeware.core) static
 		{
 			CrashHandler crashHandler;
@@ -123,7 +128,6 @@ struct ZyeWare
 				nothrow Vector2f convertDisplayToFramebufferLocation(Vector2i location);
 				nothrow ScaleMode scaleMode();
 				nothrow void scaleMode(ScaleMode value);
-				nothrow string[] cmdArgs();
 				nothrow @nogc const(ProjectProperties) projectProperties();
 				debug (1)
 				{

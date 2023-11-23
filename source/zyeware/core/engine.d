@@ -38,10 +38,6 @@ struct ProjectProperties
     string authorName = "Anonymous"; /// The author of the game. Can be anything, from a person to a company.
     string projectName = "ZyeWare Project"; /// The name of the project.
 
-    LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
-    LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
-    LogLevel palLogLevel = LogLevel.verbose; /// The log level for the Pal logger.
-
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
     DisplayProperties mainDisplayProperties; /// The properties of the main display.
@@ -80,6 +76,19 @@ struct ZyeWare
     @disable this(this);
 
 private static:
+    struct ParsedArgs
+    {
+        string applicationFile; /// The dynamic library of the application to load.
+
+        LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
+        LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
+        LogLevel palLogLevel = LogLevel.verbose; /// The log level for the Pal logger.
+
+        string graphicsDriver = "opengl"; /// The graphics driver to use.
+        string audioDriver = "openal"; /// The audio driver to use.
+        string displayDriver = "sdl"; /// The display driver to use.
+    }
+
     alias DeferFunc = void delegate();
 
     SharedLib sApplicationLibrary;
@@ -88,17 +97,14 @@ private static:
 
     Duration sFrameTime;
     Duration sUpTime;
-    Timer sCleanupTimer;
     RandomNumberGenerator sRandom;
 
     Framebuffer sMainFramebuffer;
-    Matrix4f sFramebufferProjection;
-    Matrix4f sDisplayProjection;
     Rect2i sFramebufferArea;
     ScaleMode sScaleMode;
+    bool sMustUpdateFramebufferDimensions;
 
     ProjectProperties sProjectProperties;
-    string[] sCmdArgs;
 
     DeferFunc[16] sDeferredFunctions;
     size_t sDeferredFunctionsCount;
@@ -112,22 +118,14 @@ private static:
         bool sIsEmittingEvent;
     }
 
-    ProjectProperties loadApplication()
+    ProjectProperties loadApplication(string library)
     {
-        version (linux)
-            enum libName = "./libapp.so";
-        else version (Windows)
-            enum libName = ".\\app.dll";
-        else version (OSX)
-            enum libName = "./libapp.dylib";
-        else
-            static assert(false, "Cannot compile for this platform.");
-
-        sApplicationLibrary = load(libName);
-        enforce!CoreException(sApplicationLibrary != invalidHandle, format!"Could not load application library '%s'."(libName));
+        sApplicationLibrary = load(library.toStringz);
+        enforce!CoreException(sApplicationLibrary != invalidHandle, format!"Could not load application library '%s'."(library));
+        
         ProjectProperties function() getProjectProperties;
-
         sApplicationLibrary.bindSymbol(cast(void**) &getProjectProperties, "getProjectProperties");
+
         enforce!CoreException(getProjectProperties, "Could not find getProjectProperties function in application library.");
 
         return getProjectProperties();
@@ -148,7 +146,6 @@ private static:
 
         sUpTime = Duration.zero;
         
-        import std.datetime : msecs;
         MonoTime previous = MonoTime.currTime;
         Duration lag;
 
@@ -177,6 +174,14 @@ private static:
             }
 
             InputManager.tick();
+
+            if (sMustUpdateFramebufferDimensions)
+            {
+                if (sScaleMode == ScaleMode.changeDisplaySize)
+                    framebufferSize = sMainDisplay.size;
+                
+                recalculateFramebufferArea();
+            }
 
             immutable nextFrameTime = FrameTime(dur!"hnsecs"(cast(long) (lag.total!"hnsecs" * sTimeScale)), lag);
             drawFramebuffer(nextFrameTime);
@@ -207,9 +212,6 @@ private static:
         FramebufferProperties fbProps;
         fbProps.size = sMainDisplay.size;
         sMainFramebuffer = new Framebuffer(fbProps);
-
-        sDisplayProjection = Matrix4f.orthographic(0, sMainDisplay.size.x, 0, sMainDisplay.size.y, -1, 1);
-        sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
 
         recalculateFramebufferArea();
     }
@@ -263,21 +265,26 @@ private static:
         sMainDisplay.swapBuffers();
     }
 
-    void parseCmdArgs(string[] args, ref ProjectProperties properties)
+    ParsedArgs parseCmdArgs(string[] args)
     {
         import std.getopt : getopt, defaultGetoptPrinter, config;
         import std.stdio : writeln, writefln;
         import std.traits : EnumMembers;
         import core.stdc.stdlib : exit;
 
+        ParsedArgs parsed;
+
         try
         {
             auto helpInfo = getopt(args,
                 config.passThrough,
-                "loglevel-core", "The minimum log level for engine logs to be displayed.", &properties.coreLogLevel,
-                "loglevel-client", "The minimum log level for game logs to be displayed.", &properties.clientLogLevel,
-                "loglevel-pal", "The minimum log level for Pal logs to be displayed.", &properties.palLogLevel,
-                "target-frame-rate", "The ideal targeted frame rate.", &properties.targetFrameRate
+                "loglevel-core", "The minimum log level for engine logs to be displayed.", &parsed.coreLogLevel,
+                "loglevel-client", "The minimum log level for game logs to be displayed.", &parsed.clientLogLevel,
+                "loglevel-pal", "The minimum log level for Pal logs to be displayed.", &parsed.palLogLevel,
+                "graphics-driver", "The graphics driver to use.", &parsed.graphicsDriver,
+                "audio-driver", "The audio driver to use.", &parsed.audioDriver,
+                "display-driver", "The display driver to use.", &parsed.displayDriver,
+                "game", "The dynamic library of the game to load.", &parsed.applicationFile,
             );
 
             if (helpInfo.helpWanted)
@@ -287,6 +294,9 @@ private static:
                 writeln("All arguments not understood by the engine are passed through to the game.");
                 writeln("------------------------------------------");
                 writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
+                writefln("Available graphics drivers: %(%s, %)", Pal.registeredGraphicsDrivers());
+                writefln("Available audio drivers: %(%s, %)", Pal.registeredAudioDrivers());
+                writefln("Available display drivers: %(%s, %)", Pal.registeredDisplayDrivers());
                 exit(0);
             }
         }
@@ -296,13 +306,8 @@ private static:
             writeln("Please use -h or --help to show information about the command line arguments.");
             exit(1);
         }
-    }
 
-    void loadBackends()
-    {
-        Pal.loadAudioDriver("openal");
-        Pal.loadDisplayDriver("sdl-opengl");
-        Pal.loadGraphicsDriver("opengl");
+        return parsed;
     }
 
 package(zyeware.core) static:
@@ -311,74 +316,85 @@ package(zyeware.core) static:
     void initialize(string[] args)
     {
         GC.disable();
-
-        ProjectProperties properties = loadApplication();
-
-        parseCmdArgs(args, properties);
-
-        sCmdArgs = args;
-        sProjectProperties = properties;
-        targetFrameRate = properties.targetFrameRate;
         sRandom = new RandomNumberGenerator();
+
+        ParsedArgs parsedArgs = parseCmdArgs(args);
 
         // Initialize profiler and logger before anything else.
         version (ZW_Profiling) Profiler.initialize();
-        Logger.initialize(properties.coreLogLevel, properties.clientLogLevel, properties.palLogLevel);
-        
+        Logger.initialize(parsedArgs.coreLogLevel, parsedArgs.clientLogLevel, parsedArgs.palLogLevel);
+
         // Initialize crash handler afterwards because it relies on the logger.
-        if (properties.crashHandler)
-            crashHandler = properties.crashHandler;
+        version (linux)
+            crashHandler = new LinuxDefaultCrashHandler();
+        else version (Windows)
+            crashHandler = new WindowsDefaultCrashHandler();
         else
+            crashHandler = new DefaultCrashHandler();
+
+        VFS.initialize();
+        AssetManager.initialize();
+
+        string applicationFile = parsedArgs.applicationFile;
+        if (!applicationFile)
         {
             version (linux)
-                crashHandler = new LinuxDefaultCrashHandler();
+                applicationFile = "./libapp.so";
             else version (Windows)
-                crashHandler = new WindowsDefaultCrashHandler();
+                applicationFile = ".\\app.dll";
+            else version (OSX)
+                applicationFile = "./libapp.dylib";
             else
-                crashHandler = new DefaultCrashHandler();
+                throw new CoreException("Cannot determine default application file for this platform.");
         }
 
+        ProjectProperties properties = loadApplication(applicationFile);
+
+        if (properties.crashHandler)
+            crashHandler = properties.crashHandler;
+
+        sProjectProperties = properties;
+        targetFrameRate = properties.targetFrameRate;
+        
         enforce!CoreException(properties.mainApplication, "Main application cannot be null.");
-        loadBackends();
+        
+        Pal.loadAudioDriver(parsedArgs.audioDriver);
+        Pal.loadDisplayDriver(parsedArgs.displayDriver);
+        Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);
         
         // Creates a new display and render context.
         sMainDisplay = new Display(properties.mainDisplayProperties);
         enforce!CoreException(sMainDisplay, "Main display creation failed.");
-        createFramebuffer();
-
-        // Initialize all other sub-systems.
-        VFS.initialize();
-        AssetManager.initialize();
-        Pal.audio.initialize();
-        AudioBus.create("master");
 
         Pal.graphics.api.initialize();
-        Renderer2D.initialize();
-        //Renderer3D.initialize();
+        Pal.graphics.renderer2d.initialize();
+        Pal.audio.initialize();
+
+        AudioBus.create("master");
 
         // In release mode, we want to display our fancy splash screen.
         debug sApplication = properties.mainApplication;
         else sApplication = new IntroApplication(properties.mainApplication);
 
+        createFramebuffer();
         sApplication.initialize();
     }
 
     void cleanup()
     {
-        sCleanupTimer.stop();
         sMainDisplay.destroy();
         sMainFramebuffer.destroy();
         sApplication.cleanup();
-        //Renderer3D.cleanup();
-        Renderer2D.cleanup();
+        
+        Pal.graphics.renderer2d.cleanup();
         Pal.graphics.api.cleanup();
         Pal.audio.cleanup();
 
         VFS.cleanup();
 
-        sApplicationLibrary.unload();
-
         collect();
+
+        sApplicationLibrary.unload();
     }
 
     void start()
@@ -392,7 +408,7 @@ package(zyeware.core) static:
 
 public static:
     /// The current version of the engine.
-    immutable Version engineVersion = Version(0, 5, 0, "alpha");
+    immutable Version engineVersion = Version(0, 6, 0, "alpha");
 
     /// How the framebuffer should be scaled on resizing.
     enum ScaleMode
@@ -433,21 +449,7 @@ public static:
         }
 
         if (auto wev = cast(DisplayResizedEvent) ev)
-        {
-            sDisplayProjection = Matrix4f.orthographic(0, wev.size.x, 0, wev.size.y, -1, 1);
-            recalculateFramebufferArea();
-
-            // TODO: Move this to pre-frame with flag.
-            /*if (sScaleMode == ScaleMode.changeDisplaySize)
-            {
-                FramebufferProperties fbProps = sMainFramebuffer.properties;
-                fbProps.size = wev.size;
-                sMainFramebuffer.properties = fbProps;
-
-                import std.exception : assumeWontThrow;
-                sMainFramebuffer.invalidate().assumeWontThrow;
-            }*/
-        }
+            sMustUpdateFramebufferDimensions = true;
         
         if (Exception ex = collectException(sApplication.receive(ev)))
             Logger.core.log(LogLevel.error, "Exception while emitting an event: %s", ex.message);
@@ -575,8 +577,6 @@ public static:
         fbProps.size = newSize;
 
         sMainFramebuffer.recreate(fbProps);
-
-        sFramebufferProjection = Matrix4f.orthographic(0, fbProps.size.x, fbProps.size.y, 0, -1, 1);
         recalculateFramebufferArea();
     }
 
@@ -604,14 +604,6 @@ public static:
     void scaleMode(ScaleMode value) nothrow
     {
         sScaleMode = value;
-    }
-
-    /// The arguments this application was started with.
-    /// These are the same as the ones ZyeWare was started with, but stripped of
-    /// engine-specific arguments.
-    string[] cmdArgs() nothrow
-    {
-        return sCmdArgs;
     }
 
     /// The `ProjectProperties` the engine was started with.

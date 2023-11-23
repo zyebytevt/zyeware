@@ -38,7 +38,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Pal.graphicsDriver.clearScreen(Color.black);
+        Renderer2D.clearScreen(Color.black);
 
         Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
         Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, Vector2f(4), Color.white);

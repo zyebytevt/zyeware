@@ -36,6 +36,7 @@ final class Logger
 		{
 			static void initialize(LogLevel coreLevel, LogLevel clientLevel, LogLevel palLevel);
 			static nothrow Logger core();
+			static nothrow Logger pal();
 			public
 			{
 				pure this(LogSink baseSink, LogLevel logLevel, dstring name);
@@ -62,7 +63,6 @@ final class Logger
 					}
 				}
 				void flush();
-				static nothrow Logger pal();
 				static nothrow Logger client();
 				static nothrow LogSink defaultLogSink();
 			}

@@ -1,5 +1,6 @@
 // D import file generated from 'source/zyeware/pal/pal.d'
 module zyeware.pal.pal;
+import zyeware.common;
 import zyeware.pal.graphics.driver;
 import zyeware.pal.display.driver;
 import zyeware.pal.audio.driver;
