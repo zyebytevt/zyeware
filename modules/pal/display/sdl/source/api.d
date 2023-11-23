@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl_opengl.api;
+module zyeware.pal.display.sdl.api;
 
 import core.stdc.string : memcpy;
 
@@ -20,10 +20,10 @@ import bindbc.opengl;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
-import zyeware.pal.display.sdl_opengl.types;
-import zyeware.pal.display.sdl_opengl.utils;
+import zyeware.pal.display.sdl.types;
+import zyeware.pal.display.sdl.utils;
 
-package(zyeware.pal.display.sdl_opengl):
+package(zyeware.pal.display.sdl):
 
 size_t pWindowCount = 0;
 
@@ -115,6 +115,7 @@ ptrdiff_t getGamepadIndex(in WindowData* windowData, int instanceId) nothrow
     return getGamepadIndex(windowData, SDL_GameControllerFromInstanceID(instanceId));
 }
 
+// TODO: This is still very much dependent on OpenGL, look for a way to make it more generic
 NativeHandle createDisplay(in DisplayProperties properties, in Display container)
 {
     Logger.pal.log(LogLevel.info, "Creating SDL window '%s', requested size %s...", properties.title, properties.size);
@@ -160,9 +161,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
         int length;
         ubyte* state = SDL_GetKeyboardState(&length);
         data.keyboardState = state[0 .. length];
-    }
-
-    {
+    
         int x, y, width, height;
         SDL_GetWindowSize(data.handle, &width, &height);
         SDL_GetWindowPosition(data.handle, &x, &y);
@@ -193,7 +192,7 @@ void loadLibraries()
         if (sdlResult == SDLSupport.noLibrary)
             throw new GraphicsException("Could not find SDL shared library.");
         else if (sdlResult == SDLSupport.badLibrary)
-            throw new GraphicsException("Provided SDL shared is corrupted.");
+            throw new GraphicsException("Provided SDL shared library is corrupted.");
         else
             Logger.pal.log(LogLevel.warning, "Got older SDL version than expected. This might lead to errors.");
     }

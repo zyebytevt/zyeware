@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl_opengl.utils;
+module zyeware.pal.display.sdl.utils;
 
 import bindbc.sdl;
 

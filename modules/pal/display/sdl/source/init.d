@@ -3,11 +3,11 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl_opengl.init;
+module zyeware.pal.display.sdl.init;
 
 import zyeware.pal.display.driver;
 
-import zyeware.pal.display.sdl_opengl.api;
+import zyeware.pal.display.sdl.api;
 import zyeware.pal;
 
 public:

@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl_opengl.types;
+module zyeware.pal.display.sdl.types;
 
 import std.typecons : Rebindable;
 
