@@ -1,4 +1,4 @@
-module zyeware.pal.display.callbacks;
+module zyeware.pal.display.driver;
 
 import zyeware.common;
 import zyeware.rendering;

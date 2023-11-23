@@ -1,4 +1,4 @@
-module zyeware.pal.graphicsDriver.types;
+module zyeware.pal.graphics.types;
 
 enum RenderFlag
 {

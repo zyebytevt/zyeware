@@ -41,19 +41,19 @@ public:
     this(in FramebufferProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = Pal.graphicsDriver.createFramebuffer(mProperties);
+        mNativeHandle = Pal.graphics.api.createFramebuffer(mProperties);
     }
 
     ~this()
     {
-        Pal.graphicsDriver.freeFramebuffer(mNativeHandle);
+        Pal.graphics.api.freeFramebuffer(mNativeHandle);
     }
 
     void recreate(in FramebufferProperties properties)
     {
         mProperties = properties;
-        Pal.graphicsDriver.freeFramebuffer(mNativeHandle);
-        mNativeHandle = Pal.graphicsDriver.createFramebuffer(mProperties);
+        Pal.graphics.api.freeFramebuffer(mNativeHandle);
+        mNativeHandle = Pal.graphics.api.createFramebuffer(mProperties);
     }
 
     Texture2D getTexture2D()
@@ -61,7 +61,7 @@ public:
         enforce!RenderException(mProperties.usageType == FramebufferProperties.UsageType.texture,
             "Framebuffer cannot be used as a texture.");
 
-        NativeHandle handle = Pal.graphicsDriver.getTextureFromFramebuffer(mNativeHandle);
+        NativeHandle handle = Pal.graphics.api.getTextureFromFramebuffer(mNativeHandle);
         return new Texture2D(handle, mProperties.size);
     }
 

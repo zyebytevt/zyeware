@@ -3,13 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.opengl.display;
-
-import zyeware.core.native;
-import zyeware.rendering.display;
-import zyeware.pal.display.opengl.utils;
-
-version (ZW_OpenGL):
+module zyeware.pal.display.sdl_opengl.api;
 
 import core.stdc.string : memcpy;
 
@@ -18,94 +12,23 @@ import std.exception : enforce;
 import std.typecons : scoped, Rebindable;
 import std.math : isClose;
 import std.utf : decode;
+import std.numeric;
 
 import bindbc.sdl;
 import bindbc.opengl;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.display.callbacks;
 import zyeware.pal;
-import std.numeric;
+import zyeware.pal.display.sdl_opengl.types;
+import zyeware.pal.display.sdl_opengl.utils;
 
-public:
-
-// TODO: Temp
-DisplayDriver generateDisplayPALCallbacks()
-{
-    return DisplayDriver(
-        &createDisplay,
-        &destroyDisplay,
-        &update,
-        &swapBuffers,
-        &isKeyPressed,
-        &isMouseButtonPressed,
-        &isGamepadButtonPressed,
-        &getGamepadAxisValue,
-        &getCursorPosition,
-        &setVSyncEnabled,
-        &isVSyncEnabled,
-        &setPosition,
-        &getPosition,
-        &setSize,
-        &getSize,
-        &setFullscreen,
-        &isFullscreen,
-        &setResizable,
-        &isResizable,
-        &setDecorated,
-        &isDecorated,
-        &setFocused,
-        &isFocused,
-        &setVisible,
-        &isVisible,
-        &setMinimized,
-        &isMinimized,
-        &setMaximized,
-        &isMaximized,
-        &setIcon,
-        &getIcon,
-        &setCursor,
-        &getCursor,
-        &setTitle,
-        &getTitle,
-        &setMouseCursorVisible,
-        &isMouseCursorVisible,
-        &setMouseCursorCaptured,
-        &isMouseCursorCaptured,
-        &setClipboardString,
-        &getClipboardString,
-    );
-}
-
-private:
-
-struct WindowData
-{
-public:
-    string title;
-    Vector2i size;
-    Vector2i position;
-    bool isFullscreen;
-    bool isVSyncEnabled;
-    bool isCursorCaptured;
-
-    Rebindable!(const Image) icon;
-    Rebindable!(const Cursor) cursor;
-
-    SDL_Cursor*[const Cursor] sdlCursors;
-
-    SDL_Window* handle;
-    SDL_GLContext glContext;
-    ubyte[] keyboardState;
-    SDL_GameController*[32] gamepads;
-
-    Rebindable!(const Display) container;
-}
+package(zyeware.pal.display.sdl_opengl):
 
 size_t pWindowCount = 0;
 
-extern(C) static void sdlLogFunctionCallback(void* userdata, int category, SDL_LogPriority priority, const char* message) nothrow
+extern(C)
+static void logFunctionCallback(void* userdata, int category, SDL_LogPriority priority, const char* message) nothrow
 {
     LogLevel level;
     switch (priority)
@@ -119,7 +42,7 @@ extern(C) static void sdlLogFunctionCallback(void* userdata, int category, SDL_L
     default:
     }
 
-    Logger.core.log(level, message.fromStringz);
+    Logger.pal.log(level, message.fromStringz);
 }
 
 void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
@@ -140,18 +63,18 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
         if (gamepadIndex == windowData.gamepads.length) // Too many controllers
         {
             SDL_GameControllerClose(pad);
-            Logger.core.log(LogLevel.warning, "Failed to add controller: Too many controllers attached.");
+            Logger.pal.log(LogLevel.warning, "Failed to add controller: Too many controllers attached.");
         }
         else
         {
-            Logger.core.log(LogLevel.debug_, "Added controller '%s' as gamepad #%d.",
+            Logger.pal.log(LogLevel.debug_, "Added controller '%s' as gamepad #%d.",
                 name ? name.fromStringz : "<No name>", gamepadIndex);
 
             ZyeWare.emit!InputEventGamepadAdded(gamepadIndex);
         }
     }
     else
-        Logger.core.log(LogLevel.warning, "Failed to add controller: %s.", SDL_GetError().fromStringz);
+        Logger.pal.log(LogLevel.warning, "Failed to add controller: %s.", SDL_GetError().fromStringz);
 }
 
 void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
@@ -172,7 +95,7 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
             break;
         }
 
-    Logger.core.log(LogLevel.debug_, "Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
+    Logger.pal.log(LogLevel.debug_, "Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
         gamepadIndex);
 
     ZyeWare.emit!InputEventGamepadRemoved(gamepadIndex);
@@ -192,11 +115,9 @@ ptrdiff_t getGamepadIndex(in WindowData* windowData, int instanceId) nothrow
     return getGamepadIndex(windowData, SDL_GameControllerFromInstanceID(instanceId));
 }
 
-public:
-
 NativeHandle createDisplay(in DisplayProperties properties, in Display container)
 {
-    Logger.core.log(LogLevel.info, "Creating SDL window '%s', requested size %s...", properties.title, properties.size);
+    Logger.pal.log(LogLevel.info, "Creating SDL window '%s', requested size %s...", properties.title, properties.size);
 
     if (pWindowCount == 0)
     {
@@ -204,13 +125,13 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
         enforce!GraphicsException(SDL_Init(SDL_INIT_EVERYTHING) == 0,
             format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
 
-        SDL_LogSetOutputFunction(&sdlLogFunctionCallback, null);
+        SDL_LogSetOutputFunction(&logFunctionCallback, null);
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-        Logger.core.log(LogLevel.debug_, "SDL initialized.");
+        Logger.pal.log(LogLevel.debug_, "SDL initialized.");
     }
 
     WindowData* data = new WindowData;
@@ -241,12 +162,12 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
 
     if (pWindowCount == 0)
     {
-        Pal.graphicsDriver.loadLibraries();
+        // TODO: Add re-init context?
 
-        Logger.core.log(LogLevel.info, "Initialized OpenGL Context:");
-        Logger.core.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
-        Logger.core.log(LogLevel.info, "    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
-        Logger.core.log(LogLevel.info, "    Version: %s", glGetString(GL_VERSION).fromStringz);
+        Logger.pal.log(LogLevel.info, "Initialized OpenGL Context:");
+        Logger.pal.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
+        Logger.pal.log(LogLevel.info, "    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
+        Logger.pal.log(LogLevel.info, "    Version: %s", glGetString(GL_VERSION).fromStringz);
     }
 
     {
@@ -495,7 +416,7 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow
     {
         if (SDL_GL_SetSwapInterval(-1) == -1 && SDL_GL_SetSwapInterval(1) == -1)
         {
-            Logger.core.log(LogLevel.warning, "Failed to enable VSync: %s.", SDL_GetError().fromStringz);
+            Logger.pal.log(LogLevel.warning, "Failed to enable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
@@ -505,7 +426,7 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow
     {
         if (SDL_GL_SetSwapInterval(0) == -1)
         {
-            Logger.core.log(LogLevel.warning, "Failed to disable VSync: %s.", SDL_GetError().fromStringz);
+            Logger.pal.log(LogLevel.warning, "Failed to disable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
@@ -749,7 +670,7 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
             return;
         }
 
-        Logger.core.log(LogLevel.warning, "Failed to capture mouse: %s.", SDL_GetError().fromStringz);
+        Logger.pal.log(LogLevel.warning, "Failed to capture mouse: %s.", SDL_GetError().fromStringz);
     }
     else
     {
@@ -759,7 +680,7 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
             return;
         }
 
-        Logger.core.log(LogLevel.warning, "Failed to release mouse: %s.", SDL_GetError().fromStringz);
+        Logger.pal.log(LogLevel.warning, "Failed to release mouse: %s.", SDL_GetError().fromStringz);
     }
 }
 

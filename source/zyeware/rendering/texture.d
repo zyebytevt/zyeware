@@ -60,12 +60,12 @@ public:
     {
         mProperties = properties;
         mSize = image.size;
-        mNativeHandle = Pal.graphicsDriver.createTexture2D(image, mProperties);
+        mNativeHandle = Pal.graphics.api.createTexture2D(image, mProperties);
     }
 
     ~this()
     {
-        Pal.graphicsDriver.freeTexture2D(mNativeHandle);
+        Pal.graphics.api.freeTexture2D(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow
@@ -121,12 +121,12 @@ public:
     this(in Image[6] images, in TextureProperties properties = TextureProperties.init)
     {
         mProperties = properties;
-        mNativeHandle = Pal.graphicsDriver.createTextureCubeMap(images, properties);
+        mNativeHandle = Pal.graphics.api.createTextureCubeMap(images, properties);
     }
 
     ~this()
     {
-        Pal.graphicsDriver.freeTextureCubeMap(mNativeHandle);
+        Pal.graphics.api.freeTextureCubeMap(mNativeHandle);
     }
 
     const(TextureProperties) properties() pure const nothrow

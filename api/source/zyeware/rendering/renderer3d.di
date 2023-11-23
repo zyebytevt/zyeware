@@ -4,7 +4,6 @@ import std.typecons : Rebindable;
 import std.exception : enforce;
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.renderer.callbacks;
 import zyeware.pal;
 struct Renderer3D
 {
@@ -12,6 +11,10 @@ struct Renderer3D
 	@disable this(this);
 	public static
 	{
+		pragma (inline, true)nothrow void clearScreen(in Color clearColor)
+		{
+			Pal.graphics.api.clearScreen(clearColor);
+		}
 		void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment);
 		void end();
 		void submit(in Matrix4f transform);

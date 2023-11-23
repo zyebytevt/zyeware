@@ -10,7 +10,6 @@ import std.exception : enforce;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.renderer.callbacks;
 import zyeware.pal;
 
 struct Renderer3D
@@ -19,18 +18,28 @@ struct Renderer3D
     @disable this(this);
 
 public static:
+    /// Clears the screen.
+    ///
+    /// Params:
+    ///     clearColor = The color to clear the screen to.
+    pragma(inline, true)
+    void clearScreen(in Color clearColor) nothrow
+    {
+        Pal.graphics.api.clearScreen(clearColor);
+    }
+
     void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
     {
-        Pal.renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
+        Pal.graphics.renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
     }
 
     void end()
     {
-        Pal.renderer3d.end();
+        Pal.graphics.renderer3d.end();
     }
 
     void submit(in Matrix4f transform)
     {
-        Pal.renderer3d.submit(transform);
+        Pal.graphics.renderer3d.submit(transform);
     }
 }

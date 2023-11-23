@@ -1,5 +1,5 @@
-// D import file generated from 'source/zyeware/pal/display/callbacks.d'
-module zyeware.pal.display.callbacks;
+// D import file generated from 'source/zyeware/pal/display/driver.d'
+module zyeware.pal.display.driver;
 import zyeware.common;
 import zyeware.rendering;
 struct DisplayDriver

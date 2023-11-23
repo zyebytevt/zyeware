@@ -2,7 +2,6 @@
 module zyeware.core.introapp;
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal;
 package(zyeware.core) final class IntroApplication : Application
 {
 	protected

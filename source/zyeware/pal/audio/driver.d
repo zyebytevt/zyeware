@@ -1,4 +1,4 @@
-module zyeware.pal.audio.callbacks;
+module zyeware.pal.audio.driver;
 
 import zyeware.common;
 import zyeware.pal.audio.types;

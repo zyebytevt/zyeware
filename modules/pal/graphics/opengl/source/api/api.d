@@ -3,11 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.graphicsDriver.opengl.api;
-
-import zyeware.pal.graphicsDriver.callbacks;
-
-version (ZW_OpenGL):
+module zyeware.pal.graphics.opengl.api.api;
 
 import std.typecons : Tuple;
 import std.exception : assumeWontThrow;
@@ -19,75 +15,49 @@ import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
 
-import zyeware.pal.graphicsDriver.opengl.shader;
-import zyeware.pal.graphicsDriver.types;
+import zyeware.pal.graphics.types;
+import zyeware.pal.graphics.opengl.api.types;
+import zyeware.pal.graphics.opengl.api.utils;
 
-private:
+package(zyeware.pal.graphics.opengl):
 
-struct SequentialBuffer(T)
-{
-private:
-    T[] mBuffer = new T[8];
-
-public:
-    T* add(in T value) nothrow
-    {
-        for (size_t i; i < mBuffer.length; ++i)
-        {
-            if (mBuffer[i] == T.init)
-            {
-                mBuffer[i] = value;
-                return &mBuffer[i];
-            }
-        }
-
-        size_t oldLength = mBuffer.length;
-        mBuffer.length *= 2;
-        mBuffer[oldLength] = value;
-        return &mBuffer[oldLength];
-    }
-
-    T[] data() nothrow
-    {
-        return mBuffer[0..mBuffer.length];
-    }
-}
-
-struct MeshData
-{
-    uint vao;
-    uint vbo;
-    uint ibo;
-}
-
-struct FramebufferData
-{
-    uint id;
-    uint colorAttachmentId;
-    uint depthAttachmentId;
-}
-
-bool[RenderFlag] pFlagValues;
+bool[cast(size_t) RenderFlag.max + 1] pFlagValues;
+uint[UniformLocationKey] pUniformLocationCache;
 
 version (Windows)
 {
-    extern(Windows) static void palGlErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+    extern (Windows)
+    static void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
         const(char)* message, void* userParam) nothrow
     {
-        palGlErrorCallbackImpl(source, type, id, severity, length, message, userParam);
+        errorCallbackImpl(source, type, id, severity, length, message, userParam);
     }
 }
 else
 {
-    extern(C) static void palGlErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+    extern (C)
+    static void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
         const(char)* message, void* userParam) nothrow
     {
-        palGlErrorCallbackImpl(source, type, id, severity, length, message, userParam);
+        errorCallbackImpl(source, type, id, severity, length, message, userParam);
     }
 }
 
+uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name) nothrow
+{
+    immutable uint id = *(cast(uint*) shader);
+    glUseProgram(id);
+
+    immutable auto key = UniformLocationKey(id, name);
+    uint* location = key in pUniformLocationCache;
+    if (!location)
+        return pUniformLocationCache[key] = glGetUniformLocation(id, name.toStringz);
+    
+    return *location;
+}
+
 pragma(inline, true)
-void palGlErrorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const(char)* message, void* userParam) nothrow
 {
     glGetError();
@@ -137,39 +107,10 @@ void palGlErrorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severi
             break;
     }
 
-    Logger.core.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
+    Logger.pal.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
 }
 
-GLuint palGlGetGLFilter(TextureProperties.Filter filter)
-{
-    static GLint[TextureProperties.Filter] glFilter;
-
-    if (!glFilter) 
-        glFilter = [
-            TextureProperties.Filter.nearest: GL_NEAREST,
-            TextureProperties.Filter.linear: GL_LINEAR,
-            TextureProperties.Filter.bilinear: GL_LINEAR,
-            TextureProperties.Filter.trilinear: GL_LINEAR_MIPMAP_LINEAR
-        ];
-
-    return glFilter[filter];
-}
-
-GLuint palGlGetGLWrapMode(TextureProperties.WrapMode wrapMode)
-{
-    static GLint[TextureProperties.WrapMode] glWrapMode;
-
-    if (!glWrapMode)
-        glWrapMode = [
-            TextureProperties.WrapMode.repeat: GL_REPEAT,
-            TextureProperties.WrapMode.mirroredRepeat: GL_MIRRORED_REPEAT,
-            TextureProperties.WrapMode.clampToEdge: GL_CLAMP_TO_EDGE
-        ];
-
-    return glWrapMode[wrapMode];
-}
-
-void palGlInitialize()
+void initialize()
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -181,34 +122,29 @@ void palGlInitialize()
     glDepthFunc(GL_LEQUAL);
     
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(&palGlErrorCallback, null);
+    glDebugMessageCallback(&errorCallback, null);
 
     glLineWidth(2);
     glPointSize(4);
 
     {
-        import std.traits : EnumMembers;
-
-        foreach (flag; EnumMembers!RenderFlag)
-            pFlagValues[flag] = false;
-
         GLboolean resultBool;
         GLint resultInt;
 
         glGetBooleanv(GL_DEPTH_TEST, &resultBool);
-        pFlagValues[RenderFlag.depthTesting] = cast(bool) resultBool;
+        pFlagValues[cast(size_t) RenderFlag.depthTesting] = cast(bool) resultBool;
         glGetBooleanv(GL_DEPTH_WRITEMASK, &resultBool);
-        pFlagValues[RenderFlag.depthBufferWriting] = cast(bool) resultBool;
+        pFlagValues[cast(size_t) RenderFlag.depthBufferWriting] = cast(bool) resultBool;
         glGetBooleanv(GL_CULL_FACE, &resultBool);
-        pFlagValues[RenderFlag.culling] = cast(bool) resultBool;
+        pFlagValues[cast(size_t) RenderFlag.culling] = cast(bool) resultBool;
         glGetBooleanv(GL_STENCIL_TEST, &resultBool);
-        pFlagValues[RenderFlag.stencilTesting] = cast(bool) resultBool;
+        pFlagValues[cast(size_t) RenderFlag.stencilTesting] = cast(bool) resultBool;
         glGetIntegerv(GL_POLYGON_MODE, &resultInt);
-        pFlagValues[RenderFlag.wireframe] = resultInt == GL_LINE;
+        pFlagValues[cast(size_t) RenderFlag.wireframe] = resultInt == GL_LINE;
     }
 }
 
-void palGlLoadLibs()
+void loadLibs()
 {
     import loader = bindbc.loader.sharedlib;
     import std.string : fromStringz;
@@ -221,7 +157,7 @@ void palGlLoadLibs()
     if (glResult != glSupport)
     {
         foreach (info; loader.errors)
-            Logger.core.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
+            Logger.pal.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
 
         switch (glResult)
         {
@@ -235,18 +171,16 @@ void palGlLoadLibs()
             throw new GraphicsException("No OpenGL context available.");
 
         default:
-            Logger.core.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
+            Logger.pal.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
         }
     }
 }
 
-void palGlCleanup()
+void cleanup()
 {
 }
 
-package(zyeware.pal):
-
-NativeHandle palGlCreateMesh(in Vertex3D[] vertices, in uint[] indices)
+NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices)
 {
     auto data = new MeshData;
 
@@ -281,7 +215,7 @@ NativeHandle palGlCreateMesh(in Vertex3D[] vertices, in uint[] indices)
     return cast(NativeHandle) data;
 }
 
-NativeHandle palGlCreateTexture2D(in Image image, in TextureProperties properties)
+NativeHandle createTexture2D(in Image image, in TextureProperties properties)
 {
     const(ubyte)[] pixels = image.pixels;
 
@@ -317,11 +251,11 @@ NativeHandle palGlCreateTexture2D(in Image image, in TextureProperties propertie
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, palGlGetGLFilter(properties.minFilter));
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, palGlGetGLFilter(properties.magFilter));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, palGlGetGLWrapMode(properties.wrapS));
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, palGlGetGLWrapMode(properties.wrapT));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
 
     if (properties.generateMipmaps)
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -329,7 +263,7 @@ NativeHandle palGlCreateTexture2D(in Image image, in TextureProperties propertie
     return cast(NativeHandle) id;
 }
 
-NativeHandle palGlCreateTextureCubeMap(in Image[6] images, in TextureProperties properties)
+NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties)
 {
     auto id = new uint;
 
@@ -364,11 +298,11 @@ NativeHandle palGlCreateTextureCubeMap(in Image[6] images, in TextureProperties 
             GL_UNSIGNED_BYTE, images[i].pixels.ptr);
     }
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, palGlGetGLFilter(properties.minFilter));
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, palGlGetGLFilter(properties.magFilter));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, palGlGetGLWrapMode(properties.wrapS));
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, palGlGetGLWrapMode(properties.wrapT));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, getGLWrapMode(properties.wrapS));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, getGLWrapMode(properties.wrapT));
 
     if (properties.generateMipmaps)
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
@@ -376,7 +310,7 @@ NativeHandle palGlCreateTextureCubeMap(in Image[6] images, in TextureProperties 
     return cast(NativeHandle) id;
 }
 
-NativeHandle palGlCreateFramebuffer(in FramebufferProperties properties)
+NativeHandle createFramebuffer(in FramebufferProperties properties)
 {
     auto framebuffer = new FramebufferData;
 
@@ -419,7 +353,7 @@ NativeHandle palGlCreateFramebuffer(in FramebufferProperties properties)
     return cast(NativeHandle) framebuffer;
 }
 
-NativeHandle palGlCreateShader(in ShaderProperties properties)
+NativeHandle createShader(in ShaderProperties properties)
 {
     auto id = new uint;
     *id = glCreateProgram();
@@ -496,7 +430,7 @@ NativeHandle palGlCreateShader(in ShaderProperties properties)
     return cast(NativeHandle) id;
 }
 
-void palGlFreeMesh(NativeHandle mesh) nothrow
+void freeMesh(NativeHandle mesh) nothrow
 {
     auto data = cast(MeshData*) mesh;
 
@@ -507,7 +441,7 @@ void palGlFreeMesh(NativeHandle mesh) nothrow
     destroy(data);
 }
 
-void palGlFreeTexture2D(NativeHandle texture) nothrow
+void freeTexture2D(NativeHandle texture) nothrow
 {
     auto id = cast(uint*) texture;
     
@@ -516,12 +450,12 @@ void palGlFreeTexture2D(NativeHandle texture) nothrow
     destroy(id);
 }
 
-void palGlFreeTextureCubeMap(NativeHandle texture) nothrow
+void freeTextureCubeMap(NativeHandle texture) nothrow
 {
-    palGlFreeTexture2D(texture);
+    freeTexture2D(texture);
 }
 
-void palGlFreeFramebuffer(NativeHandle framebuffer) nothrow
+void freeFramebuffer(NativeHandle framebuffer) nothrow
 {
     auto data = cast(FramebufferData*) framebuffer;
 
@@ -540,7 +474,7 @@ void palGlFreeFramebuffer(NativeHandle framebuffer) nothrow
     destroy(data);
 }
 
-void palGlFreeShader(NativeHandle shader) nothrow
+void freeShader(NativeHandle shader) nothrow
 {
     auto id = cast(uint*) shader;
 
@@ -549,14 +483,14 @@ void palGlFreeShader(NativeHandle shader) nothrow
     destroy(id);
 }
 
-void palGlSetViewport(Rect2i region) nothrow
+void setViewport(Rect2i region) nothrow
 {
     glViewport(region.position.x, region.position.y, region.size.x, region.size.y);
 }
 
-void palGlSetRenderFlag(RenderFlag flag, bool value) nothrow
+void setRenderFlag(RenderFlag flag, bool value) nothrow
 {
-    if (pFlagValues[flag] == value)
+    if (pFlagValues[cast(size_t) flag] == value)
         return;
 
     final switch (flag) with (RenderFlag)
@@ -591,15 +525,15 @@ void palGlSetRenderFlag(RenderFlag flag, bool value) nothrow
         break;
     }
 
-    pFlagValues[flag] = value;
+    pFlagValues[cast(size_t) flag] = value;
 }
 
-bool palGlGetRenderFlag(RenderFlag flag) nothrow
+bool getRenderFlag(RenderFlag flag) nothrow
 {
-    return pFlagValues[flag];
+    return pFlagValues[cast(size_t) flag];
 }
 
-size_t palGlGetRenderCapability(RenderCapability capability) nothrow
+size_t getRenderCapability(RenderCapability capability) nothrow
 {
     final switch (capability) with (RenderCapability)
     {
@@ -610,18 +544,18 @@ size_t palGlGetRenderCapability(RenderCapability capability) nothrow
     }
 }
 
-void palGlClearScreen(Color clearColor) nothrow
+void clearScreen(Color clearColor) nothrow
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void palGlSetRenderTarget(in NativeHandle target) nothrow
+void setRenderTarget(in NativeHandle target) nothrow
 {
     glBindFramebuffer(GL_FRAMEBUFFER, target ? *(cast(uint*) target) : 0);
 }
 
-void palGlPresentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow
+void presentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, *(cast(uint*) framebuffer));
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -631,7 +565,7 @@ void palGlPresentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i 
         dstRegion.size.x, dstRegion.size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
-NativeHandle palGlGetTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
+NativeHandle getTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
 {
     FramebufferData* data = cast(FramebufferData*) framebuffer;
 
@@ -640,37 +574,32 @@ NativeHandle palGlGetTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
     return cast(NativeHandle) &data.colorAttachmentId;
 }
 
-public:
-
-GraphicsDriver palGlGenerateCallbacks()
+void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow
 {
-    return GraphicsDriver(
-        &palGlInitialize,
-        &palGlLoadLibs,
-        &palGlCleanup,
-        &palGlCreateMesh,
-        &palGlCreateTexture2D,
-        &palGlCreateTextureCubeMap,
-        &palGlCreateFramebuffer,
-        &palGlCreateShader,
-        &palGlFreeMesh,
-        &palGlFreeTexture2D,
-        &palGlFreeTextureCubeMap,
-        &palGlFreeFramebuffer,
-        &palGlFreeShader,
-        &palGlSetShaderUniform1f,
-        &palGlSetShaderUniform2f,
-        &palGlSetShaderUniform3f,
-        &palGlSetShaderUniform4f,
-        &palGlSetShaderUniform1i,
-        &palGlSetShaderUniformMat4f,
-        &palGlSetViewport,
-        &palGlSetRenderFlag,
-        &palGlGetRenderFlag,
-        &palGlGetRenderCapability,
-        &palGlClearScreen,
-        &palGlSetRenderTarget,
-        &palGlPresentToScreen,
-        &palGlGetTextureFromFramebuffer,
-    );
+    glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
+}
+
+void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow
+{
+    glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
+}
+
+void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow
+{
+    glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
+}
+
+void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow
+{
+    glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value.w);
+}
+
+void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow
+{
+    glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
+}
+
+void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow
+{
+    glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value.ptr);
 }

@@ -2,7 +2,6 @@ module zyeware.core.introapp;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal;
 
 package(zyeware.core)
 final class IntroApplication : Application
@@ -69,7 +68,7 @@ public:
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        Pal.graphicsDriver.clearScreen(mBackgroundGradient.interpolate(seconds));
+        Renderer2D.clearScreen(mBackgroundGradient.interpolate(seconds));
 
         immutable float scale = mScaleInterpolator.interpolate(seconds);
         Vector2f position = Vector2f(-0.9, -0.35) * scale;

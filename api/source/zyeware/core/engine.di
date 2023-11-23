@@ -20,8 +20,6 @@ import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
 import zyeware.pal;
-import zyeware.pal.graphics.opengl.api;
-import zyeware.pal.graphics.callbacks;
 alias defer = ZyeWare.callDeferred;
 struct ProjectProperties
 {

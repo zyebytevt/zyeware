@@ -1,4 +1,9 @@
-module zyeware.pal.audio.api;
+// This file is part of the ZyeWare Game Engine, and subject to the terms
+// and conditions defined in the file 'LICENSE.txt', which is part
+// of this source code package.
+//
+// Copyright 2021 ZyeByte
+module zyeware.pal.audio.openal.api;
 
 import std.sumtype : match;
 import std.exception : enforce;
@@ -10,18 +15,20 @@ import audioformats;
 
 import zyeware.common;
 import zyeware.pal;
-import zyeware.pal.audio.thread;
+import zyeware.pal.audio.openal.types;
+import zyeware.pal.audio.openal.thread;
 
-public:
+package(zyeware.pal.audio.openal):
 
 ALCdevice* pDevice;
 ALCcontext* pContext;
 BusData[string] pBusses;
 AudioThread pAudioThread;
+__gshared SourceData*[] pSources;
 
 // This function is essentially noGC, but it's not marked as such because the array
 // is initialized the first time the function is called.
-size_t palReadShortsFromDecoder(ref AudioStream decoder, ref short[] buffer)
+size_t readShortsFromDecoder(ref AudioStream decoder, ref short[] buffer)
     in (decoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
 {
     static float[] readBuffer;
@@ -37,7 +44,7 @@ size_t palReadShortsFromDecoder(ref AudioStream decoder, ref short[] buffer)
     return readCount;
 }
 
-void palUpdateSourcesWithBus(in BusData* bus)
+void updateSourcesWithBus(in BusData* bus)
 {
     foreach (source; pSources)
     {
@@ -46,41 +53,9 @@ void palUpdateSourcesWithBus(in BusData* bus)
     }
 }
 
-__gshared SourceData*[] pSources;
-
-struct BufferData
+void initialize()
 {
-    const(ubyte[]) encodedMemory;
-    LoopPoint loopPoint;
-}
-
-struct SourceData
-{
-    uint id;
-    uint[] bufferIds;
-    short[] processingBuffer;
-    int processedCount;
-
-    float volume = 1f;
-    float pitch = 1f;
-    bool isLooping;
-
-    SourceState state;
-
-    AudioStream decoder;
-    const(BufferData)* bufferData;
-    const(BusData)* bus;
-}
-
-struct BusData
-{
-    string name;
-    float volume = 1f;
-}
-
-void palInitialize()
-{
-    palLoadLibraries();
+    loadLibraries();
 
     Logger.pal.log(LogLevel.info, "OpenAL initialized:");
     Logger.pal.log(LogLevel.info, "    Version: %s", alGetString(AL_VERSION).fromStringz);
@@ -99,7 +74,7 @@ void palInitialize()
     Logger.pal.log(LogLevel.info, "Audio thread started.");
 }
 
-void palLoadLibraries()
+void loadLibraries()
 {
     import loader = bindbc.loader.sharedlib;
     import std.string : fromStringz;
@@ -127,7 +102,7 @@ void palLoadLibraries()
     }
 }
 
-void palCleanup()
+void cleanup()
 {
     pAudioThread.stop();
     pAudioThread.join();
@@ -137,7 +112,7 @@ void palCleanup()
     Logger.pal.log(LogLevel.info, "Audio thread stopped, OpenAL terminated.");
 }
 
-NativeHandle palCreateSource(in NativeHandle busHandle)
+NativeHandle createSource(in NativeHandle busHandle)
 {
     auto source = new SourceData();
 
@@ -154,7 +129,7 @@ NativeHandle palCreateSource(in NativeHandle busHandle)
     return cast(NativeHandle) source;
 }
 
-void palFreeSource(NativeHandle handle)
+void freeSource(NativeHandle handle)
 {
     auto source = cast(SourceData*) handle;
 
@@ -179,49 +154,49 @@ void palFreeSource(NativeHandle handle)
     destroy(source);
 }
 
-NativeHandle palCreateBuffer(in ubyte[] encodedMemory, in AudioProperties properties)
+NativeHandle createBuffer(in ubyte[] encodedMemory, in AudioProperties properties)
 {
     return cast(NativeHandle) new BufferData(encodedMemory, properties.loopPoint);
 }
 
-void palFreeBuffer(NativeHandle handle)
+void freeBuffer(NativeHandle handle)
 {
     destroy(handle);
 }
 
-NativeHandle palCreateBus(string name)
+NativeHandle createBus(string name)
 {
     pBusses[name] = BusData(name);
     return cast(NativeHandle) (name in pBusses);
 }
 
-void palFreeBus(NativeHandle handle)
+void freeBus(NativeHandle handle)
 {
     auto bus = cast(BusData*) handle;
     pBusses.remove(bus.name);
     destroy(bus);
 }
 
-void palSetBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint)
+void setBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint)
 {
     auto buffer = cast(BufferData*) handle;
 
     buffer.loopPoint = loopPoint;
 }
 
-LoopPoint palGetBufferLoopPoint(in NativeHandle handle) nothrow
+LoopPoint getBufferLoopPoint(in NativeHandle handle) nothrow
 {
     auto buffer = cast(BufferData*) handle;
 
     return buffer.loopPoint;
 }
 
-void palSetSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle)
+void setSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle)
 {
     auto source = cast(SourceData*) sourceHandle;
 
     if (source.state != SourceState.stopped)
-        palStopSource(sourceHandle);
+        stopSource(sourceHandle);
 
     source.bufferData = cast(BufferData*) bufferHandle;
 
@@ -230,7 +205,7 @@ void palSetSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle)
         throw new AudioException(source.decoder.errorMessage);
 }
 
-void palSetSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle)
+void setSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle)
 {
     auto source = cast(SourceData*) sourceHandle;
     auto bus = cast(const(BusData*)) busHandle;
@@ -238,19 +213,19 @@ void palSetSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle)
     source.bus = bus;
 }
 
-void palPlaySource(NativeHandle handle)
+void playSource(NativeHandle handle)
 {
     auto source = cast(SourceData*) handle;
 
     if (source.state == SourceState.playing)
-        palStopSource(handle);
+        stopSource(handle);
 
     if (source.state == SourceState.stopped)
     {
         size_t lastReadLength;
         for (size_t i; i < source.bufferIds.length; ++i)
         {
-            lastReadLength = palReadShortsFromDecoder(source.decoder, source.processingBuffer);
+            lastReadLength = readShortsFromDecoder(source.decoder, source.processingBuffer);
             
             alBufferData(source.bufferIds[i],
                 source.decoder.getNumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
@@ -265,7 +240,7 @@ void palPlaySource(NativeHandle handle)
     alSourcePlay(source.id);
 }
 
-void palPauseSource(NativeHandle handle)
+void pauseSource(NativeHandle handle)
 {
     auto source = cast(SourceData*) handle;
 
@@ -276,7 +251,7 @@ void palPauseSource(NativeHandle handle)
     alSourcePause(source.id);
 }
 
-void palStopSource(NativeHandle handle)
+void stopSource(NativeHandle handle)
 {
     auto source = cast(SourceData*) handle;
 
@@ -299,7 +274,7 @@ void palStopSource(NativeHandle handle)
     }
 }
 
-void palUpdateSourceBuffers(NativeHandle handle)
+void updateSourceBuffers(NativeHandle handle)
 {
     auto source = cast(SourceData*) handle;
 
@@ -320,7 +295,7 @@ void palUpdateSourceBuffers(NativeHandle handle)
         uint removedBuffer;
         alSourceUnqueueBuffers(source.id, 1, &removedBuffer);
 
-        size_t lastReadLength = palReadShortsFromDecoder(source.decoder, source.processingBuffer);
+        size_t lastReadLength = readShortsFromDecoder(source.decoder, source.processingBuffer);
 
         if (lastReadLength <= 0)
         {
@@ -339,11 +314,11 @@ void palUpdateSourceBuffers(NativeHandle handle)
                     }
                 );
 
-                lastReadLength = palReadShortsFromDecoder(source.decoder, source.processingBuffer);
+                lastReadLength = readShortsFromDecoder(source.decoder, source.processingBuffer);
             }
             else
             {
-                palStopSource(handle);
+                stopSource(handle);
                 return;
             }
         }
@@ -359,7 +334,7 @@ void palUpdateSourceBuffers(NativeHandle handle)
     }
 }
 
-void palSetSourceVolume(NativeHandle handle, float volume)
+void setSourceVolume(NativeHandle handle, float volume)
 {
     auto source = cast(SourceData*) handle;
 
@@ -367,7 +342,7 @@ void palSetSourceVolume(NativeHandle handle, float volume)
     alSourcef(source.id, AL_GAIN, volume * source.bus.volume);
 }
 
-void palSetSourcePitch(NativeHandle handle, float pitch)
+void setSourcePitch(NativeHandle handle, float pitch)
 {
     auto source = cast(SourceData*) handle;
 
@@ -375,86 +350,52 @@ void palSetSourcePitch(NativeHandle handle, float pitch)
     alSourcef(source.id, AL_PITCH, pitch);
 }
 
-void palSetSourceLooping(NativeHandle handle, bool isLooping)
+void setSourceLooping(NativeHandle handle, bool isLooping)
 {
     auto source = cast(SourceData*) handle;
 
     source.isLooping = isLooping;
 }
 
-float palGetSourceVolume(in NativeHandle handle) nothrow
+float getSourceVolume(in NativeHandle handle) nothrow
 {
     auto source = cast(SourceData*) handle;
 
     return source.volume;
 }
 
-float palGetSourcePitch(in NativeHandle handle) nothrow
+float getSourcePitch(in NativeHandle handle) nothrow
 {
     auto source = cast(SourceData*) handle;
 
     return source.pitch;
 }
 
-bool palGetSourceLooping(in NativeHandle handle) nothrow
+bool getSourceLooping(in NativeHandle handle) nothrow
 {
     auto source = cast(SourceData*) handle;
 
     return source.isLooping;
 }
 
-SourceState palGetSourceState(in NativeHandle handle) nothrow
+SourceState getSourceState(in NativeHandle handle) nothrow
 {
     auto source = cast(SourceData*) handle;
 
     return source.state;
 }
 
-void palSetBusVolume(NativeHandle handle, float volume)
+void setBusVolume(NativeHandle handle, float volume)
 {
     auto bus = cast(BusData*) handle;
 
     bus.volume = volume;
-    palUpdateSourcesWithBus(bus);
+    updateSourcesWithBus(bus);
 }
 
-float palGetBusVolume(in NativeHandle handle) nothrow
+float getBusVolume(in NativeHandle handle) nothrow
 {
     auto bus = cast(BusData*) handle;
 
     return bus.volume;
-}
-
-shared static this()
-{
-    import zyeware.pal.audio.callbacks;
-
-    Pal.registerAudio("openal", () => AudioDriver(
-        &palInitialize,
-        &palLoadLibraries,
-        &palCleanup,
-        &palCreateSource,
-        &palCreateBuffer,
-        &palCreateBus,
-        &palFreeSource,
-        &palFreeBuffer,
-        &palFreeBus,
-        &palSetBufferLoopPoint,
-        &palGetBufferLoopPoint,
-        &palSetSourceBuffer,
-        &palSetSourceBus,
-        &palSetSourceVolume,
-        &palSetSourcePitch,
-        &palSetSourceLooping,
-        &palGetSourceVolume,
-        &palGetSourcePitch,
-        &palGetSourceLooping,
-        &palGetSourceState,
-        &palPlaySource,
-        &palPauseSource,
-        &palStopSource,
-        &palSetBusVolume,
-        &palGetBusVolume,
-        &palUpdateSourceBuffers,
-    ));
 }

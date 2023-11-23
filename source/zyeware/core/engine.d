@@ -28,8 +28,6 @@ import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
 import zyeware.pal;
-import zyeware.pal.graphicsDriver.opengl.api;
-import zyeware.pal.graphicsDriver.callbacks;
 
 alias defer = ZyeWare.callDeferred;
 
@@ -252,14 +250,14 @@ private static:
         sMainDisplay.update();
 
         // Prepare framebuffer and render application into it.
-        Pal.graphicsDriver.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
+        Pal.graphics.api.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
         
-        Pal.graphicsDriver.setRenderTarget(sMainFramebuffer.handle);
+        Pal.graphics.api.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw(nextFrameTime);
-        Pal.graphicsDriver.setRenderTarget(null);
+        Pal.graphics.api.setRenderTarget(null);
 
-        Pal.graphicsDriver.clearScreen(Color.black);
-        Pal.graphicsDriver.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
+        Pal.graphics.api.clearScreen(Color.black);
+        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
             sFramebufferArea);
 
         sMainDisplay.swapBuffers();
@@ -302,15 +300,9 @@ private static:
 
     void loadBackends()
     {
-        /*import zyeware.pal.display.opengl.display : generateDisplayPALCallbacks;
-        import zyeware.pal.graphicsDriver.opengl.api : palGlGenerateCallbacks;
-        import zyeware.pal.renderer.opengl.renderer2d : generateRenderer2DPALCallbacks;
-
-        Pal.sDisplayCallbacks = generateDisplayPALCallbacks();
-        Pal.sGraphicsCallbacks = palGlGenerateCallbacks();
-        Pal.sRenderer2DCallbacks = generateRenderer2DPALCallbacks();*/
-
-        Pal.loadAudio("openal");
+        Pal.loadAudioDriver("openal");
+        Pal.loadDisplayDriver("sdl-opengl");
+        Pal.loadGraphicsDriver("opengl");
     }
 
 package(zyeware.core) static:
@@ -360,7 +352,7 @@ package(zyeware.core) static:
         Pal.audio.initialize();
         AudioBus.create("master");
 
-        Pal.graphicsDriver.initialize();
+        Pal.graphics.api.initialize();
         Renderer2D.initialize();
         //Renderer3D.initialize();
 
@@ -379,7 +371,7 @@ package(zyeware.core) static:
         sApplication.cleanup();
         //Renderer3D.cleanup();
         Renderer2D.cleanup();
-        Pal.graphicsDriver.cleanup();
+        Pal.graphics.api.cleanup();
         Pal.audio.cleanup();
 
         VFS.cleanup();

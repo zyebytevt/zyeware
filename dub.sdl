@@ -18,21 +18,17 @@ subPackage "modules/ecs"
 subPackage "examples/techdemo"
 subPackage "tools/zpklink"
 subPackage "modules/pal/audio/openal"
-subPackage "interface"
+subPackage "api"
 
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
-	dependency "bindbc-opengl" version="~>1.0.0"
-	dependency "bindbc-sdl" version="~>1.0.1"
-	dependency "zyeware:pal-audio-openal" version="*"
-	versions "GL_41" "SDL_205" "GL_KHR_debug" "ZW_OpenGL" "ZW_OpenAL"
 }
 
-buildType "generate-interface" {
+buildType "api" {
 	buildOptions "syntaxOnly"
 	buildRequirements "silenceDeprecations"
 	targetType "executable"
-	dflags "-H" "-Hd=interface" "-op" "-allinst"
+	dflags "-H" "-Hd=api" "-op" "-allinst"
 }
 
 versions "ZW_Profiling"

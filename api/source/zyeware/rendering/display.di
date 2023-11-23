@@ -3,7 +3,6 @@ module zyeware.rendering.display;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
-import zyeware.pal.display.opengl.display;
 struct DisplayProperties
 {
 	string title = "ZyeWare Engine";

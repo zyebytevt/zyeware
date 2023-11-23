@@ -1,5 +1,5 @@
-// D import file generated from 'source/zyeware/pal/audio/callbacks.d'
-module zyeware.pal.audio.callbacks;
+// D import file generated from 'source/zyeware/pal/audio/driver.d'
+module zyeware.pal.audio.driver;
 import zyeware.common;
 import zyeware.pal.audio.types;
 struct AudioDriver

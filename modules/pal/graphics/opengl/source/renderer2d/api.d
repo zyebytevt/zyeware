@@ -1,4 +1,4 @@
-module zyeware.pal.renderer.opengl.renderer2d;
+module zyeware.pal.graphics.opengl.renderer2d.api;
 
 import std.traits : isSomeString;
 import std.string : lineSplitter;
@@ -9,32 +9,17 @@ import bmfont : BMFont = Font;
 
 import zyeware.common;
 import zyeware.rendering;
-import zyeware.pal.renderer.callbacks;
-import zyeware.pal.graphicsDriver.callbacks;
-import zyeware.pal.graphicsDriver.opengl;
-import zyeware.pal.graphicsDriver.types;
+import zyeware.pal.graphics.types;
 
-private:
+import zyeware.pal.graphics.opengl.api.api;
+import zyeware.pal.graphics.opengl.renderer2d.types;
+
+package(zyeware.pal.graphics.opengl):
 
 enum maxMaterialsPerDrawCall = 8;
 enum maxTexturesPerBatch = 8;
 enum maxVerticesPerBatch = 20000;
 enum maxIndicesPerBatch = 30000;
-
-struct BatchVertex2D
-{
-    Vector4f position;
-    Vector2f uv;
-    Color color;
-    float textureIndex;
-}
-
-struct GlBuffer
-{
-    uint vao;
-    uint vbo;
-    uint ibo;
-}
 
 struct Batch
 {
@@ -74,9 +59,9 @@ struct Batch
         auto shader = material.shader;
 
         glUseProgram(*(cast(uint*) shader.handle));
-        palGlSetShaderUniformMat4f(shader.handle, "iProjectionView", pProjectionViewMatrix);
-        palGlSetShaderUniform1i(shader.handle, "iTextureCount", cast(int) currentTextureCount);
-        palGlSetShaderUniform1f(shader.handle, "iTime", ZyeWare.upTime.toFloatSeconds);
+        setShaderUniformMat4f(shader.handle, "iProjectionView", pProjectionViewMatrix);
+        setShaderUniform1i(shader.handle, "iTextureCount", cast(int) currentTextureCount);
+        setShaderUniform1f(shader.handle, "iTime", ZyeWare.upTime.toFloatSeconds);
 
         foreach (string parameter; material.parameterList)
         {
@@ -84,11 +69,11 @@ struct Batch
 
             material.getParameter(parameter).match!(
                 (const(void[]) value) {},
-                (int value) { palGlSetShaderUniform1i(shader.handle, parameter, value); },
-                (float value) { palGlSetShaderUniform1f(shader.handle, parameter, value); },
-                (Vector2f value) { palGlSetShaderUniform2f(shader.handle, parameter, value); },
-                (Vector3f value) { palGlSetShaderUniform3f(shader.handle, parameter, value); },
-                (Vector4f value) { palGlSetShaderUniform4f(shader.handle, parameter, value); }
+                (int value) { setShaderUniform1i(shader.handle, parameter, value); },
+                (float value) { setShaderUniform1f(shader.handle, parameter, value); },
+                (Vector2f value) { setShaderUniform2f(shader.handle, parameter, value); },
+                (Vector3f value) { setShaderUniform3f(shader.handle, parameter, value); },
+                (Vector4f value) { setShaderUniform4f(shader.handle, parameter, value); }
             );
         }
 
@@ -262,7 +247,7 @@ void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
 {
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
-    palGlSetRenderFlag(RenderFlag.culling, false);
+    setRenderFlag(RenderFlag.culling, false);
 }
 
 void endScene()
@@ -387,22 +372,4 @@ void drawDString(in dstring text, in Font font, in Vector2f position, in Color m
     ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
 {
     drawStringImpl!dstring(text, font, position, modulate, alignment, material);
-}
-
-public:
-
-Renderer2dDriver generateRenderer2DPALCallbacks()
-{
-    return Renderer2dDriver(
-        &initialize,
-        &cleanup,
-        &beginScene,
-        &endScene,
-        &flush,
-        &drawVertices,
-        &drawRectangle,
-        &drawString,
-        &drawWString,
-        &drawDString
-    );
 }

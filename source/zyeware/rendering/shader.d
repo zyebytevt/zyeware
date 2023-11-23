@@ -40,12 +40,12 @@ public:
     this(ShaderProperties properties)
     {
         mProperties = properties;
-        mNativeHandle = Pal.graphicsDriver.createShader(properties);
+        mNativeHandle = Pal.graphics.api.createShader(properties);
     }
 
     ~this()
     {
-        Pal.graphicsDriver.freeShader(mNativeHandle);
+        Pal.graphics.api.freeShader(mNativeHandle);
     }
 
     const(NativeHandle) handle() pure const nothrow

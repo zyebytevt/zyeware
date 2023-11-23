@@ -1,9 +1,15 @@
-module zyeware.pal.audio.thread;
+// This file is part of the ZyeWare Game Engine, and subject to the terms
+// and conditions defined in the file 'LICENSE.txt', which is part
+// of this source code package.
+//
+// Copyright 2021 ZyeByte
+module zyeware.pal.audio.openal.thread;
 
 import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
 import zyeware.common;
-import zyeware.pal.audio.api;
+import zyeware.pal.audio.openal.api : updateSourceBuffers, pSources;
+import zyeware.pal.audio.openal.types;
 
 class AudioThread : Thread
 {
@@ -28,7 +34,7 @@ protected:
         while (mIsRunning)
         {
             foreach (SourceData* sourceData; pSources)
-                palUpdateSourceBuffers(sourceData);
+                updateSourceBuffers(sourceData);
 
             Thread.sleep(waitTime);
         }
