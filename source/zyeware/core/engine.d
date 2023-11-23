@@ -120,9 +120,11 @@ private static:
 
     ProjectProperties loadApplication(string library)
     {
-        sApplicationLibrary = load(library.toStringz);
-        enforce!CoreException(sApplicationLibrary != invalidHandle, format!"Could not load application library '%s'."(library));
+        void* handle = Runtime.loadLibrary(library);
+        enforce!CoreException(handle, format!"Could not load application library '%s'."(library));
         
+        sApplicationLibrary = SharedLib(handle);
+
         ProjectProperties function() getProjectProperties;
         sApplicationLibrary.bindSymbol(cast(void**) &getProjectProperties, "getProjectProperties");
 

@@ -24,6 +24,9 @@ subPackage "modules/pal/audio/openal"
 subPackage "modules/pal/graphics/opengl"
 subPackage "modules/pal/display/sdl"
 
+dflags "-defaultlib=phobos2" platform="dmd"
+dflags "-link-defaultlib-shared" platform="ldc"
+
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
 
