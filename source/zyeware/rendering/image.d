@@ -5,7 +5,10 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.image;
 
-import imagefmt;
+import std.string : format;
+import std.exception : enforce;
+
+static import gamut;
 
 import zyeware.common;
 import zyeware.rendering;
@@ -96,8 +99,18 @@ public:
 
     static Image load(in ubyte[] data)
     {
-        IFImage img = read_image(data);
+        gamut.Image image;
+        image.loadFromMemory(data);
+        enforce!ResourceException(image.isValid, format!"Failed to load image: %s"(image.errorMessage));
 
-        return new Image(img.buf8, img.c, img.bpc, Vector2i(img.w, img.h));
+        image.setLayout(gamut.LAYOUT_GAPLESS | gamut.LAYOUT_VERT_STRAIGHT);
+
+        int channels, bitsPerChannel;
+        
+        bitsPerChannel = (image.type % 3 + 1) * 8;
+        channels = image.type / 3 + 1;
+
+        return new Image(image.allPixelsAtOnce.dup, cast(ubyte) channels, cast(ubyte) bitsPerChannel,
+            Vector2i(image.width, image.height));
     }
 }
