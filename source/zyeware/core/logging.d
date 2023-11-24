@@ -7,14 +7,12 @@ module zyeware.core.logging;
 
 import core.stdc.stdio : printf;
 import std.stdio : File, stdout;
-import std.datetime : TimeOfDay, Clock;
+import std.datetime : Duration;
 import std.string : fromStringz;
 import std.format : format, sformat;
 import std.traits : isSomeString;
 import std.algorithm : remove, SwapStrategy;
 import std.conv : dtext;
-
-import terminal;
 
 import zyeware.common;
 
@@ -54,7 +52,7 @@ private:
 package(zyeware):
     static void initialize(LogLevel coreLevel, LogLevel clientLevel, LogLevel palLevel)
     {
-        sDefaultLogSink = new TerminalLogSink(new Terminal());
+        sDefaultLogSink = new ColorLogSink();
 
         sCoreLogger = new Logger(sDefaultLogSink, coreLevel, "Core");
         sClientLogger = new Logger(sDefaultLogSink, clientLevel, "Client");
@@ -124,7 +122,7 @@ public:
             auto data = LogSink.LogData(
                 mName,
                 level,
-                cast(TimeOfDay) Clock.currTime,
+                ZyeWare.upTime,
                 text
             );
 
@@ -170,7 +168,7 @@ public:
     {
         dstring loggerName; /// The name of the logger.
         LogLevel level; /// The log level of the message.
-        TimeOfDay time; /// The time this message was sent.
+        Duration uptime; /// The engine uptime this message was sent.
         dstring message; /// The message itself.
     }
 
@@ -199,44 +197,27 @@ public:
 
     override void log(LogData data)
     {
-        mFile.writeln(format!"[ %-8s | %-6s | %-7s ] %s"(data.time, data.loggerName,
-            levelNames[data.level - 1], data.message));
+        mFile.writefln("%3$-7s %2$-6s %1$7.1f | %4$s", data.uptime.toFloatSeconds, data.loggerName,
+            levelNames[data.level - 1], data.message);
     }
 }
 
-/// Represents a sink that writes to a (colour) terminal.
-class TerminalLogSink : LogSink
+/// Represents a sink that writes in color to stdout.
+class ColorLogSink : LogSink
 {
-private:
-    Terminal mTerm;
+    import consolecolors;
 
 public:
-    /// Params:
-    ///   terminal = The terminal to log into.
-    this(Terminal terminal)
-    {
-        mTerm = terminal;
-    }
-
     override void log(LogData data)
     {
-        static immutable Color[] levelColors = [
-            Color.magenta, Color.red, Color.yellow, Color.blue, Color.green,
-            Color.gray
-        ];
-        
-        Foreground(Color.white);
+        static immutable string[] levelColors = ["magenta", "red", "yellow", "blue", "green", "gray"];
 
-        mTerm.writeln(
-            Foreground(Color.white), format!"[ %-8s | %-6s | "(data.time, data.loggerName),
-            
-            Foreground(levelColors[data.level - 1]), format!"%-7s"(levelNames[data.level - 1]),
-            Foreground(Color.reset), " ] ", data.message
-        );
+        cwritefln("<%4$s>%3$-7s</%4$s> %2$-6s %1$7.1f | %5$s", data.uptime.toFloatSeconds, data.loggerName,
+            levelNames[data.level - 1], levelColors[data.level - 1], data.message);
     }
 
     override void flush() 
     {
-        mTerm.file.flush();
+        stdout.flush();
     }
 }

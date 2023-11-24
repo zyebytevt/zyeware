@@ -326,6 +326,8 @@ package(zyeware.core) static:
         version (ZW_Profiling) Profiler.initialize();
         Logger.initialize(parsedArgs.coreLogLevel, parsedArgs.clientLogLevel, parsedArgs.palLogLevel);
 
+        Logger.core.log(LogLevel.info, "ZyeWare Game Engine v%s", engineVersion.toString());
+
         // Initialize crash handler afterwards because it relies on the logger.
         version (linux)
             crashHandler = new LinuxDefaultCrashHandler();

@@ -110,17 +110,22 @@ package(zyeware) static:
 
         // Load core package and check hash if in release mode
         LoadPackageResult core = loadPackage("core.zpk", "core://");
-        /*debug {} else
+        
+        debug {} else
         {
-            enum corePackageMD5 = digest!MD5("test");
+            import std.digest;
+
+            enum corePackageMD5 = digest!MD5(import("core.zpk"));
 
             if (core.hash is null || core.hash != corePackageMD5)
                 throw new VFSException("Core package has been modified, cannot proceed.");
-        }*/
+        }
         
         sProtocols["core"] = core.root;
         sProtocols["res"] = new VFSCombinedDirectory("res://", "res://", []);
         sProtocols["user"] = createUserDir();
+
+        Logger.core.log(LogLevel.info, "Initialized VFS.");
     }
 
     void cleanup() nothrow

@@ -95,7 +95,6 @@ private static:
 package(zyeware.core) static:
     void initialize()
     {
-        //registerDefaultLoaders();
         import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, Font, Material, SpriteFrames, Cursor;
         import zyeware.core.translation : Translation;
         import zyeware.audio : AudioBuffer;
@@ -113,6 +112,8 @@ package(zyeware.core) static:
         register!Translation(&Translation.load);
         register!SpriteFrames(&SpriteFrames.load);
         register!Cursor(&Cursor.load);
+
+        Logger.core.log(LogLevel.debug_, "Initialized default asset loaders.");
     }
 
     void cleanup()
