@@ -5,24 +5,48 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.exception;
 
-private template CreateGenericExceptionType(string name)
+private mixin template GenericExceptionCtor()
 {
-    enum CreateGenericExceptionType = `class ` ~ name ~ ` : Exception
+    this(string message, string file = __FILE__,
+        size_t line = __LINE__, Throwable next = null) pure nothrow
     {
-        this(string message, string file = __FILE__,
-            size_t line = __LINE__, Throwable next = null) pure nothrow
-        {
-            super(message, file, line, next);
-        }
-    }`;
+        super(message, file, line, next);
+    }
 }
 
-mixin(CreateGenericExceptionType!"CoreException");
-mixin(CreateGenericExceptionType!"VFSException");
-mixin(CreateGenericExceptionType!"AudioException");
-mixin(CreateGenericExceptionType!"GraphicsException");
-mixin(CreateGenericExceptionType!"RenderException");
-mixin(CreateGenericExceptionType!"EntityException");
-mixin(CreateGenericExceptionType!"ComponentException");
-mixin(CreateGenericExceptionType!"SystemException");
-mixin(CreateGenericExceptionType!"GUIException");
+class CoreException : Exception
+{
+    mixin GenericExceptionCtor;
+}
+
+class VFSException : Exception
+{
+    mixin GenericExceptionCtor;
+}
+
+class ResourceException : Exception
+{
+    mixin GenericExceptionCtor;
+}
+
+// ===== PAL Exceptions =====
+
+class DisplayException : Exception
+{
+    mixin GenericExceptionCtor;
+}
+
+class AudioException : Exception
+{
+    mixin GenericExceptionCtor;
+}
+
+class GraphicsException : Exception
+{
+    mixin GenericExceptionCtor;
+}
+
+class RenderException : Exception
+{
+    mixin GenericExceptionCtor;
+}

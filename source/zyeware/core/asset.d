@@ -51,6 +51,47 @@ private static:
     LoadFunction[string] sLoaders;
     WeakReference!Object[AssetUID] sCache;
 
+    Object load(in AssetUID uid)
+    {
+        LoadFunction* loader = uid.typeFQN in sLoaders;
+        enforce!CoreException(loader, format!"'%s' was not registered as an asset."(uid.typeFQN));
+
+        // Check if we have it cached, and if so, if it's still alive
+        auto weakref = sCache.get(uid, null).assumeWontThrow;
+        if (weakref && weakref.alive)
+            return weakref.target;
+
+        // Otherwise, load asset
+        if (weakref)
+            Logger.core.log(LogLevel.debug_, "Asset '%s' (%s) got collected, reloading...", uid.path, uid.typeFQN);
+        else
+            Logger.core.log(LogLevel.debug_, "Loading asset '%s' (%s)...", uid.path, uid.typeFQN);
+
+        Object asset = loader.callback(uid.path);
+        assert(asset, format!"Loader for '%s' returned null!"(uid.typeFQN));
+
+        if (loader.cache)
+            sCache[uid] = weakReference(asset);
+
+        return asset;
+    }
+
+    void register(string fqn, LoadCallback callback, bool cache)
+    {
+        sLoaders[fqn] = LoadFunction(callback, cache);
+    }
+
+    bool unregister(string fqn)
+    {
+        return sLoaders.remove(fqn);
+    }
+
+    bool isCached(in AssetUID uid) nothrow
+    {
+        auto weakref = sCache.get(uid, null).assumeWontThrow;
+        return weakref && weakref.alive;
+    }
+
 package(zyeware.core) static:
     void initialize()
     {
@@ -88,37 +129,12 @@ public static:
     ///     T = The type of Asset to load.
     /// 
     /// Returns: The loaded asset.
+    pragma(inline, true)
     T load(T)(string path)
         if (isAsset!T)
         in (path, "Path cannot be null.")
     {
-        enum fqn = fullyQualifiedName!T;
-
-        LoadFunction* loader = fqn in sLoaders;
-        enforce!CoreException(loader, format!"'%s' was not registered as an asset."(fqn));
-
-        path = TranslationManager.remapAssetPath(path);
-
-        auto uid = AssetUID(fqn, path);
-
-        // Check if we have it cached, and if so, if it's still alive
-        auto weakref = sCache.get(uid, null).assumeWontThrow;
-        if (weakref && weakref.alive)
-            return cast(T) weakref.target;
-
-        // Otherwise, load asset
-        if (weakref)
-            Logger.core.log(LogLevel.debug_, "Asset '%s' (%s) got collected, reloading...", uid.path, uid.typeFQN);
-        else
-            Logger.core.log(LogLevel.debug_, "Loading asset '%s' (%s)...", uid.path, uid.typeFQN);
-
-        Object asset = loader.callback(path);
-        assert(asset, format!"Loader for '%s' returned null!"(T.stringof));
-
-        if (loader.cache)
-            sCache[uid] = weakReference(asset);
-
-        return cast(T) asset;
+        return cast(T) load(AssetUID(fullyQualifiedName!T, path));
     }
 
     /// Registers a new asset.
@@ -131,7 +147,7 @@ public static:
         import std.traits : getUDAs;
         auto data = getUDAs!(T, asset)[0];
 
-        sLoaders[fullyQualifiedName!T] = LoadFunction(callback, data.cache);
+        register(fullyQualifiedName!T, callback, data.cache);
     }
 
     /// Unregisters an asset.
@@ -143,7 +159,7 @@ public static:
     bool unregister(T)()
         if (isAsset!T)
     {
-        return sLoaders.remove(fullyQualifiedName!T);
+        return unregister(fullyQualifiedName!T);
     }
 
     /// Checks if the given file is already cached.
@@ -155,8 +171,7 @@ public static:
         if (isAsset!T)
         in (path, "Path cannot be null.")
     {
-        auto weakref = sCache.get(AssetUID(fullyQualifiedName!T, path), null).assumeWontThrow;
-        return weakref && weakref.alive;
+        return isCached(AssetUID(fullyQualifiedName!T, path));
     }
 
     /// Destroys all cached assets.

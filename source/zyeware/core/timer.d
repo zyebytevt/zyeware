@@ -6,7 +6,6 @@
 module zyeware.core.timer;
 
 import core.time;
-import std.exception : collectException;
 import std.typecons : Tuple, Flag, Yes, No;
 import std.algorithm : remove, countUntil;
 

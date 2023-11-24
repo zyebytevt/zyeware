@@ -79,7 +79,7 @@ public:
                         ));
                     }
                     else
-                        throw new Exception("Could not interpret loop point.");
+                        throw new ResourceException("Could not interpret loop point.");
                 }
             }
             catch (Exception ex)

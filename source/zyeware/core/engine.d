@@ -432,6 +432,7 @@ public static:
     /// Params:
     ///     E = The event type to send.
     ///     args = The arguments of the event.
+    pragma(inline, true)
     void emit(E : Event, Args...)(Args args) nothrow
     {
         emit(scoped!E(args).assumeWontThrow);

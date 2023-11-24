@@ -6,7 +6,6 @@
 module zyeware.core.application;
 
 import core.memory : GC;
-import std.exception : enforce, collectException;
 import std.algorithm : min;
 import std.typecons : Nullable;
 
