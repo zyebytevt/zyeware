@@ -5,7 +5,6 @@ import std.string : lineSplitter;
 import std.typecons : Rebindable;
 
 import bindbc.opengl;
-import bmfont : BMFont = Font;
 
 import zyeware.common;
 import zyeware.rendering;
@@ -139,23 +138,23 @@ void createBuffer(ref GlBuffer buffer)
 }
 
 // TODO: Font rendering needs to be improved.
-void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color modulate, ubyte alignment, in Material material)
+void drawStringImpl(T)(in T text, in BitmapFont font, in Vector2f position, in Color modulate, ubyte alignment, in Material material)
     if (isSomeString!T)
 {
     Vector2f cursor = Vector2f.zero;
 
-    if (alignment & Font.Alignment.middle || alignment & Font.Alignment.bottom)
+    if (alignment & BitmapFont.Alignment.middle || alignment & BitmapFont.Alignment.bottom)
     {
         immutable int height = font.getTextHeight(text);
-        cursor.y -= (alignment & Font.Alignment.middle) ? height / 2 : height;
+        cursor.y -= (alignment & BitmapFont.Alignment.middle) ? height / 2 : height;
     }
 
     foreach (T line; text.lineSplitter)
     {
-        if (alignment & Font.Alignment.center || alignment & Font.Alignment.right)
+        if (alignment & BitmapFont.Alignment.center || alignment & BitmapFont.Alignment.right)
         {
             immutable int width = font.getTextWidth(line);
-            cursor.x = -((alignment & Font.Alignment.center) ? width / 2 : width);
+            cursor.x = -((alignment & BitmapFont.Alignment.center) ? width / 2 : width);
         }
         else
             cursor.x = 0;
@@ -169,29 +168,25 @@ void drawStringImpl(T)(in T text, in Font font, in Vector2f position, in Color m
                     break;
 
                 default:
-                    BMFont.Char c = font.bmFont.getChar(line[i]);
-                    if (c == BMFont.Char.init)
+                    BitmapFont.Glyph c = font.getGlyph(line[i]);
+                    if (c == BitmapFont.Glyph.init)
                         break;
 
-                    immutable int kerning = i > 0 ? font.bmFont.getKerning(line[i - 1], line[i]) : 1;
+                    immutable int kerning = i > 0 ? font.getKerning(line[i - 1], line[i]) : 1;
 
-                    if (c.width > 0 && c.height > 0)
+                    if (c.size.x > 0 && c.size.y > 0)
                     {
-                        const(Texture2D) pageTexture = font.getPageTexture(c.page);
-                        immutable Vector2f size = pageTexture.size;
+                        const(Texture2D) pageTexture = font.getPageTexture(c.pageIndex);
 
-                        immutable Rect2f region = Rect2f(cast(float) c.x / size.x, cast(float) c.y / size.y,
-                            cast(float) c.width / size.x, cast(float) c.height / size.y);
-
-                        drawRectangle(Rect2f(0, 0, c.width, c.height), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.xoffset, c.yoffset)), 0)),
-                            modulate, pageTexture, material, region);
+                        drawRectangle(Rect2f(0, 0, c.size.x, c.size.y), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.offset.x, c.offset.y)), 0)),
+                            modulate, pageTexture, material, Rect2f(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
                     }
 
-                    cursor.x += c.xadvance + kerning;
+                    cursor.x += c.advance.x + kerning;
             }
         }
 
-        cursor.y += font.bmFont.common.lineHeight;
+        cursor.y += font.lineHeight;
     }
 }
 
@@ -356,20 +351,20 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
     drawVertices(vertices, indices, transform, texture, material);
 }
 
-void drawString(in string text, in Font font, in Vector2f position, in Color modulate = Color.white,
-    ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
+void drawString(in string text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+    ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!string(text, font, position, modulate, alignment, material);
 }
 
-void drawWString(in wstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
-    ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
+void drawWString(in wstring text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+    ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!wstring(text, font, position, modulate, alignment, material);
 }
 
-void drawDString(in dstring text, in Font font, in Vector2f position, in Color modulate = Color.white,
-    ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
+void drawDString(in dstring text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+    ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!dstring(text, font, position, modulate, alignment, material);
 }

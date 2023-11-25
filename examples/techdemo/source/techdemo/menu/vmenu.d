@@ -9,7 +9,7 @@ import zyeware.audio;
 class VerticalMenu
 {
 protected:
-    const Font mFont;
+    const BitmapFont mFont;
     Entry[] mEntries;
     int mCursor;
 
@@ -27,7 +27,7 @@ public:
         Callback onSelected;
     }
 
-    this(Entry[] entries, in Font font)
+    this(Entry[] entries, in BitmapFont font)
     {
         mEntries = entries;
         mFont = font;

@@ -32,7 +32,7 @@ protected:
 
     OrthographicCamera mUICamera;
     VerticalMenu mMainMenu;
-    Font mFont;
+    BitmapFont mFont;
     AudioSource mBackSoundSource;
     AudioSource mBGM;
     Texture2D mLogoTexture;

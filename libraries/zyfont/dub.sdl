@@ -1,0 +1,6 @@
+name "zyfont"
+description "ZyeWare binary font format de/serializer."
+authors "ZyeByte"
+copyright "Copyright © 2023, ZyeByte"
+license "LGPL-3.0"
+targetType "sourceLibrary"

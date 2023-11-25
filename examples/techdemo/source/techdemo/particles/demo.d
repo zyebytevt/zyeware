@@ -13,7 +13,7 @@ class ParticlesDemo : GameState
 {
 protected:
     OrthographicCamera mUICamera;
-    Font mFont;
+    BitmapFont mFont;
     Particles2D mParticles;
     ParticleRegistrationID mStarParticlesId;
 

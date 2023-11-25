@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/bfnt
+bfnt.so
+bfnt.dylib
+bfnt.dll
+bfnt.a
+bfnt.lib
+bfnt-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

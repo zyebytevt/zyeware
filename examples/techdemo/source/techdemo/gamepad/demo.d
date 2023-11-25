@@ -13,7 +13,7 @@ class GamepadDemo : GameState
 {
 protected:
     OrthographicCamera mUICamera;
-    Font mFont;
+    BitmapFont mFont;
     size_t mCurrentGamepadIndex;
 
 public:

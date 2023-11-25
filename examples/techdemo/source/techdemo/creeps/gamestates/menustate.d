@@ -12,7 +12,7 @@ class CreepsMenuState : GameState
 protected:
     Texture2D mTitleTexture;
     OrthographicCamera mCamera;
-    Font mFont;
+    BitmapFont mFont;
     size_t mIgnoreInputFrames;
 
 public:

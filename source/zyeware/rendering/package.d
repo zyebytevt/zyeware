@@ -11,7 +11,7 @@ public
     import zyeware.rendering.color;
     import zyeware.rendering.cursor;
     import zyeware.rendering.environment;
-    import zyeware.rendering.font;
+    import zyeware.rendering.bitmapfont;
     import zyeware.rendering.framebuffer;
     import zyeware.rendering.image;
     import zyeware.rendering.material;

@@ -10,8 +10,6 @@ import std.string : lineSplitter;
 import std.typecons : Rebindable;
 import std.exception : enforce;
 
-import bmfont : BMFont = Font;
-
 import zyeware.common;
 import zyeware.core.debugging.profiler;
 import zyeware.rendering;
@@ -128,8 +126,8 @@ public static:
     ///     modulate = The color of the text.
     ///     alignment = The alignment of the text.
     ///     material = The material to use. If `null`, uses the default material.
-    void drawString(T)(in T text, in Font font, in Vector2f position, in Color modulate = Color.white,
-        ubyte alignment = Font.Alignment.left | Font.Alignment.top, in Material material = null)
+    void drawString(T)(in T text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+        ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
         if (isSomeString!T)
     {
         static if (is(T == string))

@@ -10,7 +10,7 @@ protected:
     Texture2D mEngineLogo;
     Application mMainApplication;
     OrthographicCamera mCamera;
-    Font mInternalFont;
+    BitmapFont mInternalFont;
     string mVersionString;
 
     Gradient mBackgroundGradient;
@@ -29,7 +29,7 @@ public:
         ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
         mEngineLogo = AssetManager.load!Texture2D("core://textures/engine-logo.png");
-        mInternalFont = AssetManager.load!Font("core://fonts/internal.fnt");
+        mInternalFont = AssetManager.load!BitmapFont("core://fonts/internal.fnt");
         mVersionString = "v" ~ ZyeWare.engineVersion.toString;
 
         mCamera = new OrthographicCamera(-1, 1, 1, -1);
@@ -82,7 +82,7 @@ public:
             Color(1, 1, 1, alpha), mEngineLogo);
 
         Renderer2D.drawString(mVersionString, mInternalFont, Vector2f(-1, -1), Color(1, 1, 1, alpha),
-            Font.Alignment.left | Font.Alignment.bottom);
+            BitmapFont.Alignment.left | BitmapFont.Alignment.bottom);
         
         Renderer2D.endScene();
     }

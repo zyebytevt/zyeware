@@ -95,7 +95,7 @@ private static:
 package(zyeware.core) static:
     void initialize()
     {
-        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, Font, Material, SpriteFrames, Cursor;
+        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, BitmapFont, Material, SpriteFrames, Cursor;
         import zyeware.core.translation : Translation;
         import zyeware.audio : AudioBuffer;
 
@@ -107,7 +107,7 @@ package(zyeware.core) static:
 
         register!Image(&Image.load);
         register!Mesh3D(&Mesh3D.load);
-        register!Font(&Font.load);
+        register!BitmapFont(&BitmapFont.load);
         register!Material(&Material.load);
         register!Translation(&Translation.load);
         register!SpriteFrames(&SpriteFrames.load);
