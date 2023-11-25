@@ -10,3 +10,5 @@ bin/
 .vscode
 dub.selections.json
 out/*
+libraries/api
+api/
