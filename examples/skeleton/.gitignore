@@ -14,4 +14,4 @@ skeleton-test-*
 *.o
 *.obj
 *.lst
-out/skeleton
+out/
