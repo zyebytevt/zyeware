@@ -25,7 +25,7 @@ subPackage "modules/pal/graphics/opengl"
 subPackage "modules/pal/display/sdl"
 
 dflags "-defaultlib=phobos2" platform="dmd"
-dflags "-link-defaultlib-shared" platform="ldc"
+dflags "-link-defaultlib-shared" "--fvisibility=public" platform="ldc"
 
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
