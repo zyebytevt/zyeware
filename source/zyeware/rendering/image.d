@@ -25,9 +25,9 @@ protected:
 public:
     this(in ubyte[] pixels, ubyte channels, ubyte bitsPerChannel, Vector2i size) pure nothrow
         in (size.x > 0 && size.y > 0, "Image must be at least 1x1.")
-        in (pixels && pixels.length == size.x * size.y * channels, "Invalid amount of pixels.")
+        in (pixels && pixels.length == size.x * size.y * channels * (bitsPerChannel / 8), "Invalid amount of pixels.")
         in (channels > 0 && channels <= 4, "Invalid amount of channels.")
-        in (bitsPerChannel > 0 && bitsPerChannel <= 8, "Invalid amount of bits per channel.")
+        in (bitsPerChannel >= 8 && bitsPerChannel <= 32, "Invalid amount of bits per channel.")
     {
         mPixels = pixels;
         mChannels = channels;
@@ -105,10 +105,8 @@ public:
 
         image.setLayout(gamut.LAYOUT_GAPLESS | gamut.LAYOUT_VERT_STRAIGHT);
 
-        int channels, bitsPerChannel;
-        
-        bitsPerChannel = (image.type % 3 + 1) * 8;
-        channels = image.type / 3 + 1;
+        immutable int bitsPerChannel = (image.type % 3 + 1) * 8;
+        immutable int channels = image.type / 3 + 1;
 
         return new Image(image.allPixelsAtOnce.dup, cast(ubyte) channels, cast(ubyte) bitsPerChannel,
             Vector2i(image.width, image.height));
