@@ -30,12 +30,12 @@ private:
     static TimerEntry[] sTimerEntries;
 
 package(zyeware.core):
-    static void tickEntries(FrameTime frameTime)
+    static void tickEntries()
     {
         for (size_t i; i < sTimerEntries.length; ++i)
         {
             TimerEntry* entry = &sTimerEntries[i];
-            entry.timeLeft -= frameTime.deltaTime;
+            entry.timeLeft -= ZyeWare.frameTime.deltaTime;
 
             if (entry.timeLeft <= Duration.zero)
             {

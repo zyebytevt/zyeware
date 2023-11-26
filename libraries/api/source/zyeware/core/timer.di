@@ -16,7 +16,7 @@ final class Timer
 		static TimerEntry[] sTimerEntries;
 		package(zyeware.core)
 		{
-			static void tickEntries(FrameTime frameTime);
+			static void tickEntries();
 			public
 			{
 				alias Callback = void delegate(Timer timer);

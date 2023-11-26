@@ -44,11 +44,11 @@ public:
 		mFont = AssetManager.load!BitmapFont("core://fonts/internal.zfnt");
 	}
 
-	override void tick(in FrameTime frameTime)
+	override void tick()
 	{
 	}
 
-	override void draw(in FrameTime nextFrameTime)
+	override void draw()
 	{
 		Renderer2D.clearScreen(Color.lime);
 

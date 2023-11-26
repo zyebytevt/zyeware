@@ -58,13 +58,13 @@ public:
         super.receive(ev);
     }
 
-    override void tick(in FrameTime frameTime)
+    override void tick()
     {
         if (ZyeWare.upTime.toFloatSeconds > 2.5f)
             defer(() { ZyeWare.application = mMainApplication; });
     }
 
-    override void draw(in FrameTime nextFrameTime)
+    override void draw()
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 

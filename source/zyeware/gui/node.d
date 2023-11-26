@@ -132,11 +132,11 @@ protected:
         return false;
     }
 
-    void customTick(in FrameTime frameTime)
+    void customTick()
     {
     }
 
-    void customDraw(in FrameTime nextFrameTime) const
+    void customDraw() const
     {
     }
 
@@ -167,15 +167,15 @@ public:
         updateArea(queryParentArea());
     }
 
-    final void tick(in FrameTime frameTime)
+    final void tick()
     {
         if (mMustUpdate)
             updateArea(queryParentArea());
         
-        customTick(frameTime);
+        customTick();
 
         foreach (node; mChildren)
-            node.tick(frameTime);
+            node.tick();
     }
     
     final void draw(in FrameTime nextFrameTime) const

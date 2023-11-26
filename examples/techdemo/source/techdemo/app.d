@@ -31,11 +31,11 @@ public:
 	{
 	}
 
-	override void tick(in FrameTime frameTime)
+	override void tick()
 	{
 	}
 
-	override void draw(in FrameTime nextFrameTime)
+	override void draw()
 	{
 	}
 }

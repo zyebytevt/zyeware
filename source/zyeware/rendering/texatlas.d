@@ -12,51 +12,22 @@ struct TextureAtlas
 {
 private:
     Texture2D mTexture;
-    Rect2f mRegion = Rect2f(0, 0, 1, 1);
-
     size_t mHFrames, mVFrames;
-    size_t mFrame;
 
 public:
-    this(Texture2D texture) pure nothrow
-    {
-        mTexture = texture;
-        mRegion = Rect2f(0, 0, 1, 1);
-    }
-
-    this(Texture2D texture, Rect2f region) pure nothrow
-    {
-        mTexture = texture;
-        mRegion = region;
-    }
-
-    this(Texture2D texture, size_t hFrames, size_t vFrames, size_t frame) pure nothrow
+    this(Texture2D texture, size_t hFrames, size_t vFrames) pure nothrow
     {
         mTexture = texture;
         mHFrames = hFrames;
         mVFrames = vFrames;
-
-        this.frame = frame;
     }
 
-    void region(in Rect2f value) pure nothrow
+    Rect2f getRegionForFrame(size_t frame) pure nothrow
     {
-        mRegion = value;
-    }
+        immutable float x1 = cast(float) (frame % mHFrames) / mHFrames;
+        immutable float y1 = cast(float) (frame / mHFrames) / mVFrames;
 
-    Rect2f region() pure const nothrow
-    {
-        return mRegion;
-    }
-
-    void frame(size_t value) pure nothrow
-    {
-        mFrame = value;
-
-        immutable float x1 = cast(float) (mFrame % mHFrames) / mHFrames;
-        immutable float y1 = cast(float) (mFrame / mHFrames) / mVFrames;
-
-        mRegion = Rect2f(
+        return Rect2f(
             x1,
             y1,
             1.0f / mHFrames,
@@ -64,9 +35,12 @@ public:
         );
     }
 
-    size_t frame() pure const nothrow
+    Vector2f spriteSize() pure nothrow
     {
-        return mFrame;
+        return Vector2f(
+            mTexture.size.x / mHFrames,
+            mTexture.size.y / mVFrames
+        );
     }
 
     inout(Texture2D) texture() pure inout nothrow

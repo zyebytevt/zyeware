@@ -50,15 +50,15 @@ public:
         }
     }
 
-    void tick(in FrameTime frameTime)
+    void tick()
     {
-        immutable float delta = frameTime.deltaTime.toFloatSeconds;
+        immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
 
         foreach (ParticleContainer* particles; mParticles.values)
         {
             for (size_t i; i < particles.activeParticlesCount; ++i)
             {
-                particles.lifeTimes[i] -= frameTime.deltaTime;
+                particles.lifeTimes[i] -= ZyeWare.frameTime.deltaTime;
                 if (particles.lifeTimes[i] <= Duration.zero)
                 {
                     particles.remove(i);

@@ -12,8 +12,8 @@ abstract class Application
 	public
 	{
 		abstract void initialize();
-		abstract void tick(in FrameTime frameTime);
-		abstract void draw(in FrameTime nextFrameTime);
+		abstract void tick();
+		abstract void draw();
 		void cleanup();
 		void receive(in Event ev);
 	}
@@ -29,8 +29,8 @@ class GameStateApplication : Application
 			public
 			{
 				override void receive(in Event ev);
-				override void tick(in FrameTime frameTime);
-				override void draw(in FrameTime nextFrameTime);
+				override void tick();
+				override void draw();
 				void changeState(GameState state);
 				void pushState(GameState state);
 				void popState();

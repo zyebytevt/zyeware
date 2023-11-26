@@ -16,8 +16,8 @@ abstract class GameState
 				pure nothrow this(GameStateApplication application);
 				public
 				{
-					abstract void tick(in FrameTime frameTime);
-					abstract void draw(in FrameTime nextFrameTime);
+					abstract void tick();
+					abstract void draw();
 					void onAttach(bool firstTime);
 					void onDetach();
 					void receive(in Event ev);

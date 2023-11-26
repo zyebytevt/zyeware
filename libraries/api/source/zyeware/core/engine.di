@@ -65,8 +65,9 @@ struct ZyeWare
 		SharedLib sApplicationLibrary;
 		Display sMainDisplay;
 		Application sApplication;
-		Duration sFrameTime;
+		Duration sWaitTime;
 		Duration sUpTime;
+		FrameTime sFrameTime;
 		RandomNumberGenerator sRandom;
 		Framebuffer sMainFramebuffer;
 		Rect2i sFramebufferArea;
@@ -86,7 +87,7 @@ struct ZyeWare
 		void runMainLoop();
 		void createFramebuffer();
 		nothrow void recalculateFramebufferArea();
-		void drawFramebuffer(in FrameTime nextFrameTime);
+		void drawFramebuffer();
 		ParsedArgs parseCmdArgs(string[] args);
 		package(zyeware.core) static
 		{
@@ -119,6 +120,7 @@ struct ZyeWare
 				void targetFrameRate(int fps);
 				nothrow float timeScale();
 				nothrow void timeScale(float value);
+				nothrow FrameTime frameTime();
 				nothrow RandomNumberGenerator random();
 				nothrow Display mainDisplay();
 				nothrow Vector2i framebufferSize();

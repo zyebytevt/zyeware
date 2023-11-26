@@ -39,11 +39,11 @@ public:
         Logger.client.log(LogLevel.debug_, "%(%s, %)", (cast(RectangleShape2D) mSecondShape).vertices);
     }
 
-    override void tick(in FrameTime frameTime)
+    override void tick()
     {
-        DemoMenu.background.tick(frameTime.deltaTime);
+        DemoMenu.background.tick();
 
-        immutable float delta = frameTime.deltaTime.toFloatSeconds;
+        immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
 
         Vector2f position = mSecondTransform.position;
         float rotation = mSecondTransform.rotation;

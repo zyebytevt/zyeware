@@ -32,10 +32,10 @@ public:
     ///
     /// Params:
     ///     frameTime = The time between this frame and the last.
-    abstract void tick(in FrameTime frameTime);
+    abstract void tick();
 
     /// Override this function to perform rendering.
-    abstract void draw(in FrameTime nextFrameTime);
+    abstract void draw();
     
     /// Called when this game state gets attached to a `GameStateApplication`.
     ///

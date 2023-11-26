@@ -22,8 +22,8 @@ package(zyeware.core) final class IntroApplication : Application
 				override void initialize();
 				override void cleanup();
 				override void receive(in Event ev);
-				override void tick(in FrameTime frameTime);
-				override void draw(in FrameTime nextFrameTime);
+				override void tick();
+				override void draw();
 			}
 		}
 	}

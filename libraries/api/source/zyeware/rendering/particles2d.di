@@ -23,7 +23,7 @@ class Particles2D
 			ParticleRegistrationID registerType(in ParticleProperties2D type, size_t maxParticles);
 			nothrow void unregisterType(ParticleRegistrationID id);
 			void emit(ParticleRegistrationID id, Vector2f position, size_t amount);
-			void tick(in FrameTime frameTime);
+			void tick();
 			void draw(in FrameTime nextFrameTime);
 			pure nothrow size_t count();
 		}

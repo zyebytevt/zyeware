@@ -95,8 +95,9 @@ private static:
     Display sMainDisplay;
     Application sApplication;
 
-    Duration sFrameTime;
+    Duration sWaitTime;
     Duration sUpTime;
+    FrameTime sFrameTime;
     RandomNumberGenerator sRandom;
 
     Framebuffer sMainFramebuffer;
@@ -161,18 +162,18 @@ private static:
 
             immutable MonoTime current = MonoTime.currTime;
             immutable Duration elapsed = current - previous;
-            immutable frameTime = FrameTime(dur!"hnsecs"(cast(long) (sFrameTime.total!"hnsecs" * sTimeScale)), sFrameTime);
+            sFrameTime = FrameTime(dur!"hnsecs"(cast(long) (sWaitTime.total!"hnsecs" * sTimeScale)), sWaitTime);
 
             previous = current;
             lag += elapsed;
 
-            while (lag >= sFrameTime)
+            while (lag >= sWaitTime)
             {
-                Timer.tickEntries(frameTime);
-                sApplication.tick(frameTime);
+                Timer.tickEntries();
+                sApplication.tick();
                 
-                lag -= sFrameTime;
-                sUpTime += sFrameTime;
+                lag -= sWaitTime;
+                sUpTime += sWaitTime;
             }
 
             InputManager.tick();
@@ -185,8 +186,7 @@ private static:
                 recalculateFramebufferArea();
             }
 
-            immutable nextFrameTime = FrameTime(dur!"hnsecs"(cast(long) (lag.total!"hnsecs" * sTimeScale)), lag);
-            drawFramebuffer(nextFrameTime);
+            drawFramebuffer();
 
             // Call all registered deferred functions at the end of the frame.
             {
@@ -249,7 +249,7 @@ private static:
         sFramebufferArea = Rect2i(finalPos, finalPos + finalSize);
     }
 
-    void drawFramebuffer(in FrameTime nextFrameTime)
+    void drawFramebuffer()
     {
         sMainDisplay.update();
 
@@ -257,7 +257,7 @@ private static:
         Pal.graphics.api.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
         
         Pal.graphics.api.setRenderTarget(sMainFramebuffer.handle);
-        sApplication.draw(nextFrameTime);
+        sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
         Pal.graphics.api.clearScreen(Color.black);
@@ -538,7 +538,7 @@ public static:
     void targetFrameRate(int fps) 
         in (fps > 0, "Target FPS must be greater than 0.")
     {
-        sFrameTime = dur!"msecs"(cast(int) (1000f / cast(float) fps));
+        sWaitTime = dur!"msecs"(cast(int) (1000f / cast(float) fps));
     }
 
     /// The current time scale. This controls the speed of the game, assuming
@@ -555,6 +555,11 @@ public static:
         in (value != float.nan, "Timescale value was nan.")
     {
         sTimeScale = value;
+    }
+
+    FrameTime frameTime() nothrow
+    {
+        return sFrameTime;
     }
 
     RandomNumberGenerator random() nothrow

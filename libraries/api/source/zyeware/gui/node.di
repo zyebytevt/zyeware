@@ -41,8 +41,8 @@ version (none)
 			final nothrow void checkForCursorEvent(in Event ev);
 			nothrow void updateArea(Rect2f parentArea);
 			pure nothrow bool customReceive(in Event ev);
-			void customTick(in FrameTime frameTime);
-			const void customDraw(in FrameTime nextFrameTime);
+			void customTick();
+			const void customDraw();
 			nothrow void arrangeChildren();
 			nothrow void onCursorEnter();
 			nothrow void onCursorExit();
@@ -53,7 +53,7 @@ version (none)
 			{
 				bool visible = true;
 				this(GUINode parent, Sides anchor, Sides margin, string name = null);
-				final void tick(in FrameTime frameTime);
+				final void tick();
 				final const void draw(in FrameTime nextFrameTime);
 				final nothrow bool receive(in Event ev);
 				final pure nothrow GUINode findByName(string name);

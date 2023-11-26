@@ -39,10 +39,10 @@ public:
     abstract void initialize();
 
     /// Override this method to perform logic on every frame.
-    abstract void tick(in FrameTime frameTime);
+    abstract void tick();
 
     /// Override this method to perform rendering.
-    abstract void draw(in FrameTime nextFrameTime);
+    abstract void draw();
 
     /// Destroys the application.
     void cleanup() {}
@@ -79,16 +79,16 @@ public:
             currentState.receive(ev);
     }
 
-    override void tick(in FrameTime frameTime)
+    override void tick()
     {
         if (hasState)
-            currentState.tick(frameTime);
+            currentState.tick();
     }
 
-    override void draw(in FrameTime nextFrameTime)
+    override void draw()
     {
         if (hasState)
-            currentState.draw(nextFrameTime);
+            currentState.draw();
     }
 
     /// Change the current state to the given one.
