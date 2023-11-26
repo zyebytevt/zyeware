@@ -1,14 +1,9 @@
 .dub
-docs.json
-__dummy.html
-docs/
-bin/
+out/
 *.exe
 *.o
+*.so
 *.lst
 *.a
 .vscode
 dub.selections.json
-out/*
-libraries/api
-api/

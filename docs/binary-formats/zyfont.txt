@@ -1,0 +1,33 @@
+Magic ZFNT1
+
+pstring name;
+short size;
+bool isBold;
+bool isItalic;
+short lineHeight;
+ubyte[4] padding; // (up, right, down, left)
+ubyte[2] spacing; // (horizontal, vertical)
+
+uint charCount;
+{
+	dchar id;
+    ubyte pageIndex;
+    float u1, v1; // top-left of char in page
+    float u2, v2; // bottom-right of char in page
+    short xoffset, yoffset; // offset when drawing char to screen
+    short xadvance, yadvance; // advancement of current position after drawing char
+}
+
+uint kerningCount;
+{
+    ulong kerningId; // calculated by (first << 32 | second)
+    short amount;
+}
+
+ushort pageCount;
+{
+    ubyte channels;
+    ubyte bitsPerChannel;
+    int xsize, ysize;
+    ubyte[channels * (bitsPerChannel / 8) * xsize * ysize] pixels;
+}
