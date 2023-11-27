@@ -11,14 +11,19 @@ import zyeware.rendering;
 		Animation[string] mAnimations;
 		public
 		{
+			struct Frame
+			{
+				size_t index;
+				Duration duration;
+			}
 			struct Animation
 			{
-				size_t startFrame;
-				size_t endFrame;
-				Duration frameInterval;
+				string name;
+				Frame[] frames;
 				bool isLooping;
 				bool hFlip;
 				bool vFlip;
+				Duration duration() pure const nothrow;
 			}
 			pure nothrow void addAnimation(string name, Animation animation);
 			pure nothrow void removeAnimation(string name);
