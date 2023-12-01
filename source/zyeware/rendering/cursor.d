@@ -1,7 +1,10 @@
 module zyeware.rendering.cursor;
 
+import std.conv : to;
+
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.utils.tokenizer;
 
 @asset(Yes.cache)
 final class Cursor
@@ -29,11 +32,20 @@ public:
 
     static Cursor load(string path)
     { 
-        auto document = ZDLDocument.load(path);
+        auto t = Tokenizer(["image", "hotspot"]);
+        t.load(path);
+
+        t.expect(Token.Type.keyword, "image", "Expected image declaration.");
+        immutable string imagePath = t.expect(Token.Type.string, null).value;
+
+        t.expect(Token.Type.keyword, "hotspot", "Expected hotspot declaration.");
+        immutable int x = t.expect(Token.Type.integer, null).value.to!int;
+        t.expect(Token.Type.delimiter, ",");
+        immutable int y = t.expect(Token.Type.integer, null).value.to!int;
 
         return new Cursor(
-            AssetManager.load!Image(document.root.image.expectValue!ZDLString),
-            document.root.hotspot.expectValue!Vector2i
+            AssetManager.load!Image(imagePath),
+            Vector2i(x, y)
         );
     }
 }

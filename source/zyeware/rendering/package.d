@@ -22,7 +22,7 @@ public
     import zyeware.rendering.renderer3d;
     import zyeware.rendering.shader;
     import zyeware.rendering.sky;
-    import zyeware.rendering.spriteframes;
+    import zyeware.rendering.frameanim;
     import zyeware.rendering.terrain;
     import zyeware.rendering.texatlas;
     import zyeware.rendering.texture;

@@ -95,7 +95,7 @@ private static:
 package(zyeware.core) static:
     void initialize()
     {
-        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, BitmapFont, Material, SpriteFrames, Cursor;
+        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, BitmapFont, Material, FrameAnimations, Cursor;
         import zyeware.core.translation : Translation;
         import zyeware.audio : AudioBuffer;
 
@@ -110,7 +110,7 @@ package(zyeware.core) static:
         register!BitmapFont(&BitmapFont.load);
         register!Material(&Material.load);
         register!Translation(&Translation.load);
-        register!SpriteFrames(&SpriteFrames.load);
+        register!FrameAnimations(&FrameAnimations.load);
         register!Cursor(&Cursor.load);
 
         Logger.core.log(LogLevel.debug_, "Initialized default asset loaders.");

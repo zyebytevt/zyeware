@@ -226,7 +226,7 @@ public:
     static Translation load(string path)
         in (path, "Path cannot be null.")
     {
-        auto document = ZDLDocument.load(path);
+        /*auto document = ZDLDocument.load(path);
 
         immutable string locale = document.root.locale.expectValue!ZDLString.to!string;
         auto translation = new Translation(locale);
@@ -243,6 +243,7 @@ public:
         }
 
         translation.optimize();
-        return translation;
+        return translation;*/
+        return null;
     }
 }

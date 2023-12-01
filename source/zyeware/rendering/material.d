@@ -10,7 +10,7 @@ import std.string : format, startsWith;
 import std.exception : enforce;
 import std.typecons : Rebindable;
 import std.conv : to;
-import std.string : split;
+import std.string : split, format;
 import std.algorithm : map, filter, sort, uniq;
 import std.array : array;
 
@@ -18,6 +18,7 @@ import inmath.linalg;
 
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.utils.tokenizer;
 
 @asset(Yes.cache)
 class Material
@@ -158,47 +159,94 @@ public:
     static Material load(string path)
         in (path, "Path cannot be null.")
     {
-        auto document = ZDLDocument.load(path);
+        auto t = Tokenizer(["shader", "extends", "parameter", "texture"]);
+        t.load(path);
 
-        Material material;
-
+        bool isRoot;
+        string resourcePath;
         Parameter[string] parameters;
         Texture[] textures;
-        // Parse all parameters first
 
-        if (const(ZDLNode*) parametersNode = document.root.getNode("parameters"))
+        if (t.consume(Token.Type.keyword, "shader"))
         {
-            foreach (string name, const ref ZDLNode value; parametersNode.expectValue!ZDLMap)
-            {
-                if (value.checkValue!ZDLInteger)
-                    parameters[name] = Parameter(value.expectValue!ZDLInteger.to!int);
-                else if (value.checkValue!ZDLFloat)
-                    parameters[name] = Parameter(value.expectValue!ZDLFloat.to!float);
-                else if (value.checkValue!Vector2f)
-                    parameters[name] = Parameter(value.expectValue!Vector2f);
-                else if (value.checkValue!Vector3f)
-                    parameters[name] = Parameter(value.expectValue!Vector3f);
-                else if (value.checkValue!Vector4f)
-                    parameters[name] = Parameter(value.expectValue!Vector4f);
-                else
-                    throw new RenderException(format!"Unknown parameter type for '%s'."(name));
-            }
+            isRoot = true;
+            resourcePath = t.expect(Token.Type.string, null, "Expected path to shader.").value;
         }
-
-        if (const(ZDLNode*) texturesNode = document.root.getNode("textures"))
+        else if (t.consume(Token.Type.keyword, "extends"))
         {
-            foreach (const ref ZDLNode textureNode; texturesNode.expectValue!ZDLList)
+            isRoot = false;
+            resourcePath = t.expect(Token.Type.string, null, "Expected path to material.").value;
+        }
+        else
+            throw new ResourceException("Expected 'shader' or 'extends' as first instruction.");
+
+        while (!t.isEof)
+        {
+            if (t.consume(Token.Type.keyword, "parameter"))
             {
-                immutable string type = textureNode.type.expectValue!ZDLString.to!string;
+                immutable string name = t.expect(Token.Type.identifier, null, "Expected parameter name.").value;
+
+                if (t.consume(Token.Type.delimiter, "("))
+                {
+                    string[] values;
+                    while (!t.isEof)
+                    {
+                        values ~= t.get().value;
+                        if (t.consume(Token.Type.delimiter, ")"))
+                            break;
+                        else
+                            t.expect(Token.Type.delimiter, ",", "Expected comma between values.");
+                    }
+                    
+                    switch (values.length)
+                    {
+                    case 2:
+                        parameters[name] = Parameter(Vector2f(values[0].to!float, values[1].to!float));
+                        break;
+                    
+                    case 3:
+                        parameters[name] = Parameter(Vector3f(values[0].to!float, values[1].to!float, values[2].to!float));
+                        break;
+
+                    case 4:
+                        parameters[name] = Parameter(Vector4f(values[0].to!float, values[1].to!float, values[2].to!float, values[3].to!float));
+                        break;
+
+                    default:
+                        throw new RenderException(format!"Invalid number of values for vector '%s'."(name));
+                    }
+                }
+                else
+                {
+                    Token tk = t.get();
+
+                    switch (tk.type)
+                    {
+                    case Token.Type.integer:
+                        parameters[name] = Parameter(tk.value.to!int);
+                        break;
+                    
+                    case Token.Type.decimal:
+                        parameters[name] = Parameter(tk.value.to!float);
+                        break;
+
+                    default:
+                        throw new RenderException(format!"Invalid parameter value for '%s'."(name));
+                    }
+                }
+            }
+            else if (t.consume(Token.Type.keyword, "texture"))
+            {
+                immutable string type = t.expect(Token.Type.identifier, null, "Expected texture type.").value;
 
                 switch (type)
                 {
-                case "2d":
-                    textures ~= AssetManager.load!Texture2D(textureNode.path.expectValue!ZDLString.to!string);
+                case "two":
+                    textures ~= AssetManager.load!Texture2D(t.expect(Token.Type.string, null, "Expected path to texture.").value);
                     break;
 
                 case "cube":
-                    textures ~= AssetManager.load!TextureCubeMap(textureNode.path.expectValue!ZDLString.to!string);
+                    textures ~= AssetManager.load!TextureCubeMap(t.expect(Token.Type.string, null, "Expected path to texture.").value);
                     break;
 
                 case "null":
@@ -209,19 +257,16 @@ public:
                     throw new RenderException(format!"Unknown texture type '%s'."(type));
                 }
             }
+            else
+                throw new ResourceException(format!"Unknown instruction '%s'."(t.get().value));
         }
 
+        Material material;
         // Check if it either inherits a material or is root
-        if (const(ZDLNode*) shaderNode = document.root.getNode("shader"))
-        {
-            material = new Material(AssetManager.load!Shader(shaderNode.expectValue!ZDLString.to!string), textures.length);
-        }
-        else if (const(ZDLNode*) extendsNode = document.root.getNode("extends"))
-        {
-            material = new Material(AssetManager.load!Material(extendsNode.expectValue!ZDLString.to!string));
-        }
+        if (isRoot)
+            material = new Material(AssetManager.load!Shader(resourcePath), textures.length);
         else
-            throw new RenderException(format!"Material '%s': Need either 'shader' or 'extends'."(path));
+            material = new Material(AssetManager.load!Material(resourcePath));
 
         material.mParameters = parameters;
         foreach (size_t index, Texture texture; textures)

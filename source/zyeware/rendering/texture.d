@@ -6,10 +6,13 @@
 module zyeware.rendering.texture;
 
 import std.conv : to;
+import std.string : format;
+import std.algorithm : countUntil;
 
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
+import zyeware.utils.tokenizer;
 
 struct TextureProperties
 {
@@ -90,21 +93,7 @@ public:
         Image img = AssetManager.load!Image(path);
 
         if (VFS.hasFile(path ~ ".props")) // Properties file exists
-        {
-            try
-            {
-                auto document = ZDLDocument.load(path ~ ".props");
-
-                properties.minFilter = getNodeValue!ZDLString(document.root, "minFilter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = getNodeValue!ZDLString(document.root, "magFilter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = getNodeValue!ZDLString(document.root, "wrapS", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = getNodeValue!ZDLString(document.root, "wrapT", "repeat").to!(TextureProperties.WrapMode);
-            }
-            catch (Exception ex)
-            {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
-            }
-        }
+            parseTextureProperties(path ~ ".props", properties);
 
         return new Texture2D(img, properties);
     }
@@ -143,35 +132,59 @@ public:
     static TextureCubeMap load(string path)
     {
         TextureProperties properties;
+        Image[6] images;
 
-        auto document = ZDLDocument.load(path);
-        
-        Image[6] images = [
-            AssetManager.load!Image(document.root.x.positive.expectValue!ZDLString),
-            AssetManager.load!Image(document.root.x.negative.expectValue!ZDLString),
-            AssetManager.load!Image(document.root.y.positive.expectValue!ZDLString),
-            AssetManager.load!Image(document.root.y.negative.expectValue!ZDLString),
-            AssetManager.load!Image(document.root.z.positive.expectValue!ZDLString),
-            AssetManager.load!Image(document.root.z.negative.expectValue!ZDLString),
-        ];
+        immutable string[] sides = ["right", "left", "top", "bottom", "front", "back"];
+        auto t = Tokenizer(sides);
+        t.load(path);
 
-        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+        while (!t.isEof)
         {
-            try
-            {
-                document = ZDLDocument.load(path ~ ".props");
+            immutable string side = t.expect(Token.Type.keyword, null, "Expected side definition.").value;
+            immutable string imagePath = t.expect(Token.Type.string, null, "Expected image path.").value;
 
-                properties.minFilter = getNodeValue!ZDLString(document.root, "minFilter", "nearest").to!(TextureProperties.Filter);
-                properties.magFilter = getNodeValue!ZDLString(document.root, "magFilter", "nearest").to!(TextureProperties.Filter);
-                properties.wrapS = getNodeValue!ZDLString(document.root, "wrapS", "repeat").to!(TextureProperties.WrapMode);
-                properties.wrapT = getNodeValue!ZDLString(document.root, "wrapT", "repeat").to!(TextureProperties.WrapMode);
-            }
-            catch (Exception ex)
-            {
-                Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
-            }
+            immutable size_t sideIndex = sides.countUntil(side);
+            images[sideIndex] = AssetManager.load!Image(imagePath);
         }
 
+        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+            parseTextureProperties(path ~ ".props", properties);
+
         return new TextureCubeMap(images, properties);
+    }
+}
+
+private void parseTextureProperties(string path, out TextureProperties properties)
+{
+    try
+    {
+        auto t = Tokenizer(["filter", "wrap"]);
+        t.load(path);
+
+        while (!t.isEof)
+        {
+            if (t.consume(Token.Type.keyword, "filter"))
+            {
+                t.expect(Token.Type.identifier, "min", "Expected min filter declaration.");
+                properties.minFilter = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.Filter);
+                t.expect(Token.Type.delimiter, ",");
+                t.expect(Token.Type.identifier, "mag", "Expected mag filter declaration.");
+                properties.magFilter = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.Filter);
+            }
+            else if (t.consume(Token.Type.keyword, "wrap"))
+            {
+                t.expect(Token.Type.identifier, "s", "Expected wrap s declaration.");
+                properties.wrapS = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.WrapMode);
+                t.expect(Token.Type.delimiter, ",");
+                t.expect(Token.Type.identifier, "t", "Expected wrap t declaration.");
+                properties.wrapT = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.WrapMode);
+            }
+            else
+                throw new ResourceException(format!"Unexpected token '%s' in texture properties file."(t.get().value));
+        }
+    }
+    catch (Exception ex)
+    {
+        Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
     }
 }

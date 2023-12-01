@@ -5,10 +5,13 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.buffer;
 
+import std.conv : to;
+
 import zyeware.common;
 import zyeware.audio;
 import zyeware.pal;
 import zyeware.pal.audio.types;
+import zyeware.utils.tokenizer;
 
 /// Contains an encoded audio segment, plus various information like
 /// loop point etc.
@@ -65,21 +68,35 @@ public:
         {
             try
             {
-                auto document = ZDLDocument.load(path ~ ".props");
+                auto t = Tokenizer(["loop"]);
+                t.load(path ~ ".props");
 
-                if (const(ZDLNode*) node = document.root.getNode("loopPoint"))
+                while (!t.isEof)
                 {
-                    if (node.getNode("sample"))
-                        properties.loopPoint = LoopPoint(cast(int) node.sample.expectValue!ZDLInteger);
-                    else if (node.getNode("pattern"))
+                    if (t.consume(Token.Type.keyword, "loop"))
                     {
-                        properties.loopPoint = LoopPoint(ModuleLoopPoint(
-                            cast(int) node.pattern.expectValue!ZDLInteger,
-                            cast(int) node.row.expectValue!ZDLInteger
-                        ));
+                        if (t.consume(Token.Type.identifier, "sample"))
+                        {
+                            properties.loopPoint = LoopPoint(t.expect(Token.Type.integer, null,
+                                "Expected integer as sample.").value.to!int);
+                        }
+                        else if (t.consume(Token.Type.identifier, "module"))
+                        {
+                            immutable int pattern = t.expect(Token.Type.integer, null,
+                                "Expected integer as pattern.").value.to!int;
+                            
+                            t.expect(Token.Type.delimiter, ",", "Expected comma in loop point.");
+                            
+                            immutable int row = t.expect(Token.Type.integer, null,
+                                "Expected integer as row.").value.to!int;
+
+                            properties.loopPoint = LoopPoint(ModuleLoopPoint(pattern, row));
+                        }
+                        else
+                            throw new ResourceException("Could not interpret loop point.");
                     }
                     else
-                        throw new ResourceException("Could not interpret loop point.");
+                        throw new ResourceException("Unknown token '%s' in properties file.", t.get().value);
                 }
             }
             catch (Exception ex)

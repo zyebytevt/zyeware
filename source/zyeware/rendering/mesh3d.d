@@ -15,6 +15,7 @@ import inmath.linalg;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
+import zyeware.utils.tokenizer;
 
 interface Mesh
 {
@@ -100,10 +101,11 @@ public:
         {
             try
             {
-                auto document = ZDLDocument.load(path ~ ".props");
+                auto t = Tokenizer(["material"]);
+                t.load(path ~ ".props");
 
-                if (string materialPath = getNodeValue!ZDLString(document.root, "material", null).to!string)
-                    mesh.mMaterial = AssetManager.load!Material(materialPath);
+                t.expect(Token.Type.keyword, "material", "Expected material declaration.");
+                mesh.mMaterial = AssetManager.load!Material(t.expect(Token.Type.string, null, "Expected path.").value);
             }
             catch (Exception ex)
             {

@@ -9,12 +9,14 @@ import std.exception : enforce;
 import std.regex : ctRegex, matchAll;
 import std.typecons : Tuple;
 import std.array : replaceInPlace;
+import std.algorithm : countUntil;
 
 import inmath.linalg;
 
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
+import zyeware.utils.tokenizer;
 
 struct ShaderProperties
 {
@@ -95,8 +97,6 @@ public:
             return mutableSource.idup;
         }
 
-        auto document = ZDLDocument.load(path);
-
         ShaderProperties properties;
 
         void loadShader(string filePath, ShaderProperties.ShaderType type)
@@ -108,22 +108,17 @@ public:
             properties.sources[type] = parseIncludes(shaderFile.readAll!string);
         }
 
-        foreach (string name, const ref ZDLNode value; document.root.opengl.expectValue!ZDLMap)
+        immutable string[] shaderTypes = ["vertex", "fragment", "geometry", "compute"];
+        auto t = Tokenizer(shaderTypes);
+        t.load(path);
+
+        while (!t.isEof)
         {
-            switch (name)
-            {
-            case "vertex":
-                loadShader(value.expectValue!ZDLString, ShaderProperties.ShaderType.vertex);
-                break;
+            immutable string type = t.expect(Token.Type.keyword, null, "Expected shader type.").value;
+            immutable shaderType = cast(ShaderProperties.ShaderType) shaderTypes.countUntil(type);
+            immutable string shaderPath = t.expect(Token.Type.string, null, "Expected shader path.").value;
 
-            case "fragment":
-                loadShader(value.expectValue!ZDLString, ShaderProperties.ShaderType.fragment);
-                break;
-
-            default:
-                Logger.core.log(LogLevel.warning, "'%s': Unknown node '%s'.",
-                    path, name);
-            }
+            loadShader(shaderPath, shaderType);
         }
 
         return new Shader(properties);

@@ -4,6 +4,29 @@ import std.array : appender;
 import std.ascii : isAlpha, isAlphaNum, isWhite, isDigit;
 import std.string : indexOf, format;
 import std.algorithm : canFind;
+import std.typecons : Rebindable;
+
+import zyeware.common;
+
+class TokenizerException : Exception
+{
+protected:
+    Token mToken;
+
+public:
+    this(string message, Token token, string file = __FILE__,
+        size_t line = __LINE__, Throwable next = null) pure nothrow
+    {
+        super(message, file, line, next);
+    
+        mToken = token;
+    }
+
+    const(Token) token() const pure nothrow
+    {
+        return mToken;
+    }
+}
 
 struct Token
 {
@@ -21,8 +44,9 @@ struct Token
         identifier,
         keyword,
         delimiter,
-        number,
-        string_,
+        integer,
+        decimal,
+        string,
     }
 
     Position sourcePosition;
@@ -34,7 +58,7 @@ struct Tokenizer
 {
 private:
     string mInput;
-    string[] mKeywords;
+    Rebindable!(const(string[])) mKeywords;
     size_t mCursor;
     Token mCurrent;
     Token.Position mCurrentPosition;
@@ -139,7 +163,7 @@ private:
 
             advance();
 
-            mCurrent = Token(startPosition, Token.Type.string_, sb.data);
+            mCurrent = Token(startPosition, Token.Type.string, sb.data);
             return;
         }
         else if (isAlpha(mInput[mCursor]))
@@ -160,15 +184,26 @@ private:
         {
             immutable size_t start = mCursor;
             immutable Token.Position startPosition = mCurrentPosition;
+            Token.Type type = Token.Type.integer;
 
             while (mCursor < mInput.length && (isDigit(mInput[mCursor]) || "._".indexOf(
                     mInput[mCursor]) > -1))
-                advance();
+            {
+                if (mInput[mCursor] == '.')
+                {
+                    if (type == Token.Type.decimal)
+                        break;
 
-            mCurrent = Token(startPosition, Token.Type.number, mInput[start .. mCursor]);
+                    type = Token.Type.decimal;
+                }
+
+                advance();
+            }
+
+            mCurrent = Token(startPosition, type, mInput[start .. mCursor]);
             return;
         }
-        else if ("[](){},:-+/;".indexOf(mInput[mCursor]) > -1)
+        else if ("[](){},:-+/*;=".indexOf(mInput[mCursor]) > -1)
         {
             mCurrent = Token(mCurrentPosition, Token.Type.delimiter, mInput[mCursor .. mCursor + 1]);
             advance();
@@ -180,12 +215,25 @@ private:
     }
 
 public:
-    this(string input, string filename, string[] keywords = [])
+    this(in string[] keywords) pure nothrow
+    {
+        mKeywords = keywords;
+    }
+
+    void load(string path)
+    {
+        VFSFile file = VFS.getFile(path);
+        scope (exit)
+            file.close();
+
+        parse(file.readAll!string(), path);
+    }
+
+    void parse(string input, string filename = "<unknown>") pure nothrow
     {
         mInput = input;
         mCursor = 0;
         mCurrentPosition = Token.Position(filename, 1, 1);
-        mKeywords = keywords;;
 
         fetch();
     }
@@ -235,7 +283,7 @@ public:
             if (!msg)
                 msg = format!"Expected %s, got %s (%s)"(type, token.type, token.value);
             
-            throw new Exception(msg);
+            throw new TokenizerException(msg, token);
         }
 
         return token;

@@ -1,4 +1,4 @@
-module zyeware.rendering.spriteframes;
+module zyeware.rendering.frameanim;
 
 import std.datetime : dur, Duration;
 import std.conv : to;
@@ -9,7 +9,7 @@ import zyeware.rendering;
 import zyeware.utils.tokenizer;
 
 @asset(Yes.cache)
-class SpriteFrames
+class FrameAnimations
 {
 protected:
     Animation[string] mAnimations;
@@ -72,57 +72,64 @@ public:
         return name in mAnimations;
     }
 
-    static SpriteFrames load(string path)
+    static FrameAnimations load(string path)
         in (path, "Path cannot be null")
     {
         VFSFile sourceFile = VFS.getFile(path);
         scope (exit) sourceFile.close();
         immutable string source = sourceFile.readAll!string();
 
-        auto spriteFrames = new SpriteFrames();
+        auto frameAnims = new FrameAnimations();
 
-        auto tokenizer = new Tokenizer(source, path, ["animation", "frame", "to", "loop", "hflip", "vflip", "msecs"]);
+        auto t = Tokenizer(["animation", "frame", "to", "loop", "hflip", "vflip", "msecs"]);
+        t.load(path);
 
-        while (!tokenizer.isEof)
+        while (!t.isEof)
         {
             Animation animation;
 
-            tokenizer.expect(Token.Type.keyword, "animation", "Expected an animation declaration.");
+            t.expect(Token.Type.keyword, "animation", "Expected an animation declaration.");
 
-            immutable string animationName = tokenizer.expect(Token.Type.identifier, null, "Expected an animation name.").value;
+            immutable string animationName = t.expect(Token.Type.identifier, null, "Expected an animation name.").value;
 
-            while (tokenizer.consume(Token.Type.keyword, "frame"))
+            while (t.consume(Token.Type.keyword, "frame"))
             {
-                immutable size_t startFrame = tokenizer.expect(Token.Type.number, null, "Expected a frame index.").value.to!size_t;
+                immutable size_t startFrame = t.expect(Token.Type.integer, null, "Expected a frame index.").value.to!size_t;
                 size_t endFrame = startFrame;
 
-                if (tokenizer.consume(Token.Type.keyword, "to"))
-                    endFrame = tokenizer.expect(Token.Type.number, null, "Expected a frame index.").value.to!size_t;
+                if (t.consume(Token.Type.keyword, "to"))
+                    endFrame = t.expect(Token.Type.integer, null, "Expected a frame index.").value.to!size_t;
                 
-                tokenizer.expect(Token.Type.keyword, "msecs", "Expected a duration declaration.");
-                immutable size_t durationMsecs = tokenizer.expect(Token.Type.number, null, "Expected a duration.").value.to!size_t;
+                t.expect(Token.Type.keyword, "msecs", "Expected a duration declaration.");
+                immutable size_t durationMsecs = t.expect(Token.Type.integer, null).value.to!size_t;
 
-                enforce(startFrame <= endFrame, "Start frame cannot be greater than end frame.");
-
-                for (size_t i = startFrame; i <= endFrame; i++)
-                    animation.frames ~= Frame(i, dur!"msecs"(durationMsecs));
+                if (endFrame >= startFrame)
+                {
+                    for (size_t i = startFrame; i <= endFrame; i++)
+                        animation.frames ~= Frame(i, dur!"msecs"(durationMsecs));
+                }
+                else
+                {
+                    for (size_t i = startFrame; i >= endFrame; i--)
+                        animation.frames ~= Frame(i, dur!"msecs"(durationMsecs));
+                }
             }
 
-            while (!tokenizer.isEof)
+            while (!t.isEof)
             {
-                if (tokenizer.consume(Token.Type.keyword, "loop"))
+                if (t.consume(Token.Type.keyword, "loop"))
                     animation.isLooping = true;
-                else if (tokenizer.consume(Token.Type.keyword, "hflip"))
+                else if (t.consume(Token.Type.keyword, "hflip"))
                     animation.hFlip = true;
-                else if (tokenizer.consume(Token.Type.keyword, "vflip"))
+                else if (t.consume(Token.Type.keyword, "vflip"))
                     animation.vFlip = true;
                 else
                     break;
             }
 
-            spriteFrames.addAnimation(animationName, animation);
+            frameAnims.addAnimation(animationName, animation);
         }
 
-        return spriteFrames;
+        return frameAnims;
     }
 }
