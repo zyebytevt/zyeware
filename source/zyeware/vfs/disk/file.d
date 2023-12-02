@@ -17,7 +17,7 @@ protected:
     FILE* mStream;
     FileSize mCachedFileSize = FileSize.min;
 
-package:
+package(zyeware.vfs):
     this(string name, string diskPath) pure nothrow
     {
         super(name);

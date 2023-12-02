@@ -16,6 +16,7 @@ import std.path : buildNormalizedPath, dirName, isValidPath;
 
 import zyeware.common;
 import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
+import zyeware.vfs.zip : VFSZipLoader;
 import zyeware.vfs.dir : VFSCombinedDirectory;
 
 struct VFS
@@ -104,7 +105,8 @@ package(zyeware) static:
         if (exists(buildNormalizedPath(thisExePath.dirName, userDirPortableName, "_sc_")))
             sPortableMode = true;
 
-        VFS.addLoader(new VFSDiskLoader());
+        VFS.registerLoader(new VFSDiskLoader());
+        VFS.registerLoader(new VFSZipLoader());
     
         sSchemes["core"] = loadPackage("core.zpk", "core:");
         sSchemes["res"] = new VFSCombinedDirectory("res:", []);
@@ -120,12 +122,20 @@ package(zyeware) static:
     }
 
 public static:
-    void addLoader(VFSLoader loader) nothrow
+    /// Registers a new VFSLoader to be used when loading packages.
+    ///
+    /// Params:
+    ///     loader: The loader to register.
+    void registerLoader(VFSLoader loader) nothrow
         in (loader)
     {
         sLoaders ~= loader;
     }
 
+    /// Adds a package to the VFS.
+    ///
+    /// Params:
+    ///     path: The real path to the package.
     VFSDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
@@ -135,12 +145,29 @@ public static:
         return pck;
     }
 
+    /// Opens the file with the given path and mode.
+    /// 
+    /// Params:
+    ///   name = The path to the file.
+    ///   mode = The mode to open the file in.
     VFSFile open(string name, VFSFile.Mode mode = VFSFile.Mode.read)
         in (name, "Name cannot be null.")
     {
         VFSFile file = getFile(name);
         file.open(mode);
         return file;
+    }
+
+    /// Opens a file from memory.
+    ///
+    /// Params:
+    ///   name = The name of the file. Can be arbitrary.
+    ///   data = The data of the file.
+    VFSFile openFromMemory(string name, in ubyte[] data)
+    {
+        import zyeware.vfs.memory.file : VFSMemoryFile;
+
+        return new VFSMemoryFile(name, data);
     }
 
     VFSFile getFile(string name)
