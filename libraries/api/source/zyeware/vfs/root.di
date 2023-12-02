@@ -9,32 +9,32 @@ import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
 import std.path : buildNormalizedPath, dirName, isValidPath;
 import zyeware.common;
-import zyeware.vfs;
-package(zyeware.vfs) alias LoadPackageResult = Tuple!(VFSDirectory, "root", immutable(ubyte[]), "hash");
+import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
+import zyeware.vfs.dir : VFSCombinedDirectory;
 struct VFS
 {
 	private static
 	{
 		enum userDirVFSPath = "user://";
 		enum userDirPortableName = "ZyeWareData/";
-		VFSDirectory[string] sProtocols;
+		VFSDirectory[string] sSchemes;
 		VFSLoader[] sLoaders;
 		bool sPortableMode;
-		pragma (inline, true)VFSDirectory getProtocol(string protocol)
-		in (protocol)
+		pragma (inline, true)VFSDirectory getScheme(string scheme)
+		in (scheme)
 		{
-			VFSDirectory dir = sProtocols.get(protocol, null);
-			enforce!VFSException(dir, format!"Unknown VFS protocol '%s'."(protocol));
+			VFSDirectory dir = sSchemes.get(scheme, null);
+			enforce!VFSException(dir, format!"Unknown VFS scheme '%s'."(scheme));
 			return dir;
 		}
 		pragma (inline, true)auto splitPath(string path)
 		in (path)
 		{
-			auto splitResult = path.findSplit("://");
+			auto splitResult = path.findSplit(":");
 			enforce!VFSException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty, "Malformed VFS path.");
 			return splitResult;
 		}
-		LoadPackageResult loadPackage(string path, string name);
+		VFSDirectory loadPackage(string path, string name);
 		VFSDirectory createUserDir();
 		package(zyeware) static
 		{
@@ -44,12 +44,12 @@ struct VFS
 			{
 				nothrow void addLoader(VFSLoader loader);
 				VFSDirectory addPackage(string path);
-				VFSFile getFile(string name, VFSFile.Mode mode = VFSFile.Mode.read);
+				VFSFile open(string name, VFSFile.Mode mode = VFSFile.Mode.read);
+				VFSFile getFile(string name);
 				VFSDirectory getDirectory(string name);
 				bool hasFile(string name);
 				bool hasDirectory(string name);
 				nothrow bool portableMode();
-				pure nothrow bool isValidVFSPath(string path);
 			}
 		}
 	}

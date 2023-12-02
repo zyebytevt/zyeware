@@ -1,9 +1,11 @@
 // D import file generated from 'source/zyeware/audio/buffer.d'
 module zyeware.audio.buffer;
+import std.conv : to;
 import zyeware.common;
 import zyeware.audio;
 import zyeware.pal;
 import zyeware.pal.audio.types;
+import zyeware.utils.tokenizer;
 @(asset(Yes.cache))class AudioBuffer : NativeObject
 {
 	protected

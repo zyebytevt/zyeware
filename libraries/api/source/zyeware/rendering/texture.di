@@ -1,9 +1,12 @@
 // D import file generated from 'source/zyeware/rendering/texture.d'
 module zyeware.rendering.texture;
 import std.conv : to;
+import std.string : format;
+import std.algorithm : countUntil;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
+import zyeware.utils.tokenizer;
 struct TextureProperties
 {
 	enum Filter
@@ -67,3 +70,4 @@ interface Texture : NativeObject
 		}
 	}
 }
+private void parseTextureProperties(string path, out TextureProperties properties);

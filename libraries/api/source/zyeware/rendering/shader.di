@@ -4,10 +4,12 @@ import std.exception : enforce;
 import std.regex : ctRegex, matchAll;
 import std.typecons : Tuple;
 import std.array : replaceInPlace;
+import std.algorithm : countUntil;
 import inmath.linalg;
 import zyeware.common;
 import zyeware.rendering;
 import zyeware.pal;
+import zyeware.utils.tokenizer;
 struct ShaderProperties
 {
 	enum ShaderType

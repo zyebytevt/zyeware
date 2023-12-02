@@ -5,12 +5,13 @@ import std.string : format, startsWith;
 import std.exception : enforce;
 import std.typecons : Rebindable;
 import std.conv : to;
-import std.string : split;
+import std.string : split, format;
 import std.algorithm : map, filter, sort, uniq;
 import std.array : array;
 import inmath.linalg;
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.utils.tokenizer;
 @(asset(Yes.cache))class Material
 {
 	protected

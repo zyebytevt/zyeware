@@ -1,7 +1,9 @@
 // D import file generated from 'source/zyeware/rendering/cursor.d'
 module zyeware.rendering.cursor;
+import std.conv : to;
 import zyeware.common;
 import zyeware.rendering;
+import zyeware.utils.tokenizer;
 @(asset(Yes.cache))final class Cursor
 {
 	protected

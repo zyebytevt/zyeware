@@ -20,7 +20,6 @@ import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
 import zyeware.pal;
-alias defer = ZyeWare.callDeferred;
 struct ProjectProperties
 {
 	string authorName = "Anonymous";
