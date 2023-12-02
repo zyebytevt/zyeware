@@ -1,7 +1,8 @@
 module zyeware.vfs.zip.loader;
 
-import std.string : split;
+import std.string : split, startsWith;
 import std.file : read, isFile;
+import std.exception : enforce;
 import std.zip;
 
 import zyeware.common;
@@ -24,6 +25,8 @@ public:
         in (diskPath && name)
     {
         ZipArchive archive = new ZipArchive(read(diskPath));
+        enforce!VFSException(archive.comment.startsWith("ZPK2\x0D\x0A"), "ZIP archive is not a valid ZyeWare package.");
+
         FileNode* root = new FileNode();
 
         foreach (ArchiveMember member; archive.directory)
