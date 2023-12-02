@@ -29,8 +29,6 @@ import zyeware.utils.format;
 import zyeware.core.introapp;
 import zyeware.pal;
 
-alias defer = ZyeWare.callDeferred;
-
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
 struct ProjectProperties

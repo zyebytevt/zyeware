@@ -61,7 +61,7 @@ public:
     override void tick()
     {
         if (ZyeWare.upTime.toFloatSeconds > 2.5f)
-            defer(() { ZyeWare.application = mMainApplication; });
+            ZyeWare.callDeferred(() { ZyeWare.application = mMainApplication; });
     }
 
     override void draw()
