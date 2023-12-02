@@ -49,7 +49,7 @@ public:
 
 		VFS.addPackage("techdemo.zpk");
 
-		VFSDirectory locales = VFS.getDirectory("res://locales");
+		VFSDirectory locales = VFS.getDirectory("res:locales");
 		foreach (string localeFile; locales.files)
 			TranslationManager.addLocale(AssetManager.load!Translation(locales.fullname ~ "/" ~ localeFile));
 
@@ -79,7 +79,7 @@ public:
 			.addInput(new InputEventKey(KeyCode.enter))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.a));
 
-		ZyeWare.mainDisplay.cursor = AssetManager.load!Cursor("core://cursors/arrow.cursor");
+		ZyeWare.mainDisplay.cursor = AssetManager.load!Cursor("core:cursors/arrow.cursor");
 
         changeState(new DemoMenu(this));
 	}

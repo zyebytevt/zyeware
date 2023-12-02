@@ -4,7 +4,7 @@
 layout(location = 0) out vec4 oColor;
 
 // ===== INPUTS =====
-#include "core://shaders/include/glsl/uniforms3d.glsl"
+#include "core:shaders/include/glsl/uniforms3d.glsl"
 
 layout(std140) uniform ModelUniforms
 {
@@ -22,7 +22,7 @@ in vec3 vToCameraVector;
 in vec3 vNormal;
 
 // ===== FUNCTIONS =====
-#include "core://shaders/include/glsl/utils.glsl"
+#include "core:shaders/include/glsl/utils.glsl"
 
 void main()
 {

@@ -1,14 +1,14 @@
 x {
-    positive "res://terraindemo/skybox/left.png"
-    negative "res://terraindemo/skybox/right.png"
+    positive "res:terraindemo/skybox/left.png"
+    negative "res:terraindemo/skybox/right.png"
 }
 
 y {
-    positive "res://terraindemo/skybox/top.png"
-    negative "res://terraindemo/skybox/bottom.png"
+    positive "res:terraindemo/skybox/top.png"
+    negative "res:terraindemo/skybox/bottom.png"
 }
 
 z {
-    positive "res://terraindemo/skybox/back.png"
-    negative "res://terraindemo/skybox/front.png"
+    positive "res:terraindemo/skybox/back.png"
+    negative "res:terraindemo/skybox/front.png"
 }

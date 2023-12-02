@@ -27,7 +27,7 @@ package:
         if (!camera)
         {
             camera = new OrthographicCamera(-1, 1, 1, -1);
-            texture = AssetManager.load!Texture2D("core://textures/no-camera.png");
+            texture = AssetManager.load!Texture2D("core:textures/no-camera.png");
         }
 
         Renderer2D.beginScene(camera.projectionMatrix, Matrix4f.identity);

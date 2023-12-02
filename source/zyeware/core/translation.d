@@ -171,8 +171,8 @@ public:
     ///   newPath = The new path
     void addAssetRemap(string origPath, string newPath) pure
     {
-        enforce!CoreException(VFS.isValidVFSPath(origPath) && VFS.isValidVFSPath(newPath), "Malformed VFS paths for asset remapping.");
-        enforce!CoreException(!origPath.startsWith("core://"), "Cannot remap assets from core package.");
+        //enforce!CoreException(VFS.isValidVFSPath(origPath) && VFS.isValidVFSPath(newPath), "Malformed VFS paths for asset remapping.");
+        //enforce!CoreException(!origPath.startsWith("core:"), "Cannot remap assets from core package.");
 
         mAssetRemaps[origPath] = newPath;
     }

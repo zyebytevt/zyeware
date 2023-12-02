@@ -2,6 +2,6 @@
 // Uses multitexturing.
 
 opengl {
-    vertex "core://shaders/3d/glsl/terrain.vert.glsl"
-    fragment "core://shaders/3d/glsl/terrain.frag.glsl"
+    vertex "core:shaders/3d/glsl/terrain.vert.glsl"
+    fragment "core:shaders/3d/glsl/terrain.frag.glsl"
 }

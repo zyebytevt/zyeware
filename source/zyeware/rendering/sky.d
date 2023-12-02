@@ -21,7 +21,7 @@ public:
         in (texture)
     {
         if (!shader)
-            shader = AssetManager.load!Shader("core://shaders/3d/skybox.shd");
+            shader = AssetManager.load!Shader("core:shaders/3d/skybox.shd");
 
         mMaterial = new Material(shader);
         mMaterial.setTexture(0, texture);

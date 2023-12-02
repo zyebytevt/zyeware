@@ -216,7 +216,7 @@ void initialize()
     pBatches.length = 1;
     initializeBatch(pBatches[0]);
 
-    pDefaultMaterial = AssetManager.load!Material("core://materials/2d/default.mtl");
+    pDefaultMaterial = AssetManager.load!Material("core:materials/2d/default.mtl");
 }
 
 void cleanup()

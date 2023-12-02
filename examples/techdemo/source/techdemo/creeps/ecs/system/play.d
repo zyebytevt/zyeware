@@ -33,11 +33,11 @@ protected:
         player.register!PlayerComponent();
         player.register!SpriteComponent(Vector2f(111/2, 135/2), Vector2f(111/4, 135/4),
             TextureAtlas(
-                AssetManager.load!Texture2D("res://creeps/sprites/player.png"),
+                AssetManager.load!Texture2D("res:creeps/sprites/player.png"),
                 2, 2, 0
             ),
             Color.white);
-        player.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res://creeps/sprites/player.anim"), "walk", No.autostart);
+        player.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res:creeps/sprites/player.anim"), "walk", No.autostart);
         player.register!Collision2DComponent(new CircleShape2D(25), 1, 2);
 
         return player;
@@ -54,11 +54,11 @@ protected:
         mob.register!MobComponent(motion);
         mob.register!SpriteComponent(Vector2f(132/2, 186/2), Vector2f(132/4, 186/4), 
             TextureAtlas(
-                AssetManager.load!Texture2D("res://creeps/sprites/creeps.png"),
+                AssetManager.load!Texture2D("res:creeps/sprites/creeps.png"),
                 3, 2, 0
             ),
             Color.white);
-        mob.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res://creeps/sprites/creeps.anim"), 
+        mob.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res:creeps/sprites/creeps.anim"), 
             ["fly", "swim", "walk"][uniform(0, $)], Yes.autostart);
         mob.register!Collision2DComponent(new CircleShape2D(25), 2, 0);
 
@@ -90,8 +90,8 @@ public:
     {
         mPlayState = playState;
 
-        mMusic = AssetManager.load!AudioBuffer("res://creeps/audio/music.ogg");
-        mGameOverSound = AssetManager.load!AudioBuffer("res://creeps/audio/gameover.ogg");
+        mMusic = AssetManager.load!AudioBuffer("res:creeps/audio/music.ogg");
+        mGameOverSound = AssetManager.load!AudioBuffer("res:creeps/audio/gameover.ogg");
         mAudioSource = new AudioSource(AudioBus.get("master"));
 
         mScore = 0;

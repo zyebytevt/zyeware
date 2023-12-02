@@ -72,7 +72,7 @@ public:
         if (firstTime)
         {
             mUICamera = new OrthographicCamera(0, 640, 480, 0);
-            mFont = AssetManager.load!Font("core://fonts/internal.fnt");
+            mFont = AssetManager.load!Font("core:fonts/internal.fnt");
         }
     }
 }

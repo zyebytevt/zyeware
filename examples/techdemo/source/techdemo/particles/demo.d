@@ -52,7 +52,7 @@ public:
         if (firstTime)
         {
             mUICamera = new OrthographicCamera(0, 640, 480, 0);
-            mFont = AssetManager.load!Font("core://fonts/internal.fnt");
+            mFont = AssetManager.load!Font("core:fonts/internal.fnt");
             mParticles = new Particles2D();
 
             Gradient gradient;
@@ -61,7 +61,7 @@ public:
             gradient.addPoint(1, Color.yellow);
 
             ParticleProperties2D starType = {
-                texture: AssetManager.load!Texture2D("res://menu/menuStar.png"),
+                texture: AssetManager.load!Texture2D("res:menu/menuStar.png"),
                 gravity: Vector2f(0, 15),
                 speed: {
                     min: 30f,

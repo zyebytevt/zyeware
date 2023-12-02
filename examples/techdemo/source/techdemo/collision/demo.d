@@ -30,7 +30,7 @@ public:
         mFirstTransform = Transform2DComponent(Vector2f(100, 240));
         mSecondTransform = Transform2DComponent(Vector2f(400, 240));
 
-        mCircleTexture = AssetManager.load!Texture2D("res://sprites/circle.png");
+        mCircleTexture = AssetManager.load!Texture2D("res:sprites/circle.png");
 
         mSecondShape = new RectangleShape2D(Vector2f(50));
         mFirstShape = new CircleShape2D(50);

@@ -6,22 +6,23 @@
 module zyeware.vfs.file;
 
 import core.stdc.stdio;
-import core.stdc.config : c_long;
+
 import std.bitmanip : Endian, littleEndianToNative, bigEndianToNative;
 import std.traits : isNumeric, isUnsigned;
 import std.exception : enforce;
 
 import zyeware.common;
-import zyeware.vfs;
 
 /// Represents a virtual file in the VFS. Where this file is
 /// physically located depends on the implementation.
-abstract class VFSFile : VFSBase
+abstract class VFSFile
 {
 protected:
-    this(string fullname, string name) pure nothrow
+    string mName;
+
+    this(string name) pure nothrow
     {
-        super(fullname, name);
+        mName = name;
     }
 
 public:
@@ -45,6 +46,46 @@ public:
         append /// Opens for appending, creates empty file if it doesn't exist.
     }
 
+    /// Reads data from the file into a block of memory.
+    /// Returns: The total number of elements successfully read.
+    /// Params:
+    ///     ptr = Pointer to a block of memory with a minimum size of size*n.
+    ///     size = Size in bytes of each element to be read.
+    ///     n = The number of elements to read.
+    abstract size_t read(void* ptr, size_t size, size_t n) nothrow;
+
+    /// Writes data from a block of memory to the file.
+    /// Returns: The number of elements successfully written.
+    /// Params:
+    ///     ptr = Pointer of a block of memory with a minimum size of size*n.
+    ///     size = Size in bytes of each element to be written.
+    ///     n = The number of elements to write.
+    abstract size_t write(const void* ptr, size_t size, size_t n) nothrow;
+
+    /// Sets the file position pointer inside the file.
+    /// Params:
+    ///     offset = The offset to set the file position to.
+    ///     whence = How to interpret the given offset.
+    abstract void seek(long offset, Seek whence) nothrow;
+
+    /// Returns the current file position.
+    abstract long tell() nothrow;
+    /// Flushes all writing operations to disk.
+    abstract bool flush() nothrow;
+    /// Opens the file with the given access mode.
+    abstract void open(VFSFile.Mode mode);
+    /// Closes the file. Afterwards, no further operations should be taken on this file.
+    abstract void close() nothrow;
+
+    /// Returns the total file size in bytes.
+    abstract FileSize size() nothrow;
+
+    /// Returns `true` if the file is currently open, `false` otherwise.
+    abstract bool isOpened() pure const nothrow;
+
+    /// Returns `true` if the end of file has been reached, `false` otherwise.
+    abstract bool isEof() pure nothrow;
+
     /// Reads the entire content of the file.
     /// Returns: The content of the file.
     /// 
@@ -60,14 +101,6 @@ public:
         read(cast(void[]) buffer);
         return cast(T) buffer;
     }
-
-    /// Reads data from the file into a block of memory.
-    /// Returns: The total number of elements successfully read.
-    /// Params:
-    ///     ptr = Pointer to a block of memory with a minimum size of size*n.
-    ///     size = Size in bytes of each element to be read.
-    ///     n = The number of elements to read.
-    abstract size_t read(void* ptr, size_t size, size_t n) nothrow;
 
     /// Reads data from the file into an array.
     /// Returns: The total number of elements successfully read.
@@ -117,14 +150,6 @@ public:
         read(buffer.ptr, Char.sizeof, length);
         return buffer.idup;
     }
-
-    /// Writes data from a block of memory to the file.
-    /// Returns: The number of elements successfully written.
-    /// Params:
-    ///     ptr = Pointer of a block of memory with a minimum size of size*n.
-    ///     size = Size in bytes of each element to be written.
-    ///     n = The number of elements to write.
-    abstract size_t write(const void* ptr, size_t size, size_t n) nothrow;
     
     /// Writes data from an array to the file.
     /// Returns: The total number of elements successfully written.
@@ -174,237 +199,5 @@ public:
 
         writeNumber(cast(LengthType) text.length, endianness);
         write(text.ptr, Char.sizeof, text.length);
-    }
-
-    /// Sets the file position pointer inside the file.
-    /// Params:
-    ///     offset = The offset to set the file position to.
-    ///     whence = How to interpret the given offset.
-    abstract void seek(long offset, Seek whence) nothrow;
-
-    /// Returns the current file position.
-    abstract long tell() nothrow;
-    /// Flushes all writing operations to disk.
-    abstract bool flush() nothrow;
-    /// Closes the file. Afterwards, no further operations should be taken on this file.
-    abstract void close() nothrow;
-
-    /// Returns the total file size in bytes.
-    abstract FileSize size() nothrow;
-
-    /// Returns `true` if the file is currently open, `false` otherwise.
-    abstract bool isOpen() pure const nothrow;
-
-    /// Returns `true` if the end of file has been reached, `false` otherwise.
-    abstract bool isEof() pure nothrow;
-}
-
-package:
-
-class VFSDiskFile : VFSFile
-{
-protected:
-    FILE* mCFile;
-    FileSize mCachedFileSize = FileSize.min;
-
-package:
-    this(string fullname, string name, FILE* file) pure nothrow
-        in (file)
-    {
-        super(fullname, name);
-        mCFile = file;
-    }
-
-public:
-    ~this()
-    {
-        close();
-    }
-
-    override size_t read(void* ptr, size_t size, size_t n) nothrow
-        in (ptr)
-    {
-        if (!isOpen)
-            return 0;
-
-        return fread(ptr, size, n, mCFile);
-    }
-
-    override size_t write(const void* ptr, size_t size, size_t n) nothrow
-        in (ptr)
-    {
-        if (!isOpen)
-            return 0;
-
-        return fwrite(ptr, size, n, mCFile);
-    }
-
-    override void seek(long offset, Seek whence) nothrow
-    {
-        if (!isOpen)
-            return;
-
-        static int[Seek] seekToC;
-        if (!seekToC)
-            seekToC = [
-                Seek.current: SEEK_CUR,
-                Seek.set: SEEK_SET,
-                Seek.end: SEEK_END
-            ];
-
-        assert(fseek(mCFile, cast(c_long) offset, seekToC[whence]) == 0, "Failed to seek.");
-    }
-
-    override long tell() nothrow
-    {
-        if (!isOpen)
-            return -1;
-
-        return cast(long) ftell(mCFile);
-    }
-
-    override bool flush() nothrow
-    {
-        return isOpen && fflush(mCFile) == 0;
-    }
-
-    override void close() nothrow
-    {
-        if (isOpen)
-        {
-            fclose(mCFile);
-            mCFile = null;
-        }
-    }
-
-    override FileSize size() nothrow
-    {
-        if (!isOpen)
-            return -1;
-
-        if (mCachedFileSize == FileSize.min)
-        {
-            immutable c_long pos = ftell(mCFile);
-            //enforce!VFSException(pos > -1L, "Failed to ftell");
-
-            fseek(mCFile, 0, SEEK_END);
-            mCachedFileSize = cast(FileSize) ftell(mCFile);
-            fseek(mCFile, pos, SEEK_SET);
-        }
-
-        return mCachedFileSize;
-    }
-
-    override bool isOpen() pure const nothrow
-    {
-        return mCFile !is null;
-    }
-
-    override bool isEof() pure nothrow
-    {
-        return feof(mCFile) != 0;
-    }
-}
-
-class VFSZPKFile : VFSFile
-{
-protected:
-    FILE* mCFile;
-    FileSize mFileSize;
-    long mFileOffset;
-    long mFilePointer;
-    bool mIsOpen = true;
-
-package:
-    this(string fullname, string name, FILE* file, int offset, int fileSize) pure nothrow
-        in (file)
-    {
-        super(fullname, name);
-        mCFile = file;
-        mFileOffset = offset;
-        mFileSize = fileSize;
-    }
-
-public:
-    override size_t read(void* ptr, size_t size, size_t n) nothrow
-        in (ptr)
-    {
-        if (!isOpen)
-            return 0;
-
-        fseek(mCFile, cast(c_long)(mFileOffset + mFilePointer), SEEK_SET);
-
-        if (mFilePointer + n * size > mFileSize)
-            n = cast(size_t)(mFileSize - mFilePointer) / size;
-
-        immutable size_t bRead = fread(ptr, size, n, mCFile);
-        mFilePointer += bRead * size;
-        return bRead;
-    }
-
-    override size_t write(const void* ptr, size_t size, size_t n) nothrow
-    {
-        assert(false, "Cannot write files into ZPK archives.");
-    }
-
-    override void seek(long offset, Seek whence) nothrow
-    {
-        if (!isOpen)
-            return;
-
-        final switch (whence) with (Seek)
-        {
-        case set:
-            mFilePointer = offset;
-            break;
-
-        case current:
-            mFilePointer += offset;
-            break;
-
-        case end:
-            mFilePointer = mFileSize - offset;
-            break;
-        }
-
-        assert(mFilePointer >= 0 && mFilePointer < mFileSize, "Failed to seek.");
-    }
-
-    override long tell() pure nothrow
-    {
-        if (!isOpen)
-            return -1;
-
-        return mFilePointer;
-    }
-
-    override bool flush() pure nothrow
-    {
-        // No flushing needed when file is read-only.
-        // Return true for error checking routines.
-        return true;
-    }
-
-    override void close() pure nothrow
-    {
-        mIsOpen = false;
-    }
-
-    override FileSize size() pure nothrow
-    {
-        if (!isOpen)
-            return -1;
-
-        return mFileSize;
-    }
-
-    override bool isOpen() pure const nothrow
-    {
-        return mIsOpen;
-    }
-
-    override bool isEof() pure nothrow
-    {
-        return mFilePointer >= mFileSize;
     }
 }

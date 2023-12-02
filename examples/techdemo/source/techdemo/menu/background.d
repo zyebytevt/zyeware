@@ -116,8 +116,8 @@ protected:
 public:
     this()
     {
-        mStarTexture = AssetManager.load!Texture2D("res://menu/menuStar.png");
-        mBackdrop = AssetManager.load!Texture2D("res://menu/background.png");
+        mStarTexture = AssetManager.load!Texture2D("res:menu/menuStar.png");
+        mBackdrop = AssetManager.load!Texture2D("res:menu/background.png");
 
         for (size_t i; i < mStars.length; ++i)
             mFreeStars.insertBack(i);

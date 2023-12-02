@@ -32,9 +32,9 @@ public:
         mEntries = entries;
         mFont = font;
 
-        mCursorUp = AssetManager.load!AudioBuffer("res://menu/up.ogg");
-        mCursorDown = AssetManager.load!AudioBuffer("res://menu/down.ogg");
-        mAccept = AssetManager.load!AudioBuffer("res://menu/accept.ogg");
+        mCursorUp = AssetManager.load!AudioBuffer("res:menu/up.ogg");
+        mCursorDown = AssetManager.load!AudioBuffer("res:menu/down.ogg");
+        mAccept = AssetManager.load!AudioBuffer("res:menu/accept.ogg");
 
         mSource = new AudioSource(AudioBus.get("master"));
     }

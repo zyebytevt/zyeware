@@ -1,6 +1,6 @@
 // ZyeWare - Default material
 
-shader "core://shaders/3d/default.shd"
+shader "core:shaders/3d/default.shd"
 
 parameters {
     shineDamper 1.0

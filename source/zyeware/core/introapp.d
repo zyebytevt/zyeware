@@ -28,8 +28,8 @@ public:
     {
         ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
-        mEngineLogo = AssetManager.load!Texture2D("core://textures/engine-logo.png");
-        mInternalFont = AssetManager.load!BitmapFont("core://fonts/internal.fnt");
+        mEngineLogo = AssetManager.load!Texture2D("core:textures/engine-logo.png");
+        mInternalFont = AssetManager.load!BitmapFont("core:fonts/internal.fnt");
         mVersionString = "v" ~ ZyeWare.engineVersion.toString;
 
         mCamera = new OrthographicCamera(-1, 1, 1, -1);

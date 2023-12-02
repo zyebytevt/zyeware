@@ -43,10 +43,10 @@ public:
         super(application);
 
         mUICamera = new OrthographicCamera(0, 640, 480, 0);
-        mFont = AssetManager.load!Font("core://fonts/internal.fnt");
+        mFont = AssetManager.load!Font("core:fonts/internal.fnt");
         mBackSoundSource = new AudioSource(AudioBus.get("master"));
-        mBackSoundSource.buffer = AssetManager.load!AudioBuffer("res://menu/back.ogg");
-        mLogoTexture = AssetManager.load!Texture2D("core://textures/engine-logo.png");
+        mBackSoundSource.buffer = AssetManager.load!AudioBuffer("res:menu/back.ogg");
+        mLogoTexture = AssetManager.load!Texture2D("core:textures/engine-logo.png");
 
         if (!sBackground)
             sBackground = new MenuBackground();
@@ -162,7 +162,7 @@ public:
         {
             mBGM = new AudioSource(AudioBus.get("master"));
             mBGM.volume = 0.4f;
-            mBGM.buffer = AssetManager.load!AudioBuffer("res://pixels-bgm.ogg");
+            mBGM.buffer = AssetManager.load!AudioBuffer("res:pixels-bgm.ogg");
             mBGM.looping = true;
             mBGM.play();
         }

@@ -20,8 +20,8 @@ protected:
 
     Entity createTree(Vector3f position)
     {
-        Mesh mesh = AssetManager.load!Mesh("res://terraindemo/tree/mesh.obj");
-        mesh.material = AssetManager.load!Material("res://terraindemo/tree/material.mtl");
+        Mesh mesh = AssetManager.load!Mesh("res:terraindemo/tree/mesh.obj");
+        mesh.material = AssetManager.load!Material("res:terraindemo/tree/material.mtl");
 
         Entity entity = entities.create();
 
@@ -33,8 +33,8 @@ protected:
 
     Entity createGrass(Vector3f position)
     {
-        Mesh mesh = AssetManager.load!Mesh("res://terraindemo/grass/mesh.obj");
-        mesh.material = AssetManager.load!Material("res://terraindemo/grass/material.mtl");
+        Mesh mesh = AssetManager.load!Mesh("res:terraindemo/grass/mesh.obj");
+        mesh.material = AssetManager.load!Material("res:terraindemo/grass/material.mtl");
 
         Entity entity = entities.create();
 
@@ -46,8 +46,8 @@ protected:
 
     Entity createStall(Vector3f position)
     {
-        Mesh mesh = AssetManager.load!Mesh("res://terraindemo/stall/mesh.obj");
-        //mesh.material = AssetManager.load!Material("res://terraindemo/stall/material.mtl");
+        Mesh mesh = AssetManager.load!Mesh("res:terraindemo/stall/mesh.obj");
+        //mesh.material = AssetManager.load!Material("res:terraindemo/stall/material.mtl");
 
         Entity entity = entities.create();
 
@@ -62,19 +62,19 @@ protected:
     {
         TerrainProperties properties = {
             size: Vector2f(256, 256),
-            blendMap: AssetManager.load!Texture2D("res://terraindemo/terrain/blendmap.png"),
+            blendMap: AssetManager.load!Texture2D("res:terraindemo/terrain/blendmap.png"),
             textureTiling: Vector2f(10)
         };
         
-        properties.textures[0] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/grass.png");
-        properties.textures[1] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/grassFlowers.png");
-        properties.textures[2] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/mud.png");
-        properties.textures[3] = AssetManager.load!Texture2D("res://terraindemo/terrain/textures/path.png");
+        properties.textures[0] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/grass.png");
+        properties.textures[1] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/grassFlowers.png");
+        properties.textures[2] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/mud.png");
+        properties.textures[3] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/path.png");
 
         Entity terrain = entities.create();
         
         terrain.register!Transform3DComponent(Vector3f(0));
-        terrain.register!Render3DComponent(new Terrain(properties, AssetManager.load!Image("res://terraindemo/terrain/heightmap.png"), 32f));
+        terrain.register!Render3DComponent(new Terrain(properties, AssetManager.load!Image("res:terraindemo/terrain/heightmap.png"), 32f));
 
         return terrain;
     }
@@ -88,7 +88,7 @@ protected:
 
         environment.ambientColor = Color(0.1, 0.1, 0.1, 1);
         environment.fogColor = Color(0.3, 0.4, 0.6, 0.05);
-        environment.sky = new Skybox(AssetManager.load!TextureCubeMap("res://terraindemo/skybox/skybox.cube"));
+        environment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
 
         camera.register!CameraComponent(nativeCamera, environment, Yes.active);
         camera.register!Transform3DComponent(position, rotation);
@@ -111,7 +111,7 @@ public:
 
         createCamera(Vector3f(128f, 5f, 128f), Quaternionf.identity);
 
-        Image entitymap = AssetManager.load!Image("res://terraindemo/terrain/entitymap.png");
+        Image entitymap = AssetManager.load!Image("res:terraindemo/terrain/entitymap.png");
 
         for (uint y; y < entitymap.size.y; ++y)
             for (uint x; x < entitymap.size.x; ++x)
@@ -138,7 +138,7 @@ public:
         {
             mAmbienceSource = AudioSource.create(null);
             //mAmbienceSource.loop = true;
-            mAmbienceSource.sound = AssetManager.load!AudioBuffer("res://terraindemo/ambience.ogg");
+            mAmbienceSource.sound = AssetManager.load!AudioBuffer("res:terraindemo/ambience.ogg");
         }
 
         InputManager.addAction("pl_forward", 0.25f)

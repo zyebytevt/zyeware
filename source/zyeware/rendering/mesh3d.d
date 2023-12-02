@@ -125,7 +125,7 @@ Mesh3D loadFromOBJFile(string path)
     import std.string : splitLines, strip, startsWith, split;
     import std.conv : to;
 
-    VFSFile file = VFS.getFile(path);
+    VFSFile file = VFS.open(path);
     scope(exit) file.close();
     string content = file.readAll!string;
 

@@ -2,6 +2,6 @@
 // Used by the 2D batch renderer.
 
 opengl {
-    vertex "core://shaders/2d/glsl/default.vert.glsl"
-    fragment "core://shaders/2d/glsl/default.frag.glsl"
+    vertex "core:shaders/2d/glsl/default.vert.glsl"
+    fragment "core:shaders/2d/glsl/default.frag.glsl"
 }

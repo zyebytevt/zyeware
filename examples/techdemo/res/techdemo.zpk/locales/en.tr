@@ -6,7 +6,7 @@ translations {
 
 remaps [
     {
-        old "res://whatever"
-        new "res://new"
+        old "res:whatever"
+        new "res:new"
     }
 ]

@@ -1,14 +1,14 @@
 x {
-    positive "core://textures/missing.png"
-    negative "core://textures/missing.png"
+    positive "core:textures/missing.png"
+    negative "core:textures/missing.png"
 }
 
 y {
-    positive "core://textures/missing.png"
-    negative "core://textures/missing.png"
+    positive "core:textures/missing.png"
+    negative "core:textures/missing.png"
 }
 
 z {
-    positive "core://textures/missing.png"
-    negative "core://textures/missing.png"
+    positive "core:textures/missing.png"
+    negative "core:textures/missing.png"
 }

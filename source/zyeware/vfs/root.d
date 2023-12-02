@@ -15,9 +15,8 @@ import std.file : mkdirRecurse, thisExePath, exists;
 import std.path : buildNormalizedPath, dirName, isValidPath;
 
 import zyeware.common;
-import zyeware.vfs;
-
-package(zyeware.vfs) alias LoadPackageResult = Tuple!(VFSDirectory, "root", immutable(ubyte[]), "hash");
+import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
+import zyeware.vfs.dir : VFSCombinedDirectory;
 
 struct VFS
 {
@@ -25,16 +24,16 @@ private static:
     enum userDirVFSPath = "user://";
     enum userDirPortableName = "ZyeWareData/";
 
-    VFSDirectory[string] sProtocols;
+    VFSDirectory[string] sSchemes;
     VFSLoader[] sLoaders;
     bool sPortableMode;
 
     pragma(inline, true)
-    VFSDirectory getProtocol(string protocol)
-        in (protocol)
+    VFSDirectory getScheme(string scheme)
+        in (scheme, "Scheme cannot be null.")
     {
-        VFSDirectory dir = sProtocols.get(protocol, null);
-        enforce!VFSException(dir, format!"Unknown VFS protocol '%s'."(protocol));
+        VFSDirectory dir = sSchemes.get(scheme, null);
+        enforce!VFSException(dir, format!"Unknown VFS scheme '%s'."(scheme));
         return dir;
     }
 
@@ -42,13 +41,13 @@ private static:
     auto splitPath(string path)
         in (path, "Path cannot be null")
     {
-        auto splitResult = path.findSplit("://");
+        auto splitResult = path.findSplit(":");
         enforce!VFSException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty,
             "Malformed VFS path.");
         return splitResult;
     }
 
-    LoadPackageResult loadPackage(string path, string name)
+    VFSDirectory loadPackage(string path, string name)
         in (path && name)
     {
         foreach (VFSLoader loader; sLoaders)
@@ -96,7 +95,7 @@ private static:
 
         mkdirRecurse(dataDir);
 
-        return new VFSDiskDirectory(userDirVFSPath, userDirVFSPath, dataDir);
+        return new VFSDiskDirectory(userDirVFSPath, dataDir);
     }
 
 package(zyeware) static:
@@ -105,32 +104,18 @@ package(zyeware) static:
         if (exists(buildNormalizedPath(thisExePath.dirName, userDirPortableName, "_sc_")))
             sPortableMode = true;
 
-        VFS.addLoader(new VFSDirectoryLoader());
-        VFS.addLoader(new VFSZPKLoader());
-
-        // Load core package and check hash if in release mode
-        LoadPackageResult core = loadPackage("core.zpk", "core://");
-        
-        /*debug {} else
-        {
-            import std.digest;
-
-            enum corePackageMD5 = digest!MD5(import("core.zpk"));
-
-            if (core.hash is null || core.hash != corePackageMD5)
-                throw new VFSException("Core package has been modified, cannot proceed.");
-        }*/
-        
-        sProtocols["core"] = core.root;
-        sProtocols["res"] = new VFSCombinedDirectory("res://", "res://", []);
-        sProtocols["user"] = createUserDir();
+        VFS.addLoader(new VFSDiskLoader());
+    
+        sSchemes["core"] = loadPackage("core.zpk", "core:");
+        sSchemes["res"] = new VFSCombinedDirectory("res:", []);
+        sSchemes["user"] = createUserDir();
 
         Logger.core.log(LogLevel.info, "Initialized VFS.");
     }
 
     void cleanup() nothrow
     {
-        sProtocols.clear();
+        sSchemes.clear();
         sLoaders.length = 0;
     }
 
@@ -144,48 +129,50 @@ public static:
     VFSDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
-        auto zpk = loadPackage(path, "/").root;
-        (cast(VFSCombinedDirectory) sProtocols["res"]).addDirectory(zpk);
+        VFSDirectory pck = loadPackage(path, "/");
+        (cast(VFSCombinedDirectory) sSchemes["res"]).addDirectory(pck);
         Logger.core.log(LogLevel.info, "Added package '%s'.", path);
-        return zpk;
+        return pck;
     }
 
-    VFSFile getFile(string name, VFSFile.Mode mode = VFSFile.Mode.read)
+    VFSFile open(string name, VFSFile.Mode mode = VFSFile.Mode.read)
+        in (name, "Name cannot be null.")
+    {
+        VFSFile file = getFile(name);
+        file.open(mode);
+        return file;
+    }
+
+    VFSFile getFile(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
-        return getProtocol(splitResult[0]).getFile(splitResult[2], mode);
+        return getScheme(splitResult[0]).getFile(splitResult[2]);
     }
 
     VFSDirectory getDirectory(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
-        return getProtocol(splitResult[0]).getDirectory(splitResult[2]);
+        return getScheme(splitResult[0]).getDirectory(splitResult[2]);
     }
 
     bool hasFile(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
-        return getProtocol(splitResult[0]).hasFile(splitResult[2]);
+        return getScheme(splitResult[0]).hasFile(splitResult[2]);
     }
 
     bool hasDirectory(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
-        return getProtocol(splitResult[0]).hasDirectory(splitResult[2]);
+        return getScheme(splitResult[0]).hasDirectory(splitResult[2]);
     }
 
     bool portableMode() nothrow
     {
         return sPortableMode;
-    }
-
-    bool isValidVFSPath(string path) pure nothrow
-    {
-        auto splitResult = path.findSplit("://");
-        return !splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty;
     }
 }

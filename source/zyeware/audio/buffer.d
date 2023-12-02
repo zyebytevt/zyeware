@@ -58,7 +58,7 @@ public:
     {
         // The daemons are the best community!
 
-        VFSFile source = VFS.getFile(path);
+        VFSFile source = VFS.open(path);
         ubyte[] rawFileData = source.readAll!(ubyte[])();
         source.close();
 

@@ -96,7 +96,7 @@ public:
 
         if (!material)
         {
-            material = new Material(AssetManager.load!Shader("core://shaders/3d/terrain.shd"),
+            material = new Material(AssetManager.load!Shader("core:shaders/3d/terrain.shd"),
                     BufferLayout([
                         BufferElement("textureTiling", BufferElement.Type.vec2)
                     ])

@@ -75,7 +75,7 @@ public:
     static FrameAnimations load(string path)
         in (path, "Path cannot be null")
     {
-        VFSFile sourceFile = VFS.getFile(path);
+        VFSFile sourceFile = VFS.open(path);
         scope (exit) sourceFile.close();
         immutable string source = sourceFile.readAll!string();
 

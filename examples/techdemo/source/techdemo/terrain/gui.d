@@ -19,7 +19,7 @@ public:
     this()
     {
         mUICamera = new OrthographicCamera(0, 640, 480, 0);
-        mFont = AssetManager.load!Font("core://fonts/internal.fnt");
+        mFont = AssetManager.load!Font("core:fonts/internal.fnt");
     }
 
     override void draw(EntityManager entities, in FrameTime nextFrameTime)

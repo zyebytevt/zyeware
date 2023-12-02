@@ -3,6 +3,6 @@
 // view-projection matrix and a samplerCube.
 
 opengl {
-    vertex "core://shaders/3d/glsl/skybox.vert.glsl"
-    fragment "core://shaders/3d/glsl/skybox.frag.glsl"
+    vertex "core:shaders/3d/glsl/skybox.vert.glsl"
+    fragment "core:shaders/3d/glsl/skybox.frag.glsl"
 }

@@ -58,9 +58,9 @@ public:
     {
         if (firstTime)
         {
-            mTitleTexture = AssetManager.load!Texture2D("res://creeps/sprites/title.png");
+            mTitleTexture = AssetManager.load!Texture2D("res:creeps/sprites/title.png");
             mCamera = new OrthographicCamera(0, 480, 720, 0);
-            mFont = AssetManager.load!Font("core://fonts/internal.fnt");
+            mFont = AssetManager.load!Font("core:fonts/internal.fnt");
 
             ZyeWare.changeDisplaySize(screenSize);
         }

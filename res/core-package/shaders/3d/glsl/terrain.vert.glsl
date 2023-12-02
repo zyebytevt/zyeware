@@ -7,7 +7,7 @@ layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec4 aColor;
 
 // ===== INPUTS =====
-#include "core://shaders/include/glsl/uniforms3d.glsl"
+#include "core:shaders/include/glsl/uniforms3d.glsl"
 
 // ===== VARIANTS =====
 out vec2 vUV;

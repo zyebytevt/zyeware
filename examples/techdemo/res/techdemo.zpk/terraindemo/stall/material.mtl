@@ -1,4 +1,4 @@
-extends "core://materials/default.mtl"
+extends "core:materials/default.mtl"
 
 parameters {
     shineDamper 1.0
@@ -7,6 +7,6 @@ parameters {
 textures [
     {
         type "2d"
-        path "res://terraindemo/stall/texture.png"
+        path "res:terraindemo/stall/texture.png"
     }
 ]

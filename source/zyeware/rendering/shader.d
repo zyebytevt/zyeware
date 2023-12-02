@@ -82,7 +82,7 @@ public:
 
                 foreach (ref Include include; includes)
                 {
-                    VFSFile includeFile = VFS.getFile(cast(string) include.path);
+                    VFSFile includeFile = VFS.open(cast(string) include.path);
                     char[] includeSource = cast(char[]) includeFile.readAll!string;
                     includeFile.close();
 
@@ -102,7 +102,7 @@ public:
         void loadShader(string filePath, ShaderProperties.ShaderType type)
         {
             Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
-            VFSFile shaderFile = VFS.getFile(filePath);
+            VFSFile shaderFile = VFS.open(filePath);
             scope(exit) shaderFile.close();
 
             properties.sources[type] = parseIncludes(shaderFile.readAll!string);

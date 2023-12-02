@@ -1,6 +1,6 @@
 // ZyeWare default 3D unshaded shader.
 
 opengl {
-    vertex "core://shaders/3d/glsl/unshaded.vert.glsl"
-    fragment "core://shaders/3d/glsl/unshaded.frag.glsl"
+    vertex "core:shaders/3d/glsl/unshaded.vert.glsl"
+    fragment "core:shaders/3d/glsl/unshaded.frag.glsl"
 }

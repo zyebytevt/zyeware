@@ -15,7 +15,7 @@ class MeshDemo : GameState
 {
 protected:
     static immutable string[] sMeshPaths = [
-        "res://meshes/teapot_normal.obj"
+        "res:meshes/teapot_normal.obj"
     ];
 
     PerspectiveCamera mWorldCamera;
@@ -96,7 +96,7 @@ public:
 
         Material material = mCurrentMesh.material;
         if (!material)
-            material = AssetManager.load!Material("core://materials/default.mtl");
+            material = AssetManager.load!Material("core:materials/default.mtl");
 
         Renderer3D.uploadLights(mLights);
         Renderer3D.begin(mWorldCamera.projectionMatrix, mViewMatrix, mEnvironment);
@@ -124,9 +124,9 @@ public:
 
             mUICamera = new OrthographicCamera(0, 640, 480, 0);
 
-            mFont = AssetManager.load!Font("core://fonts/internal.fnt");
+            mFont = AssetManager.load!Font("core:fonts/internal.fnt");
             mEnvironment = new Environment3D();
-            mEnvironment.sky = new Skybox(AssetManager.load!TextureCubeMap("res://terraindemo/skybox/skybox.cube"));
+            mEnvironment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
             mEnvironment.ambientColor = Color.black;
 
             mLights ~= Renderer3D.Light(Vector3f(-5, 2, -5), Color.white, Vector3f(1, 0.005, 0.001));
