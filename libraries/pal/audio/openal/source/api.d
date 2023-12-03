@@ -57,16 +57,16 @@ void initialize()
 {
     loadLibraries();
 
+    enforce!AudioException(pDevice = alcOpenDevice(null), "Failed to create audio device.");
+    enforce!AudioException(pContext = alcCreateContext(pDevice, null), "Failed to create audio context.");
+
+    enforce!AudioException(alcMakeContextCurrent(pContext), "Failed to make audio context current.");
+
     Logger.pal.log(LogLevel.info, "Initialized OpenAL:");
     Logger.pal.log(LogLevel.info, "    Version: %s", alGetString(AL_VERSION).fromStringz);
     Logger.pal.log(LogLevel.info, "    Vendor: %s", alGetString(AL_VENDOR).fromStringz);
     Logger.pal.log(LogLevel.info, "    Renderer: %s", alGetString(AL_RENDERER).fromStringz);
     Logger.pal.log(LogLevel.info, "    Extensions: %s", alGetString(AL_EXTENSIONS).fromStringz);
-
-    enforce!AudioException(pDevice = alcOpenDevice(null), "Failed to create audio device.");
-    enforce!AudioException(pContext = alcCreateContext(pDevice, null), "Failed to create audio context.");
-
-    enforce!AudioException(alcMakeContextCurrent(pContext), "Failed to make audio context current.");
 
     pAudioThread = new AudioThread();
     pAudioThread.start();
