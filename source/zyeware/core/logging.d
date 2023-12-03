@@ -212,8 +212,10 @@ public:
     {
         static immutable string[] levelColors = ["magenta", "red", "yellow", "blue", "green", "gray"];
 
-        cwritefln("<%4$s>%3$-7s</%4$s> %2$-6s %1$7.1f | %5$s", data.uptime.toFloatSeconds, data.loggerName,
-            levelNames[data.level - 1], levelColors[data.level - 1], data.message);
+        size_t upSeconds = data.uptime.total!"seconds";
+
+        cwritefln("<%1$s>%2$-7s</%1$s> %3$-6s %4$4d:%5$02d | %6$s", levelColors[data.level - 1], levelNames[data.level - 1],
+            data.loggerName, upSeconds / 60, upSeconds % 60, data.message);
     }
 
     override void flush() 

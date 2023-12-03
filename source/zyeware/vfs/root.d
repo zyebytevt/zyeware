@@ -16,8 +16,23 @@ import std.path : buildNormalizedPath, dirName, isValidPath;
 
 import zyeware.common;
 import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
-import zyeware.vfs.zip : VFSZipLoader;
+import zyeware.vfs.zip : VFSZipLoader, VFSZipDirectory;
 import zyeware.vfs.dir : VFSCombinedDirectory;
+
+private ubyte[16] md5FromHex(string hexString)
+{
+    import std.conv : to;
+
+    if (hexString.length != 32)
+        assert(false, "Invalid MD5 string.");
+
+    ubyte[16] result;
+
+    for (size_t i; i < result.length; ++i)
+        result[i] = hexString[i * 2 .. i * 2 + 2].to!ubyte(16);
+
+    return result;
+}
 
 struct VFS
 {
@@ -107,8 +122,23 @@ package(zyeware) static:
 
         VFS.registerLoader(new VFSDiskLoader());
         VFS.registerLoader(new VFSZipLoader());
+
+        VFSDirectory corePackage = loadPackage("core.zpk", "core:");
+
+        // In release mode, let's check if the core package has been modified.
+        debug {} else {
+            VFSZipDirectory coreZip = cast(VFSZipDirectory) corePackage;
+            enforce!VFSException(coreZip, "Core package must be a zip archive.");
+
+            import std.digest.md : md5Of;
+            import std.zip : ZipArchive;
+
+            enum coreMd5 = md5FromHex("9448bc0b4ca2a31ac1b6b71c940d1601");
+            enforce!VFSException(md5Of((cast(ZipArchive)coreZip.mArchive).data) == coreMd5,
+                "Core package has been modified, cannot continue.");
+        }
     
-        sSchemes["core"] = loadPackage("core.zpk", "core:");
+        sSchemes["core"] = corePackage;
         sSchemes["res"] = new VFSCombinedDirectory("res:", []);
         sSchemes["user"] = createUserDir();
 

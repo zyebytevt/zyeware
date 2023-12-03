@@ -22,7 +22,6 @@ protected:
         file
     }
 
-    const ZipArchive mArchive;
     FileNode* mRoot;
 
     NodeType getNodeType(string path) pure const nothrow
@@ -81,6 +80,8 @@ protected:
     }
 
 package(zyeware.vfs):
+    const ZipArchive mArchive;
+
     this(string name, in ZipArchive archive, FileNode* root) pure nothrow
     {
         super(name);

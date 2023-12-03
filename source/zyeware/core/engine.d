@@ -94,7 +94,7 @@ private static:
     Application sApplication;
 
     Duration sWaitTime;
-    Duration sUpTime;
+    MonoTime sStartupTime;
     FrameTime sFrameTime;
     RandomNumberGenerator sRandom;
 
@@ -145,8 +145,6 @@ private static:
             }, No.oneshot, Yes.autostart);
         }
 
-        sUpTime = Duration.zero;
-        
         MonoTime previous = MonoTime.currTime;
         Duration lag;
 
@@ -171,7 +169,6 @@ private static:
                 sApplication.tick();
                 
                 lag -= sWaitTime;
-                sUpTime += sWaitTime;
             }
 
             InputManager.tick();
@@ -316,6 +313,7 @@ package(zyeware.core) static:
     void initialize(string[] args)
     {
         GC.disable();
+        sStartupTime = MonoTime.currTime;
         sRandom = new RandomNumberGenerator();
 
         ParsedArgs parsedArgs = parseCmdArgs(args);
@@ -529,7 +527,7 @@ public static:
     /// The duration the engine is already running.
     Duration upTime() nothrow
     {
-        return sUpTime;
+        return MonoTime.currTime - sStartupTime;
     }
 
     /// The target framerate to hit. This is not a guarantee.
