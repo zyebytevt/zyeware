@@ -1,7 +1,7 @@
 module skeleton.app;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.core.application;
 import zyeware.core.main;
 import zyeware.pal;

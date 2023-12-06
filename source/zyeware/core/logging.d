@@ -14,7 +14,7 @@ import std.traits : isSomeString;
 import std.algorithm : remove, SwapStrategy;
 import std.conv : dtext;
 
-import zyeware.common;
+import zyeware;
 
 
 /// The log level to use for various logs.

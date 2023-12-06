@@ -5,8 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.audio.source;
 
-import zyeware.common;
-import zyeware.audio;
+import zyeware;
+
 import zyeware.pal;
 import zyeware.pal.audio.types;
 

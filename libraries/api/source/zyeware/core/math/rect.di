@@ -2,7 +2,7 @@
 module zyeware.core.math.rect;
 import std.traits : isNumeric;
 import inmath.linalg;
-import zyeware.common;
+import zyeware;
 alias Rect2f = Rect!float;
 alias Rect2i = Rect!int;
 struct Rect(T) if (isNumeric!T)

@@ -3,7 +3,7 @@ module zyeware.core.math.vector;
 import inmath.math;
 import inmath.linalg;
 public import inmath.linalg : dot, cross;
-import zyeware.common;
+import zyeware;
 alias Vector2f = Vector!(float, 2);
 alias Vector2i = Vector!(int, 2);
 alias Vector3f = Vector!(float, 3);

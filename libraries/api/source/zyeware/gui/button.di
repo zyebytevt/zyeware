@@ -2,8 +2,8 @@
 module zyeware.gui.button;
 version (none)
 {
-	import zyeware.common;
-	import zyeware.rendering;
+	import zyeware;
+	
 	import zyeware.gui;
 	class GUIButton : GUINode
 	{

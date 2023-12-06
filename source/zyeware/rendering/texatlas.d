@@ -5,8 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.texatlas;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 struct TextureAtlas
 {

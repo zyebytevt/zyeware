@@ -5,7 +5,7 @@ import std.file : read, isFile;
 import std.exception : enforce;
 import std.zip;
 
-import zyeware.common;
+import zyeware;
 import zyeware.vfs.zip;
 
 package(zyeware.vfs):

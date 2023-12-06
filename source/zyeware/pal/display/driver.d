@@ -5,8 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.pal.display.driver;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 struct DisplayDriver
 {

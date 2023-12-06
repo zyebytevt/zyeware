@@ -3,7 +3,7 @@ module zyeware.core.math.shape2d;
 import std.range;
 import std.typecons : Tuple, Rebindable;
 
-import zyeware.common;
+import zyeware;
 
 /// Represents a collision in 2D space.
 struct Collision2D

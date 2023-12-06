@@ -13,7 +13,7 @@ import std.string : fromStringz;
 import bindbc.openal;
 import audioformats;
 
-import zyeware.common;
+import zyeware;
 import zyeware.pal;
 import zyeware.pal.audio.openal.types;
 import zyeware.pal.audio.openal.thread;

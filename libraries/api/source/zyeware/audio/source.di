@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/audio/source.d'
 module zyeware.audio.source;
-import zyeware.common;
-import zyeware.audio;
+import zyeware;
 import zyeware.pal;
 import zyeware.pal.audio.types;
 class AudioSource : NativeObject

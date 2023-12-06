@@ -1,6 +1,6 @@
 // D import file generated from 'source/zyeware/pal/audio/driver.d'
 module zyeware.pal.audio.driver;
-import zyeware.common;
+import zyeware;
 import zyeware.pal.audio.types;
 struct AudioDriver
 {

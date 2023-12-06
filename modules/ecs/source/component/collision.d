@@ -7,7 +7,7 @@ module zyeware.ecs.component.collision;
 
 import std.bitmanip;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 /// The `Collision2DComponent`, when attached, will cause this entity

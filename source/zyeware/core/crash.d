@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.crash;
 
-import zyeware.common;
+import zyeware;
 
 /// A `CrashHandler` is responsible for gracefully handling an unhandled `Throwable`.
 /// The handler must expect the engine to close immediately after handling.

@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.gamestate;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 /// `ECSGameState` implements the logic for a state that uses the

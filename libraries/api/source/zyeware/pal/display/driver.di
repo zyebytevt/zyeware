@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/pal/display/driver.d'
 module zyeware.pal.display.driver;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 struct DisplayDriver
 {
 	public

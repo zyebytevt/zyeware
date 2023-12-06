@@ -7,8 +7,8 @@ module zyeware.core.gamestate;
 
 public import zyeware.core.application : GameStateApplication;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 /// A game state is used in conjunction with a `GameStateApplication` instance
 /// to make managing an application with different states easier.

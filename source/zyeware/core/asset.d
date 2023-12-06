@@ -10,7 +10,7 @@ import std.exception : collectException, assumeWontThrow, enforce;
 import std.typecons : Tuple;
 import std.traits : fullyQualifiedName;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.weakref;
 
 /// UDA to mark an asset to be loaded.

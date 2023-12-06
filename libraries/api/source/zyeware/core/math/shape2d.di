@@ -2,7 +2,7 @@
 module zyeware.core.math.shape2d;
 import std.range;
 import std.typecons : Tuple, Rebindable;
-import zyeware.common;
+import zyeware;
 struct Collision2D
 {
 	bool isColliding;

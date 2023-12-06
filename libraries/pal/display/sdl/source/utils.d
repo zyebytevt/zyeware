@@ -7,8 +7,8 @@ module zyeware.pal.display.sdl.utils;
 
 import bindbc.sdl;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 SDL_Surface* createSurfaceFromImage(in Image image) nothrow
 {

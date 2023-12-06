@@ -11,7 +11,7 @@ import std.exception : enforce;
 
 import inmath.linalg;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 /// The Transform2DComponent, if attached, will give an entity a 2D

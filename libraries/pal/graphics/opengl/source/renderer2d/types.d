@@ -1,7 +1,7 @@
 module zyeware.pal.graphics.opengl.renderer2d.types;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 struct BatchVertex2D
 {

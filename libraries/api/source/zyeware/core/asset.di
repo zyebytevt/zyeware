@@ -4,7 +4,7 @@ import std.string : format;
 import std.exception : collectException, assumeWontThrow, enforce;
 import std.typecons : Tuple;
 import std.traits : fullyQualifiedName;
-import zyeware.common;
+import zyeware;
 import zyeware.core.weakref;
 struct asset
 {

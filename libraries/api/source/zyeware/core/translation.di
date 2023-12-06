@@ -3,7 +3,7 @@ module zyeware.core.translation;
 import std.string : format, startsWith;
 import std.exception : enforce, assumeWontThrow;
 import std.conv : to;
-import zyeware.common;
+import zyeware;
 alias tr = TranslationManager.translate;
 struct TranslationManager
 {

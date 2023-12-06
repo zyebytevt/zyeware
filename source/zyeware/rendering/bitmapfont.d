@@ -11,8 +11,8 @@ import std.algorithm : map;
 import std.string : format;
 
 import zyeware.zyfont;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 struct BitmapFontProperties
 {

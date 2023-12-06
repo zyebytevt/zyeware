@@ -8,7 +8,7 @@ import std.format : format, sformat;
 import std.traits : isSomeString;
 import std.algorithm : remove, SwapStrategy;
 import std.conv : dtext;
-import zyeware.common;
+import zyeware;
 enum LogLevel
 {
 	off,

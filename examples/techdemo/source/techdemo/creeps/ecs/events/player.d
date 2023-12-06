@@ -1,6 +1,6 @@
 module techdemo.creeps.ecs.events.player;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 @event struct PlayerDestroyedEvent

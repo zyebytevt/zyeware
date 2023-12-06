@@ -8,9 +8,11 @@ import std.range : empty;
 import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
 import std.path : buildNormalizedPath, dirName, isValidPath;
-import zyeware.common;
+import zyeware;
 import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
+import zyeware.vfs.zip : VFSZipLoader, VFSZipDirectory;
 import zyeware.vfs.dir : VFSCombinedDirectory;
+private ubyte[16] md5FromHex(string hexString);
 struct VFS
 {
 	private static
@@ -42,9 +44,10 @@ struct VFS
 			nothrow void cleanup();
 			public static
 			{
-				nothrow void addLoader(VFSLoader loader);
+				nothrow void registerLoader(VFSLoader loader);
 				VFSDirectory addPackage(string path);
 				VFSFile open(string name, VFSFile.Mode mode = VFSFile.Mode.read);
+				VFSFile openFromMemory(string name, in ubyte[] data);
 				VFSFile getFile(string name);
 				VFSDirectory getDirectory(string name);
 				bool hasFile(string name);

@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/core/introapp.d'
 module zyeware.core.introapp;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 package(zyeware.core) final class IntroApplication : Application
 {
 	protected

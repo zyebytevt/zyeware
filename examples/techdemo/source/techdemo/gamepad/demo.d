@@ -3,8 +3,8 @@ module techdemo.gamepad.demo;
 import std.exception : enforce;
 import std.string : format;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.pal;
 
 import techdemo.menu.menu;

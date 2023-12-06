@@ -7,8 +7,8 @@ module zyeware.ecs.component.camera;
 
 import inmath.linalg;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.ecs;
 
 /// The `CameraComponent`, when attached, will set the current entity as

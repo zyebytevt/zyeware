@@ -13,8 +13,8 @@ import std.algorithm : countUntil;
 
 import inmath.linalg;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.pal;
 import zyeware.utils.tokenizer;
 

@@ -3,10 +3,10 @@ module techdemo.terrain.demo;
 import std.math : sin, cos;
 import std.string : format;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
-import zyeware.rendering;
-import zyeware.audio;
+
+
 
 import techdemo.terrain.gui;
 import techdemo.terrain.camera;

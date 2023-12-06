@@ -4,7 +4,7 @@ import core.stdc.stdio;
 import core.stdc.config : c_long;
 import std.exception : enforce;
 import std.string : toStringz;
-import zyeware.common;
+import zyeware;
 package(zyeware.vfs) class VFSDiskFile : VFSFile
 {
 	protected
@@ -12,7 +12,7 @@ package(zyeware.vfs) class VFSDiskFile : VFSFile
 		string mDiskPath;
 		FILE* mStream;
 		FileSize mCachedFileSize = FileSize.min;
-		package
+		package(zyeware.vfs)
 		{
 			pure nothrow this(string name, string diskPath);
 			public

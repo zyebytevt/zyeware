@@ -6,8 +6,8 @@ import std.datetime;
 import std.math : sin, cos, fmod, PI;
 import std.random : uniform;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 private static immutable Vector2f screenCenter = Vector2f(320, 240);
 

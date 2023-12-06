@@ -2,8 +2,8 @@
 module zyeware.rendering.spriteframes;
 import std.datetime : dur, Duration;
 import std.conv : to;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 @(asset(Yes.cache))class SpriteFrames
 {
 	protected

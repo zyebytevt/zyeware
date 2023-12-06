@@ -5,8 +5,7 @@ import std.path : extension;
 import std.conv : to;
 import std.typecons : Rebindable;
 import inmath.linalg;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.pal;
 import zyeware.utils.tokenizer;
 interface Mesh

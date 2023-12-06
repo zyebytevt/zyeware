@@ -2,9 +2,9 @@ module techdemo.menu.vmenu;
 
 import std.typecons : Tuple;
 
-import zyeware.common;
-import zyeware.rendering;
-import zyeware.audio;
+import zyeware;
+
+
 
 class VerticalMenu
 {

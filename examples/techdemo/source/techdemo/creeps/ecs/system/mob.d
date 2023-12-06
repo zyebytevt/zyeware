@@ -2,7 +2,7 @@ module techdemo.creeps.ecs.system.mob;
 
 import std.algorithm : clamp;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 import techdemo.creeps.gamestates.menustate;

@@ -7,8 +7,8 @@ module zyeware.rendering.framebuffer;
 
 import std.exception : enforce;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.pal;
 
 struct FramebufferProperties

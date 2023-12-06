@@ -3,7 +3,7 @@ module zyeware.core.interpolator;
 import std.algorithm : remove, sort, clamp;
 import std.typecons : Tuple;
 
-import zyeware.common;
+import zyeware;
 
 /// The `Interpolator` allows to create various keypoints on a 
 /// one dimensional line, and interpolating between them.

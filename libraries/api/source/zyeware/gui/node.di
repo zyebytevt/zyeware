@@ -4,7 +4,7 @@ version (none)
 {
 	import std.algorithm : countUntil, remove;
 	import std.typecons : Tuple;
-	import zyeware.common;
+	import zyeware;
 	struct Sides
 	{
 		enum zero = Sides(0, 0, 0, 0);

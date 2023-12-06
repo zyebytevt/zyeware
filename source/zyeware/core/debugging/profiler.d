@@ -8,7 +8,7 @@ module zyeware.core.debugging.profiler;
 import std.datetime.stopwatch : StopWatch;
 import std.datetime : Duration;
 
-import zyeware.common;
+import zyeware;
 
 version (ZW_Profiling):
 

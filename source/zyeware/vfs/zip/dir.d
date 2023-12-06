@@ -5,7 +5,7 @@ import std.string : split, format;
 import std.exception : enforce;
 import std.path : isRooted;
 
-import zyeware.common;
+import zyeware;
 import zyeware.vfs.zip;
 
 package(zyeware.vfs):

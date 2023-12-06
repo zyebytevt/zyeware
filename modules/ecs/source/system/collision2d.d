@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.system.collision2d;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 /// Holds information about a collision that happened.

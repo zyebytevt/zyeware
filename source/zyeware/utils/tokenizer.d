@@ -6,7 +6,7 @@ import std.string : indexOf, format;
 import std.algorithm : canFind;
 import std.typecons : Rebindable;
 
-import zyeware.common;
+import zyeware;
 
 class TokenizerException : Exception
 {

@@ -7,7 +7,7 @@ import std.algorithm : find;
 import std.string : indexOf, format;
 import std.exception : enforce;
 import std.conv : to;
-import zyeware.common;
+import zyeware;
 private
 {
 	struct Tokenizer

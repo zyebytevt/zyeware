@@ -2,8 +2,7 @@
 module zyeware.rendering.image;
 import std.string : format;
 import std.exception : enforce;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 @(asset(Yes.cache))class Image
 {
 	protected

@@ -28,7 +28,7 @@ import std.exception : enforce;
 
 import zyeware.ecs.core.component;
 import zyeware.ecs.core.pool;
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 /// Attribute to use upon component struct's and union's.

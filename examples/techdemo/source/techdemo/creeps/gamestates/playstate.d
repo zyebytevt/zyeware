@@ -5,9 +5,9 @@ import std.math : sin, cos, PI;
 import std.algorithm : clamp;
 import std.random : uniform;
 
-import zyeware.common;
-import zyeware.rendering;
-import zyeware.audio;
+import zyeware;
+
+
 import zyeware.ecs;
 
 import techdemo.creeps.ecs.component.player;

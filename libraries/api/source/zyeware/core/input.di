@@ -2,7 +2,7 @@
 module zyeware.core.input;
 import std.typecons : scoped, Rebindable, rebindable;
 import std.exception : assumeWontThrow;
-import zyeware.common;
+import zyeware;
 struct InputManager
 {
 	@disable this();

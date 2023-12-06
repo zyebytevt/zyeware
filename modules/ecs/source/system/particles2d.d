@@ -2,9 +2,9 @@ module zyeware.ecs.system.particles2d;
 
 import std.datetime : Duration;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
-import zyeware.rendering;
+
 
 version(none):
 

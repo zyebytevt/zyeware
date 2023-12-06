@@ -8,7 +8,7 @@ module zyeware.core.input;
 import std.typecons : scoped, Rebindable, rebindable;
 import std.exception : assumeWontThrow;
 
-import zyeware.common;
+import zyeware;
 
 /// The `InputManager` is responsible for mapping inputs to specific actions.
 struct InputManager

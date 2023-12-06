@@ -3,7 +3,7 @@ module zyeware.rendering.color;
 import inmath.linalg;
 import inmath.hsv : rgb2hsv, hsv2rgb;
 
-import zyeware.common;
+import zyeware;
 
 alias Gradient = Interpolator!(Color, Color.lerp);
 

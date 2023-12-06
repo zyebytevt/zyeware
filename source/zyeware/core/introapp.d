@@ -1,7 +1,7 @@
 module zyeware.core.introapp;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 package(zyeware.core)
 final class IntroApplication : Application
@@ -26,7 +26,7 @@ package(zyeware):
 public:
     override void initialize()
     {
-        ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
+        ZyeWare.scaleMode = ScaleMode.keepAspect;
 
         mEngineLogo = AssetManager.load!Texture2D("core:textures/engine-logo.png");
         mInternalFont = AssetManager.load!BitmapFont("core:fonts/internal.fnt");
@@ -61,7 +61,10 @@ public:
     override void tick()
     {
         if (ZyeWare.upTime.toFloatSeconds > 2.5f)
-            ZyeWare.callDeferred(() { ZyeWare.application = mMainApplication; });
+            ZyeWare.callDeferred(() {
+                ZyeWare.scaleMode = ZyeWare.projectProperties.scaleMode;
+                ZyeWare.application = mMainApplication;
+            });
     }
 
     override void draw()

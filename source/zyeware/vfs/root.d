@@ -14,7 +14,7 @@ import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
 import std.path : buildNormalizedPath, dirName, isValidPath;
 
-import zyeware.common;
+import zyeware;
 import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
 import zyeware.vfs.zip : VFSZipLoader, VFSZipDirectory;
 import zyeware.vfs.dir : VFSCombinedDirectory;

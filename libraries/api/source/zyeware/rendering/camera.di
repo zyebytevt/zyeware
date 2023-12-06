@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/rendering/camera.d'
 module zyeware.rendering.camera;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 interface Camera
 {
 	public

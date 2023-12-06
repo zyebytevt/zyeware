@@ -9,7 +9,7 @@ import std.string : format, startsWith;
 import std.exception : enforce, assumeWontThrow;
 import std.conv : to;
 
-import zyeware.common;
+import zyeware;
 
 /// Translates a key.
 alias tr = TranslationManager.translate;

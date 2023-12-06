@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/rendering/texatlas.d'
 module zyeware.rendering.texatlas;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 struct TextureAtlas
 {
 	private

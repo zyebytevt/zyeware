@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.vfs.loader;
 
-import zyeware.common;
+import zyeware;
 import zyeware.vfs;
 
 /// Interface for all VFS loaders. They are responsible for checking and loading various

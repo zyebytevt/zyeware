@@ -7,8 +7,8 @@ module zyeware.rendering.terrain;
 
 import std.math : fmod;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 /+
 struct TerrainProperties

@@ -2,8 +2,7 @@
 module zyeware.rendering.renderer3d;
 import std.typecons : Rebindable;
 import std.exception : enforce;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.pal;
 struct Renderer3D
 {

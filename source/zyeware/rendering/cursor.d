@@ -2,8 +2,8 @@ module zyeware.rendering.cursor;
 
 import std.conv : to;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.utils.tokenizer;
 
 @asset(Yes.cache)

@@ -1,6 +1,6 @@
 module techdemo.creeps.ecs.component.mob;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 @component struct MobComponent

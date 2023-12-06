@@ -2,7 +2,7 @@
 module zyeware.core.interpolator;
 import std.algorithm : remove, sort, clamp;
 import std.typecons : Tuple;
-import zyeware.common;
+import zyeware;
 struct Interpolator(T, alias lerp)
 {
 	protected

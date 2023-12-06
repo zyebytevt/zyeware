@@ -1,8 +1,8 @@
 module techdemo.app;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.application;
-import zyeware.rendering;
+
 
 import techdemo.menu.menu;
 

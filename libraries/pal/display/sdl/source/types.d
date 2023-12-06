@@ -9,8 +9,8 @@ import std.typecons : Rebindable;
 
 import bindbc.sdl;
 
-import zyeware.rendering;
-import zyeware.common;
+
+import zyeware;
 
 struct WindowData
 {

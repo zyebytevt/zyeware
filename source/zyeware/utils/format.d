@@ -2,7 +2,7 @@ module zyeware.utils.format;
 
 import std.format : format;
 
-import zyeware.common;
+import zyeware;
 
 string bytesToString(size_t byteCount) pure nothrow
 {

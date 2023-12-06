@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/pal/graphics/driver.d'
 module zyeware.pal.graphics.driver;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.pal.graphics.types;
 struct GraphicsDriver
 {

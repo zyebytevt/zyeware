@@ -1,7 +1,7 @@
 // D import file generated from 'source/zyeware/audio/bus.d'
 module zyeware.audio.bus;
 import std.algorithm : clamp;
-import zyeware.common;
+import zyeware;
 import zyeware.pal;
 class AudioBus : NativeObject
 {

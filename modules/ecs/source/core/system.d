@@ -30,7 +30,7 @@ import std.exception : enforce;
 
 import zyeware.ecs.core.entity;
 import zyeware.core.debugging.profiler;
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
 
 /// How a system handles pause mode.

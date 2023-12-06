@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.pal.pal;
 
-import zyeware.common;
+import zyeware;
 import zyeware.pal.graphics.driver;
 import zyeware.pal.display.driver;
 import zyeware.pal.audio.driver;

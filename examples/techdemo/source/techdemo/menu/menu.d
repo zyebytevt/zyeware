@@ -6,9 +6,9 @@ import std.string : format;
 import std.random : uniform;
 import std.datetime : Duration, dur;
 
-import zyeware.common;
-import zyeware.rendering;
-import zyeware.audio;
+import zyeware;
+
+
 import zyeware.pal.audio.types;
 
 import techdemo.menu.vmenu;

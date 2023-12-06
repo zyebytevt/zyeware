@@ -10,9 +10,9 @@ import std.typecons : Tuple;
 import std.string : format;
 import std.exception : enforce;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
-import zyeware.rendering;
+
 
 /// The `SpriteComponent` gives an entity the ability to represent itself
 /// with a `Texture2D` with the given parameters.

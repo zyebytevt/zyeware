@@ -13,7 +13,7 @@ import std.stdio : stderr;
 
 import bindbc.loader;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.application;
 
 version (unittest)

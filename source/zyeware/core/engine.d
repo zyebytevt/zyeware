@@ -18,12 +18,12 @@ import std.algorithm : min;
 
 import bindbc.loader;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.events;
 import zyeware.core.application;
 import zyeware.core.debugging;
-import zyeware.rendering;
-import zyeware.audio;
+
+
 import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
@@ -39,11 +39,21 @@ struct ProjectProperties
     Application mainApplication; /// The application to use.
     CrashHandler crashHandler; /// The crash handler to use.
     DisplayProperties mainDisplayProperties; /// The properties of the main display.
+    ScaleMode scaleMode = ScaleMode.center; /// How the main framebuffer should be scaled on resizing.
 
     uint audioBufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
     uint audioBufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
 
     uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
+}
+
+/// How the main framebuffer should be scaled on resizing.
+enum ScaleMode
+{
+    center, /// Keep the original size at the center of the display.
+    keepAspect, /// Scale with display, but keep the aspect.
+    fill, /// Fill the display completely.
+    changeDisplaySize /// Resize the framebuffer itself.
 }
 
 /// Holds information about passed time since the last frame.
@@ -355,6 +365,7 @@ package(zyeware.core) static:
 
         sProjectProperties = properties;
         targetFrameRate = properties.targetFrameRate;
+        sScaleMode = properties.scaleMode;
         
         enforce!CoreException(properties.mainApplication, "Main application cannot be null.");
         
@@ -409,15 +420,6 @@ package(zyeware.core) static:
 public static:
     /// The current version of the engine.
     immutable Version engineVersion = Version(0, 6, 0, "alpha");
-
-    /// How the framebuffer should be scaled on resizing.
-    enum ScaleMode
-    {
-        center, /// Keep the original size at the center of the display.
-        keepAspect, /// Scale with display, but keep the aspect.
-        fill, /// Fill the display completely.
-        changeDisplaySize /// Resize the framebuffer itself.
-    }
 
     /// Stops the main loop and quits the engine.
     void quit() nothrow

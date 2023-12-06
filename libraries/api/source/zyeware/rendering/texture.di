@@ -3,8 +3,7 @@ module zyeware.rendering.texture;
 import std.conv : to;
 import std.string : format;
 import std.algorithm : countUntil;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.pal;
 import zyeware.utils.tokenizer;
 struct TextureProperties

@@ -10,9 +10,9 @@ import std.string : lineSplitter;
 import std.typecons : Rebindable;
 import std.exception : enforce;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.debugging.profiler;
-import zyeware.rendering;
+
 import zyeware.pal;
 
 struct Renderer2D

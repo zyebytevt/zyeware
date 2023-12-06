@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/rendering/display.d'
 module zyeware.rendering.display;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.pal;
 struct DisplayProperties
 {

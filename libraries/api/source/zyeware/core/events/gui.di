@@ -3,7 +3,7 @@ module zyeware.core.events.gui;
 version (none)
 {
 	import std.format : format;
-	import zyeware.common;
+	import zyeware;
 	import zyeware.gui;
 	abstract class GUIEvent : Event
 	{

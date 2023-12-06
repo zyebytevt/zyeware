@@ -6,8 +6,8 @@ import std.typecons : Rebindable;
 
 import bindbc.opengl;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.pal.graphics.types;
 
 import zyeware.pal.graphics.opengl.api.api;

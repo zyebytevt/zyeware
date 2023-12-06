@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/rendering/environment.d'
 module zyeware.rendering.environment;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 struct Environment3D
 {
 	Mesh3D sky;

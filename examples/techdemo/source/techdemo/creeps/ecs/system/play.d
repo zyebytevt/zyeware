@@ -4,9 +4,9 @@ import std.random : uniform;
 import std.datetime : dur;
 import std.math : sin, cos, PI;
 
-import zyeware.common;
-import zyeware.rendering;
-import zyeware.audio;
+import zyeware;
+
+
 import zyeware.ecs;
 
 import techdemo.creeps.ecs.component.player;

@@ -8,7 +8,7 @@ module zyeware.vfs.dir;
 import std.exception : enforce;
 import std.string : format;
 
-import zyeware.common;
+import zyeware;
 import zyeware.vfs;
 
 /// Represents a virtual directory in the VFS. Where this directory is

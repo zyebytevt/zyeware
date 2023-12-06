@@ -4,7 +4,7 @@ import std.exception : enforce, assumeWontThrow;
 import std.string : format;
 import std.path : isRooted, buildPath, baseName;
 import std.file : exists, isDir, isFile, dirEntries, SpanMode;
-import zyeware.common;
+import zyeware;
 import zyeware.vfs.dir : isWriteMode;
 import zyeware.vfs.disk;
 package(zyeware.vfs) class VFSDiskDirectory : VFSDirectory

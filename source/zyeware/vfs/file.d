@@ -11,7 +11,7 @@ import std.bitmanip : Endian, littleEndianToNative, bigEndianToNative;
 import std.traits : isNumeric, isUnsigned;
 import std.exception : enforce;
 
-import zyeware.common;
+import zyeware;
 
 /// Represents a virtual file in the VFS. Where this file is
 /// physically located depends on the implementation.

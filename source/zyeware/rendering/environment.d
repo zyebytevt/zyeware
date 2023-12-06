@@ -5,8 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.environment;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 struct Environment3D
 {

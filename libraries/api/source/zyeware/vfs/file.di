@@ -4,7 +4,7 @@ import core.stdc.stdio;
 import std.bitmanip : Endian, littleEndianToNative, bigEndianToNative;
 import std.traits : isNumeric, isUnsigned;
 import std.exception : enforce;
-import zyeware.common;
+import zyeware;
 abstract class VFSFile
 {
 	protected

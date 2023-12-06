@@ -7,8 +7,8 @@ module zyeware.audio.buffer;
 
 import std.conv : to;
 
-import zyeware.common;
-import zyeware.audio;
+import zyeware;
+
 import zyeware.pal;
 import zyeware.pal.audio.types;
 import zyeware.utils.tokenizer;

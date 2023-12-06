@@ -3,8 +3,7 @@ module zyeware.rendering.frameanim;
 import std.datetime : dur, Duration;
 import std.conv : to;
 import std.exception : enforce;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.utils.tokenizer;
 @(asset(Yes.cache))class FrameAnimations
 {

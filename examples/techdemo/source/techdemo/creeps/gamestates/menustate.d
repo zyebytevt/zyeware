@@ -2,8 +2,8 @@ module techdemo.creeps.gamestates.menustate;
 
 import std.math : sin;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 import techdemo.creeps.gamestates.playstate;
 

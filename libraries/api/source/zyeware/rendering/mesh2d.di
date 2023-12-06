@@ -1,7 +1,6 @@
 // D import file generated from 'source/zyeware/rendering/mesh2d.d'
 module zyeware.rendering.mesh2d;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 @(asset(Yes.cache))class Mesh2D : Mesh
 {
 	protected

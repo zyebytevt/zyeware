@@ -1,8 +1,7 @@
 // D import file generated from 'source/zyeware/core/gamestate.d'
 module zyeware.core.gamestate;
 public import zyeware.core.application : GameStateApplication;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 abstract class GameState
 {
 	private

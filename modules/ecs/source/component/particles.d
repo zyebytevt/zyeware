@@ -1,8 +1,8 @@
 module zyeware.ecs.component.particles;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
-import zyeware.rendering;
+
 
 version(none):
 

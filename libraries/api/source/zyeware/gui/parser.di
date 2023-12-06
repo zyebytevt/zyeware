@@ -5,6 +5,6 @@ version (none)
 	import std.exception : enforce;
 	import std.string : format;
 	import std.algorithm : filter;
-	import zyeware.common;
+	import zyeware;
 	import zyeware.gui;
 }

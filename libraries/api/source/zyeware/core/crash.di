@@ -1,6 +1,6 @@
 // D import file generated from 'source/zyeware/core/crash.d'
 module zyeware.core.crash;
-import zyeware.common;
+import zyeware;
 interface CrashHandler
 {
 	void show(Throwable t);

@@ -7,7 +7,7 @@ module zyeware.pal.audio.openal.thread;
 
 import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
-import zyeware.common;
+import zyeware;
 import zyeware.pal.audio.openal.api : updateSourceBuffers, pSources;
 import zyeware.pal.audio.openal.types;
 

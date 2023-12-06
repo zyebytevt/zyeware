@@ -1,8 +1,8 @@
 module zyeware.pal.graphics.opengl.api.utils;
 
-import bindbc.opengl;
+import zyeware;
 
-import zyeware.rendering;
+import bindbc.opengl;
 
 package(zyeware.pal.graphics.opengl):
 

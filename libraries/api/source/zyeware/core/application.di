@@ -4,9 +4,8 @@ import core.memory : GC;
 import std.algorithm : min;
 import std.typecons : Nullable;
 public import zyeware.core.gamestate;
-import zyeware.common;
+import zyeware;
 import zyeware.utils.collection;
-import zyeware.rendering;
 abstract class Application
 {
 	public

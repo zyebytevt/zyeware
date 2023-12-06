@@ -3,8 +3,8 @@ module techdemo.terrain.camera;
 import std.math : sin, cos;
 
 import zyeware.ecs;
-import zyeware.rendering;
-import zyeware.common;
+
+import zyeware;
 
 version(none):
 

@@ -4,7 +4,7 @@ import std.traits : isNumeric;
 
 import inmath.linalg;
 
-import zyeware.common;
+import zyeware;
 
 /// A two dimensional rectangle with float values.
 alias Rect2f = Rect!float;

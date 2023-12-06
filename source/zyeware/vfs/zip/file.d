@@ -6,7 +6,7 @@ import std.exception : enforce;
 import std.zip;
 import std.typecons : Rebindable;
 
-import zyeware.common;
+import zyeware;
 
 package(zyeware.vfs):
 

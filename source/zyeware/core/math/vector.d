@@ -5,7 +5,7 @@ import inmath.linalg;
 
 public import inmath.linalg : dot, cross;
 
-import zyeware.common;
+import zyeware;
 
 /// A two dimensional vector with float values.
 alias Vector2f = Vector!(float, 2);

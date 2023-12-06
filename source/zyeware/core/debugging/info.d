@@ -2,7 +2,7 @@ module zyeware.core.debugging.info;
 
 import core.memory;
 
-import zyeware.common;
+import zyeware;
 
 version (ZW_Profiling)
 package(zyeware)

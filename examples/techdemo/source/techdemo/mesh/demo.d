@@ -6,8 +6,8 @@ import std.exception : enforce;
 import std.math : sin, cos, PI, abs;
 import std.algorithm : clamp;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 version(none):
 

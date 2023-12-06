@@ -9,8 +9,7 @@ import std.math : sin, cos, PI;
 import std.exception : enforce;
 import std.range : walkLength;
 import std.string : format;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 alias ParticleRegistrationID = size_t;
 class Particles2D
 {

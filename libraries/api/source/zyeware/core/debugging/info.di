@@ -1,7 +1,7 @@
 // D import file generated from 'source/zyeware/core/debugging/info.d'
 module zyeware.core.debugging.info;
 import core.memory;
-import zyeware.common;
+import zyeware;
 version (ZW_Profiling)
 {
 	package(zyeware) struct DebugInfoManager

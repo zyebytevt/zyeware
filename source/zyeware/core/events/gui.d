@@ -9,7 +9,7 @@ version(none):
 
 import std.format : format;
 
-import zyeware.common;
+import zyeware;
 import zyeware.gui;
 
 // ==============================================================

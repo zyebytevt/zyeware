@@ -5,7 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.pal.audio.driver;
 
-import zyeware.common;
+import zyeware;
 import zyeware.pal.audio.types;
 
 struct AudioDriver

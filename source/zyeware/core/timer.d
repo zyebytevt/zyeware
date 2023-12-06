@@ -9,7 +9,7 @@ import core.time;
 import std.typecons : Tuple, Flag, Yes, No;
 import std.algorithm : remove, countUntil;
 
-import zyeware.common;
+import zyeware;
 
 /// A timer is used to call a callback function after a specified
 /// amount of time has passed. It can be set to trigger only once,

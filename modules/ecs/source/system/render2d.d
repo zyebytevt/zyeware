@@ -7,9 +7,9 @@ module zyeware.ecs.system.render2d;
 
 import std.datetime : Duration;
 
-import zyeware.common;
+import zyeware;
 import zyeware.ecs;
-import zyeware.rendering;
+
 import zyeware.pal;
 
 /// This system is responsible for rendering all entities with `SpriteComponent`s to

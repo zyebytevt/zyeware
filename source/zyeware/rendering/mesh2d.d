@@ -1,7 +1,7 @@
 module zyeware.rendering.mesh2d;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 @asset(Yes.cache)
 class Mesh2D : Mesh

@@ -10,12 +10,10 @@ import std.typecons : scoped;
 import std.datetime : Duration, dur;
 import std.algorithm : min;
 import bindbc.loader;
-import zyeware.common;
+import zyeware;
 import zyeware.core.events;
 import zyeware.core.application;
 import zyeware.core.debugging;
-import zyeware.rendering;
-import zyeware.audio;
 import zyeware.core.crash;
 import zyeware.utils.format;
 import zyeware.core.introapp;
@@ -27,9 +25,17 @@ struct ProjectProperties
 	Application mainApplication;
 	CrashHandler crashHandler;
 	DisplayProperties mainDisplayProperties;
+	ScaleMode scaleMode = ScaleMode.center;
 	uint audioBufferSize = 4096 * 4;
 	uint audioBufferCount = 4;
 	uint targetFrameRate = 60;
+}
+enum ScaleMode
+{
+	center,
+	keepAspect,
+	fill,
+	changeDisplaySize,
 }
 struct FrameTime
 {
@@ -65,7 +71,7 @@ struct ZyeWare
 		Display sMainDisplay;
 		Application sApplication;
 		Duration sWaitTime;
-		Duration sUpTime;
+		MonoTime sStartupTime;
 		FrameTime sFrameTime;
 		RandomNumberGenerator sRandom;
 		Framebuffer sMainFramebuffer;
@@ -97,13 +103,6 @@ struct ZyeWare
 			public static
 			{
 				immutable Version engineVersion = Version(0, 6, 0, "alpha");
-				enum ScaleMode
-				{
-					center,
-					keepAspect,
-					fill,
-					changeDisplaySize,
-				}
 				nothrow void quit();
 				pragma (inline, true)nothrow void emit(E : Event, Args...)(Args args)
 				{

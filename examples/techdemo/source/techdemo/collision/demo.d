@@ -2,10 +2,10 @@ module techdemo.collision.demo;
 
 import std.random : uniform;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.gamestate;
 import zyeware.ecs;
-import zyeware.rendering;
+
 import zyeware.pal;
 
 import techdemo.menu.menu;

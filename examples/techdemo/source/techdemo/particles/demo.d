@@ -4,8 +4,8 @@ import std.exception : enforce;
 import std.datetime : seconds, msecs;
 import std.string : format;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.core.debugging.profiler;
 import zyeware.pal;
 

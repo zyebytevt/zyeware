@@ -3,8 +3,8 @@ module techdemo.terrain.gui;
 import std.string : format;
 
 import zyeware.ecs;
-import zyeware.rendering;
-import zyeware.common;
+
+import zyeware;
 import zyeware.core.debugging.profiler;
 
 version(none):

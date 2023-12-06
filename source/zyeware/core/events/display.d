@@ -8,7 +8,7 @@ module zyeware.core.events.display;
 import std.string : format;
 import std.typecons : Rebindable;
 
-import zyeware.common;
+import zyeware;
 import zyeware.core.events.event;
 import zyeware.rendering.display;
 

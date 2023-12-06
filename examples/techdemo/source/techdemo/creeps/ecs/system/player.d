@@ -2,8 +2,8 @@ module techdemo.creeps.ecs.system.player;
 
 import std.algorithm : clamp;
 
-import zyeware.common;
-import zyeware.audio;
+import zyeware;
+
 import zyeware.ecs;
 
 import techdemo.creeps.ecs.component.player;

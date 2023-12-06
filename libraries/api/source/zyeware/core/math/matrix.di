@@ -2,7 +2,7 @@
 module zyeware.core.math.matrix;
 import inmath.math;
 import inmath.linalg;
-import zyeware.common;
+import zyeware;
 alias Quaternionf = Quaternion!float;
 alias Matrix4f = Matrix!(float, 4, 4);
 alias Matrix3f = Matrix!(float, 3, 3);

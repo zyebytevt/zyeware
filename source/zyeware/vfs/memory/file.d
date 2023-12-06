@@ -2,7 +2,7 @@ module zyeware.vfs.memory.file;
 
 import core.stdc.string : memcpy;
 
-import zyeware.common;
+import zyeware;
 
 package(zyeware.vfs):
 

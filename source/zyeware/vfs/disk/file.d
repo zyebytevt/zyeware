@@ -6,7 +6,7 @@ import core.stdc.config : c_long;
 import std.exception : enforce;
 import std.string : toStringz;
 
-import zyeware.common;
+import zyeware;
 
 package(zyeware.vfs):
 

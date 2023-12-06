@@ -11,8 +11,8 @@ import std.string : format, toStringz, fromStringz;
 
 import bindbc.opengl;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.pal;
 
 import zyeware.pal.graphics.types;

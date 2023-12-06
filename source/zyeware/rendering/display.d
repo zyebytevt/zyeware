@@ -5,8 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.display;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 import zyeware.pal;
 
 struct DisplayProperties

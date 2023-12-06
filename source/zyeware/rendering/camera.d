@@ -5,8 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.rendering.camera;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 /// Provides common functionality between different types of cameras.
 interface Camera

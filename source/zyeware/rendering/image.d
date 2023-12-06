@@ -10,8 +10,8 @@ import std.exception : enforce;
 
 static import gamut;
 
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 
 @asset(Yes.cache)
 class Image

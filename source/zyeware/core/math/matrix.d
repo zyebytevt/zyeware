@@ -3,7 +3,7 @@ module zyeware.core.math.matrix;
 import inmath.math;
 import inmath.linalg;
 
-import zyeware.common;
+import zyeware;
 
 /// A quaternion with float values.
 alias Quaternionf = Quaternion!(float);

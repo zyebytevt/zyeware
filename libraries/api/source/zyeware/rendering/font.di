@@ -3,8 +3,8 @@ module zyeware.rendering.font;
 import std.traits : isSomeString;
 import std.range : ElementEncodingType;
 import bmfont : BMFont = Font, parseFnt;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
+
 @(asset(Yes.cache))class Font
 {
 	protected

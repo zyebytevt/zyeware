@@ -3,7 +3,7 @@ module zyeware.core.timer;
 import core.time;
 import std.typecons : Tuple, Flag, Yes, No;
 import std.algorithm : remove, countUntil;
-import zyeware.common;
+import zyeware;
 final class Timer
 {
 	private

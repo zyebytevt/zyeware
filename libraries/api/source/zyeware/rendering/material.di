@@ -9,8 +9,7 @@ import std.string : split, format;
 import std.algorithm : map, filter, sort, uniq;
 import std.array : array;
 import inmath.linalg;
-import zyeware.common;
-import zyeware.rendering;
+import zyeware;
 import zyeware.utils.tokenizer;
 @(asset(Yes.cache))class Material
 {
