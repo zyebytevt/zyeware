@@ -7,7 +7,7 @@ module zyeware.rendering;
 
 public
 {
-    import zyeware.rendering.camera;
+    import zyeware.rendering.projection;
     import zyeware.rendering.color;
     import zyeware.rendering.cursor;
     import zyeware.rendering.environment;

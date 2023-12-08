@@ -9,7 +9,7 @@ final class IntroApplication : Application
 protected:
     Texture2D mEngineLogo;
     Application mMainApplication;
-    OrthographicCamera mCamera;
+    OrthographicProjection mProjection;
     BitmapFont mInternalFont;
     string mVersionString;
 
@@ -32,7 +32,7 @@ public:
         mInternalFont = AssetManager.load!BitmapFont("core:fonts/internal.fnt");
         mVersionString = "v" ~ ZyeWare.engineVersion.toString;
 
-        mCamera = new OrthographicCamera(-1, 1, 1, -1);
+        mProjection = new OrthographicProjection(-1, 1, 1, -1);
 
         mBackgroundGradient.addPoint(0, Color.grape);
         mAlphaInterpolator.addPoint(0, 1f);
@@ -79,7 +79,7 @@ public:
 
         immutable float alpha = mAlphaInterpolator.interpolate(seconds);
 
-        Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mProjection.projectionMatrix, Matrix4f.identity);
 
         Renderer2D.drawRectangle(Rect2f(position, size), Matrix4f.identity,
             Color(1, 1, 1, alpha), mEngineLogo);
