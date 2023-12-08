@@ -3,14 +3,14 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.ecs.gamestate;
+module zyeware.ecs.appstate;
 
 import zyeware;
 import zyeware.ecs;
 
 /// `ECSGameState` implements the logic for a state that uses the
 /// entity-component-system model.
-class ECSGameState : GameState
+class ECSGameState : AppState
 {
 private:
     EntityManager mEntities;
@@ -18,7 +18,7 @@ private:
     SystemManager mSystems;
 
 protected:
-    this(GameStateApplication application, size_t maxComponentTypes = 64,
+    this(StateApplication application, size_t maxComponentTypes = 64,
             size_t componentPoolSize = 8192)
     {
         super(application);

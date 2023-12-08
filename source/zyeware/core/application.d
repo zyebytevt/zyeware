@@ -9,7 +9,7 @@ import core.memory : GC;
 import std.algorithm : min;
 import std.typecons : Nullable;
 
-public import zyeware.core.gamestate;
+public import zyeware.core.appstate;
 import zyeware;
 import zyeware.utils.collection;
 
@@ -61,13 +61,13 @@ public:
 
 /// A ZyeWare application that takes care of the game state logic.
 /// Game states can be set, pushed and popped.
-class GameStateApplication : Application
+class StateApplication : Application
 {
 private:
     enum deferWarning = "Changing game state during event emission can cause instability. Use a deferred call instead.";
 
 protected:
-    GrowableStack!GameState mStateStack;
+    GrowableStack!AppState mStateStack;
 
 public:
     override void receive(in Event ev)
@@ -98,7 +98,7 @@ public:
     /// Params:
     ///     state = The game state to switch to.
     /// See_Also: ZyeWare.callDeferred
-    void changeState(GameState state)
+    void changeState(AppState state)
         in (state, "Game state cannot be null.")
     {
         debug if (ZyeWare.isEmittingEvent)
@@ -120,7 +120,7 @@ public:
     /// Params:
     ///     state = The state to push and switch to.
     /// See_Also: ZyeWare.callDeferred
-    void pushState(GameState state)
+    void pushState(AppState state)
         in (state, "Game state cannot be null.")
     {
         debug if (ZyeWare.isEmittingEvent)
@@ -154,7 +154,7 @@ public:
 
     /// The current game state.
     pragma(inline, true)
-    GameState currentState()
+    AppState currentState()
     {
         return mStateStack.peek;
     }

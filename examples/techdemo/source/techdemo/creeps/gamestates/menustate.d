@@ -7,7 +7,7 @@ import zyeware;
 
 import techdemo.creeps.gamestates.playstate;
 
-class CreepsMenuState : GameState
+class CreepsMenuState : AppState
 {
 protected:
     Texture2D mTitleTexture;
@@ -18,7 +18,7 @@ protected:
 public:
     static immutable Vector2i screenSize = Vector2i(480, 720);
 
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
     }

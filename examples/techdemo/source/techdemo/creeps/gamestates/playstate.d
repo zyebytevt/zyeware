@@ -19,7 +19,7 @@ import techdemo.creeps.ecs.system.play;
 class CreepsPlayState : ECSGameState
 {
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
     }

@@ -11,5 +11,5 @@ public
     import zyeware.ecs.component;
     import zyeware.ecs.system;
 
-    import zyeware.ecs.gamestate;
+    import zyeware.ecs.appstate;
 }

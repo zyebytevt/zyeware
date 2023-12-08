@@ -3,25 +3,25 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.core.gamestate;
+module zyeware.core.appstate;
 
-public import zyeware.core.application : GameStateApplication;
+public import zyeware.core.application : StateApplication;
 
 import zyeware;
 
 
-/// A game state is used in conjunction with a `GameStateApplication` instance
+/// A game state is used in conjunction with a `StateApplication` instance
 /// to make managing an application with different states easier.
-abstract class GameState
+abstract class AppState
 {
 private:
-    GameStateApplication mApplication;
+    StateApplication mApplication;
 
 package(zyeware.core):
     bool mWasAlreadyAttached;
 
 protected:
-    this(GameStateApplication application) pure nothrow
+    this(StateApplication application) pure nothrow
         in (application, "Parent application cannot be null.")
     {
         mApplication = application;
@@ -37,13 +37,13 @@ public:
     /// Override this function to perform rendering.
     abstract void draw();
     
-    /// Called when this game state gets attached to a `GameStateApplication`.
+    /// Called when this game state gets attached to a `StateApplication`.
     ///
     /// Params:
     ///     firstTime = Whether it gets attached the first time or not.
     void onAttach(bool firstTime) {}
 
-    /// Called when this game state gets detached from a `GameStateApplication`.
+    /// Called when this game state gets detached from a `StateApplication`.
     void onDetach() {}
     
     /// Handles the specified event in whatever manners seem appropriate.
@@ -53,7 +53,7 @@ public:
     void receive(in Event ev) {}
 
     /// The application this game state is registered to.
-    inout(GameStateApplication) application() pure inout nothrow
+    inout(StateApplication) application() pure inout nothrow
     {
         return mApplication;
     }

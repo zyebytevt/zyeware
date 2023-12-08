@@ -9,7 +9,7 @@ import zyeware.pal;
 
 import techdemo.menu.menu;
 
-class GamepadDemo : GameState
+class GamepadDemo : AppState
 {
 protected:
     OrthographicCamera mUICamera;
@@ -17,7 +17,7 @@ protected:
     size_t mCurrentGamepadIndex;
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
     }

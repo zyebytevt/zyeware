@@ -11,7 +11,7 @@ import zyeware.gui;
 
 version(none):
 
-class GUIDemo : GameState
+class GUIDemo : AppState
 {
 protected:
     OrthographicCamera mUICamera;
@@ -20,7 +20,7 @@ protected:
     GUINode mRoot;
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
     }

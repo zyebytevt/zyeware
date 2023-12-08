@@ -9,7 +9,7 @@ import zyeware;
 import zyeware.core.debugging.profiler;
 import zyeware.pal;
 
-class ParticlesDemo : GameState
+class ParticlesDemo : AppState
 {
 protected:
     OrthographicCamera mUICamera;
@@ -18,7 +18,7 @@ protected:
     ParticleRegistrationID mStarParticlesId;
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
     }

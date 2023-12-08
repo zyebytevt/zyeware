@@ -23,7 +23,7 @@ import techdemo.gui.demo;
 
 private static immutable Vector2f screenCenter = Vector2f(320, 240);
 
-class DemoMenu : GameState
+class DemoMenu : AppState
 {
 protected:
     static size_t sCurrentLocale = 0;
@@ -38,7 +38,7 @@ protected:
     Texture2D mLogoTexture;
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
 

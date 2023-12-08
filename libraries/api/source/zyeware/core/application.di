@@ -3,7 +3,7 @@ module zyeware.core.application;
 import core.memory : GC;
 import std.algorithm : min;
 import std.typecons : Nullable;
-public import zyeware.core.gamestate;
+public import zyeware.core.appstate;
 import zyeware;
 import zyeware.utils.collection;
 abstract class Application
@@ -17,23 +17,23 @@ abstract class Application
 		void receive(in Event ev);
 	}
 }
-class GameStateApplication : Application
+class StateApplication : Application
 {
 	private
 	{
 		enum deferWarning = "Changing game state during event emission can cause instability. Use a deferred call instead.";
 		protected
 		{
-			GrowableStack!GameState mStateStack;
+			GrowableStack!AppState mStateStack;
 			public
 			{
 				override void receive(in Event ev);
 				override void tick();
 				override void draw();
-				void changeState(GameState state);
-				void pushState(GameState state);
+				void changeState(AppState state);
+				void pushState(AppState state);
 				void popState();
-				pragma (inline, true)GameState currentState()
+				pragma (inline, true)AppState currentState()
 				{
 					return mStateStack.peek;
 				}

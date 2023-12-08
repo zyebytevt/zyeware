@@ -97,7 +97,7 @@ protected:
     }
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         import std.random : uniform;
 

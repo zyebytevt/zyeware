@@ -7,7 +7,7 @@ package(zyeware.core) final class IntroApplication : Application
 	{
 		Texture2D mEngineLogo;
 		Application mMainApplication;
-		OrthographicCamera mCamera;
+		OrthographicProjection mCamera;
 		BitmapFont mInternalFont;
 		string mVersionString;
 		Gradient mBackgroundGradient;

@@ -22,7 +22,7 @@ public:
         mVFrames = vFrames;
     }
 
-    Rect2f getRegionForFrame(size_t frame) pure nothrow
+    Rect2f getRegionForFrame(size_t frame) pure const nothrow
     {
         immutable float x1 = cast(float) (frame % mHFrames) / mHFrames;
         immutable float y1 = cast(float) (frame / mHFrames) / mVFrames;
@@ -35,7 +35,7 @@ public:
         );
     }
 
-    Vector2f spriteSize() pure nothrow
+    Vector2f spriteSize() pure const nothrow
     {
         return Vector2f(
             mTexture.size.x / mHFrames,

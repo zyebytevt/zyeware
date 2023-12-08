@@ -40,7 +40,7 @@ public:
 	}
 }
 
-class TechDemoApplication : GameStateApplication
+class TechDemoApplication : StateApplication
 {
 public:
 	override void initialize()

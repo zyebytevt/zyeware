@@ -11,7 +11,7 @@ import zyeware;
 
 version(none):
 
-class MeshDemo : GameState
+class MeshDemo : AppState
 {
 protected:
     static immutable string[] sMeshPaths = [
@@ -41,7 +41,7 @@ protected:
     }
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
     }

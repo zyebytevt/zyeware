@@ -5,7 +5,7 @@ public
 	import zyeware.core.application;
 	import zyeware.core.asset;
 	import zyeware.core.engine;
-	import zyeware.core.gamestate;
+	import zyeware.core.appstate;
 	import zyeware.core.input;
 	import zyeware.core.logging;
 	import zyeware.core.timer;

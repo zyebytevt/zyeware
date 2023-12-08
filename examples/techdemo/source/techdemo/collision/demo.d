@@ -3,14 +3,14 @@ module techdemo.collision.demo;
 import std.random : uniform;
 
 import zyeware;
-import zyeware.core.gamestate;
+import zyeware.core.appstate;
 import zyeware.ecs;
 
 import zyeware.pal;
 
 import techdemo.menu.menu;
 
-class CollisionDemo : GameState
+class CollisionDemo : AppState
 {
 protected:
     OrthographicCamera mCamera;
@@ -21,7 +21,7 @@ protected:
     Texture2D mCircleTexture;
 
 public:
-    this(GameStateApplication application)
+    this(StateApplication application)
     {
         super(application);
 
