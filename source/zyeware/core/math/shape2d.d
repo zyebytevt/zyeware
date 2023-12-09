@@ -1,5 +1,7 @@
 module zyeware.core.math.shape2d;
 
+version(none):
+
 import std.range;
 import std.typecons : Tuple, Rebindable;
 
@@ -430,4 +432,43 @@ public:
 
         return super.checkCollision(transform, other, otherTransform);
     }*/
+}
+
+/// Perform a raycast against a shape in 2D space.
+Collision2D raycast(Vector2f origin, Vector2f direction, float maxDistance, Shape2D shape, Matrix4f transform)
+{
+    Collision2D result;
+    result.isColliding = false;
+
+    // Calculate the end point of the ray
+    Vector2f endPoint = origin + direction * maxDistance;
+
+    // Check intersection with a circle
+    if (auto circle = cast(CircleShape2D) shape)
+    {
+        // Calculate the center of the circle in world space
+        Vector2f center = transform * Vector4f(0, 0, 0, 1);
+
+        // Calculate the vector from the origin to the center of the circle
+        Vector2f oc = center - origin;
+
+        // Calculate the projection of oc onto the ray direction
+        float t = dot(oc, direction);
+
+        // Calculate the closest point on the ray to the center of the circle
+        Vector2f closestPoint = origin + direction * t;
+
+        // Calculate the distance between the closest point and the center of the circle
+        float distance = (closestPoint - center).length;
+
+        // Check if the ray intersects the circle
+        if (distance <= circle.radius && t >= 0 && t <= maxDistance)
+        {
+            result.isColliding = true;
+            result.point = closestPoint;
+            result.normal = (closestPoint - center).normalized;
+        }
+    }
+
+    return result;
 }

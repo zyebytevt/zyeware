@@ -4,6 +4,7 @@ import inmath.math;
 import inmath.linalg;
 
 public import inmath.linalg : dot, cross;
+import inmath.util : isVector;
 
 import zyeware;
 
@@ -21,6 +22,14 @@ alias Vector3i = Vector!(int, 3);
 alias Vector4f = Vector!(float, 4);
 /// A four dimensional vector with int values.
 alias Vector4i = Vector!(int, 4);
+
+alias cross3d = cross;
+
+T.vt cross2d(T)(const T veca, const T vecb) @safe pure nothrow
+    if (isVector!T && T.dimension == 2)
+{
+    return veca.x * vecb.y - veca.y * vecb.x;
+}
 
 /// Calculates the height on a specific point of a triangle using the barycentric algorithm.
 /// Params:

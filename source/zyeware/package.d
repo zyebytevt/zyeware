@@ -18,6 +18,8 @@ public
     import zyeware.pal.audio.types;
     import zyeware.audio;
 
+    import zyeware.physics;
+
     import zyeware.utils.codes;
     import zyeware.utils.format;
     import zyeware.utils.memory;
