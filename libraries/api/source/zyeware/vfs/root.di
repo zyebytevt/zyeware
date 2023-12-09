@@ -9,47 +9,47 @@ import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
 import std.path : buildNormalizedPath, dirName, isValidPath;
 import zyeware;
-import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
-import zyeware.vfs.zip : VFSZipLoader, VFSZipDirectory;
-import zyeware.vfs.dir : VFSCombinedDirectory;
+import zyeware.vfs.disk : VfsDiskLoader, VfsDiskDirectory;
+import zyeware.vfs.zip : VfsZipLoader, VfsZipDirectory;
+import zyeware.vfs.dir : VfsCombinedDirectory;
 private ubyte[16] md5FromHex(string hexString);
-struct VFS
+struct Vfs
 {
 	private static
 	{
-		enum userDirVFSPath = "user://";
+		enum userDirVfsPath = "user://";
 		enum userDirPortableName = "ZyeWareData/";
-		VFSDirectory[string] sSchemes;
-		VFSLoader[] sLoaders;
+		VfsDirectory[string] sSchemes;
+		VfsLoader[] sLoaders;
 		bool sPortableMode;
-		pragma (inline, true)VFSDirectory getScheme(string scheme)
+		pragma (inline, true)VfsDirectory getScheme(string scheme)
 		in (scheme)
 		{
-			VFSDirectory dir = sSchemes.get(scheme, null);
-			enforce!VFSException(dir, format!"Unknown VFS scheme '%s'."(scheme));
+			VfsDirectory dir = sSchemes.get(scheme, null);
+			enforce!VfsException(dir, format!"Unknown Vfs scheme '%s'."(scheme));
 			return dir;
 		}
 		pragma (inline, true)auto splitPath(string path)
 		in (path)
 		{
 			auto splitResult = path.findSplit(":");
-			enforce!VFSException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty, "Malformed VFS path.");
+			enforce!VfsException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty, "Malformed Vfs path.");
 			return splitResult;
 		}
-		VFSDirectory loadPackage(string path, string name);
-		VFSDirectory createUserDir();
+		VfsDirectory loadPackage(string path, string name);
+		VfsDirectory createUserDir();
 		package(zyeware) static
 		{
 			void initialize();
 			nothrow void cleanup();
 			public static
 			{
-				nothrow void registerLoader(VFSLoader loader);
-				VFSDirectory addPackage(string path);
-				VFSFile open(string name, VFSFile.Mode mode = VFSFile.Mode.read);
-				VFSFile openFromMemory(string name, in ubyte[] data);
-				VFSFile getFile(string name);
-				VFSDirectory getDirectory(string name);
+				nothrow void registerLoader(VfsLoader loader);
+				VfsDirectory addPackage(string path);
+				VfsFile open(string name, VfsFile.Mode mode = VfsFile.Mode.read);
+				VfsFile openFromMemory(string name, in ubyte[] data);
+				VfsFile getFile(string name);
+				VfsDirectory getDirectory(string name);
 				bool hasFile(string name);
 				bool hasDirectory(string name);
 				nothrow bool portableMode();

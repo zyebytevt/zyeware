@@ -5,7 +5,7 @@ import std.bitmanip : Endian, littleEndianToNative, bigEndianToNative;
 import std.traits : isNumeric, isUnsigned;
 import std.exception : enforce;
 import zyeware;
-abstract class VFSFile
+abstract class VfsFile
 {
 	protected
 	{
@@ -33,7 +33,7 @@ abstract class VFSFile
 			abstract nothrow void seek(long offset, Seek whence);
 			abstract nothrow long tell();
 			abstract nothrow bool flush();
-			abstract void open(VFSFile.Mode mode);
+			abstract void open(VfsFile.Mode mode);
 			abstract nothrow void close();
 			abstract nothrow FileSize size();
 			abstract const pure nothrow bool isOpened();

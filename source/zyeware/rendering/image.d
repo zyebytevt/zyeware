@@ -91,7 +91,7 @@ public:
     static Image load(string path)
         in (path, "Path cannot be null.")
     {
-        VFSFile file = VFS.open(path);
+        VfsFile file = Vfs.open(path);
         scope(exit) file.close();
 
         return load(file.readAll!(ubyte[]));

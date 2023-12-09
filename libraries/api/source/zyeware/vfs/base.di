@@ -1,6 +1,6 @@
 // D import file generated from 'source/zyeware/vfs/base.d'
 module zyeware.vfs.base;
-abstract class VFSBase
+abstract class VfsBase
 {
 	protected
 	{

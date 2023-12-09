@@ -7,7 +7,7 @@ import std.file : exists, isDir, isFile, dirEntries, SpanMode;
 import zyeware;
 import zyeware.vfs.dir : isWriteMode;
 import zyeware.vfs.disk;
-package(zyeware.vfs) class VFSDiskDirectory : VFSDirectory
+package(zyeware.vfs) class VfsDiskDirectory : VfsDirectory
 {
 	protected
 	{
@@ -17,8 +17,8 @@ package(zyeware.vfs) class VFSDiskDirectory : VFSDirectory
 			pure nothrow this(string name, string diskPath);
 			public
 			{
-				override const VFSDirectory getDirectory(string name);
-				override const VFSFile getFile(string name);
+				override const VfsDirectory getDirectory(string name);
+				override const VfsFile getFile(string name);
 				override const nothrow bool hasDirectory(string name);
 				override const nothrow bool hasFile(string name);
 				override const immutable(string[]) files();

@@ -2,11 +2,11 @@
 module zyeware.vfs.loader;
 import zyeware;
 import zyeware.vfs;
-interface VFSLoader
+interface VfsLoader
 {
 	public
 	{
-		const VFSDirectory load(string diskPath, string name);
+		const VfsDirectory load(string diskPath, string name);
 		const bool eligable(string diskPath);
 	}
 }

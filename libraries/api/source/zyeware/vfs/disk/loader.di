@@ -4,11 +4,11 @@ import std.path : baseName;
 import std.file : exists, isDir;
 import zyeware.vfs;
 import zyeware.vfs.disk;
-package(zyeware.vfs) class VFSDiskLoader : VFSLoader
+package(zyeware.vfs) class VfsDiskLoader : VfsLoader
 {
 	public
 	{
-		const VFSDirectory load(string diskPath, string name);
+		const VfsDirectory load(string diskPath, string name);
 		const bool eligable(string diskPath);
 	}
 }

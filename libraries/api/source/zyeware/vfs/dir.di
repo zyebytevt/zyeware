@@ -4,7 +4,7 @@ import std.exception : enforce;
 import std.string : format;
 import zyeware;
 import zyeware.vfs;
-abstract class VFSDirectory
+abstract class VfsDirectory
 {
 	protected
 	{
@@ -12,8 +12,8 @@ abstract class VFSDirectory
 		pure nothrow this(string name);
 		public
 		{
-			abstract VFSDirectory getDirectory(string name);
-			abstract VFSFile getFile(string name);
+			abstract VfsDirectory getDirectory(string name);
+			abstract VfsFile getFile(string name);
 			abstract const nothrow bool hasDirectory(string name);
 			abstract const nothrow bool hasFile(string name);
 			abstract const immutable(string[]) files();
@@ -23,20 +23,20 @@ abstract class VFSDirectory
 }
 package(zyeware.vfs)
 {
-	pure nothrow bool isWriteMode(VFSFile.Mode mode);
-	class VFSCombinedDirectory : VFSDirectory
+	pure nothrow bool isWriteMode(VfsFile.Mode mode);
+	class VfsCombinedDirectory : VfsDirectory
 	{
 		protected
 		{
-			VFSDirectory[] mDirectories;
+			VfsDirectory[] mDirectories;
 			package
 			{
-				pure nothrow this(string name, VFSDirectory[] directories);
-				pure nothrow void addDirectory(VFSDirectory directory);
+				pure nothrow this(string name, VfsDirectory[] directories);
+				pure nothrow void addDirectory(VfsDirectory directory);
 				public
 				{
-					override VFSDirectory getDirectory(string name);
-					override VFSFile getFile(string name);
+					override VfsDirectory getDirectory(string name);
+					override VfsFile getFile(string name);
 					override const nothrow bool hasDirectory(string name);
 					override const nothrow bool hasFile(string name);
 					override const immutable(string[]) files();

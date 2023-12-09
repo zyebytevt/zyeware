@@ -6,11 +6,11 @@ import std.exception : enforce;
 import std.path : isRooted;
 import zyeware;
 import zyeware.vfs.zip;
-package(zyeware.vfs) class VFSZipDirectory : VFSDirectory
+package(zyeware.vfs) class VfsZipDirectory : VfsDirectory
 {
 	protected
 	{
-		alias FileNode = VFSZipLoader.FileNode;
+		alias FileNode = VfsZipLoader.FileNode;
 		enum NodeType
 		{
 			invalid,
@@ -26,8 +26,8 @@ package(zyeware.vfs) class VFSZipDirectory : VFSDirectory
 			pure nothrow this(string name, in ZipArchive archive, FileNode* root);
 			public
 			{
-				override const VFSDirectory getDirectory(string name);
-				override const VFSFile getFile(string name);
+				override const VfsDirectory getDirectory(string name);
+				override const VfsFile getFile(string name);
 				override const nothrow bool hasDirectory(string name);
 				override const nothrow bool hasFile(string name);
 				override const immutable(string[]) files();

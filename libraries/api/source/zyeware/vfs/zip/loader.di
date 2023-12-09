@@ -6,7 +6,7 @@ import std.exception : enforce;
 import std.zip;
 import zyeware;
 import zyeware.vfs.zip;
-package(zyeware.vfs) class VFSZipLoader : VFSLoader
+package(zyeware.vfs) class VfsZipLoader : VfsLoader
 {
 	package(zyeware.vfs)
 	{
@@ -18,7 +18,7 @@ package(zyeware.vfs) class VFSZipLoader : VFSLoader
 		}
 		public
 		{
-			const VFSDirectory load(string diskPath, string name);
+			const VfsDirectory load(string diskPath, string name);
 			const bool eligable(string diskPath);
 		}
 	}

@@ -19,7 +19,7 @@ class CoreException : Exception
     mixin GenericExceptionCtor;
 }
 
-class VFSException : Exception
+class VfsException : Exception
 {
     mixin GenericExceptionCtor;
 }

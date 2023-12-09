@@ -36,7 +36,7 @@ public:
 	{
 		ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
-		VFS.addPackage("skeleton.zpk");
+		Vfs.addPackage("skeleton.zpk");
 
 		mSprite = AssetManager.load!Texture2D("core:textures/missing.png");
 		mCamera = new OrthographicCamera(0, 800, 600, 0);

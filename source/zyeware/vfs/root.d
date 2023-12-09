@@ -15,9 +15,9 @@ import std.file : mkdirRecurse, thisExePath, exists;
 import std.path : buildNormalizedPath, dirName, isValidPath;
 
 import zyeware;
-import zyeware.vfs.disk : VFSDiskLoader, VFSDiskDirectory;
-import zyeware.vfs.zip : VFSZipLoader, VFSZipDirectory;
-import zyeware.vfs.dir : VFSCombinedDirectory;
+import zyeware.vfs.disk : VfsDiskLoader, VfsDiskDirectory;
+import zyeware.vfs.zip : VfsZipLoader, VfsZipDirectory;
+import zyeware.vfs.dir : VfsCombinedDirectory;
 
 private ubyte[16] md5FromHex(string hexString)
 {
@@ -34,22 +34,22 @@ private ubyte[16] md5FromHex(string hexString)
     return result;
 }
 
-struct VFS
+struct Vfs
 {
 private static:
-    enum userDirVFSPath = "user://";
+    enum userDirVfsPath = "user://";
     enum userDirPortableName = "ZyeWareData/";
 
-    VFSDirectory[string] sSchemes;
-    VFSLoader[] sLoaders;
+    VfsDirectory[string] sSchemes;
+    VfsLoader[] sLoaders;
     bool sPortableMode;
 
     pragma(inline, true)
-    VFSDirectory getScheme(string scheme)
+    VfsDirectory getScheme(string scheme)
         in (scheme, "Scheme cannot be null.")
     {
-        VFSDirectory dir = sSchemes.get(scheme, null);
-        enforce!VFSException(dir, format!"Unknown VFS scheme '%s'."(scheme));
+        VfsDirectory dir = sSchemes.get(scheme, null);
+        enforce!VfsException(dir, format!"Unknown Vfs scheme '%s'."(scheme));
         return dir;
     }
 
@@ -58,22 +58,22 @@ private static:
         in (path, "Path cannot be null")
     {
         auto splitResult = path.findSplit(":");
-        enforce!VFSException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty,
-            "Malformed VFS path.");
+        enforce!VfsException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty,
+            "Malformed Vfs path.");
         return splitResult;
     }
 
-    VFSDirectory loadPackage(string path, string name)
+    VfsDirectory loadPackage(string path, string name)
         in (path && name)
     {
-        foreach (VFSLoader loader; sLoaders)
+        foreach (VfsLoader loader; sLoaders)
             if (loader.eligable(path))
                 return loader.load(path, name);
 
-        throw new VFSException(format!"Failed to find eligable loader for package '%s'."(path));
+        throw new VfsException(format!"Failed to find eligable loader for package '%s'."(path));
     }
 
-    VFSDirectory createUserDir()
+    VfsDirectory createUserDir()
     {
         immutable string userDirName = ZyeWare.projectProperties.authorName ~ "/" ~ ZyeWare.projectProperties.projectName;
 
@@ -111,7 +111,7 @@ private static:
 
         mkdirRecurse(dataDir);
 
-        return new VFSDiskDirectory(userDirVFSPath, dataDir);
+        return new VfsDiskDirectory(userDirVfsPath, dataDir);
     }
 
 package(zyeware) static:
@@ -120,29 +120,29 @@ package(zyeware) static:
         if (exists(buildNormalizedPath(thisExePath.dirName, userDirPortableName, "_sc_")))
             sPortableMode = true;
 
-        VFS.registerLoader(new VFSDiskLoader());
-        VFS.registerLoader(new VFSZipLoader());
+        Vfs.registerLoader(new VfsDiskLoader());
+        Vfs.registerLoader(new VfsZipLoader());
 
-        VFSDirectory corePackage = loadPackage("core.zpk", "core:");
+        VfsDirectory corePackage = loadPackage("core.zpk", "core:");
 
         // In release mode, let's check if the core package has been modified.
         debug {} else {
-            VFSZipDirectory coreZip = cast(VFSZipDirectory) corePackage;
-            enforce!VFSException(coreZip, "Core package must be a zip archive.");
+            VfsZipDirectory coreZip = cast(VfsZipDirectory) corePackage;
+            enforce!VfsException(coreZip, "Core package must be a zip archive.");
 
             import std.digest.md : md5Of;
             import std.zip : ZipArchive;
 
             enum coreMd5 = md5FromHex("9448bc0b4ca2a31ac1b6b71c940d1601");
-            enforce!VFSException(md5Of((cast(ZipArchive)coreZip.mArchive).data) == coreMd5,
+            enforce!VfsException(md5Of((cast(ZipArchive)coreZip.mArchive).data) == coreMd5,
                 "Core package has been modified, cannot continue.");
         }
     
         sSchemes["core"] = corePackage;
-        sSchemes["res"] = new VFSCombinedDirectory("res:", []);
+        sSchemes["res"] = new VfsCombinedDirectory("res:", []);
         sSchemes["user"] = createUserDir();
 
-        Logger.core.log(LogLevel.info, "Initialized VFS.");
+        Logger.core.log(LogLevel.info, "Initialized Vfs.");
     }
 
     void cleanup() nothrow
@@ -152,25 +152,25 @@ package(zyeware) static:
     }
 
 public static:
-    /// Registers a new VFSLoader to be used when loading packages.
+    /// Registers a new VfsLoader to be used when loading packages.
     ///
     /// Params:
     ///     loader: The loader to register.
-    void registerLoader(VFSLoader loader) nothrow
+    void registerLoader(VfsLoader loader) nothrow
         in (loader)
     {
         sLoaders ~= loader;
     }
 
-    /// Adds a package to the VFS.
+    /// Adds a package to the Vfs.
     ///
     /// Params:
     ///     path: The real path to the package.
-    VFSDirectory addPackage(string path)
+    VfsDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
-        VFSDirectory pck = loadPackage(path, "/");
-        (cast(VFSCombinedDirectory) sSchemes["res"]).addDirectory(pck);
+        VfsDirectory pck = loadPackage(path, "/");
+        (cast(VfsCombinedDirectory) sSchemes["res"]).addDirectory(pck);
         Logger.core.log(LogLevel.info, "Added package '%s'.", path);
         return pck;
     }
@@ -180,10 +180,10 @@ public static:
     /// Params:
     ///   name = The path to the file.
     ///   mode = The mode to open the file in.
-    VFSFile open(string name, VFSFile.Mode mode = VFSFile.Mode.read)
+    VfsFile open(string name, VfsFile.Mode mode = VfsFile.Mode.read)
         in (name, "Name cannot be null.")
     {
-        VFSFile file = getFile(name);
+        VfsFile file = getFile(name);
         file.open(mode);
         return file;
     }
@@ -193,21 +193,21 @@ public static:
     /// Params:
     ///   name = The name of the file. Can be arbitrary.
     ///   data = The data of the file.
-    VFSFile openFromMemory(string name, in ubyte[] data)
+    VfsFile openFromMemory(string name, in ubyte[] data)
     {
-        import zyeware.vfs.memory.file : VFSMemoryFile;
+        import zyeware.vfs.memory.file : VfsMemoryFile;
 
-        return new VFSMemoryFile(name, data);
+        return new VfsMemoryFile(name, data);
     }
 
-    VFSFile getFile(string name)
+    VfsFile getFile(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
         return getScheme(splitResult[0]).getFile(splitResult[2]);
     }
 
-    VFSDirectory getDirectory(string name)
+    VfsDirectory getDirectory(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);

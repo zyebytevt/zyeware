@@ -41,7 +41,7 @@ public static:
     /// Remaps an asset path.
     ///
     /// Params:
-    ///     origPath = The original VFS path to remap.
+    ///     origPath = The original Vfs path to remap.
     ///
     /// Returns: The remapped asset, or `origPath` if noo remapping exists.
     string remapAssetPath(string origPath) nothrow
@@ -171,7 +171,7 @@ public:
     ///   newPath = The new path
     void addAssetRemap(string origPath, string newPath) pure
     {
-        //enforce!CoreException(VFS.isValidVFSPath(origPath) && VFS.isValidVFSPath(newPath), "Malformed VFS paths for asset remapping.");
+        //enforce!CoreException(Vfs.isValidVfsPath(origPath) && Vfs.isValidVfsPath(newPath), "Malformed Vfs paths for asset remapping.");
         //enforce!CoreException(!origPath.startsWith("core:"), "Cannot remap assets from core package.");
 
         mAssetRemaps[origPath] = newPath;
@@ -205,7 +205,7 @@ public:
     /// Remaps a resource path.
     ///
     /// Params:
-    ///     origPath = The original VFS path to remap.
+    ///     origPath = The original Vfs path to remap.
     ///
     /// Returns: The remapped resource, or `origPath` if noo remapping exists.
     string remapAssetPath(string origPath) pure const nothrow

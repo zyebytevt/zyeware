@@ -222,7 +222,7 @@ public:
 
     void load(string path)
     {
-        VFSFile file = VFS.open(path);
+        VfsFile file = Vfs.open(path);
         scope (exit)
             file.close();
 

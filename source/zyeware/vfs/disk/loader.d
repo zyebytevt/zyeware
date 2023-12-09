@@ -8,14 +8,14 @@ import zyeware.vfs.disk;
 
 package(zyeware.vfs):
 
-/// Loads file system directories as VFS directories.
-class VFSDiskLoader : VFSLoader
+/// Loads file system directories as Vfs directories.
+class VfsDiskLoader : VfsLoader
 {
 public:
-    VFSDirectory load(string diskPath, string name) const
+    VfsDirectory load(string diskPath, string name) const
         in (diskPath && name, "Disk path and name must be valid.")
     {
-        return new VFSDiskDirectory(name, diskPath);
+        return new VfsDiskDirectory(name, diskPath);
     }
 
     bool eligable(string diskPath) const

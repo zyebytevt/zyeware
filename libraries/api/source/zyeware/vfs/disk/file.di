@@ -5,7 +5,7 @@ import core.stdc.config : c_long;
 import std.exception : enforce;
 import std.string : toStringz;
 import zyeware;
-package(zyeware.vfs) class VFSDiskFile : VFSFile
+package(zyeware.vfs) class VfsDiskFile : VfsFile
 {
 	protected
 	{
@@ -23,7 +23,7 @@ package(zyeware.vfs) class VFSDiskFile : VFSFile
 				override nothrow void seek(long offset, Seek whence);
 				override nothrow long tell();
 				override nothrow bool flush();
-				override void open(VFSFile.Mode mode);
+				override void open(VfsFile.Mode mode);
 				override nothrow void close();
 				override nothrow FileSize size();
 				override const pure nothrow bool isOpened();

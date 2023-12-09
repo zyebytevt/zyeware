@@ -10,7 +10,7 @@ import zyeware.vfs.zip;
 
 package(zyeware.vfs):
 
-class VFSZipLoader : VFSLoader
+class VfsZipLoader : VfsLoader
 {
 package(zyeware.vfs):
     struct FileNode
@@ -21,11 +21,11 @@ package(zyeware.vfs):
     }
 
 public:
-    VFSDirectory load(string diskPath, string name) const
+    VfsDirectory load(string diskPath, string name) const
         in (diskPath && name)
     {
         ZipArchive archive = new ZipArchive(read(diskPath));
-        enforce!VFSException(archive.comment.startsWith("ZPK2\x0D\x0A"), "ZIP archive is not a valid ZyeWare package.");
+        enforce!VfsException(archive.comment.startsWith("ZPK2\x0D\x0A"), "ZIP archive is not a valid ZyeWare package.");
 
         FileNode* root = new FileNode();
 
@@ -52,7 +52,7 @@ public:
             current.member = member;
         }
 
-        return new VFSZipDirectory(name, archive, root);
+        return new VfsZipDirectory(name, archive, root);
     }
 
     bool eligable(string diskPath) const

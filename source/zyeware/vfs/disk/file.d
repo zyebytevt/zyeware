@@ -10,7 +10,7 @@ import zyeware;
 
 package(zyeware.vfs):
 
-class VFSDiskFile : VFSFile
+class VfsDiskFile : VfsFile
 {
 protected:
     string mDiskPath;
@@ -84,13 +84,13 @@ public:
         return isOpened && fflush(mStream) == 0;
     }
 
-    override void open(VFSFile.Mode mode)
+    override void open(VfsFile.Mode mode)
     {
         if (isOpened)
             return;
 
         const(char)* modeStr;
-        final switch (mode) with (VFSFile.Mode)
+        final switch (mode) with (VfsFile.Mode)
         {
         case read:
             modeStr = "rb";
@@ -110,7 +110,7 @@ public:
         }
 
         mStream = fopen(mDiskPath.toStringz, modeStr);
-        enforce!VFSException(mStream, "Failed to open file.");
+        enforce!VfsException(mStream, "Failed to open file.");
     }
 
     override void close() nothrow

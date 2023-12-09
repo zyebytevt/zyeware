@@ -155,7 +155,7 @@ public:
         import std.zlib : uncompress;
         import std.bitmanip : read;
 
-        VFSFile sourceFile = VFS.open(path);
+        VfsFile sourceFile = Vfs.open(path);
         scope (exit) sourceFile.close();
         ubyte[] source = sourceFile.readAll!(ubyte[]);
 

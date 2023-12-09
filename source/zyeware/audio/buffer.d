@@ -49,22 +49,22 @@ public:
         return mNativeHandle;
     }
 
-    /// Loads a sound from a given VFS path.
+    /// Loads a sound from a given Vfs path.
     /// Params:
-    ///   path = The path inside the VFS.
+    ///   path = The path inside the Vfs.
     /// Returns: A newly created `Sound` instance.
-    /// Throws: `VFSException` if the given file can't be loaded.
+    /// Throws: `VfsException` if the given file can't be loaded.
     static AudioBuffer load(string path)
     {
         // The daemons are the best community!
 
-        VFSFile source = VFS.open(path);
+        VfsFile source = Vfs.open(path);
         ubyte[] rawFileData = source.readAll!(ubyte[])();
         source.close();
 
         AudioProperties properties;
 
-        if (VFS.hasFile(path ~ ".props")) // Properties file exists
+        if (Vfs.hasFile(path ~ ".props")) // Properties file exists
         {
             try
             {

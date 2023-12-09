@@ -10,7 +10,7 @@ import zyeware;
 
 package(zyeware.vfs):
 
-class VFSZipFile : VFSFile
+class VfsZipFile : VfsFile
 {
 protected:
     ZipArchive mArchive;
@@ -84,12 +84,12 @@ public:
         return false;
     }
 
-    override void open(VFSFile.Mode mode)
+    override void open(VfsFile.Mode mode)
     {
         if (isOpened)
             return;
 
-        enforce!VFSException(mode == VFSFile.Mode.read, "Compressed archives only support read mode");
+        enforce!VfsException(mode == VfsFile.Mode.read, "Compressed archives only support read mode");
         
         mData = mMember.expandedData ? mMember.expandedData : mArchive.expand(mMember);
         mFilePointer = 0;

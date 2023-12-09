@@ -10,10 +10,10 @@ import zyeware.vfs.zip;
 
 package(zyeware.vfs):
 
-class VFSZipDirectory : VFSDirectory
+class VfsZipDirectory : VfsDirectory
 {
 protected:
-    alias FileNode = VFSZipLoader.FileNode;
+    alias FileNode = VfsZipLoader.FileNode;
 
     enum NodeType
     {
@@ -61,7 +61,7 @@ protected:
             switch (part)
             {
             case "..":
-                enforce!VFSException(current.parent, "Cannot go above root directory.");
+                enforce!VfsException(current.parent, "Cannot go above root directory.");
                 current = current.parent;
                 break;
             
@@ -70,7 +70,7 @@ protected:
 
             default:
                 FileNode** child = part in current.children;
-                enforce!VFSException(child, format!"Directory '%s' not found."(part));
+                enforce!VfsException(child, format!"Directory '%s' not found."(part));
                 current = *child;
                 break;
             }
@@ -90,27 +90,27 @@ package(zyeware.vfs):
     }
 
 public:
-    override VFSDirectory getDirectory(string name) const
+    override VfsDirectory getDirectory(string name) const
         in (name, "Name cannot be null.")
     {
-        enforce!VFSException(!isRooted(name), "Directory name cannot be rooted.");
+        enforce!VfsException(!isRooted(name), "Directory name cannot be rooted.");
         FileNode* newRoot = traversePath(name);
 
-        enforce!VFSException(!newRoot.member, format!"'%s' is not a directory."(name));
-        return new VFSZipDirectory(name, mArchive, newRoot);
+        enforce!VfsException(!newRoot.member, format!"'%s' is not a directory."(name));
+        return new VfsZipDirectory(name, mArchive, newRoot);
     }
 
-    override VFSFile getFile(string name) const
+    override VfsFile getFile(string name) const
         in (name, "Name cannot be null.")
     {
-        enforce!VFSException(!isRooted(name), "File name cannot be rooted.");
+        enforce!VfsException(!isRooted(name), "File name cannot be rooted.");
         FileNode* fileNode = traversePath(name);
 
-        enforce!VFSException(fileNode.member, format!"'%s' is not a file."(name));
+        enforce!VfsException(fileNode.member, format!"'%s' is not a file."(name));
 
         // After examination, it seems that the ZipArchive instance
         // isn't actually modified, so casting to mutable is safe. Probably.
-        return new VFSZipFile(name, cast(ZipArchive) mArchive, fileNode.member);
+        return new VfsZipFile(name, cast(ZipArchive) mArchive, fileNode.member);
     }
 
     override bool hasDirectory(string name) const nothrow

@@ -5,7 +5,7 @@ import std.exception : enforce;
 import std.zip;
 import std.typecons : Rebindable;
 import zyeware;
-package(zyeware.vfs) class VFSZipFile : VFSFile
+package(zyeware.vfs) class VfsZipFile : VfsFile
 {
 	protected
 	{
@@ -23,7 +23,7 @@ package(zyeware.vfs) class VFSZipFile : VFSFile
 				override nothrow void seek(long offset, Seek whence);
 				override nothrow long tell();
 				override nothrow bool flush();
-				override void open(VFSFile.Mode mode);
+				override void open(VfsFile.Mode mode);
 				override nothrow void close();
 				override nothrow FileSize size();
 				override const pure nothrow bool isOpened();

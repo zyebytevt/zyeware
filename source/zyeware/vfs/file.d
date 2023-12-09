@@ -13,9 +13,9 @@ import std.exception : enforce;
 
 import zyeware;
 
-/// Represents a virtual file in the VFS. Where this file is
+/// Represents a virtual file in the Vfs. Where this file is
 /// physically located depends on the implementation.
-abstract class VFSFile
+abstract class VfsFile
 {
 protected:
     string mName;
@@ -73,7 +73,7 @@ public:
     /// Flushes all writing operations to disk.
     abstract bool flush() nothrow;
     /// Opens the file with the given access mode.
-    abstract void open(VFSFile.Mode mode);
+    abstract void open(VfsFile.Mode mode);
     /// Closes the file. Afterwards, no further operations should be taken on this file.
     abstract void close() nothrow;
 
@@ -199,5 +199,10 @@ public:
 
         writeNumber(cast(LengthType) text.length, endianness);
         write(text.ptr, Char.sizeof, text.length);
+    }
+
+    string name() pure const nothrow
+    {
+        return mName;
     }
 }

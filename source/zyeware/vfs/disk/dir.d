@@ -11,7 +11,7 @@ import zyeware.vfs.disk;
 
 package(zyeware.vfs):
 
-class VFSDiskDirectory : VFSDirectory
+class VfsDiskDirectory : VfsDirectory
 {
 protected:
     immutable string mDiskPath;
@@ -25,22 +25,22 @@ package(zyeware.vfs):
     }
 
 public:
-    override VFSDirectory getDirectory(string name) const
+    override VfsDirectory getDirectory(string name) const
         in (name, "Name cannot be null.")
     {
-        enforce!VFSException(!isRooted(name), "Subdirectory name cannot be rooted.");
-        enforce!VFSException(hasDirectory(name), format!"Subdirectory '%s' not found."(name));
+        enforce!VfsException(!isRooted(name), "Subdirectory name cannot be rooted.");
+        enforce!VfsException(hasDirectory(name), format!"Subdirectory '%s' not found."(name));
 
-        return new VFSDiskDirectory(name, buildPath(mDiskPath, name));
+        return new VfsDiskDirectory(name, buildPath(mDiskPath, name));
     }
 
-    override VFSFile getFile(string name) const
+    override VfsFile getFile(string name) const
         in (name, "Name cannot be null.")
     {
-        enforce!VFSException(!isRooted(name), "File name cannot be rooted.");
-        enforce!VFSException(hasFile(name), format!"File '%s' not found."(name));
+        enforce!VfsException(!isRooted(name), "File name cannot be rooted.");
+        enforce!VfsException(hasFile(name), format!"File '%s' not found."(name));
 
-        return new VFSDiskFile(name, buildPath(mDiskPath, name));
+        return new VfsDiskFile(name, buildPath(mDiskPath, name));
     }
 
     override bool hasDirectory(string name) const nothrow

@@ -342,7 +342,7 @@ package(zyeware.core) static:
         else
             crashHandler = new DefaultCrashHandler();
 
-        VFS.initialize();
+        Vfs.initialize();
         AssetManager.initialize();
 
         string applicationFile = parsedArgs.applicationFile;
@@ -401,7 +401,7 @@ package(zyeware.core) static:
         Pal.graphics.api.cleanup();
         Pal.audio.cleanup();
 
-        VFS.cleanup();
+        Vfs.cleanup();
 
         collect();
 
