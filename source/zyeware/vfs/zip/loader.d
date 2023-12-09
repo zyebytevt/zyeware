@@ -21,8 +21,8 @@ package(zyeware.vfs):
     }
 
 public:
-    VfsDirectory load(string diskPath, string name) const
-        in (diskPath && name)
+    VfsDirectory load(string diskPath, string scheme) const
+        in (diskPath && scheme)
     {
         ZipArchive archive = new ZipArchive(read(diskPath));
         enforce!VfsException(archive.comment.startsWith("ZPK2\x0D\x0A"), "ZIP archive is not a valid ZyeWare package.");
@@ -52,7 +52,7 @@ public:
             current.member = member;
         }
 
-        return new VfsZipDirectory(name, archive, root);
+        return new VfsZipDirectory(scheme, archive, root);
     }
 
     bool eligable(string diskPath) const

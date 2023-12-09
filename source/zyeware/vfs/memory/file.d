@@ -14,9 +14,9 @@ protected:
     bool mIsOpened;
 
 package(zyeware.vfs):
-    this(string name, in ubyte[] data) pure nothrow
+    this(string path, in ubyte[] data) pure nothrow
     {
-        super(name);
+        super(path);
         mData = data;
     }
 

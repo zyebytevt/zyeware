@@ -1,8 +1,8 @@
 module zyeware.vfs.disk.dir;
 
+static import std.path;
 import std.exception : enforce, assumeWontThrow;
 import std.string : format;
-import std.path : isRooted, buildPath, baseName;
 import std.file : exists, isDir, isFile, dirEntries, SpanMode; 
 
 import zyeware;
@@ -17,10 +17,10 @@ protected:
     immutable string mDiskPath;
 
 package(zyeware.vfs):
-    this(string name, string diskPath) pure nothrow
+    this(string path, string diskPath) pure nothrow
         in (diskPath, "Disk path cannot be null!")
     {
-        super(name);
+        super(path);
         mDiskPath = diskPath;
     }
 
@@ -28,41 +28,45 @@ public:
     override VfsDirectory getDirectory(string name) const
         in (name, "Name cannot be null.")
     {
-        enforce!VfsException(!isRooted(name), "Subdirectory name cannot be rooted.");
-        enforce!VfsException(hasDirectory(name), format!"Subdirectory '%s' not found."(name));
+        enforce!VfsException(!std.path.isRooted(name), "Subdirectory name cannot be rooted.");
 
-        return new VfsDiskDirectory(name, buildPath(mDiskPath, name));
+        immutable string newPath = buildPath(mPath, name);
+
+        enforce!VfsException(hasDirectory(name), format!"Subdirectory '%s' not found."(newPath));
+        return new VfsDiskDirectory(newPath, std.path.buildPath(mDiskPath, name));
     }
 
     override VfsFile getFile(string name) const
         in (name, "Name cannot be null.")
     {
-        enforce!VfsException(!isRooted(name), "File name cannot be rooted.");
-        enforce!VfsException(hasFile(name), format!"File '%s' not found."(name));
+        enforce!VfsException(!std.path.isRooted(name), "File name cannot be rooted.");
 
-        return new VfsDiskFile(name, buildPath(mDiskPath, name));
+        immutable string newPath = buildPath(mPath, name);
+
+        enforce!VfsException(hasFile(name), format!"File '%s' not found."(newPath));
+        return new VfsDiskFile(newPath, std.path.buildPath(mDiskPath, name));
     }
 
     override bool hasDirectory(string name) const nothrow
         in (name, "Name cannot be null.")
     {
-        immutable string path = buildPath(mDiskPath, name);
+        immutable string path = std.path.buildPath(mDiskPath, name);
         return exists(path) && isDir(path).assumeWontThrow;
     }
 
     override bool hasFile(string name) const nothrow
         in (name, "Name cannot be null.")
     {
-        immutable string path = buildPath(mDiskPath, name);
+        immutable string path = std.path.buildPath(mDiskPath, name);
         return exists(path) && isFile(path).assumeWontThrow;
     }
 
     override immutable(string[]) files() const
     {
         string[] result;
-        foreach (string name; dirEntries(mDiskPath, SpanMode.shallow))
-            if (isFile(name))
-                result ~= name.baseName;
+        foreach (string path; dirEntries(mDiskPath, SpanMode.shallow))
+            if (isFile(path))
+                result ~= path;
 
         return result.idup;
     }
@@ -70,9 +74,9 @@ public:
     override immutable(string[]) directories() const
     {
         string[] result;
-        foreach (string name; dirEntries(mDiskPath, SpanMode.shallow))
-            if (isDir(name))
-                result ~= name.baseName;
+        foreach (string path; dirEntries(mDiskPath, SpanMode.shallow))
+            if (isDir(path))
+                result ~= path;
 
         return result.idup;
     }

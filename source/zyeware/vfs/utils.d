@@ -1,6 +1,7 @@
 module zyeware.vfs.utils;
 
 import std.string : indexOf, lastIndexOf;
+import std.array : Appender;
 
 string getScheme(string path) pure
 {
@@ -60,4 +61,22 @@ string getDirname(string path) pure
         return path;
 
     return path[0 .. index];
+}
+
+string buildPath(string[] paths...) pure nothrow
+{
+    Appender!string result = "";
+
+    foreach (string path; paths)
+    {
+        if (!path)
+            continue;
+        
+        if (result[].length > 0 && result[][$-1] != '/')
+            result ~= '/';
+
+        result ~= path;
+    }
+
+    return result[];
 }

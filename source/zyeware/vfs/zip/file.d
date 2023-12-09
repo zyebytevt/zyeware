@@ -20,9 +20,9 @@ protected:
     size_t mFilePointer;
 
 package(zyeware.vfs):
-    this(string name, ZipArchive archive, ArchiveMember member)
+    this(string path, ZipArchive archive, ArchiveMember member)
     {
-        super(name);
+        super(path);
         mArchive = archive;
         mMember = member;
     }

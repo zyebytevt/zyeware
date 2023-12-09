@@ -16,11 +16,11 @@ import zyeware.vfs;
 abstract class VfsDirectory
 {
 protected:
-    string mName;
+    string mPath;
 
-    this(string name) pure nothrow
+    this(string path) pure nothrow
     {
-        mName = name;
+        mPath = path;
     }
 
 public:
@@ -45,6 +45,11 @@ public:
 
     /// Returns the names of all subdirectories inside this directory.
     abstract immutable(string[]) directories() const;
+
+    string path() pure const nothrow
+    {
+        return mPath;
+    }
 }
 
 package(zyeware.vfs):
@@ -61,9 +66,9 @@ protected:
     VfsDirectory[] mDirectories;
 
 package:
-    this(string name, VfsDirectory[] directories) pure nothrow
+    this(string path, VfsDirectory[] directories) pure nothrow
     {
-        super(name);
+        super(path);
         mDirectories = directories;
     }
 
@@ -85,7 +90,7 @@ public:
 
         enforce!VfsException(foundDirectories.length > 0, format!"Directory '%s' not found."(name));
 
-        return new VfsCombinedDirectory(name, foundDirectories);
+        return new VfsCombinedDirectory(buildPath(mPath, name), foundDirectories);
     }
 
     override VfsFile getFile(string name)

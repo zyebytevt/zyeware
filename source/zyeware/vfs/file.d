@@ -18,11 +18,11 @@ import zyeware;
 abstract class VfsFile
 {
 protected:
-    string mName;
+    string mPath;
 
-    this(string name) pure nothrow
+    this(string path) pure nothrow
     {
-        mName = name;
+        mPath = path;
     }
 
 public:
@@ -201,8 +201,8 @@ public:
         write(text.ptr, Char.sizeof, text.length);
     }
 
-    string name() pure const nothrow
+    string path() pure const nothrow
     {
-        return mName;
+        return mPath;
     }
 }

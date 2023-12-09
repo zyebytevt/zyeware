@@ -18,9 +18,9 @@ protected:
     FileSize mCachedFileSize = FileSize.min;
 
 package(zyeware.vfs):
-    this(string name, string diskPath) pure nothrow
+    this(string path, string diskPath) pure nothrow
     {
-        super(name);
+        super(path);
         mDiskPath = diskPath;
     }
 

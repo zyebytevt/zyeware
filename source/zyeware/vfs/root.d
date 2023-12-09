@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.vfs.root;
 
+static import std.path;
+
 import core.stdc.stdlib : getenv;
 import std.algorithm : findSplit;
 import std.exception : enforce;
@@ -12,7 +14,6 @@ import std.typecons : Tuple;
 import std.range : empty;
 import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
-import std.path : buildNormalizedPath, dirName, isValidPath;
 
 import zyeware;
 import zyeware.vfs.disk : VfsDiskLoader, VfsDiskDirectory;
@@ -63,12 +64,12 @@ private static:
         return splitResult;
     }
 
-    VfsDirectory loadPackage(string path, string name)
-        in (path && name)
+    VfsDirectory loadPackage(string path, string scheme)
+        in (path && scheme)
     {
         foreach (VfsLoader loader; sLoaders)
             if (loader.eligable(path))
-                return loader.load(path, name);
+                return loader.load(path, scheme);
 
         throw new VfsException(format!"Failed to find eligable loader for package '%s'."(path));
     }
@@ -77,7 +78,7 @@ private static:
     {
         immutable string userDirName = ZyeWare.projectProperties.authorName ~ "/" ~ ZyeWare.projectProperties.projectName;
 
-        string dataDir = buildNormalizedPath(thisExePath.dirName, userDirPortableName, userDirName);
+        string dataDir = std.path.buildNormalizedPath(std.path.dirName(thisExePath), userDirPortableName, userDirName);
 
         if (!sPortableMode)
         {
@@ -95,15 +96,15 @@ private static:
                 }
 
                 version (linux)
-                    dataDir = buildNormalizedPath(homedir.fromStringz.idup, ".local/share/zyeware/", userDirName);
+                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup, ".local/share/zyeware/", userDirName);
                 else version (OSX)
-                    dataDir = buildNormalizedPath(homedir.fromStringz.idup, "Library/Application Support/ZyeWare/", userDirName);
+                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup, "Library/Application Support/ZyeWare/", userDirName);
                 else
-                    dataDir = buildNormalizedPath(homedir.fromStringz.idup, ".zyeware/", userDirName);
+                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup, ".zyeware/", userDirName);
             }
             else version (Windows)
             {
-                dataDir = buildNormalizedPath(getenv("LocalAppData").fromStringz.idup, "ZyeWare/", userDirName);            
+                dataDir = std.path.buildNormalizedPath(getenv("LocalAppData").fromStringz.idup, "ZyeWare/", userDirName);            
             }
             else
                 sPortableMode = true;
@@ -117,7 +118,7 @@ private static:
 package(zyeware) static:
     void initialize()
     {
-        if (exists(buildNormalizedPath(thisExePath.dirName, userDirPortableName, "_sc_")))
+        if (exists(std.path.buildNormalizedPath(std.path.dirName(thisExePath), userDirPortableName, "_sc_")))
             sPortableMode = true;
 
         Vfs.registerLoader(new VfsDiskLoader());
@@ -169,7 +170,9 @@ public static:
     VfsDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
-        VfsDirectory pck = loadPackage(path, "/");
+        immutable string scheme = std.path.stripExtension(std.path.baseName(path)) ~ ':';
+        VfsDirectory pck = loadPackage(path, scheme);
+
         (cast(VfsCombinedDirectory) sSchemes["res"]).addDirectory(pck);
         Logger.core.log(LogLevel.info, "Added package '%s'.", path);
         return pck;

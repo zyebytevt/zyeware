@@ -96,8 +96,10 @@ public:
         enforce!VfsException(!isRooted(name), "Directory name cannot be rooted.");
         FileNode* newRoot = traversePath(name);
 
-        enforce!VfsException(!newRoot.member, format!"'%s' is not a directory."(name));
-        return new VfsZipDirectory(name, mArchive, newRoot);
+        immutable string newPath = buildPath(mPath, name);
+
+        enforce!VfsException(!newRoot.member, format!"'%s' is not a directory."(newPath));
+        return new VfsZipDirectory(newPath, mArchive, newRoot);
     }
 
     override VfsFile getFile(string name) const
@@ -106,11 +108,13 @@ public:
         enforce!VfsException(!isRooted(name), "File name cannot be rooted.");
         FileNode* fileNode = traversePath(name);
 
-        enforce!VfsException(fileNode.member, format!"'%s' is not a file."(name));
+        immutable string newPath = buildPath(mPath, name);
+
+        enforce!VfsException(fileNode.member, format!"'%s' is not a file."(newPath));
 
         // After examination, it seems that the ZipArchive instance
         // isn't actually modified, so casting to mutable is safe. Probably.
-        return new VfsZipFile(name, cast(ZipArchive) mArchive, fileNode.member);
+        return new VfsZipFile(newPath, cast(ZipArchive) mArchive, fileNode.member);
     }
 
     override bool hasDirectory(string name) const nothrow
