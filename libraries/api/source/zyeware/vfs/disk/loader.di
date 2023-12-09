@@ -8,7 +8,7 @@ package(zyeware.vfs) class VfsDiskLoader : VfsLoader
 {
 	public
 	{
-		const VfsDirectory load(string diskPath, string name);
+		const VfsDirectory load(string diskPath, string scheme);
 		const bool eligable(string diskPath);
 	}
 }

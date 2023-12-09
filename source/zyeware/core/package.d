@@ -8,12 +8,12 @@ public
     import zyeware.core.appstate;
     import zyeware.core.input;
     import zyeware.core.logging;
-    import zyeware.core.timer;
     import zyeware.core.translation;
     import zyeware.core.exception;
     import zyeware.core.interpolator;
     import zyeware.core.random;
     import zyeware.core.native;
+    import zyeware.core.dynlib;
 
     import zyeware.core.events;
     import zyeware.core.math;

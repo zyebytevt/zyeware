@@ -8,7 +8,7 @@ module zyeware.vfs.root;
 static import std.path;
 
 import core.stdc.stdlib : getenv;
-import std.algorithm : findSplit;
+import std.algorithm : findSplit, canFind;
 import std.exception : enforce;
 import std.typecons : Tuple;
 import std.range : empty;
@@ -112,7 +112,7 @@ private static:
 
         mkdirRecurse(dataDir);
 
-        return new VfsDiskDirectory(userDirVfsPath, dataDir);
+        return new VfsDiskDirectory(userDirVfsPath ~ ':', dataDir);
     }
 
 package(zyeware) static:
@@ -124,7 +124,7 @@ package(zyeware) static:
         Vfs.registerLoader(new VfsDiskLoader());
         Vfs.registerLoader(new VfsZipLoader());
 
-        VfsDirectory corePackage = loadPackage("core.zpk", "core:");
+        VfsDirectory corePackage = loadPackage("core.zpk", "core");
 
         // In release mode, let's check if the core package has been modified.
         debug {} else {
@@ -170,11 +170,14 @@ public static:
     VfsDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
-        immutable string scheme = std.path.stripExtension(std.path.baseName(path)) ~ ':';
+        immutable string scheme = std.path.stripExtension(std.path.baseName(path));
+        enforce!CoreException(!sSchemes.keys.canFind(scheme), format!"Scheme '%s' already exists."(scheme));
+
         VfsDirectory pck = loadPackage(path, scheme);
 
         (cast(VfsCombinedDirectory) sSchemes["res"]).addDirectory(pck);
-        Logger.core.log(LogLevel.info, "Added package '%s'.", path);
+        sSchemes[scheme] = pck;
+        Logger.core.log(LogLevel.info, "Added package '%s' as '%s'.", path, scheme);
         return pck;
     }
 

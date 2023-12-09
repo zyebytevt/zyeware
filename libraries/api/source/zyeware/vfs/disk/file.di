@@ -14,7 +14,7 @@ package(zyeware.vfs) class VfsDiskFile : VfsFile
 		FileSize mCachedFileSize = FileSize.min;
 		package(zyeware.vfs)
 		{
-			pure nothrow this(string name, string diskPath);
+			pure nothrow this(string path, string diskPath);
 			public
 			{
 				~this();

@@ -11,7 +11,6 @@ import std.typecons : Rebindable;
 import std.exception : enforce;
 
 import zyeware;
-import zyeware.core.debugging.profiler;
 
 import zyeware.pal;
 

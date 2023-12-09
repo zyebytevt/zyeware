@@ -6,4 +6,5 @@ public
 	import zyeware.vfs.file;
 	import zyeware.vfs.loader;
 	import zyeware.vfs.root;
+	import zyeware.vfs.utils;
 }

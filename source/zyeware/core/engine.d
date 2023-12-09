@@ -19,14 +19,7 @@ import std.algorithm : min;
 import bindbc.loader;
 
 import zyeware;
-import zyeware.core.events;
-import zyeware.core.application;
-import zyeware.core.debugging;
-
-
 import zyeware.core.crash;
-import zyeware.utils.format;
-import zyeware.core.introapp;
 import zyeware.pal;
 
 /// Struct that holds information about the project.
@@ -86,7 +79,7 @@ struct ZyeWare
 private static:
     struct ParsedArgs
     {
-        string applicationFile; /// The dynamic library of the application to load.
+        string[] packages; /// The packages to load.
 
         LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
         LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
@@ -127,12 +120,18 @@ private static:
         bool sIsEmittingEvent;
     }
 
-    ProjectProperties loadApplication(string library)
+    ProjectProperties loadProperties()
     {
-        void* handle = Runtime.loadLibrary(library);
-        enforce!CoreException(handle, format!"Could not load application library '%s'."(library));
-        
-        sApplicationLibrary = SharedLib(handle);
+        version (linux)
+            immutable string path = "res:libapp.so";
+        else version (Windows)
+            immutable string path = "res:app.dll";
+        else version (OSX)
+            immutable string path = "res:libapp.dylib";
+        else
+            static assert(false, "Cannot load application library on this platform.");
+
+        sApplicationLibrary = loadDynamicLibrary(path);
 
         ProjectProperties function() getProjectProperties;
         sApplicationLibrary.bindSymbol(cast(void**) &getProjectProperties, "getProjectProperties");
@@ -144,28 +143,11 @@ private static:
 
     void runMainLoop()
     {
-        version (ZW_Profiling)
-        {
-            ushort fpsCounter;
-
-            Timer fpsCounterTimer = new Timer(dur!"seconds"(1), (timer)
-            {
-                Profiler.sFPS = fpsCounter;
-                fpsCounter = 0;
-            }, No.oneshot, Yes.autostart);
-        }
-
         MonoTime previous = MonoTime.currTime;
         Duration lag;
 
         while (sRunning)
         {
-            version (ZW_Profiling)
-            {
-                Profiler.clearAndSwap();
-                scope (exit) ++fpsCounter;
-            }
-
             immutable MonoTime current = MonoTime.currTime;
             immutable Duration elapsed = current - previous;
             sFrameTime = FrameTime(dur!"hnsecs"(cast(long) (sWaitTime.total!"hnsecs" * sTimeScale)), sWaitTime);
@@ -175,9 +157,7 @@ private static:
 
             while (lag >= sWaitTime)
             {
-                Timer.tickEntries();
                 sApplication.tick();
-                
                 lag -= sWaitTime;
             }
 
@@ -210,8 +190,6 @@ private static:
                 sDeferredFunctionsCount = 0;
             }
         }
-
-        version (ZW_Profiling) fpsCounterTimer.stop();
     }
 
     void createFramebuffer()
@@ -285,13 +263,13 @@ private static:
         {
             auto helpInfo = getopt(args,
                 config.passThrough,
+                "game", "The packages to load.", &parsed.packages,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &parsed.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &parsed.clientLogLevel,
                 "loglevel-pal", "The minimum log level for Pal logs to be displayed.", &parsed.palLogLevel,
                 "graphics-driver", "The graphics driver to use.", &parsed.graphicsDriver,
                 "audio-driver", "The audio driver to use.", &parsed.audioDriver,
                 "display-driver", "The display driver to use.", &parsed.displayDriver,
-                "game", "The dynamic library of the game to load.", &parsed.applicationFile,
             );
 
             if (helpInfo.helpWanted)
@@ -329,9 +307,7 @@ package(zyeware.core) static:
         ParsedArgs parsedArgs = parseCmdArgs(args);
 
         // Initialize profiler and logger before anything else.
-        version (ZW_Profiling) Profiler.initialize();
         Logger.initialize(parsedArgs.coreLogLevel, parsedArgs.clientLogLevel, parsedArgs.palLogLevel);
-
         Logger.core.log(LogLevel.info, "ZyeWare Game Engine v%s", engineVersion.toString());
 
         // Initialize crash handler afterwards because it relies on the logger.
@@ -345,20 +321,11 @@ package(zyeware.core) static:
         Vfs.initialize();
         AssetManager.initialize();
 
-        string applicationFile = parsedArgs.applicationFile;
-        if (!applicationFile)
-        {
-            version (linux)
-                applicationFile = "./libapp.so";
-            else version (Windows)
-                applicationFile = ".\\app.dll";
-            else version (OSX)
-                applicationFile = "./libapp.dylib";
-            else
-                throw new CoreException("Cannot determine default application file for this platform.");
-        }
+        Vfs.addPackage("main.zpk");
+        foreach (string pckPath; parsedArgs.packages)
+            Vfs.addPackage(pckPath);
 
-        ProjectProperties properties = loadApplication(applicationFile);
+        ProjectProperties properties = loadProperties();
 
         if (properties.crashHandler)
             crashHandler = properties.crashHandler;
@@ -383,9 +350,7 @@ package(zyeware.core) static:
 
         AudioBus.create("master");
 
-        // In release mode, we want to display our fancy splash screen.
-        debug sApplication = properties.mainApplication;
-        else sApplication = new IntroApplication(properties.mainApplication);
+        sApplication = properties.mainApplication;
 
         createFramebuffer();
         sApplication.initialize();
@@ -459,12 +424,6 @@ public static:
 
         if (auto input = cast(InputEvent) ev)
             InputManager.receive(input).assumeWontThrow;
-
-        version (ZW_Profiling)
-        {
-            if (auto key = cast(InputEventKey) ev)
-                DebugInfoManager.receive(key);
-        }
     }
 
     /// Starts a garbage collection cycle, and clears the cache of dead references.

@@ -11,8 +11,8 @@ struct TextureAtlas
 		public
 		{
 			pure nothrow this(Texture2D texture, size_t hFrames, size_t vFrames);
-			pure const nothrow Rect2f getRegionForFrame(size_t frame);
-			pure const nothrow Vector2f spriteSize();
+			const pure nothrow Rect2f getRegionForFrame(size_t frame);
+			const pure nothrow Vector2f spriteSize();
 			inout pure nothrow inout(Texture2D) texture();
 		}
 	}

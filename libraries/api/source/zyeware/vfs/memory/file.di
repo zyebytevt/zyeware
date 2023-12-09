@@ -11,7 +11,7 @@ package(zyeware.vfs) class VfsMemoryFile : VfsFile
 		bool mIsOpened;
 		package(zyeware.vfs)
 		{
-			pure nothrow this(string name, in ubyte[] data);
+			pure nothrow this(string path, in ubyte[] data);
 			public
 			{
 				override nothrow size_t read(void* ptr, size_t size, size_t n);

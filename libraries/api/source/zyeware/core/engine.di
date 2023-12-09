@@ -11,12 +11,7 @@ import std.datetime : Duration, dur;
 import std.algorithm : min;
 import bindbc.loader;
 import zyeware;
-import zyeware.core.events;
-import zyeware.core.application;
-import zyeware.core.debugging;
 import zyeware.core.crash;
-import zyeware.utils.format;
-import zyeware.core.introapp;
 import zyeware.pal;
 struct ProjectProperties
 {
@@ -58,7 +53,7 @@ struct ZyeWare
 	{
 		struct ParsedArgs
 		{
-			string applicationFile;
+			string[] packages;
 			LogLevel coreLogLevel = LogLevel.verbose;
 			LogLevel clientLogLevel = LogLevel.verbose;
 			LogLevel palLogLevel = LogLevel.verbose;
@@ -88,7 +83,7 @@ struct ZyeWare
 			bool sIsProcessingDeferred;
 			bool sIsEmittingEvent;
 		}
-		ProjectProperties loadApplication(string library);
+		ProjectProperties loadProperties();
 		void runMainLoop();
 		void createFramebuffer();
 		nothrow void recalculateFramebufferArea();

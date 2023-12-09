@@ -72,7 +72,9 @@ string buildPath(string[] paths...) pure nothrow
         if (!path)
             continue;
         
-        if (result[].length > 0 && result[][$-1] != '/')
+        immutable char lastChar = result[].length > 0 ? result[][$-1] : '/';
+
+        if (lastChar != '/' && lastChar != ':')
             result ~= '/';
 
         result ~= path;

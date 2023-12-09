@@ -9,8 +9,8 @@ abstract class VfsFile
 {
 	protected
 	{
-		string mName;
-		pure nothrow this(string name);
+		string mPath;
+		pure nothrow this(string path);
 		public
 		{
 			alias FileSize = long;
@@ -96,6 +96,7 @@ abstract class VfsFile
 				writeNumber(cast(LengthType)text.length, endianness);
 				write(text.ptr, Char.sizeof, text.length);
 			}
+			const pure nothrow string path();
 		}
 	}
 }

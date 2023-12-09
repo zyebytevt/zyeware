@@ -15,7 +15,7 @@ package(zyeware.vfs) class VfsZipFile : VfsFile
 		size_t mFilePointer;
 		package(zyeware.vfs)
 		{
-			this(string name, ZipArchive archive, ArchiveMember member);
+			this(string path, ZipArchive archive, ArchiveMember member);
 			public
 			{
 				override nothrow size_t read(void* ptr, size_t size, size_t n);

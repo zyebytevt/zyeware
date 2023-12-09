@@ -1,5 +1,6 @@
 // D import file generated from 'source/zyeware/vfs/root.d'
 module zyeware.vfs.root;
+static import std.path;
 import core.stdc.stdlib : getenv;
 import std.algorithm : findSplit;
 import std.exception : enforce;
@@ -7,7 +8,6 @@ import std.typecons : Tuple;
 import std.range : empty;
 import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
-import std.path : buildNormalizedPath, dirName, isValidPath;
 import zyeware;
 import zyeware.vfs.disk : VfsDiskLoader, VfsDiskDirectory;
 import zyeware.vfs.zip : VfsZipLoader, VfsZipDirectory;
@@ -36,7 +36,7 @@ struct Vfs
 			enforce!VfsException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty, "Malformed Vfs path.");
 			return splitResult;
 		}
-		VfsDirectory loadPackage(string path, string name);
+		VfsDirectory loadPackage(string path, string scheme);
 		VfsDirectory createUserDir();
 		package(zyeware) static
 		{

@@ -8,8 +8,8 @@ abstract class VfsDirectory
 {
 	protected
 	{
-		string mName;
-		pure nothrow this(string name);
+		string mPath;
+		pure nothrow this(string path);
 		public
 		{
 			abstract VfsDirectory getDirectory(string name);
@@ -18,6 +18,7 @@ abstract class VfsDirectory
 			abstract const nothrow bool hasFile(string name);
 			abstract const immutable(string[]) files();
 			abstract const immutable(string[]) directories();
+			const pure nothrow string path();
 		}
 	}
 }
@@ -31,7 +32,7 @@ package(zyeware.vfs)
 			VfsDirectory[] mDirectories;
 			package
 			{
-				pure nothrow this(string name, VfsDirectory[] directories);
+				pure nothrow this(string path, VfsDirectory[] directories);
 				pure nothrow void addDirectory(VfsDirectory directory);
 				public
 				{

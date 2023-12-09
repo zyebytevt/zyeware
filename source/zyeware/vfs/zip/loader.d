@@ -52,7 +52,7 @@ public:
             current.member = member;
         }
 
-        return new VfsZipDirectory(scheme, archive, root);
+        return new VfsZipDirectory(scheme ~ ':', archive, root);
     }
 
     bool eligable(string diskPath) const
