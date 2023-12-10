@@ -40,21 +40,89 @@ private immutable dstring[] levelNames = [
 final class Logger
 {
 private:
-    LogSink[] mSinks;
+    LogSink mSink;
     LogLevel mLogLevel;
     dstring mName;
 
 public:
     /// Params:
-    ///   baseSink = The log sink to use for writing messages.
+    ///   sink = The log sink to use for writing messages.
     ///   logLevel = The minimum log level that should be logged.
     ///   name = The name of the logger.
-    this(LogSink baseSink, LogLevel logLevel, dstring name) pure
+    this(LogSink sink, LogLevel logLevel, dstring name) pure nothrow
     {
-        addSink(baseSink);
-
+        mSink = sink;
         mLogLevel = logLevel;
         mName = name;
+    }
+
+    /// Writes a message to this log.
+    /// Params:
+    ///   level = The log level the message should be written as.
+    ///   message = The message itself.
+    void log(LogLevel level, dstring message) nothrow
+    {
+        if (level > mLogLevel)
+            return;
+        
+        try
+        {
+            auto data = LogSink.LogData(
+                mName,
+                level,
+                ZyeWare.upTime,
+                message
+            );
+
+            mSink.log(data);
+        }
+        catch (Exception ex)
+        {
+            printf("Logger threw an exception. Could not log.\n");
+        }
+    }
+
+    /// Flushes the log sink connected to this log.
+    void flush() 
+    {
+        mSink.flush();
+    }
+}
+
+/// Represents a sink to write a message into. This can be either a file, a console,
+/// a in-game display, etc.
+abstract class LogSink
+{
+public:
+    /// The data that should be logged.
+    struct LogData
+    {
+        dstring loggerName; /// The name of the logger.
+        LogLevel level; /// The log level of the message.
+        Duration uptime; /// The engine uptime this message was sent.
+        dstring message; /// The message itself.
+    }
+
+    /// Logs the given data.
+    /// Params:
+    ///   data = The data to log.
+    abstract void log(in LogData data);
+
+    /// Flushes the current sink.
+    abstract void flush() ;
+}
+
+final class CombinedLogSink : LogSink
+{
+private:
+    LogSink[] mSinks;
+
+public:
+    /// Params:
+    ///   sinks = The sinks to combine.
+    this(LogSink[] sinks)
+    {
+        mSinks = sinks;
     }
 
     /// Add a log sink to this logger.
@@ -77,68 +145,23 @@ public:
             }
     }
 
-    /// Writes a message to this log.
-    /// Params:
-    ///   level = The log level the message should be written as.
-    ///   message = The message itself.
-    void log(LogLevel level, dstring message) nothrow
+    override void log(in LogData data)
     {
-        if (level > mLogLevel)
-            return;
-        
-        try
-        {
-            auto data = LogSink.LogData(
-                mName,
-                level,
-                ZyeWare.upTime,
-                message
-            );
-
-            foreach (LogSink sink; mSinks)
-                sink.log(data);
-        }
-        catch (Exception ex)
-        {
-            printf("Logger threw an exception. Could not log.\n");
-        }
+        foreach (sink; mSinks)
+            sink.log(data);
     }
 
-    /// Flushes all log sinks connected to this log.
-    void flush() 
+    override void flush()
     {
-        foreach (LogSink sink; mSinks)
+        foreach (sink; mSinks)
             sink.flush();
     }
-}
-
-/// Represents a sink to write a message into. This can be either a file, a console,
-/// a in-game display, etc.
-abstract class LogSink
-{
-public:
-    /// The data that should be logged.
-    struct LogData
-    {
-        dstring loggerName; /// The name of the logger.
-        LogLevel level; /// The log level of the message.
-        Duration uptime; /// The engine uptime this message was sent.
-        dstring message; /// The message itself.
-    }
-
-    /// Logs the given data.
-    /// Params:
-    ///   data = The data to log.
-    abstract void log(LogData data);
-
-    /// Flushes the current sink.
-    abstract void flush() ;
 }
 
 /// Represents a log sink that logs into a real file.
 class FileLogSink : LogSink
 {
-private:
+protected:
     File mFile;
 
 public:
@@ -149,10 +172,15 @@ public:
         mFile = file;
     }
 
-    override void log(LogData data)
+    override void log(in LogData data)
     {
         mFile.writefln("%3$-7s %2$-6s %1$7.1f | %4$s", data.uptime.toFloatSeconds, data.loggerName,
             levelNames[data.level - 1], data.message);
+    }
+
+    override void flush()
+    {
+        mFile.flush();
     }
 }
 
@@ -162,7 +190,7 @@ class ColorLogSink : LogSink
     import consolecolors;
 
 public:
-    override void log(LogData data)
+    override void log(in LogData data)
     {
         static immutable string[] levelColors = ["magenta", "red", "yellow", "blue", "green", "gray"];
 

@@ -1,6 +1,7 @@
 module zyeware.core.properties;
 
 import std.conv : to;
+import std.system : OS;
 
 import zyeware;
 
@@ -13,6 +14,8 @@ struct ProjectProperties
 
     DisplayProperties mainDisplayProperties; /// The properties of the main display.
     ScaleMode scaleMode = ScaleMode.center; /// How the main framebuffer should be scaled on resizing.
+
+    string[OS] appLibraries; /// The libraries that should be loaded for the project, depending on the OS.
 
     uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
 
@@ -38,6 +41,24 @@ struct ProjectProperties
 
         if (auto iconNode = displayNode.getChild("icon"))
             properties.mainDisplayProperties.icon = AssetManager.load!Image(iconNode.expectValue!string());
+
+        if (auto libNode = root.getChild("main-library"))
+        {
+            for (size_t i; i < libNode.children.length; ++i)
+            {
+                SDLNode* osNode = &libNode.children[i];
+
+                immutable OS libraryOs = osNode.name.to!OS;
+
+                if (libraryOs == OS.unknown)
+                {
+                    warning("Ignoring 'unknown' main-library definition.");
+                    continue;
+                }
+
+                properties.appLibraries[libraryOs] = osNode.expectValue!string();
+            }
+        }
 
         return properties;
     }

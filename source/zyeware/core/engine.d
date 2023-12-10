@@ -103,16 +103,12 @@ private static:
 
     Application createClientApplication()
     {
-        version (linux)
-            immutable string path = "res:libapp.so";
-        else version (Windows)
-            immutable string path = "res:app.dll";
-        else version (OSX)
-            immutable string path = "res:libapp.dylib";
-        else
-            static assert(false, "Cannot load application library on this platform.");
+        import std.system : os;
 
-        sApplicationLibrary = loadDynamicLibrary(path);
+        string* path = os in sProjectProperties.appLibraries;
+        enforce!CoreException(path, "No application library declared for this platform.");
+
+        sApplicationLibrary = loadDynamicLibrary(*path);
 
         Application function() createApplication;
         sApplicationLibrary.bindSymbol(cast(void**) &createApplication, "createApplication");
@@ -135,7 +131,6 @@ private static:
             previous = current;
 
             sApplication.tick();
-
             InputManager.tick();
 
             if (sMustUpdateFramebufferDimensions)
@@ -308,7 +303,7 @@ package(zyeware.core) static:
         foreach (string pckPath; parsedArgs.packages)
             Vfs.addPackage(pckPath);
 
-        sProjectProperties = ProjectProperties.load("res:project.zyeware");
+        sProjectProperties = ProjectProperties.load("res:zyeware.conf");
         sApplication = createClientApplication();
         enforce!CoreException(sApplication, "Main application cannot be null.");
         

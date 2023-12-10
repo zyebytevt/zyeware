@@ -5,6 +5,8 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.crash;
 
+import std.string : format;
+
 import zyeware;
 
 /// A `CrashHandler` is responsible for gracefully handling an unhandled `Throwable`.
@@ -52,35 +54,44 @@ class LinuxDefaultCrashHandler : DefaultCrashHandler
 {
     import std.process : execute, executeShell;
 
+private:
+    enum popupTitle = "Fatal Error";
+    enum popupDescription = "Please notify the developer about this issue.\nAdditionally, if this is a bug"
+    ~ " in the engine, please leave a bug report over at https://github.com/zyebytevt/zyeware.";
+    enum popupMoreDetails = "For more details, please look into the logs.";
+
 protected:
     bool commandExists(string command)
     {
         return executeShell("type " ~ command).status == 0;
     }
 
-    void showKDialog(string message, string details, string title)
+    void showKDialog(Throwable t)
     {
         execute([
             "kdialog",
             "--detailederror",
-            message,
-            details,
+            t.message,
+            t.toString(),
             "--title",
-            title,
+            popupTitle,
             "--ok-label",
             "Close ZyeWare"
         ]);
     }
 
-    void showZenity(string message, string title)
+    void showZenity(in Throwable t)
     {
-        execute([
+        immutable string message =
+            format!"<span size='x-large' weight='bold'>%s</span>\n\n%s\n%s"(t.message, popupDescription, popupMoreDetails);
+
+        auto result = execute([
             "zenity",
             "--error",
             "--text",
             message,
             "--title",
-            title,
+            popupTitle,
             "--width",
             "500",
             "--ok-label",
@@ -88,8 +99,11 @@ protected:
         ]);
     }
 
-    void showXMessage(string message)
+    void showXMessage(in Throwable t)
     {
+        immutable string message =
+            format!"%s\n\n%s\n%s"(t.message, popupDescription, popupMoreDetails);
+
         execute([
             "xmessage",
             "-buttons",
@@ -99,15 +113,18 @@ protected:
         ]);
     }
 
-    void showGXMessage(string message, string title)
+    void showGXMessage(in Throwable t)
     {
+        immutable string message =
+            format!"%s\n\n%s\n%s"(t.message, popupDescription, popupMoreDetails);
+
         execute([
             "gxmessage",
             "-ontop",
             "-buttons",
             "Close ZyeWare:0",
             "-title",
-            title,
+            popupTitle,
             "-center",
             message
         ]);
@@ -118,20 +135,14 @@ public:
     {
         super.show(t);
 
-        enum title = "Can I go home yet?";
-        enum message = "As it turns out, the application has crashed. ZyeByte is sorry for the inconvenience, be it as "
-        ~ "the game or engine developer alike.\nIf you do suspect it's an issue of the engine though, please leave "
-        ~ "a bug report over at https://github.com/zyebytevt/zyeware!\nWith this, I'm sure it can be fixed soon.\n\n"
-        ~ "(Restarting often fixes issues, I've been told!)";
-
         if (commandExists("kdialog"))
-            showKDialog(message, t.toString(), title);
+            showKDialog(t);
         else if (commandExists("zenity"))
-            showZenity(message ~ "\n\n" ~ t.toString(), title);
+            showZenity(t);
         else if (commandExists("gxmessage"))
-            showGXMessage(message ~ "\n\n" ~ t.toString(), title);
+            showGXMessage(t);
         else if (commandExists("xmessage"))
-            showXMessage(message ~ "\n\n" ~ t.toString());
+            showXMessage(t);
         else
         {
             warning("Could not find appropriate message box application to use.");

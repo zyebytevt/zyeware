@@ -58,7 +58,9 @@ public:
         in (name, "Name cannot be null.")
     {
         immutable string path = std.path.buildPath(mDiskPath, name);
-        return exists(path) && isFile(path).assumeWontThrow;
+
+        try return exists(path) && isFile(path);
+        catch (Exception) return false;
     }
 
     override immutable(string[]) files() const

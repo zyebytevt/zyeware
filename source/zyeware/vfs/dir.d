@@ -100,7 +100,7 @@ public:
             if (dir.hasFile(name))
                 return dir.getFile(name);
 
-        throw new VfsException(format!"File '%s' not found."(name));
+        throw new VfsException(format!"File '%s' not found."(buildPath(mPath, name)));
     }
 
     override bool hasDirectory(string name) const nothrow
