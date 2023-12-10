@@ -14,6 +14,7 @@ import std.stdio : stderr;
 import bindbc.loader;
 
 import zyeware;
+import zyeware.core.dynlib : cleanDynamicLibraries;
 import zyeware.core.application;
 
 version (unittest)
@@ -29,6 +30,7 @@ else
             ZyeWare.initialize(args);
             ZyeWare.start();
             ZyeWare.cleanup();
+            
             return 0;
         }
         catch (Throwable t)
@@ -38,7 +40,11 @@ else
             else
                 stderr.writeln(t.toString());
 
-            abort();
+            return 1;
+        }
+        finally
+        {
+            cleanDynamicLibraries();
         }
     }
 }

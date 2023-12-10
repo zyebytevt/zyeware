@@ -22,24 +22,6 @@ import zyeware;
 import zyeware.core.crash;
 import zyeware.pal;
 
-/// Struct that holds information about the project.
-/// Note that the author name and project name are used to determine the save data directory.
-struct ProjectProperties
-{
-    string authorName = "Anonymous"; /// The author of the game. Can be anything, from a person to a company.
-    string projectName = "ZyeWare Project"; /// The name of the project.
-
-    Application mainApplication; /// The application to use.
-    CrashHandler crashHandler; /// The crash handler to use.
-    DisplayProperties mainDisplayProperties; /// The properties of the main display.
-    ScaleMode scaleMode = ScaleMode.center; /// How the main framebuffer should be scaled on resizing.
-
-    uint audioBufferSize = 4096 * 4; /// The size of an individual audio buffer in samples.
-    uint audioBufferCount = 4; /// The amount of audio buffers to cycle through for streaming.
-
-    uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.
-}
-
 /// How the main framebuffer should be scaled on resizing.
 enum ScaleMode
 {
@@ -120,7 +102,7 @@ private static:
         bool sIsEmittingEvent;
     }
 
-    ProjectProperties loadProperties()
+    Application createClientApplication()
     {
         version (linux)
             immutable string path = "res:libapp.so";
@@ -133,12 +115,12 @@ private static:
 
         sApplicationLibrary = loadDynamicLibrary(path);
 
-        ProjectProperties function() getProjectProperties;
-        sApplicationLibrary.bindSymbol(cast(void**) &getProjectProperties, "getProjectProperties");
+        Application function() createApplication;
+        sApplicationLibrary.bindSymbol(cast(void**) &createApplication, "createApplication");
 
-        enforce!CoreException(getProjectProperties, "Could not find getProjectProperties function in application library.");
+        enforce!CoreException(createApplication, "Could not find 'createApplication' function in application library.");
 
-        return getProjectProperties();
+        return createApplication();
     }
 
     void runMainLoop()
@@ -300,10 +282,9 @@ package(zyeware.core) static:
 
     void initialize(string[] args)
     {
-        GC.disable();
         sStartupTime = MonoTime.currTime;
-        sRandom = new RandomNumberGenerator();
 
+        GC.disable();
         ParsedArgs parsedArgs = parseCmdArgs(args);
 
         // Initialize profiler and logger before anything else.
@@ -325,23 +306,20 @@ package(zyeware.core) static:
         foreach (string pckPath; parsedArgs.packages)
             Vfs.addPackage(pckPath);
 
-        ProjectProperties properties = loadProperties();
-
-        if (properties.crashHandler)
-            crashHandler = properties.crashHandler;
-
-        sProjectProperties = properties;
-        targetFrameRate = properties.targetFrameRate;
-        sScaleMode = properties.scaleMode;
-        
-        enforce!CoreException(properties.mainApplication, "Main application cannot be null.");
+        sProjectProperties = ProjectProperties.load("res:project.zyeware");
+        sApplication = createClientApplication();
+        enforce!CoreException(sApplication, "Main application cannot be null.");
         
         Pal.loadAudioDriver(parsedArgs.audioDriver);
         Pal.loadDisplayDriver(parsedArgs.displayDriver);
         Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);
         
         // Creates a new display and render context.
-        sMainDisplay = new Display(properties.mainDisplayProperties);
+        sRandom = new RandomNumberGenerator();
+        targetFrameRate = sProjectProperties.targetFrameRate;
+        sScaleMode = sProjectProperties.scaleMode;
+        sMainDisplay = new Display(sProjectProperties.mainDisplayProperties);
+
         enforce!CoreException(sMainDisplay, "Main display creation failed.");
 
         Pal.graphics.api.initialize();
@@ -349,8 +327,6 @@ package(zyeware.core) static:
         Pal.audio.initialize();
 
         AudioBus.create("master");
-
-        sApplication = properties.mainApplication;
 
         createFramebuffer();
         sApplication.initialize();

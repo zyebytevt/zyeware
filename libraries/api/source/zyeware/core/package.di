@@ -14,6 +14,7 @@ public
 	import zyeware.core.random;
 	import zyeware.core.native;
 	import zyeware.core.dynlib;
+	import zyeware.core.properties;
 	import zyeware.core.events;
 	import zyeware.core.math;
 }

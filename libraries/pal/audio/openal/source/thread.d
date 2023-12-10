@@ -8,7 +8,7 @@ module zyeware.pal.audio.openal.thread;
 import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
 import zyeware;
-import zyeware.pal.audio.openal.api : updateSourceBuffers, pSources;
+import zyeware.pal.audio.openal.api : audioBufferCount, audioBufferSize, updateSourceBuffers, pSources;
 import zyeware.pal.audio.openal.types;
 
 class AudioThread : Thread
@@ -28,8 +28,7 @@ protected:
         //     (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
         // We assume a default sample rate of 44100 for audio.
 
-        immutable Duration waitTime = msecs(ZyeWare.projectProperties.audioBufferSize
-            / ZyeWare.projectProperties.audioBufferCount / 44_100 / 2 * 1000);
+        immutable Duration waitTime = msecs(audioBufferSize / audioBufferCount / 44_100 / 2 * 1000);
 
         while (mIsRunning)
         {
@@ -49,5 +48,6 @@ public:
     void stop()
     {
         mIsRunning = false;
+        join();
     }
 }

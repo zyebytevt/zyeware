@@ -2,7 +2,7 @@
 module zyeware.vfs.root;
 static import std.path;
 import core.stdc.stdlib : getenv;
-import std.algorithm : findSplit;
+import std.algorithm : findSplit, canFind;
 import std.exception : enforce;
 import std.typecons : Tuple;
 import std.range : empty;

@@ -13,18 +13,6 @@ import bindbc.loader;
 import zyeware;
 import zyeware.core.crash;
 import zyeware.pal;
-struct ProjectProperties
-{
-	string authorName = "Anonymous";
-	string projectName = "ZyeWare Project";
-	Application mainApplication;
-	CrashHandler crashHandler;
-	DisplayProperties mainDisplayProperties;
-	ScaleMode scaleMode = ScaleMode.center;
-	uint audioBufferSize = 4096 * 4;
-	uint audioBufferCount = 4;
-	uint targetFrameRate = 60;
-}
 enum ScaleMode
 {
 	center,
@@ -83,7 +71,7 @@ struct ZyeWare
 			bool sIsProcessingDeferred;
 			bool sIsEmittingEvent;
 		}
-		ProjectProperties loadProperties();
+		Application getClientApplication();
 		void runMainLoop();
 		void createFramebuffer();
 		nothrow void recalculateFramebufferArea();

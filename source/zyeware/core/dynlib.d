@@ -3,10 +3,10 @@ module zyeware.core.dynlib;
 import core.runtime : Runtime;
 
 static import std.path;
-import std.exception : enforce;
-import std.file : isDir, exists, write, tempDir, mkdirRecurse;
-import std.digest.md : md5Of, toHexString;
+import std.exception : enforce, collectException;
+import std.file : isDir, exists, write, tempDir, mkdirRecurse, remove;
 import std.string : format;
+import std.uuid : randomUUID;
 
 import bindbc.loader;
 
@@ -30,15 +30,31 @@ SharedLib loadDynamicLibrary(string vfsPath)
     immutable string tempDirectory = std.path.buildPath(tempDir, "zyeware");
     mkdirRecurse(tempDirectory);
 
-    immutable string tempFileName = std.path.buildPath(tempDirectory, toHexString(md5Of(libraryFile.path)) ~ dllExtension);
+    immutable string tempFilePath = std.path.buildPath(tempDirectory, randomUUID.toString() ~ dllExtension);
 
-    if (!exists(tempFileName))
-        write(tempFileName, libraryFile.readAll!(void[]));
+    write(tempFilePath, libraryFile.readAll!(void[]));
+    pLoadedLibraries ~= tempFilePath;
     
-    void* handle = Runtime.loadLibrary(tempFileName);
+    void* handle = Runtime.loadLibrary(tempFilePath);
     enforce!CoreException(handle, format!"Failed to load dynamic library '%s'."(vfsPath));
 
-    Logger.core.log(LogLevel.debug_, "Extracted '%s' to '%s' and loaded it.", libraryFile.path, tempFileName);
+    Logger.core.log(LogLevel.debug_, "Extracted '%s' to '%s' and loaded it.", libraryFile.path, tempFilePath);
 
     return SharedLib(handle);
 }
+
+package(zyeware.core):
+
+void cleanDynamicLibraries()
+{
+    foreach (ref string path; pLoadedLibraries)
+    {
+        collectException(remove(path));
+    }
+
+    pLoadedLibraries.length = 0;
+}
+
+private:
+
+__gshared string[] pLoadedLibraries;

@@ -20,6 +20,9 @@ import zyeware.pal.audio.openal.thread;
 
 package(zyeware.pal.audio.openal):
 
+enum audioBufferSize = 4096 * 4;
+enum audioBufferCount = 4;
+
 ALCdevice* pDevice;
 ALCcontext* pContext;
 BusData[string] pBusses;
@@ -33,7 +36,7 @@ size_t readShortsFromDecoder(ref AudioStream decoder, ref short[] buffer)
 {
     static float[] readBuffer;
     if (!readBuffer)
-        readBuffer = new float[ZyeWare.projectProperties.audioBufferSize];
+        readBuffer = new float[audioBufferSize];
 
     size_t readCount = decoder.readSamplesFloat(&readBuffer[0], cast(int)(readBuffer.length/decoder.getNumChannels()))
         * decoder.getNumChannels();
@@ -116,8 +119,8 @@ NativeHandle createSource(in NativeHandle busHandle)
 {
     auto source = new SourceData();
 
-    source.bufferIds = new uint[ZyeWare.projectProperties.audioBufferCount];
-    source.processingBuffer = new short[ZyeWare.projectProperties.audioBufferSize];
+    source.bufferIds = new uint[audioBufferCount];
+    source.processingBuffer = new short[audioBufferSize];
     source.bus = cast(const(BusData*)) busHandle;
 
     alGenSources(1, &source.id);
