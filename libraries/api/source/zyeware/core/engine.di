@@ -71,7 +71,7 @@ struct ZyeWare
 			bool sIsProcessingDeferred;
 			bool sIsEmittingEvent;
 		}
-		Application getClientApplication();
+		Application createClientApplication();
 		void runMainLoop();
 		void createFramebuffer();
 		nothrow void recalculateFramebufferArea();

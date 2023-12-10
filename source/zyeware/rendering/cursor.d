@@ -4,8 +4,6 @@ import std.conv : to;
 
 import zyeware;
 
-import zyeware.utils.tokenizer;
-
 @asset(Yes.cache)
 final class Cursor
 {

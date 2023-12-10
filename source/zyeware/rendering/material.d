@@ -18,8 +18,6 @@ import inmath.linalg;
 
 import zyeware;
 
-import zyeware.utils.tokenizer;
-
 @asset(Yes.cache)
 class Material
 {

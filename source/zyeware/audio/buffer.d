@@ -11,7 +11,6 @@ import zyeware;
 
 import zyeware.pal;
 import zyeware.pal.audio.types;
-import zyeware.utils.tokenizer;
 
 /// Contains an encoded audio segment, plus various information like
 /// loop point etc.
@@ -68,35 +67,21 @@ public:
         {
             try
             {
-                auto t = Tokenizer(["loop"]);
-                t.load(path ~ ".props");
+                SDLNode* root = loadSdlDocument(path ~ ".props");
 
-                while (!t.isEof)
+                if (SDLNode* loopNode = root.getChild("loop"))
                 {
-                    if (t.consume(Token.Type.keyword, "loop"))
+                    if (SDLNode* sampleNode = loopNode.getChild("sample"))
                     {
-                        if (t.consume(Token.Type.identifier, "sample"))
-                        {
-                            properties.loopPoint = LoopPoint(t.expect(Token.Type.integer, null,
-                                "Expected integer as sample.").value.to!int);
-                        }
-                        else if (t.consume(Token.Type.identifier, "module"))
-                        {
-                            immutable int pattern = t.expect(Token.Type.integer, null,
-                                "Expected integer as pattern.").value.to!int;
-                            
-                            t.expect(Token.Type.delimiter, ",", "Expected comma in loop point.");
-                            
-                            immutable int row = t.expect(Token.Type.integer, null,
-                                "Expected integer as row.").value.to!int;
-
-                            properties.loopPoint = LoopPoint(ModuleLoopPoint(pattern, row));
-                        }
-                        else
-                            throw new ResourceException("Could not interpret loop point.");
+                        properties.loopPoint = LoopPoint(sampleNode.expectValue!int());
+                    }
+                    else if (SDLNode* moduleNode = loopNode.getChild("module"))
+                    {
+                        properties.loopPoint = LoopPoint(ModuleLoopPoint(moduleNode.expectValue!int(),
+                            moduleNode.expectChildValue!int("row")));
                     }
                     else
-                        throw new ResourceException("Unknown token '%s' in properties file.", t.get().value);
+                        throw new ResourceException("Could not interpret loop point.");
                 }
             }
             catch (Exception ex)

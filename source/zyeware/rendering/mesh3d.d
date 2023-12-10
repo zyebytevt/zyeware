@@ -15,7 +15,6 @@ import inmath.linalg;
 import zyeware;
 
 import zyeware.pal;
-import zyeware.utils.tokenizer;
 
 interface Mesh
 {

@@ -16,7 +16,6 @@ import inmath.linalg;
 import zyeware;
 
 import zyeware.pal;
-import zyeware.utils.tokenizer;
 
 struct ShaderProperties
 {
@@ -112,7 +111,7 @@ public:
 
         import std.traits : EnumMembers;
         import std.conv : to;
-        
+
         static foreach (type; EnumMembers!(ShaderProperties.ShaderType))
         {
             if (SDLNode* shaderTypeNode = root.getChild(type.to!string))

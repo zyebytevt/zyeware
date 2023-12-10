@@ -6,6 +6,7 @@ import core.thread : rt_moduleTlsCtor, rt_moduleTlsDtor;
 import std.stdio : stderr;
 import bindbc.loader;
 import zyeware;
+import zyeware.core.dynlib : cleanDynamicLibraries;
 import zyeware.core.application;
 version (unittest)
 {

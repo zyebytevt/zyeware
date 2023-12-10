@@ -6,8 +6,6 @@ import std.exception : enforce;
 
 import zyeware;
 
-import zyeware.utils.tokenizer;
-
 @asset(Yes.cache)
 class FrameAnimations
 {

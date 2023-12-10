@@ -25,7 +25,7 @@ struct ProjectProperties
         properties.authorName = root.expectChildValue!string("author");
         properties.projectName = root.expectChildValue!string("name");
 
-        properties.scaleMode = root.getChildValue!string("scaleMode", "center").to!ScaleMode;
+        properties.scaleMode = root.getChildValue!string("scale-mode", "center").to!ScaleMode;
 
         // Load display properties
 

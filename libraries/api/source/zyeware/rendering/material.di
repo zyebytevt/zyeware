@@ -10,7 +10,6 @@ import std.algorithm : map, filter, sort, uniq;
 import std.array : array;
 import inmath.linalg;
 import zyeware;
-import zyeware.utils.tokenizer;
 @(asset(Yes.cache))class Material
 {
 	protected
