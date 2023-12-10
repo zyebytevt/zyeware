@@ -81,50 +81,51 @@ public:
 
         auto frameAnims = new FrameAnimations();
 
-        auto t = Tokenizer(["animation", "frame", "to", "loop", "hflip", "vflip", "msecs"]);
-        t.load(path);
+        SDLNode* root = loadSdlDocument(path ~ ".props");
 
-        while (!t.isEof)
+        for (size_t i; i < root.children.length; ++i)
         {
+            SDLNode* node = &root.children[i];
+
             Animation animation;
 
-            t.expect(Token.Type.keyword, "animation", "Expected an animation declaration.");
+            immutable string animationName = node.name;
+            
+            animation.isLooping = node.getAttributeValue!bool("loop", false);
+            animation.hFlip = node.getAttributeValue!bool("hflip", false);
+            animation.vFlip = node.getAttributeValue!bool("vflip", false);
 
-            immutable string animationName = t.expect(Token.Type.identifier, null, "Expected an animation name.").value;
-
-            while (t.consume(Token.Type.keyword, "frame"))
+            for (size_t j; j < node.children.length; ++j)
             {
-                immutable size_t startFrame = t.expect(Token.Type.integer, null, "Expected a frame index.").value.to!size_t;
-                size_t endFrame = startFrame;
+                SDLNode* frameNode = &node.children[j];
 
-                if (t.consume(Token.Type.keyword, "to"))
-                    endFrame = t.expect(Token.Type.integer, null, "Expected a frame index.").value.to!size_t;
-                
-                t.expect(Token.Type.keyword, "msecs", "Expected a duration declaration.");
-                immutable size_t durationMsecs = t.expect(Token.Type.integer, null).value.to!size_t;
+                size_t startFrame, endFrame, durationMsecs;
+
+                if (frameNode.name == "frame")
+                {
+                    startFrame = cast(size_t) frameNode.getValue!int();
+                    endFrame = startFrame;
+                }
+                else if (frameNode.name == "frame-range")
+                {
+                    startFrame = frameNode.expectAttributeValue!size_t("start");
+                    endFrame = frameNode.expectAttributeValue!size_t("end");
+                }
+                else
+                    throw new Exception("Invalid frame node name: " ~ frameNode.name);
+
+                durationMsecs = frameNode.expectAttributeValue!size_t("msecs");
 
                 if (endFrame >= startFrame)
                 {
-                    for (size_t i = startFrame; i <= endFrame; i++)
-                        animation.frames ~= Frame(i, dur!"msecs"(durationMsecs));
+                    for (size_t k = startFrame; k <= endFrame; k++)
+                        animation.frames ~= Frame(k, dur!"msecs"(durationMsecs));
                 }
                 else
                 {
-                    for (size_t i = startFrame; i >= endFrame; i--)
-                        animation.frames ~= Frame(i, dur!"msecs"(durationMsecs));
+                    for (size_t k = startFrame; k >= endFrame; k--)
+                        animation.frames ~= Frame(k, dur!"msecs"(durationMsecs));
                 }
-            }
-
-            while (!t.isEof)
-            {
-                if (t.consume(Token.Type.keyword, "loop"))
-                    animation.isLooping = true;
-                else if (t.consume(Token.Type.keyword, "hflip"))
-                    animation.hFlip = true;
-                else if (t.consume(Token.Type.keyword, "vflip"))
-                    animation.vFlip = true;
-                else
-                    break;
             }
 
             frameAnims.addAnimation(animationName, animation);

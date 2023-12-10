@@ -128,24 +128,15 @@ public:
         return mNativeHandle;
     }
 
-    // TODO: Implement ZDL loading of images
     static TextureCubeMap load(string path)
     {
         TextureProperties properties;
         Image[6] images;
 
-        immutable string[] sides = ["right", "left", "top", "bottom", "front", "back"];
-        auto t = Tokenizer(sides);
-        t.load(path);
+        SDLNode* root = loadSdlDocument(path);
 
-        while (!t.isEof)
-        {
-            immutable string side = t.expect(Token.Type.keyword, null, "Expected side definition.").value;
-            immutable string imagePath = t.expect(Token.Type.string, null, "Expected image path.").value;
-
-            immutable size_t sideIndex = sides.countUntil(side);
-            images[sideIndex] = AssetManager.load!Image(imagePath);
-        }
+        static foreach (size_t i, string side; ["right", "left", "top", "bottom", "front", "back"])
+            images[i] = AssetManager.load!Image(root.expectChildValue!string(side));
 
         if (Vfs.hasFile(path ~ ".props")) // Properties file exists
             parseTextureProperties(path ~ ".props", properties);
@@ -158,29 +149,18 @@ private void parseTextureProperties(string path, out TextureProperties propertie
 {
     try
     {
-        auto t = Tokenizer(["filter", "wrap"]);
-        t.load(path);
+        SDLNode* root = loadSdlDocument(path);
 
-        while (!t.isEof)
+        if (SDLNode* filter = root.getChild("filter"))
         {
-            if (t.consume(Token.Type.keyword, "filter"))
-            {
-                t.expect(Token.Type.identifier, "min", "Expected min filter declaration.");
-                properties.minFilter = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.Filter);
-                t.expect(Token.Type.delimiter, ",");
-                t.expect(Token.Type.identifier, "mag", "Expected mag filter declaration.");
-                properties.magFilter = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.Filter);
-            }
-            else if (t.consume(Token.Type.keyword, "wrap"))
-            {
-                t.expect(Token.Type.identifier, "s", "Expected wrap s declaration.");
-                properties.wrapS = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.WrapMode);
-                t.expect(Token.Type.delimiter, ",");
-                t.expect(Token.Type.identifier, "t", "Expected wrap t declaration.");
-                properties.wrapT = t.expect(Token.Type.identifier, null).value.to!(TextureProperties.WrapMode);
-            }
-            else
-                throw new ResourceException(format!"Unexpected token '%s' in texture properties file."(t.get().value));
+            properties.minFilter = filter.expectAttributeValue!string("min").to!(TextureProperties.Filter);
+            properties.magFilter = filter.expectAttributeValue!string("mag").to!(TextureProperties.Filter);
+        }
+
+        if (SDLNode* wrap = root.getChild("wrap"))
+        {
+            properties.wrapS = wrap.expectAttributeValue!string("s").to!(TextureProperties.WrapMode);
+            properties.wrapT = wrap.expectAttributeValue!string("t").to!(TextureProperties.WrapMode);
         }
     }
     catch (Exception ex)

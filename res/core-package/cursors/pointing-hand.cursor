@@ -1,2 +1,2 @@
 image "core:textures/default-cursor/pointing-hand.png"
-hotspot 11, 6
+hotspot x=11 y=6

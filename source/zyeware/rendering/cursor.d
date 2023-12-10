@@ -32,16 +32,12 @@ public:
 
     static Cursor load(string path)
     { 
-        auto t = Tokenizer(["image", "hotspot"]);
-        t.load(path);
+        SDLNode* root = loadSdlDocument(path);
 
-        t.expect(Token.Type.keyword, "image", "Expected image declaration.");
-        immutable string imagePath = t.expect(Token.Type.string, null).value;
-
-        t.expect(Token.Type.keyword, "hotspot", "Expected hotspot declaration.");
-        immutable int x = t.expect(Token.Type.integer, null).value.to!int;
-        t.expect(Token.Type.delimiter, ",");
-        immutable int y = t.expect(Token.Type.integer, null).value.to!int;
+        immutable string imagePath = root.expectChildValue!string("image");
+        SDLNode* hotspotNode = root.expectChild("hotspot");
+        immutable int x = hotspotNode.expectAttributeValue!int("x");
+        immutable int y = hotspotNode.expectAttributeValue!int("y");
 
         return new Cursor(
             AssetManager.load!Image(imagePath),

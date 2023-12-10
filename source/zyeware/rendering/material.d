@@ -159,94 +159,92 @@ public:
     static Material load(string path)
         in (path, "Path cannot be null.")
     {
-        auto t = Tokenizer(["shader", "extends", "parameter", "texture"]);
-        t.load(path);
-
+        SDLNode* root = loadSdlDocument(path);
+        
         bool isRoot;
         string resourcePath;
         Parameter[string] parameters;
         Texture[] textures;
 
-        if (t.consume(Token.Type.keyword, "shader"))
+        if (auto shaderNode = root.getChild("shader"))
         {
             isRoot = true;
-            resourcePath = t.expect(Token.Type.string, null, "Expected path to shader.").value;
+            resourcePath = shaderNode.expectValue!string();
         }
-        else if (t.consume(Token.Type.keyword, "extends"))
+        else if (auto extendsNode = root.getChild("extends"))
         {
             isRoot = false;
-            resourcePath = t.expect(Token.Type.string, null, "Expected path to material.").value;
+            resourcePath = extendsNode.expectValue!string();
         }
         else
-            throw new ResourceException("Expected 'shader' or 'extends' as first instruction.");
+            throw new ResourceException("Expected either 'shader' or 'extends' instruction.");
 
-        while (!t.isEof)
+        if (auto parametersNode = root.getChild("parameters"))
         {
-            if (t.consume(Token.Type.keyword, "parameter"))
+            for (size_t i; i < parametersNode.children.length; ++i)
             {
-                immutable string name = t.expect(Token.Type.identifier, null, "Expected parameter name.").value;
+                SDLNode* parameterNode = &parametersNode.children[i];
 
-                if (t.consume(Token.Type.delimiter, "("))
+                immutable string type = parameterNode.expectAttributeValue!string("type");
+
+                switch (type)
                 {
-                    string[] values;
-                    while (!t.isEof)
-                    {
-                        values ~= t.get().value;
-                        if (t.consume(Token.Type.delimiter, ")"))
-                            break;
-                        else
-                            t.expect(Token.Type.delimiter, ",", "Expected comma between values.");
-                    }
-                    
-                    switch (values.length)
-                    {
-                    case 2:
-                        parameters[name] = Parameter(Vector2f(values[0].to!float, values[1].to!float));
-                        break;
-                    
-                    case 3:
-                        parameters[name] = Parameter(Vector3f(values[0].to!float, values[1].to!float, values[2].to!float));
-                        break;
+                case "int":
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!int("value"));
+                    break;
 
-                    case 4:
-                        parameters[name] = Parameter(Vector4f(values[0].to!float, values[1].to!float, values[2].to!float, values[3].to!float));
-                        break;
+                case "float":
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!float("value"));
+                    break;
 
-                    default:
-                        throw new RenderException(format!"Invalid number of values for vector '%s'."(name));
-                    }
-                }
-                else
-                {
-                    Token tk = t.get();
+                case "vec2":
+                    Vector2f value;
+                    value.x = parameterNode.expectAttributeValue!float("x");
+                    value.y = parameterNode.expectAttributeValue!float("y");
+                    parameters[parametersNode.name] = Parameter(value);
+                    break;
 
-                    switch (tk.type)
-                    {
-                    case Token.Type.integer:
-                        parameters[name] = Parameter(tk.value.to!int);
-                        break;
-                    
-                    case Token.Type.decimal:
-                        parameters[name] = Parameter(tk.value.to!float);
-                        break;
+                case "vec3":
+                    Vector3f value;
+                    value.x = parameterNode.expectAttributeValue!float("x");
+                    value.y = parameterNode.expectAttributeValue!float("y");
+                    value.z = parameterNode.expectAttributeValue!float("z");
+                    parameters[parametersNode.name] = Parameter(value);
+                    break;
 
-                    default:
-                        throw new RenderException(format!"Invalid parameter value for '%s'."(name));
-                    }
+                case "vec4":
+                    Vector4f value;
+                    value.x = parameterNode.expectAttributeValue!float("x");
+                    value.y = parameterNode.expectAttributeValue!float("y");
+                    value.z = parameterNode.expectAttributeValue!float("z");
+                    value.w = parameterNode.expectAttributeValue!float("w");
+                    parameters[parametersNode.name] = Parameter(value);
+                    break;
+
+                default:
+                    throw new ResourceException(format!"Unknown parameter type '%s'."(type));
                 }
             }
-            else if (t.consume(Token.Type.keyword, "texture"))
+        }
+
+        if (auto texturesNode = root.getChild("textures"))
+        {
+            for (size_t i; i < texturesNode.children.length; ++i)
             {
-                immutable string type = t.expect(Token.Type.identifier, null, "Expected texture type.").value;
+                SDLNode* textureNode = &texturesNode.children[i];
+
+                enforce!ResourceException(textureNode.name == "texture", "Expected 'texture' node.");
+
+                immutable string type = textureNode.expectAttributeValue!string("type");
 
                 switch (type)
                 {
                 case "two":
-                    textures ~= AssetManager.load!Texture2D(t.expect(Token.Type.string, null, "Expected path to texture.").value);
+                    textures ~= AssetManager.load!Texture2D(textureNode.expectAttributeValue!string("path"));
                     break;
 
                 case "cube":
-                    textures ~= AssetManager.load!TextureCubeMap(t.expect(Token.Type.string, null, "Expected path to texture.").value);
+                    textures ~= AssetManager.load!TextureCubeMap(textureNode.expectAttributeValue!string("path"));
                     break;
 
                 case "null":
@@ -254,11 +252,9 @@ public:
                     break;
 
                 default:
-                    throw new RenderException(format!"Unknown texture type '%s'."(type));
+                    throw new ResourceException(format!"Unknown texture type '%s'."(type));
                 }
             }
-            else
-                throw new ResourceException(format!"Unknown instruction '%s'."(t.get().value));
         }
 
         Material material;

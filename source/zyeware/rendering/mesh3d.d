@@ -101,11 +101,8 @@ public:
         {
             try
             {
-                auto t = Tokenizer(["material"]);
-                t.load(path ~ ".props");
-
-                t.expect(Token.Type.keyword, "material", "Expected material declaration.");
-                mesh.mMaterial = AssetManager.load!Material(t.expect(Token.Type.string, null, "Expected path.").value);
+                SDLNode* root = loadSdlDocument(path ~ ".props");
+                mesh.mMaterial = AssetManager.load!Material(root.expectChildValue!string("material"));
             }
             catch (Exception ex)
             {

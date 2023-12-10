@@ -108,17 +108,18 @@ public:
             properties.sources[type] = parseIncludes(shaderFile.readAll!string);
         }
 
-        immutable string[] shaderTypes = ["vertex", "fragment", "geometry", "compute"];
-        auto t = Tokenizer(shaderTypes);
-        t.load(path);
+        SDLNode* root = loadSdlDocument(path);
 
-        while (!t.isEof)
+        import std.traits : EnumMembers;
+        import std.conv : to;
+        
+        static foreach (type; EnumMembers!(ShaderProperties.ShaderType))
         {
-            immutable string type = t.expect(Token.Type.keyword, null, "Expected shader type.").value;
-            immutable shaderType = cast(ShaderProperties.ShaderType) shaderTypes.countUntil(type);
-            immutable string shaderPath = t.expect(Token.Type.string, null, "Expected shader path.").value;
-
-            loadShader(shaderPath, shaderType);
+            if (SDLNode* shaderTypeNode = root.getChild(type.to!string))
+            {
+                immutable string shaderPath = shaderTypeNode.expectValue!string();
+                loadShader(shaderPath, type);
+            }
         }
 
         return new Shader(properties);

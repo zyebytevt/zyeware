@@ -62,7 +62,7 @@ T expectChildValue(T)(SDLNode* parent, string childName)
     return expectValue!T(expectChild(parent, childName));
 }
 
-T getAttribute(T)(in SDLNode* node, string attributeName, T default_ = T.init)
+T getAttributeValue(T)(in SDLNode* node, string attributeName, T default_ = T.init)
 {
     if (auto attribute = findAttribute(node, attributeName))
         return cast(T) attribute.value;
@@ -70,7 +70,7 @@ T getAttribute(T)(in SDLNode* node, string attributeName, T default_ = T.init)
     return default_;
 }
 
-T expectAttribute(T)(in SDLNode* node, string attributeName)
+T expectAttributeValue(T)(in SDLNode* node, string attributeName)
 {
     if (auto attribute = findAttribute(node, attributeName))
         return cast(T) attribute.value;
