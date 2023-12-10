@@ -44,7 +44,6 @@ struct ZyeWare
 			string[] packages;
 			LogLevel coreLogLevel = LogLevel.verbose;
 			LogLevel clientLogLevel = LogLevel.verbose;
-			LogLevel palLogLevel = LogLevel.verbose;
 			string graphicsDriver = "opengl";
 			string audioDriver = "openal";
 			string displayDriver = "sdl";

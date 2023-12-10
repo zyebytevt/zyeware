@@ -96,7 +96,7 @@ package(zyeware.core) static:
     void initialize()
     {
         import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, BitmapFont, Material, FrameAnimations, Cursor;
-        import zyeware.core.translation : Translation;
+        import zyeware.core.locale : Locale;
         import zyeware.audio : AudioBuffer;
 
         register!Shader((path) => cast(Object) Shader.load(path));
@@ -109,7 +109,7 @@ package(zyeware.core) static:
         register!Mesh3D(&Mesh3D.load);
         register!BitmapFont(&BitmapFont.load);
         register!Material(&Material.load);
-        register!Translation(&Translation.load);
+        register!Locale(&Locale.load);
         register!FrameAnimations(&FrameAnimations.load);
         register!Cursor(&Cursor.load);
 

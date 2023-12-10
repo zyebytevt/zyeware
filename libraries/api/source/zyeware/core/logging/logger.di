@@ -23,14 +23,12 @@ final class Logger
 {
 	private
 	{
-		LogSink[] mSinks;
+		LogSink mSink;
 		LogLevel mLogLevel;
 		dstring mName;
 		public
 		{
-			pure this(LogSink baseSink, LogLevel logLevel, dstring name);
-			pure @trusted void addSink(LogSink sink);
-			@trusted void removeSink(LogSink sink);
+			pure nothrow this(LogSink sink, LogLevel logLevel, dstring name);
 			nothrow void log(LogLevel level, dstring message);
 			void flush();
 		}
@@ -47,19 +45,35 @@ abstract class LogSink
 			Duration uptime;
 			dstring message;
 		}
-		abstract void log(LogData data);
+		abstract void log(in LogData data);
 		abstract void flush();
+	}
+}
+final class CombinedLogSink : LogSink
+{
+	private
+	{
+		LogSink[] mSinks;
+		public
+		{
+			this(LogSink[] sinks);
+			pure @trusted void addSink(LogSink sink);
+			@trusted void removeSink(LogSink sink);
+			override void log(in LogData data);
+			override void flush();
+		}
 	}
 }
 class FileLogSink : LogSink
 {
-	private
+	protected
 	{
 		File mFile;
 		public
 		{
 			this(File file);
-			override void log(LogData data);
+			override void log(in LogData data);
+			override void flush();
 		}
 	}
 }
@@ -67,7 +81,7 @@ class ColorLogSink : LogSink
 {
 	public
 	{
-		override void log(LogData data);
+		override void log(in LogData data);
 		override void flush();
 	}
 }
