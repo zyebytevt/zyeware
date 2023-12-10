@@ -22,27 +22,22 @@ struct ProjectProperties
 
         ProjectProperties properties;
 
-        properties.authorName = cast(string) root.expectChild("author").expectValue();
-        properties.projectName = cast(string) root.expectChild("name").expectValue();
-        
-        if (auto scaleModeNode = root.getChild("scaleMode"))
-            properties.scaleMode = (cast(string) scaleModeNode.expectValue()).to!ScaleMode;
+        properties.authorName = root.expectChildValue!string("author");
+        properties.projectName = root.expectChildValue!string("name");
+
+        properties.scaleMode = root.getChildValue!string("scaleMode", "center").to!ScaleMode;
 
         // Load display properties
 
         SDLNode* displayNode = root.expectChild("display");
 
-        properties.mainDisplayProperties.title = cast(string) displayNode.expectChild("title").expectValue();
-
-        if (auto resizableNode = displayNode.getChild("resizable"))
-            properties.mainDisplayProperties.resizable = cast(Flag!"resizable") resizableNode.expectValue();
+        properties.mainDisplayProperties.title = displayNode.expectChildValue!string("title");
+        properties.mainDisplayProperties.resizable = cast(Flag!"resizable") displayNode.getChildValue!bool("resizable", false);
         
-        immutable int width = cast(int) displayNode.expectChild("width").expectValue();
-        immutable int height = cast(int) displayNode.expectChild("height").expectValue();
-        properties.mainDisplayProperties.size = Vector2i(width, height);
+        properties.mainDisplayProperties.size = Vector2i(displayNode.expectChildValue!int("width"), displayNode.expectChildValue!int("height"));
 
         if (auto iconNode = displayNode.getChild("icon"))
-            properties.mainDisplayProperties.icon = AssetManager.load!Image(cast(string) iconNode.expectValue());
+            properties.mainDisplayProperties.icon = AssetManager.load!Image(iconNode.expectValue!string());
 
         return properties;
     }

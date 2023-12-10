@@ -126,22 +126,16 @@ private static:
     void runMainLoop()
     {
         MonoTime previous = MonoTime.currTime;
-        Duration lag;
 
         while (sRunning)
         {
             immutable MonoTime current = MonoTime.currTime;
             immutable Duration elapsed = current - previous;
-            sFrameTime = FrameTime(dur!"hnsecs"(cast(long) (sWaitTime.total!"hnsecs" * sTimeScale)), sWaitTime);
-
+            
+            sFrameTime = FrameTime(dur!"hnsecs"(cast(long) (elapsed.total!"hnsecs" * sTimeScale)), elapsed);
             previous = current;
-            lag += elapsed;
 
-            while (lag >= sWaitTime)
-            {
-                sApplication.tick();
-                lag -= sWaitTime;
-            }
+            sApplication.tick();
 
             InputManager.tick();
 
@@ -171,6 +165,11 @@ private static:
                 }
                 sDeferredFunctionsCount = 0;
             }
+
+            // Wait until the target frame rate is reached.
+            immutable Duration timeToWait = sWaitTime - (MonoTime.currTime - current);
+            if (timeToWait > Duration.zero)
+                Thread.sleep(timeToWait);
         }
     }
 
