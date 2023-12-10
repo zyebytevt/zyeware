@@ -30,19 +30,16 @@ size_t pWindowCount = 0;
 extern(C)
 static void logFunctionCallback(void* userdata, int category, SDL_LogPriority priority, const char* message) nothrow
 {
-    LogLevel level;
     switch (priority)
     {
-    case SDL_LOG_PRIORITY_VERBOSE: level = LogLevel.verbose; break;
-    case SDL_LOG_PRIORITY_DEBUG: level = LogLevel.debug_; break;
-    case SDL_LOG_PRIORITY_INFO: level = LogLevel.info; break;
-    case SDL_LOG_PRIORITY_WARN: level = LogLevel.warning; break;
-    case SDL_LOG_PRIORITY_ERROR: level = LogLevel.error; break;
-    case SDL_LOG_PRIORITY_CRITICAL: level = LogLevel.fatal; break;
+    case SDL_LOG_PRIORITY_VERBOSE: verbose(message.fromStringz); break;
+    case SDL_LOG_PRIORITY_DEBUG: debug_(message.fromStringz); break;
+    case SDL_LOG_PRIORITY_INFO: info(message.fromStringz); break;
+    case SDL_LOG_PRIORITY_WARN: warning(message.fromStringz); break;
+    case SDL_LOG_PRIORITY_ERROR: error(message.fromStringz); break;
+    case SDL_LOG_PRIORITY_CRITICAL: fatal(message.fromStringz); break;
     default:
     }
-
-    Logger.pal.log(level, message.fromStringz);
 }
 
 void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
@@ -63,18 +60,18 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
         if (gamepadIndex == windowData.gamepads.length) // Too many controllers
         {
             SDL_GameControllerClose(pad);
-            Logger.pal.log(LogLevel.warning, "Failed to add controller: Too many controllers attached.");
+            warning("Failed to add controller: Too many controllers attached.");
         }
         else
         {
-            Logger.pal.log(LogLevel.debug_, "Added controller '%s' as gamepad #%d.",
+            debug_("Added controller '%s' as gamepad #%d.",
                 name ? name.fromStringz : "<No name>", gamepadIndex);
 
             ZyeWare.emit!InputEventGamepadAdded(gamepadIndex);
         }
     }
     else
-        Logger.pal.log(LogLevel.warning, "Failed to add controller: %s.", SDL_GetError().fromStringz);
+        warning("Failed to add controller: %s.", SDL_GetError().fromStringz);
 }
 
 void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
@@ -95,7 +92,7 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
             break;
         }
 
-    Logger.pal.log(LogLevel.debug_, "Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
+    debug_("Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
         gamepadIndex);
 
     ZyeWare.emit!InputEventGamepadRemoved(gamepadIndex);
@@ -118,7 +115,7 @@ ptrdiff_t getGamepadIndex(in WindowData* windowData, int instanceId) nothrow
 // TODO: This is still very much dependent on OpenGL, look for a way to make it more generic
 NativeHandle createDisplay(in DisplayProperties properties, in Display container)
 {
-    Logger.pal.log(LogLevel.info, "Creating SDL window '%s', requested size %s...", properties.title, properties.size);
+    info("Creating SDL window '%s', requested size %s...", properties.title, properties.size);
 
     if (pWindowCount == 0)
     {
@@ -132,7 +129,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-        Logger.pal.log(LogLevel.debug_, "SDL initialized.");
+        debug_("SDL initialized.");
     }
 
     WindowData* data = new WindowData;
@@ -153,7 +150,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     data.glContext = SDL_GL_CreateContext(data.handle);
     enforce!GraphicsException(data.glContext, format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
 
-    Logger.pal.log(LogLevel.debug_, "OpenGL context created.");
+    debug_("OpenGL context created.");
 
     data.isVSyncEnabled = SDL_GL_GetSwapInterval() != 0;
 
@@ -187,14 +184,14 @@ void loadLibraries()
     if (sdlResult != sdlSupport)
     {
         foreach (info; loader.errors)
-            Logger.pal.log(LogLevel.warning, "SDL loader: %s", info.message.fromStringz);
+            warning("SDL loader: %s", info.message.fromStringz);
 
         if (sdlResult == SDLSupport.noLibrary)
             throw new GraphicsException("Could not find SDL shared library.");
         else if (sdlResult == SDLSupport.badLibrary)
             throw new GraphicsException("Provided SDL shared library is corrupted.");
         else
-            Logger.pal.log(LogLevel.warning, "Got older SDL version than expected. This might lead to errors.");
+            warning("Got older SDL version than expected. This might lead to errors.");
     }
 }
 
@@ -430,7 +427,7 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow
     {
         if (SDL_GL_SetSwapInterval(-1) == -1 && SDL_GL_SetSwapInterval(1) == -1)
         {
-            Logger.pal.log(LogLevel.warning, "Failed to enable VSync: %s.", SDL_GetError().fromStringz);
+            warning("Failed to enable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
@@ -440,7 +437,7 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow
     {
         if (SDL_GL_SetSwapInterval(0) == -1)
         {
-            Logger.pal.log(LogLevel.warning, "Failed to disable VSync: %s.", SDL_GetError().fromStringz);
+            warning("Failed to disable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
@@ -684,7 +681,7 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
             return;
         }
 
-        Logger.pal.log(LogLevel.warning, "Failed to capture mouse: %s.", SDL_GetError().fromStringz);
+        warning("Failed to capture mouse: %s.", SDL_GetError().fromStringz);
     }
     else
     {
@@ -694,7 +691,7 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
             return;
         }
 
-        Logger.pal.log(LogLevel.warning, "Failed to release mouse: %s.", SDL_GetError().fromStringz);
+        warning("Failed to release mouse: %s.", SDL_GetError().fromStringz);
     }
 }
 

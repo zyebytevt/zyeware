@@ -7,4 +7,3 @@ targetType "sourceLibrary"
 
 dependency "audio-formats" version="~>3.0.1"
 dependency "bindbc-openal" version="~>1.1.0"
-

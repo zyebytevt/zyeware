@@ -16,4 +16,7 @@ public
 	import zyeware.utils.collection;
 	import zyeware.utils.signal;
 	import zyeware.utils.sdlang;
+	import zyeware.core.logging.logger;
+	
+	import zyeware.core.logging.client : fatal, error, warning, info, debug_, verbose;
 }

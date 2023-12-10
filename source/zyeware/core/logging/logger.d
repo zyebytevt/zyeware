@@ -3,19 +3,17 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.core.logging;
+module zyeware.core.logging.logger;
 
 import core.stdc.stdio : printf;
 import std.stdio : File, stdout;
 import std.datetime : Duration;
 import std.string : fromStringz;
-import std.format : format, sformat;
 import std.traits : isSomeString;
 import std.algorithm : remove, SwapStrategy;
 import std.conv : dtext;
 
 import zyeware;
-
 
 /// The log level to use for various logs.
 enum LogLevel
@@ -38,36 +36,13 @@ private immutable dstring[] levelNames = [
     "Verbose"
 ];
 
-/// Represents a single logger, and also contains the standard core and client loggers.
+/// Represents a single logger.
 final class Logger
 {
 private:
     LogSink[] mSinks;
     LogLevel mLogLevel;
     dstring mName;
-    
-    __gshared LogSink sDefaultLogSink;
-    __gshared Logger sCoreLogger, sClientLogger, sPalLogger;
-
-package(zyeware):
-    static void initialize(LogLevel coreLevel, LogLevel clientLevel, LogLevel palLevel)
-    {
-        sDefaultLogSink = new ColorLogSink();
-
-        sCoreLogger = new Logger(sDefaultLogSink, coreLevel, "Core");
-        sClientLogger = new Logger(sDefaultLogSink, clientLevel, "Client");
-        sPalLogger = new Logger(sDefaultLogSink, palLevel, "PAL");
-    }
-
-    static Logger core() nothrow
-    {
-        return sCoreLogger;
-    }
-
-    static Logger pal() nothrow
-    {
-        return sPalLogger;
-    }
 
 public:
     /// Params:
@@ -105,32 +80,23 @@ public:
     /// Writes a message to this log.
     /// Params:
     ///   level = The log level the message should be written as.
-    ///   message = The message itself. Can be a format string.
-    ///   args = Arguments used for formatting.
-    void log(S, T...)(LogLevel level, S message, T args) nothrow
-        if (isSomeString!S)
+    ///   message = The message itself.
+    void log(LogLevel level, dstring message) nothrow
     {
-        static char[2048] formatted;
-
         if (level > mLogLevel)
             return;
         
         try
         {
-            immutable dstring text = sformat(formatted, message, args).dtext;
-
             auto data = LogSink.LogData(
                 mName,
                 level,
                 ZyeWare.upTime,
-                text
+                message
             );
 
             foreach (LogSink sink; mSinks)
                 sink.log(data);
-
-            // TODO: Is there a better way than disposing?
-            text.dispose();
         }
         catch (Exception ex)
         {
@@ -143,18 +109,6 @@ public:
     {
         foreach (LogSink sink; mSinks)
             sink.flush();
-    }
-
-    /// The default client logger.
-    static Logger client() nothrow
-    {
-        return sClientLogger;
-    }
-
-    /// The default log sink that all loggers have as a base sink.
-    static LogSink defaultLogSink() nothrow
-    {
-        return sDefaultLogSink;
     }
 }
 

@@ -7,7 +7,6 @@ public
     import zyeware.core.engine;
     import zyeware.core.appstate;
     import zyeware.core.input;
-    import zyeware.core.logging;
     import zyeware.core.translation;
     import zyeware.core.exception;
     import zyeware.core.interpolator;

@@ -57,7 +57,7 @@ public:
     static Shader load(string path)
         in (path, "Path cannot be null.")
     {
-        Logger.core.log(LogLevel.debug_, "Loading shader '%s'...", path);
+        debug_("Loading shader '%s'...", path);
 
         string parseIncludes(string source)
         {
@@ -100,7 +100,7 @@ public:
 
         void loadShader(string filePath, ShaderProperties.ShaderType type)
         {
-            Logger.core.log(LogLevel.verbose, "Loading external shader source '%s'...", filePath);
+            verbose("Loading external shader source '%s'...", filePath);
             VfsFile shaderFile = Vfs.open(filePath);
             scope(exit) shaderFile.close();
 

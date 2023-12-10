@@ -143,7 +143,7 @@ package(zyeware) static:
         sSchemes["res"] = new VfsCombinedDirectory("res:", []);
         sSchemes["user"] = createUserDir();
 
-        Logger.core.log(LogLevel.info, "Initialized Vfs.");
+        info("Initialized Vfs.");
     }
 
     void cleanup() nothrow
@@ -177,7 +177,7 @@ public static:
 
         (cast(VfsCombinedDirectory) sSchemes["res"]).addDirectory(pck);
         sSchemes[scheme] = pck;
-        Logger.core.log(LogLevel.info, "Added package '%s' as '%s'.", path, scheme);
+        info("Added package '%s' as '%s'.", path, scheme);
         return pck;
     }
 

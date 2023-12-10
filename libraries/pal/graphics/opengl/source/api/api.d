@@ -91,23 +91,21 @@ static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum seve
     switch (severity)
     {
         case GL_DEBUG_SEVERITY_LOW:
-            logLevel = LogLevel.info;
+            info("%s: %s", typeName, cast(string) message[0..length]);
             break;
 
         case GL_DEBUG_SEVERITY_MEDIUM:
-            logLevel = LogLevel.warning;
+            warning("%s: %s", typeName, cast(string) message[0..length]);
             break;
 
         case GL_DEBUG_SEVERITY_HIGH:
-            logLevel = LogLevel.error;
+            error("%s: %s", typeName, cast(string) message[0..length]);
             break;
 
         default:
-            logLevel = LogLevel.debug_;
+            debug_("%s: %s", typeName, cast(string) message[0..length]);
             break;
     }
-
-    Logger.pal.log(logLevel, "%s: %s", typeName, cast(string) message[0..length]);
 }
 
 void initialize()
@@ -122,7 +120,7 @@ void initialize()
     if (glResult != glSupport)
     {
         foreach (info; loader.errors)
-            Logger.pal.log(LogLevel.warning, "OpenGL loader: %s", info.message.fromStringz);
+            warning("OpenGL loader: %s", info.message.fromStringz);
 
         switch (glResult)
         {
@@ -136,11 +134,11 @@ void initialize()
             throw new GraphicsException("No OpenGL context available.");
 
         default:
-            Logger.pal.log(LogLevel.warning, "Got older OpenGL version than expected. This might lead to errors.");
+            warning("Got older OpenGL version than expected. This might lead to errors.");
         }
     }
 
-    Logger.pal.log(LogLevel.debug_, "OpenGL dynamic library loaded.");
+    debug_("OpenGL dynamic library loaded.");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -173,12 +171,12 @@ void initialize()
         pFlagValues[cast(size_t) RenderFlag.wireframe] = resultInt == GL_LINE;
     }
 
-    Logger.pal.log(LogLevel.info, "Initialized OpenGL:");
-    Logger.pal.log(LogLevel.info, "    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
-    Logger.pal.log(LogLevel.info, "    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
-    Logger.pal.log(LogLevel.info, "    Version: %s", glGetString(GL_VERSION).fromStringz);
-    Logger.pal.log(LogLevel.info, "    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
-    Logger.pal.log(LogLevel.info, "    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
+    info("Initialized OpenGL:");
+    info("    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
+    info("    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
+    info("    Version: %s", glGetString(GL_VERSION).fromStringz);
+    info("    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
+    info("    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
 }
 
 void cleanup()

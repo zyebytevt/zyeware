@@ -62,7 +62,7 @@ public:
     {
         mProperties = properties;
 
-        Logger.core.log(LogLevel.debug_, "Creating bitmap font '%s, %d'...",
+        debug_("Creating bitmap font '%s, %d'...",
             mProperties.fontName, mProperties.fontSize);
 
         for (size_t i; i < mProperties.pages.length; ++i)

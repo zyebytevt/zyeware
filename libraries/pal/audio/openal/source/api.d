@@ -65,16 +65,16 @@ void initialize()
 
     enforce!AudioException(alcMakeContextCurrent(pContext), "Failed to make audio context current.");
 
-    Logger.pal.log(LogLevel.info, "Initialized OpenAL:");
-    Logger.pal.log(LogLevel.info, "    Version: %s", alGetString(AL_VERSION).fromStringz);
-    Logger.pal.log(LogLevel.info, "    Vendor: %s", alGetString(AL_VENDOR).fromStringz);
-    Logger.pal.log(LogLevel.info, "    Renderer: %s", alGetString(AL_RENDERER).fromStringz);
-    Logger.pal.log(LogLevel.info, "    Extensions: %s", alGetString(AL_EXTENSIONS).fromStringz);
+    info("Initialized OpenAL:");
+    info("    Version: %s", alGetString(AL_VERSION).fromStringz);
+    info("    Vendor: %s", alGetString(AL_VENDOR).fromStringz);
+    info("    Renderer: %s", alGetString(AL_RENDERER).fromStringz);
+    info("    Extensions: %s", alGetString(AL_EXTENSIONS).fromStringz);
 
     pAudioThread = new AudioThread();
     pAudioThread.start();
 
-    Logger.pal.log(LogLevel.info, "Audio thread started.");
+    info("Audio thread started.");
 }
 
 void loadLibraries()
@@ -89,7 +89,7 @@ void loadLibraries()
     if (alResult != alSupport)
     {
         foreach (info; loader.errors)
-            Logger.pal.log(LogLevel.warning, "OpenAL loader: %s", info.message.fromStringz);
+            warning("OpenAL loader: %s", info.message.fromStringz);
 
         switch (alResult)
         {
@@ -100,7 +100,7 @@ void loadLibraries()
             throw new AudioException("Provided OpenAL shared is corrupted.");
 
         default:
-            Logger.pal.log(LogLevel.warning, "Got older OpenAL version than expected. This might lead to errors.");
+            warning("Got older OpenAL version than expected. This might lead to errors.");
         }
     }
 }
@@ -112,7 +112,7 @@ void cleanup()
     
     alcCloseDevice(pDevice);
 
-    Logger.pal.log(LogLevel.info, "Audio thread stopped, OpenAL terminated.");
+    info("Audio thread stopped, OpenAL terminated.");
 }
 
 NativeHandle createSource(in NativeHandle busHandle)
@@ -308,12 +308,12 @@ void updateSourceBuffers(NativeHandle handle)
                     (int sample)
                     {
                         if (!source.decoder.seekPosition(sample))
-                            Logger.pal.log(LogLevel.warning, "Seeking to sample %d failed.", sample);
+                            warning("Seeking to sample %d failed.", sample);
                     },
                     (ModuleLoopPoint mod)
                     {
                         if (!source.decoder.seekPosition(mod.pattern, mod.row))
-                            Logger.pal.log(LogLevel.warning, "Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
+                            warning("Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
                     }
                 );
 

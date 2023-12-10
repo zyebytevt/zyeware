@@ -32,19 +32,17 @@ public:
     {
         import std.string : split, startsWith;
 
-        Logger.core.log(LogLevel.fatal, "==================== Unhandled throwable '%s' ====================",
+        fatal("==================== Unhandled throwable '%s' ====================",
             typeid(t).toString().split(".")[$-1]);
-        Logger.core.log(LogLevel.fatal, "Details: %s", t.message);
+        fatal("Details: %s", t.message);
 
         foreach (trace; t.info)
             if (!trace.startsWith("??:?"))
-                Logger.core.log(LogLevel.info, trace);
+                info(trace);
         
-        Logger.core.log(LogLevel.fatal, "------------------------------");
-        Logger.core.log(LogLevel.fatal, "If you suspect that this is a ZyeWare issue, please leave a bug report over at https://github.com/zyebytevt/zyeware!");
-        Logger.core.log(LogLevel.fatal, "=================================================================");
-
-        Logger.core.flush();
+        fatal("------------------------------");
+        fatal("If you suspect that this is a ZyeWare issue, please leave a bug report over at https://github.com/zyebytevt/zyeware!");
+        fatal("=================================================================");
     }
 }
 
@@ -136,8 +134,8 @@ public:
             showXMessage(message ~ "\n\n" ~ t.toString());
         else
         {
-            Logger.core.log(LogLevel.warning, "Could not find appropriate message box application to use.");
-            Logger.core.log(LogLevel.warning, "I hope you're looking at the logs!");
+            warning("Could not find appropriate message box application to use.");
+            warning("I hope you're looking at the logs!");
         }
     }
 }

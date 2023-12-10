@@ -164,6 +164,6 @@ private void parseTextureProperties(string path, out TextureProperties propertie
     }
     catch (Exception ex)
     {
-        Logger.core.log(LogLevel.warning, "Failed to parse properties file for '%s': %s", path, ex.message);
+        warning("Failed to parse properties file for '%s': %s", path, ex.message);
     }
 }

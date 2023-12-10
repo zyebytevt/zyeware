@@ -38,7 +38,7 @@ SharedLib loadDynamicLibrary(string vfsPath)
     void* handle = Runtime.loadLibrary(tempFilePath);
     enforce!CoreException(handle, format!"Failed to load dynamic library '%s'."(vfsPath));
 
-    Logger.core.log(LogLevel.debug_, "Extracted '%s' to '%s' and loaded it.", libraryFile.path, tempFilePath);
+    debug_("Extracted '%s' to '%s' and loaded it.", libraryFile.path, tempFilePath);
 
     return SharedLib(handle);
 }

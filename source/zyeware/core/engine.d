@@ -65,7 +65,6 @@ private static:
 
         LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
         LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
-        LogLevel palLogLevel = LogLevel.verbose; /// The log level for the Pal logger.
 
         string graphicsDriver = "opengl"; /// The graphics driver to use.
         string audioDriver = "openal"; /// The audio driver to use.
@@ -247,7 +246,6 @@ private static:
                 "game", "The packages to load.", &parsed.packages,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &parsed.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &parsed.clientLogLevel,
-                "loglevel-pal", "The minimum log level for Pal logs to be displayed.", &parsed.palLogLevel,
                 "graphics-driver", "The graphics driver to use.", &parsed.graphicsDriver,
                 "audio-driver", "The audio driver to use.", &parsed.audioDriver,
                 "display-driver", "The display driver to use.", &parsed.displayDriver,
@@ -287,8 +285,13 @@ package(zyeware.core) static:
         ParsedArgs parsedArgs = parseCmdArgs(args);
 
         // Initialize profiler and logger before anything else.
-        Logger.initialize(parsedArgs.coreLogLevel, parsedArgs.clientLogLevel, parsedArgs.palLogLevel);
-        Logger.core.log(LogLevel.info, "ZyeWare Game Engine v%s", engineVersion.toString());
+        import zyeware.core.logging.core : initCoreLogger;
+        import zyeware.core.logging.client : initClientLogger;
+
+        initCoreLogger(parsedArgs.coreLogLevel);
+        initClientLogger(parsedArgs.clientLogLevel);
+
+        info("ZyeWare Game Engine v%s", engineVersion.toString());
 
         // Initialize crash handler afterwards because it relies on the logger.
         version (linux)
@@ -395,7 +398,7 @@ public static:
             sMustUpdateFramebufferDimensions = true;
         
         if (Exception ex = collectException(sApplication.receive(ev)))
-            Logger.core.log(LogLevel.error, "Exception while emitting an event: %s", ex.message);
+            error("Exception while emitting an event: %s", ex.message);
 
         if (auto input = cast(InputEvent) ev)
             InputManager.receive(input).assumeWontThrow;
@@ -406,12 +409,12 @@ public static:
     {
         immutable size_t memoryBeforeCollection = GC.stats().usedSize;
 
-        Logger.core.log(LogLevel.debug_, "Running garbage collector...");
+        debug_("Running garbage collector...");
         GC.collect();
         AssetManager.cleanCache();
         GC.minimize();
 
-        Logger.core.log(LogLevel.debug_, "Finished garbage collection, freed %s.",
+        debug_("Finished garbage collection, freed %s.",
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 

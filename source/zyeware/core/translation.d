@@ -34,7 +34,7 @@ public static:
         if (sActiveLocale)
             return sActiveLocale.translate(key);
 
-        Logger.core.log(LogLevel.warning, "Tried to translate '%s' without active locale.", key);
+        warning("Tried to translate '%s' without active locale.", key);
         return key;
     }
 
@@ -70,13 +70,13 @@ public static:
         {
             sLoadedLocales[file.mLocale] = file;
             file.optimize();
-            Logger.core.log(LogLevel.debug_, "Added locale '%s' and optimized translation.", file.mLocale);
+            debug_("Added locale '%s' and optimized translation.", file.mLocale);
         }
         else
         {
             locale.mTranslations = locale.mTranslations.byPair.chain(file.mTranslations.byPair).assocArray;
             locale.optimize();
-            Logger.core.log(LogLevel.debug_, "Merged new translations into locale '%s' and optimized translation.",
+            debug_("Merged new translations into locale '%s' and optimized translation.",
                 file.mLocale);
         }
     }
@@ -89,7 +89,7 @@ public static:
         in (locale, "Locale cannot be null.")
     {
         if (sLoadedLocales.remove(locale))
-            Logger.core.log(LogLevel.debug_, "Removed locale '%s'.", locale);
+            debug_("Removed locale '%s'.", locale);
     }
 
     /// All currently loaded locales.
@@ -115,7 +115,7 @@ public static:
         enforce(file, format!"Locale '%s' doesn't have a file loaded."(locale));
 
         sActiveLocale = *file;
-        Logger.core.log(LogLevel.debug_, "Changed locale to '%s'.", locale);
+        debug_("Changed locale to '%s'.", locale);
     }
 }
 

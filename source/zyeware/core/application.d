@@ -102,7 +102,7 @@ public:
         in (state, "Game state cannot be null.")
     {
         debug if (ZyeWare.isEmittingEvent)
-            Logger.core.log(LogLevel.warning, deferWarning);
+            warning(deferWarning);
 
         if (hasState)
             mStateStack.pop().onDetach();
@@ -124,7 +124,7 @@ public:
         in (state, "Game state cannot be null.")
     {
         debug if (ZyeWare.isEmittingEvent)
-            Logger.core.log(LogLevel.warning, deferWarning);
+            warning(deferWarning);
 
         if (hasState)
             currentState.onDetach();
@@ -142,7 +142,7 @@ public:
     void popState()
     {
         debug if (ZyeWare.isEmittingEvent)
-            Logger.core.log(LogLevel.warning, deferWarning);
+            warning(deferWarning);
 
         if (hasState)
             mStateStack.pop().onDetach();

@@ -126,7 +126,7 @@ public static:
     {
         if (auto action = getAction(name))
         {
-            Logger.core.log(LogLevel.warning, "Cannot add action '%s' as it already exists.", name);
+            warning("Cannot add action '%s' as it already exists.", name);
             return action;
         }
 
