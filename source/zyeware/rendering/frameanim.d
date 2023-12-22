@@ -73,10 +73,6 @@ public:
     static FrameAnimations load(string path)
         in (path, "Path cannot be null")
     {
-        VfsFile sourceFile = Vfs.open(path);
-        scope (exit) sourceFile.close();
-        immutable string source = sourceFile.readAll!string();
-
         auto frameAnims = new FrameAnimations();
 
         SDLNode* root = loadSdlDocument(path ~ ".props");

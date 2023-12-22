@@ -196,27 +196,15 @@ public:
                     break;
 
                 case "vec2":
-                    Vector2f value;
-                    value.x = parameterNode.expectAttributeValue!float("x");
-                    value.y = parameterNode.expectAttributeValue!float("y");
-                    parameters[parametersNode.name] = Parameter(value);
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!Vector2f("value"));
                     break;
 
                 case "vec3":
-                    Vector3f value;
-                    value.x = parameterNode.expectAttributeValue!float("x");
-                    value.y = parameterNode.expectAttributeValue!float("y");
-                    value.z = parameterNode.expectAttributeValue!float("z");
-                    parameters[parametersNode.name] = Parameter(value);
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!Vector3f("value"));
                     break;
 
                 case "vec4":
-                    Vector4f value;
-                    value.x = parameterNode.expectAttributeValue!float("x");
-                    value.y = parameterNode.expectAttributeValue!float("y");
-                    value.z = parameterNode.expectAttributeValue!float("z");
-                    value.w = parameterNode.expectAttributeValue!float("w");
-                    parameters[parametersNode.name] = Parameter(value);
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!Vector4f("value"));
                     break;
 
                 default:

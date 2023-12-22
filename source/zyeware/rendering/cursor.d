@@ -32,14 +32,9 @@ public:
     { 
         SDLNode* root = loadSdlDocument(path);
 
-        immutable string imagePath = root.expectChildValue!string("image");
-        SDLNode* hotspotNode = root.expectChild("hotspot");
-        immutable int x = hotspotNode.expectAttributeValue!int("x");
-        immutable int y = hotspotNode.expectAttributeValue!int("y");
-
         return new Cursor(
-            AssetManager.load!Image(imagePath),
-            Vector2i(x, y)
+            AssetManager.load!Image(root.expectChildValue!string("image")),
+            root.expectChildValue!Vector2i("hotspot")
         );
     }
 }

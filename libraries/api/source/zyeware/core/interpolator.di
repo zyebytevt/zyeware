@@ -63,6 +63,24 @@ struct Interpolator(T, alias lerp)
 				const Point* pointSecond = &mPoints[second];
 				return lerp(pointFirst.value, pointSecond.value, (offset - pointFirst.offset) / (pointSecond.offset - pointFirst.offset));
 			}
+			static auto load(string path)
+			{
+				SDLNode* root = loadSdlDocument(path);
+
+				Interpolator!(T, lerp) interpolator;
+
+				for (size_t i; i < root.children.length; ++i)
+				{
+					SDLNode* node = &root.children[i];
+					if (node.name == "keypoint")
+						interpolator.addPoint(
+							node.getAttributeValue!float("offset"),
+							node.getAttributeValue!T("value")
+						);
+				}
+
+				return interpolator;
+			}
 		}
 	}
 }
