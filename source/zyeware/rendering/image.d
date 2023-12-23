@@ -35,10 +35,10 @@ public:
         mSize = size;
     }
 
-    col getPixel(vec2i coords) pure const nothrow
+    color getPixel(vec2i coords) pure const nothrow
     {
         if (coords.x < 0 || coords.y < 0 || coords.x >= mSize.x || coords.y >= mSize.y)
-            return col.black;
+            return color.black;
         
         ubyte r = 0, g = 0, b = 0, a = 255;
         size_t channelStart = (coords.y * mSize.x + coords.x) * mChannels;
@@ -65,7 +65,7 @@ public:
         default:
         }
 
-        return col(r / 255f, g / 255f, b / 255f, a / 255f);
+        return color(r / 255f, g / 255f, b / 255f, a / 255f);
     }
 
     const(ubyte[]) pixels() pure const nothrow

@@ -72,7 +72,7 @@ public:
             }
         }
 
-        Renderer2D.clearScreen(col.black);
+        Renderer2D.clearScreen(color.black);
 
         if (!foundCamera)
         {

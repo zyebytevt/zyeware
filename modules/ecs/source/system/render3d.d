@@ -32,7 +32,7 @@ package:
 
         Renderer2D.beginScene(camera.projectionMatrix, mat4.identity);
         if ((ZyeWare.upTime.total!"hnsecs" / 5_000_000) % 2 == 0)
-            Renderer2D.drawRectangle(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), col.white, texture);
+            Renderer2D.drawRectangle(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), color.white, texture);
         Renderer2D.endScene();
     }
 
@@ -73,7 +73,7 @@ public:
         foreach (Entity entity, Transform3DComponent* transform, LightComponent* light;
             entities.entitiesWith!(Transform3DComponent, LightComponent))
         {
-            lights[lightPointer++] = Renderer3D.Light(transform.globalPosition, light.color, light.attenuation);
+            lights[lightPointer++] = Renderer3D.Light(transform.globalPosition, light.modulate, light.attenuation);
             
             if (lightPointer == lights.length)
                 break;

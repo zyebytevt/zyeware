@@ -46,7 +46,7 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Renderer2D.clearScreen(col.black);
+        Renderer2D.clearScreen(color.black);
 
         Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
 

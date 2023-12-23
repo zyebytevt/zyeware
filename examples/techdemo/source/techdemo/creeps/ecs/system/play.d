@@ -36,7 +36,7 @@ protected:
                 AssetManager.load!Texture2D("res:creeps/sprites/player.png"),
                 2, 2, 0
             ),
-            col.white);
+            color.white);
         player.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res:creeps/sprites/player.anim"), "walk", No.autostart);
         player.register!Collision2DComponent(new CircleShape2D(25), 1, 2);
 
@@ -57,7 +57,7 @@ protected:
                 AssetManager.load!Texture2D("res:creeps/sprites/creeps.png"),
                 3, 2, 0
             ),
-            col.white);
+            color.white);
         mob.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res:creeps/sprites/creeps.anim"), 
             ["fly", "swim", "walk"][uniform(0, $)], Yes.autostart);
         mob.register!Collision2DComponent(new CircleShape2D(25), 2, 0);
@@ -69,7 +69,7 @@ protected:
     {
         Entity background = mPlayState.entities.create();
         background.register!Transform2DComponent(vec2(0));
-        background.register!SpriteComponent(vec2(480, 720), vec2(0), TextureAtlas(null), col(0.2, 0.38, 0.4));
+        background.register!SpriteComponent(vec2(480, 720), vec2(0), TextureAtlas(null), color(0.2, 0.38, 0.4));
 
         createPlayer(vec2(240, 360));
 

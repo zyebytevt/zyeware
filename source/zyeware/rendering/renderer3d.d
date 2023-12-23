@@ -21,9 +21,9 @@ public static:
     /// Clears the screen.
     ///
     /// Params:
-    ///     clearColor = The color to clear the screen to.
+    ///     clearColor = The modulate to clear the screen to.
     pragma(inline, true)
-    void clearScreen(in col clearColor) nothrow
+    void clearScreen(in color clearColor) nothrow
     {
         Pal.graphics.api.clearScreen(clearColor);
     }

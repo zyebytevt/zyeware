@@ -53,7 +53,7 @@ protected:
 
         entity.register!Transform3DComponent(position);
         entity.register!Render3DComponent(mesh);
-        entity.register!LightComponent(col(1, 0.5, 0.2, 1), vec3(1, 0.01, 0.002));
+        entity.register!LightComponent(color(1, 0.5, 0.2, 1), vec3(1, 0.01, 0.002));
 
         return entity;
     }
@@ -86,8 +86,8 @@ protected:
         auto nativeCamera = new PerspectiveCamera(640, 480, 90f, 0.01f, 1000f);
         auto environment = new Environment3D();
 
-        environment.ambientColor = col(0.1, 0.1, 0.1, 1);
-        environment.fogColor = col(0.3, 0.4, 0.6, 0.05);
+        environment.ambientColor = color(0.1, 0.1, 0.1, 1);
+        environment.fogColor = color(0.3, 0.4, 0.6, 0.05);
         environment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
 
         camera.register!CameraComponent(nativeCamera, environment, Yes.active);
@@ -116,7 +116,7 @@ public:
         for (uint y; y < entitymap.size.y; ++y)
             for (uint x; x < entitymap.size.x; ++x)
             {
-                immutable col pixel = entitymap.getPixel(vec2i(x, y));
+                immutable color pixel = entitymap.getPixel(vec2i(x, y));
                 immutable vec2 coords = vec2(x * 2f, y * 2f);
 
                 if (pixel.r == 1)

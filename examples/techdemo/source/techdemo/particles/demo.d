@@ -38,11 +38,11 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Renderer2D.clearScreen(col.black);
+        Renderer2D.clearScreen(color.black);
 
         Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
-        Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, vec2(4), col.white);
-        Renderer2D.drawString(format!"Draw calls: %d"(Profiler.currentReadData.renderData.drawCalls), mFont, vec2(4, 20), col.white);
+        Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, vec2(4), color.white);
+        Renderer2D.drawString(format!"Draw calls: %d"(Profiler.currentReadData.renderData.drawCalls), mFont, vec2(4, 20), color.white);
         mParticles.draw(nextFrameTime);
         Renderer2D.endScene();
     }
@@ -56,9 +56,9 @@ public:
             mParticles = new Particles2D();
 
             Gradient gradient;
-            gradient.addPoint(0, col.red);
-            gradient.addPoint(0.5, col.blue);
-            gradient.addPoint(1, col.yellow);
+            gradient.addPoint(0, color.red);
+            gradient.addPoint(0.5, color.blue);
+            gradient.addPoint(1, color.yellow);
 
             ParticleProperties2D starType = {
                 texture: AssetManager.load!Texture2D("res:menu/menuStar.png"),
@@ -71,7 +71,7 @@ public:
                     min: seconds(3),
                     max: seconds(3)
                 },
-                color: gradient
+                modulate: gradient
             };
 
             mStarParticlesId = mParticles.registerType(starType, 60_000);

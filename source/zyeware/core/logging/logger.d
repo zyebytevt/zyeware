@@ -184,7 +184,7 @@ public:
     }
 }
 
-/// Represents a sink that writes in color to stdout.
+/// Represents a sink that writes in modulate to stdout.
 class ColorLogSink : LogSink
 {
     import consolecolors;

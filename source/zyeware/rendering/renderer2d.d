@@ -23,9 +23,9 @@ public static:
     /// Clears the screen.
     ///
     /// Params:
-    ///     clearColor = The color to clear the screen to.
+    ///     clearColor = The modulate to clear the screen to.
     pragma(inline, true)
-    void clearScreen(in col clearColor) nothrow
+    void clearScreen(in color clearColor) nothrow
     {
         Pal.graphics.api.clearScreen(clearColor);
     }
@@ -68,12 +68,12 @@ public static:
     ///     dimensions = The dimensions of the rectangle to draw.
     ///     position = 2D position where to draw the rectangle to.
     ///     scale = How much to scale the dimensions.
-    ///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
+    ///     modulate = The modulate of the rectangle. If a texture is supplied, it will be tinted in this modulate.
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
-    void drawRectangle(in Rect2f dimensions, in vec2 position, in vec2 scale, in col modulate = col.white,
+    void drawRectangle(in Rect2f dimensions, in vec2 position, in vec2 scale, in color modulate = color.white,
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
@@ -87,12 +87,12 @@ public static:
     ///     position = 2D position where to draw the rectangle to.
     ///     scale = How much to scale the dimensions.
     ///     rotation = The rotation of the rectangle, in radians.
-    ///     modulate = The color of the rectangle. If a texture is supplied, it will be tinted in this color.
+    ///     modulate = The modulate of the rectangle. If a texture is supplied, it will be tinted in this modulate.
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
-    void drawRectangle(in Rect2f dimensions, in vec2 position, in vec2 scale, float rotation, in col modulate = vec4(1),
+    void drawRectangle(in Rect2f dimensions, in vec2 position, in vec2 scale, float rotation, in color modulate = vec4(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
@@ -105,11 +105,11 @@ public static:
     /// Params:
     ///     dimensions = The dimensions of the rectangle to draw.
     ///     transform = A 4x4 matrix used for transformation of the rectangle.
-    ///     modulate = The color of the rectangle. If a texture is suppliedW, it will be tinted in this color.
+    ///     modulate = The modulate of the rectangle. If a texture is suppliedW, it will be tinted in this modulate.
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-    void drawRectangle(in Rect2f dimensions, in mat4 transform, in col modulate = vec4(1),
+    void drawRectangle(in Rect2f dimensions, in mat4 transform, in color modulate = vec4(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
@@ -122,10 +122,10 @@ public static:
     ///     text = The text to draw.
     ///     font = The font to use.
     ///     position = The position to draw the text to.
-    ///     modulate = The color of the text.
+    ///     modulate = The modulate of the text.
     ///     alignment = The alignment of the text.
     ///     material = The material to use. If `null`, uses the default material.
-    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in col modulate = col.white,
+    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in color modulate = color.white,
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
         if (isSomeString!T)
     {

@@ -62,11 +62,11 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Renderer2D.clearScreen(col.black);
+        Renderer2D.clearScreen(color.black);
 
         auto r = Rect2f(-50, -50, 100, 100);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);
-        col c = collision.isColliding ? col(0, 1, 0, 1) : col(1, 0, 0, 1);
+        color c = collision.isColliding ? color(0, 1, 0, 1) : color(1, 0, 0, 1);
 
         Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
 

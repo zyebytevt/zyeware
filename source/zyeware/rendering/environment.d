@@ -11,6 +11,6 @@ import zyeware;
 struct Environment3D
 {
     Mesh3D sky;
-    col fogColor = col(0, 0, 0, 0.02);
-    col ambientColor = col(0.5, 0.5, 0.5, 1);
+    color fogColor = color(0, 0, 0, 0.02);
+    color ambientColor = color(0.5, 0.5, 0.5, 1);
 }

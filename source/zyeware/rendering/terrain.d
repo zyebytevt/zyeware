@@ -46,7 +46,7 @@ protected:
                     vec3(uv.x * properties.size.x, properties.heightData[currentVertex], uv.y * properties.size.y),
                     uv,
                     vec3(0),
-                    col.white
+                    color.white
                 );
 
                 ++currentVertex;
@@ -79,7 +79,7 @@ protected:
         for (uint y; y < heightMap.size.y; ++y)
             for (uint x; x < heightMap.size.x; ++x)
             {
-                immutable col pixel = heightMap.getPixel(vec2i(x, y));
+                immutable color pixel = heightMap.getPixel(vec2i(x, y));
                 heightData[currentHeightIndex++] = (pixel.r - pixel.b) * heightScale;
             }
 

@@ -24,7 +24,7 @@ struct SpriteComponent
     vec2 size; /// The size of the sprite.
     vec2 offset; /// The offset of the sprite.
     TextureAtlas atlas; /// The texture atlas used for sprite rendering.
-    col modulate = col.white; /// The modulation of this sprite.
+    color modulate = color.white; /// The modulation of this sprite.
     Material material = null; /// The material to use for rendering.
     Flag!"hFlip" hFlip; /// If the sprite is horizontally flipped.
     Flag!"vFlip" vFlip; /// If the sprite is vertically flipped.
@@ -86,6 +86,6 @@ public:
 @component
 struct LightComponent
 {
-    col color; /// The color of the light.
+    color modulate; /// The modulate of the light.
     vec3 attenuation; /// The attenuation used.
 }

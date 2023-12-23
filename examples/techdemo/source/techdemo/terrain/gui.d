@@ -33,7 +33,7 @@ public:
             auto renderData = Profiler.currentReadData.renderData;
             Renderer2D.drawString(format!"2D rects: %d\nDraw calls: %d\nPolygons: %d"(renderData.rectCount,
                 renderData.drawCalls, renderData.polygonCount),
-                mFont, vec2(640, 0), col.white, Font.Alignment.right);
+                mFont, vec2(640, 0), color.white, Font.Alignment.right);
         }
         
         Renderer2D.endScene();

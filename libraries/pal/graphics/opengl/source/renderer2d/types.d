@@ -7,7 +7,7 @@ struct BatchVertex2D
 {
     vec4 position;
     vec2 uv;
-    col color;
+    color modulate;
     float textureIndex;
 }
 

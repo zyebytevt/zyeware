@@ -218,7 +218,7 @@ private static:
         sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
-        Pal.graphics.api.clearScreen(col.black);
+        Pal.graphics.api.clearScreen(color.black);
         Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, Rect2i(vec2i.zero, sMainFramebuffer.properties.size),
             sFramebufferArea);
 

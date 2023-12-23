@@ -128,7 +128,7 @@ void createBuffer(ref GlBuffer buffer)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.uv.offsetof);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.color.offsetof);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.modulate.offsetof);
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*)BatchVertex2D.textureIndex.offsetof);
     
@@ -138,7 +138,7 @@ void createBuffer(ref GlBuffer buffer)
 }
 
 // TODO: Font rendering needs to be improved.
-void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material)
+void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material)
     if (isSomeString!T)
 {
     vec2 cursor = vec2.zero;
@@ -311,7 +311,7 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
     }
 
     foreach (size_t i, const Vertex2D vertex; vertices)
-        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * vec4(vertex.position, 0, 1), vertex.uv, vertex.color, texIdx);
+        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * vec4(vertex.position, 0, 1), vertex.uv, vertex.modulate, texIdx);
 
     foreach (size_t i, uint index; indices)
         batch.indices[batch.currentIndexCount + i] = cast(uint) batch.currentVertexCount + index;
@@ -320,7 +320,7 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
     batch.currentIndexCount += indices.length;
 }
 
-void drawRectangle(in Rect2f dimensions, in mat4 transform, in col modulate = vec4(1),
+void drawRectangle(in Rect2f dimensions, in mat4 transform, in color modulate = vec4(1),
     in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
 {
     static vec2[4] quadPositions;
@@ -351,19 +351,19 @@ void drawRectangle(in Rect2f dimensions, in mat4 transform, in col modulate = ve
     drawVertices(vertices, indices, transform, texture, material);
 }
 
-void drawString(in string text, in BitmapFont font, in vec2 position, in col modulate = col.white,
+void drawString(in string text, in BitmapFont font, in vec2 position, in color modulate = color.white,
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!string(text, font, position, modulate, alignment, material);
 }
 
-void drawWString(in wstring text, in BitmapFont font, in vec2 position, in col modulate = col.white,
+void drawWString(in wstring text, in BitmapFont font, in vec2 position, in color modulate = color.white,
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!wstring(text, font, position, modulate, alignment, material);
 }
 
-void drawDString(in dstring text, in BitmapFont font, in vec2 position, in col modulate = col.white,
+void drawDString(in dstring text, in BitmapFont font, in vec2 position, in color modulate = color.white,
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!dstring(text, font, position, modulate, alignment, material);

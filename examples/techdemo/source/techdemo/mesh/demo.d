@@ -127,10 +127,10 @@ public:
             mFont = AssetManager.load!Font("core:fonts/internal.fnt");
             mEnvironment = new Environment3D();
             mEnvironment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
-            mEnvironment.ambientColor = col.black;
+            mEnvironment.ambientColor = color.black;
 
-            mLights ~= Renderer3D.Light(vec3(-5, 2, -5), col.white, vec3(1, 0.005, 0.001));
-            mLights ~= Renderer3D.Light(vec3(5, -1, 5), col.gray, vec3(1, 0.01, 0.002));
+            mLights ~= Renderer3D.Light(vec3(-5, 2, -5), color.white, vec3(1, 0.005, 0.001));
+            mLights ~= Renderer3D.Light(vec3(5, -1, 5), color.gray, vec3(1, 0.01, 0.002));
         }
     }
 

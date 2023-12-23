@@ -40,7 +40,7 @@ public:
         void function(RenderFlag flag, bool value) nothrow setRenderFlag;
         bool function(RenderFlag flag) nothrow getRenderFlag;
         size_t function(RenderCapability capability) nothrow getCapability;
-        void function(col clearColor) nothrow clearScreen;
+        void function(color clearColor) nothrow clearScreen;
 
         void function(in NativeHandle target) nothrow setRenderTarget;
         void function(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow presentToScreen;
@@ -55,10 +55,10 @@ public:
         void function() endScene;
         void function() flush;
         void function(in Vertex2D[] vertices, in uint[] indices, in mat4 transform, in Texture2D texture, in Material material) drawVertices;
-        void function(in Rect2f dimensions, in mat4 transform, in col modulate, in Texture2D texture, in Material material, in Rect2f region) drawRectangle;
-        void function(in string text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material) drawString;
-        void function(in wstring text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material) drawWString;
-        void function(in dstring text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material) drawDString;
+        void function(in Rect2f dimensions, in mat4 transform, in color modulate, in Texture2D texture, in Material material, in Rect2f region) drawRectangle;
+        void function(in string text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawString;
+        void function(in wstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawWString;
+        void function(in dstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawDString;
     }
 
     struct Renderer3d

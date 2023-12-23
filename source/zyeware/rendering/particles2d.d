@@ -91,12 +91,12 @@ public:
 
                 import std.math.traits : isNaN;
 
-                col color = particles.type.color.interpolate(progression);
-                if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b) || isNaN(color.a))
-                    color = col.white;
+                color modulate = particles.type.modulate.interpolate(progression);
+                if (isNaN(modulate.r) || isNaN(modulate.g) || isNaN(modulate.b) || isNaN(modulate.a))
+                    modulate = color.white;
 
                 Renderer2D.drawRectangle(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
-                    color, particles.type.texture);
+                    modulate, particles.type.texture);
             }
         }
     }
@@ -119,7 +119,7 @@ public:
     Texture2D texture;
     auto size = Range!float(1, 1);
     Range!Duration lifeTime;
-    Gradient color;
+    Gradient modulate;
     vec2 gravity;
     auto spriteAngle = Range!float(0, 0);
     auto direction = Range!float(0, PI*2);

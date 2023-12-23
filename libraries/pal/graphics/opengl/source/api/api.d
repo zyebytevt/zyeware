@@ -209,9 +209,9 @@ NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices)
     // vertex texture coords
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.uv.offsetof);
-    // vertex color
+    // vertex modulate
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.color.offsetof);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D.modulate.offsetof);
 
     glBindVertexArray(0);
 
@@ -320,7 +320,7 @@ NativeHandle createFramebuffer(in FramebufferProperties properties)
     glGenFramebuffers(1, &framebuffer.id);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.id);
 
-    // Create the color attachment based on the properties.
+    // Create the modulate attachment based on the properties.
     final switch (properties.usageType) with (FramebufferProperties.UsageType)
     {
     case swapChainTarget:
@@ -545,7 +545,7 @@ size_t getCapability(RenderCapability capability) nothrow
     }
 }
 
-void clearScreen(col clearColor) nothrow
+void clearScreen(color clearColor) nothrow
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -570,7 +570,7 @@ NativeHandle getTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
 {
     FramebufferData* data = cast(FramebufferData*) framebuffer;
 
-    assert(glIsTexture(data.colorAttachmentId), "Framebuffer color attachment is not a texture.");
+    assert(glIsTexture(data.colorAttachmentId), "Framebuffer modulate attachment is not a texture.");
 
     return cast(NativeHandle) &data.colorAttachmentId;
 }
