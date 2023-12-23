@@ -82,7 +82,7 @@ public:
 
         foreach (ParticleContainer* particles; mParticles.values)
         {
-            immutable static Rect2f dimensions = Rect2f(-2, -2, 2, 2);
+            immutable static rect dimensions = rect(-2, -2, 2, 2);
 
             for (size_t i; i < particles.activeParticlesCount; ++i)
             {

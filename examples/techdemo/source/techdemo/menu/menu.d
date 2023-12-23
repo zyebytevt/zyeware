@@ -120,7 +120,7 @@ public:
 
         immutable float logoYOffset = sin(ZyeWare.upTime.toFloatSeconds * 1.5f) * 8f;
 
-        Renderer2D.drawRectangle(Rect2f(120.95, 70 + logoYOffset, 398.1, 115.2),
+        Renderer2D.drawRectangle(rect(120.95, 70 + logoYOffset, 398.1, 115.2),
             mat4.identity, color.white, mLogoTexture);
         
         mMainMenu.draw(vec2(320, 200));

@@ -32,7 +32,7 @@ package:
 
         Renderer2D.beginScene(camera.projectionMatrix, mat4.identity);
         if ((ZyeWare.upTime.total!"hnsecs" / 5_000_000) % 2 == 0)
-            Renderer2D.drawRectangle(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), color.white, texture);
+            Renderer2D.drawRectangle(rect(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), color.white, texture);
         Renderer2D.endScene();
     }
 

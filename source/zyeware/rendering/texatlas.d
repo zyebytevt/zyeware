@@ -22,12 +22,12 @@ public:
         mVFrames = vFrames;
     }
 
-    Rect2f getRegionForFrame(size_t frame) pure const nothrow
+    rect getRegionForFrame(size_t frame) pure const nothrow
     {
         immutable float x1 = cast(float) (frame % mHFrames) / mHFrames;
         immutable float y1 = cast(float) (frame / mHFrames) / mVFrames;
 
-        return Rect2f(
+        return rect(
             x1,
             y1,
             1.0f / mHFrames,

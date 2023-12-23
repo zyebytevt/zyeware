@@ -45,8 +45,8 @@ public:
 
         Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
 
-        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 720), vec2(0), vec2(1), color(0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
-        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 149), vec2(0, 250 + sin(seconds) * 30f), vec2(1), color.white, mTitleTexture);
+        Renderer2D.drawRectangle(rect(0, 0, 480, 720), vec2(0), vec2(1), color(0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
+        Renderer2D.drawRectangle(rect(0, 0, 480, 149), vec2(0, 250 + sin(seconds) * 30f), vec2(1), color.white, mTitleTexture);
 
         Renderer2D.drawString(tr("Press 'accept' to begin!\nPress 'cancel' to slither back to the main menu.\nArrow keys or controller to move."),
             mFont, vec2(240, 600), color.white, Font.Alignment.center);

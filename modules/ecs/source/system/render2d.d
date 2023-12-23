@@ -102,7 +102,7 @@ public:
                 y2 *= -1;
             }
 
-            Renderer2D.drawRectangle(Rect2f(x1, y1, x2, y2), transform.globalMatrix,
+            Renderer2D.drawRectangle(rect(x1, y1, x2, y2), transform.globalMatrix,
                 sprite.modulate, sprite.atlas.texture, sprite.material, sprite.atlas.region);
         }
 

@@ -3,7 +3,7 @@ module zyeware.core.math.vector;
 import inmath.math;
 import inmath.linalg;
 
-public import inmath.linalg : dot, cross, vec2, vec3, vec4, vec2i, vec3i, vec4i;
+public import inmath.linalg : dot, cross, vec2, vec3, vec4, vec2i, vec3i, vec4i, vec2d, vec3d, vec4d;
 import inmath.util : isVector;
 
 import zyeware;

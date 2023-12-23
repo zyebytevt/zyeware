@@ -174,14 +174,28 @@ public:
         v = values;
     }
 
-    color toRGB() const nothrow
+    pragma(inline, true)
+    color toRgb() const nothrow
     {
         return color(hsv2rgb(v));
     }
 
-    color toHSV() const nothrow
+    pragma(inline, true)
+    color toHsv() pure const nothrow
     {
         return color(rgb2hsv(v));
+    }
+
+    pragma(inline, true)
+    color brighten(float amount) pure const nothrow @nogc
+    {
+        return color(v.r + amount, v.g + amount, v.b + amount, v.a);
+    }
+
+    pragma(inline, true)
+    color darken(float amount) pure const nothrow @nogc
+    {
+        return brighten(-amount);
     }
 
     static color lerp(color a, color b, float t) pure nothrow

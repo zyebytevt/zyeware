@@ -64,7 +64,7 @@ public:
     {
         Renderer2D.clearScreen(color.black);
 
-        auto r = Rect2f(-50, -50, 100, 100);
+        auto r = rect(-50, -50, 100, 100);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);
         color c = collision.isColliding ? color(0, 1, 0, 1) : color(1, 0, 0, 1);
 

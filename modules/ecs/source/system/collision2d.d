@@ -152,10 +152,10 @@ public:
         const transform = entity.component!Transform2DComponent;
         const collision = entity.component!Collision2DComponent;
 
-        immutable Rect2f bb = collision.shape.getBoundingBox(transform.globalMatrix);
+        immutable rect bb = collision.shape.getBoundingBox(transform.globalMatrix);
         immutable vec2 pos = transform.position;
 
-        Rect2i cellExtremes = Rect2i(
+        recti cellExtremes = recti(
             cast(uint) ((pos.x + bb.min.x) / mGridCellSize),
             cast(uint) ((pos.y + bb.min.y) / mGridCellSize),
             cast(uint) ((pos.x + bb.max.x) / mGridCellSize),

@@ -484,9 +484,9 @@ void freeShader(NativeHandle shader) nothrow
     destroy(id);
 }
 
-void setViewport(Rect2i region) nothrow
+void setViewport(recti region) nothrow
 {
-    glViewport(region.position.x, region.position.y, region.size.x, region.size.y);
+    glViewport(region.x, region.y, region.width, region.height);
 }
 
 void setRenderFlag(RenderFlag flag, bool value) nothrow
@@ -556,14 +556,14 @@ void setRenderTarget(in NativeHandle target) nothrow
     glBindFramebuffer(GL_FRAMEBUFFER, target ? *(cast(uint*) target) : 0);
 }
 
-void presentToScreen(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow
+void presentToScreen(in NativeHandle framebuffer, recti srcRegion, recti dstRegion) nothrow
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, *(cast(uint*) framebuffer));
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glBlitFramebuffer(srcRegion.position.x, srcRegion.position.y, srcRegion.size.x, srcRegion.size.y, dstRegion.position.x, dstRegion.position.y,
-        dstRegion.size.x, dstRegion.size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(srcRegion.x, srcRegion.y, srcRegion.width, srcRegion.height, dstRegion.x, dstRegion.y,
+        dstRegion.width, dstRegion.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
 NativeHandle getTextureFromFramebuffer(in NativeHandle framebuffer) nothrow

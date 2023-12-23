@@ -178,8 +178,8 @@ void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color
                     {
                         const(Texture2D) pageTexture = font.getPageTexture(c.pageIndex);
 
-                        drawRectangle(Rect2f(0, 0, c.size.x, c.size.y), mat4.translation(vec3(vec2(position + cursor + vec2(c.offset.x, c.offset.y)), 0)),
-                            modulate, pageTexture, material, Rect2f(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
+                        drawRectangle(rect(0, 0, c.size.x, c.size.y), mat4.translation(vec3(vec2(position + cursor + vec2(c.offset.x, c.offset.y)), 0)),
+                            modulate, pageTexture, material, rect(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
                     }
 
                     cursor.x += c.advance.x + kerning;
@@ -320,20 +320,20 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
     batch.currentIndexCount += indices.length;
 }
 
-void drawRectangle(in Rect2f dimensions, in mat4 transform, in color modulate = vec4(1),
-    in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
+void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = vec4(1),
+    in Texture2D texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
 {
     static vec2[4] quadPositions;
-    quadPositions[0] = vec2(dimensions.position.x, dimensions.position.y);
-    quadPositions[1] = vec2(dimensions.position.x + dimensions.size.x, dimensions.position.y);
-    quadPositions[2] = vec2(dimensions.position.x + dimensions.size.x, dimensions.position.y + dimensions.size.y);
-    quadPositions[3] = vec2(dimensions.position.x, dimensions.position.y + dimensions.size.y);
+    quadPositions[0] = vec2(dimensions.x, dimensions.y);
+    quadPositions[1] = vec2(dimensions.x + dimensions.width, dimensions.y);
+    quadPositions[2] = vec2(dimensions.x + dimensions.width, dimensions.y + dimensions.height);
+    quadPositions[3] = vec2(dimensions.x, dimensions.y + dimensions.height);
 
     static vec2[4] quadUVs;
-    quadUVs[0] = vec2(region.position.x, region.position.y);
-    quadUVs[1] = vec2(region.position.x + region.size.x, region.position.y);
-    quadUVs[2] = vec2(region.position.x + region.size.x, region.position.y + region.size.y);
-    quadUVs[3] = vec2(region.position.x, region.position.y + region.size.y);
+    quadUVs[0] = vec2(region.x, region.y);
+    quadUVs[1] = vec2(region.x + region.width, region.y);
+    quadUVs[2] = vec2(region.x + region.width, region.y + region.height);
+    quadUVs[3] = vec2(region.x, region.y + region.height);
 
     static Vertex2D[4] vertices;
     static uint[6] indices;

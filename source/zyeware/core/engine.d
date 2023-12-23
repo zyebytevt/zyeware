@@ -83,7 +83,7 @@ private static:
     RandomNumberGenerator sRandom;
 
     Framebuffer sMainFramebuffer;
-    Rect2i sFramebufferArea;
+    recti sFramebufferArea;
     ScaleMode sScaleMode;
     bool sMustUpdateFramebufferDimensions;
 
@@ -204,7 +204,7 @@ private static:
             break;
         }
 
-        sFramebufferArea = Rect2i(finalPos, finalPos + finalSize);
+        sFramebufferArea = recti(finalPos.x, finalPos.y, finalPos.x + finalSize.x, finalPos.y + finalSize.y);
     }
 
     void drawFramebuffer()
@@ -212,14 +212,14 @@ private static:
         sMainDisplay.update();
 
         // Prepare framebuffer and render application into it.
-        Pal.graphics.api.setViewport(Rect2i(vec2i.zero, sMainFramebuffer.properties.size));
+        Pal.graphics.api.setViewport(recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y));
         
         Pal.graphics.api.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
         Pal.graphics.api.clearScreen(color.black);
-        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, Rect2i(vec2i.zero, sMainFramebuffer.properties.size),
+        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y),
             sFramebufferArea);
 
         sMainDisplay.swapBuffers();
@@ -528,8 +528,8 @@ public static:
     /// Returns: The converted framebuffer position.
     vec2 convertDisplayToFramebufferLocation(vec2i location) nothrow
     {
-        float x = ((location.x - sFramebufferArea.position.x) / sFramebufferArea.size.x) * sMainFramebuffer.properties.size.x;
-        float y = ((location.y - sFramebufferArea.position.y) / sFramebufferArea.size.y) * sMainFramebuffer.properties.size.y;
+        float x = ((location.x - sFramebufferArea.x) / sFramebufferArea.width) * sMainFramebuffer.properties.size.x;
+        float y = ((location.y - sFramebufferArea.y) / sFramebufferArea.height) * sMainFramebuffer.properties.size.y;
 
         return vec2(x, y);
     }

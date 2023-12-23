@@ -10,6 +10,6 @@ version(none):
 {
     ParticleRegistrationID typeId;
     Flag!"emitting" emitting;
-    Rect2f region;
+    rect region;
     size_t number;
 }
