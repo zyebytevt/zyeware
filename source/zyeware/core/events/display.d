@@ -39,20 +39,20 @@ public:
 class DisplayResizedEvent : DisplayEvent
 {
 protected:
-    Vector2i mSize;
+    vec2i mSize;
 
 public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     size = The size after resizing.
-    this(in Display display, Vector2i size) pure nothrow
+    this(in Display display, vec2i size) pure nothrow
     {
         super(display);
         mSize = size;
     }
 
     /// The size after resizing.
-    final Vector2i size() const pure nothrow
+    final vec2i size() const pure nothrow
     {
         return mSize;
     }
@@ -67,20 +67,20 @@ public:
 class DisplayMovedEvent : DisplayEvent
 {
 protected:
-    Vector2i mPosition;
+    vec2i mPosition;
 
 public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     position = The position after moving.
-    this(in Display display, Vector2i position) pure nothrow
+    this(in Display display, vec2i position) pure nothrow
     {
         super(display);
         mPosition = position;
     }
 
     /// The position after moving.
-    final Vector2i position() const pure nothrow
+    final vec2i position() const pure nothrow
     {
         return mPosition;
     }

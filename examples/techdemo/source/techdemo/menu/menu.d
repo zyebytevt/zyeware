@@ -21,7 +21,7 @@ import techdemo.gamepad.demo;
 import techdemo.particles.demo;
 import techdemo.gui.demo;
 
-private static immutable Vector2f screenCenter = Vector2f(320, 240);
+private static immutable vec2 screenCenter = vec2(320, 240);
 
 class DemoMenu : AppState
 {
@@ -114,27 +114,27 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
 
         sBackground.draw();
 
         immutable float logoYOffset = sin(ZyeWare.upTime.toFloatSeconds * 1.5f) * 8f;
 
         Renderer2D.drawRectangle(Rect2f(120.95, 70 + logoYOffset, 398.1, 115.2),
-            Matrix4f.identity, Color.white, mLogoTexture);
+            mat4.identity, col.white, mLogoTexture);
         
-        mMainMenu.draw(Vector2f(320, 200));
+        mMainMenu.draw(vec2(320, 200));
 
         Renderer2D.drawString(tr("Welcome!\nPress arrow keys to move cursor, 'return' to select.\nInside a demo, press 'escape' to return here."),
-            mFont, Vector2f(320, 6), Color.white, Font.Alignment.center);
+            mFont, vec2(320, 6), col.white, Font.Alignment.center);
 
         Renderer2D.drawString(tr("Please note that this application is used for testing\nas well as providing an example of what ZyeWare is capable of."),
-            mFont, Vector2f(320, 480 - 24), Color.white, Font.Alignment.center | Font.Alignment.bottom);
+            mFont, vec2(320, 480 - 24), col.white, Font.Alignment.center | Font.Alignment.bottom);
 
-        Renderer2D.drawString(sVersionString, mFont, Vector2f(0, 480), Color.gray,
+        Renderer2D.drawString(sVersionString, mFont, vec2(0, 480), col.gray,
             Font.Alignment.left | Font.Alignment.bottom);
 
-        Renderer2D.drawString(tr("Music by YukieVT!"), mFont, Vector2f(640, 480), Color.gray,
+        Renderer2D.drawString(tr("Music by YukieVT!"), mFont, vec2(640, 480), col.gray,
             Font.Alignment.right | Font.Alignment.bottom);
 
         Renderer2D.endScene();

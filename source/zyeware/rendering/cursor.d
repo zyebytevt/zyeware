@@ -9,10 +9,10 @@ final class Cursor
 {
 protected:
     const Image mImage;
-    Vector2i mHotspot;
+    vec2i mHotspot;
 
 public:
-    this(const Image image, Vector2i hotspot)
+    this(const Image image, vec2i hotspot)
     {
         mImage = image;
         mHotspot = hotspot;
@@ -23,7 +23,7 @@ public:
         return mImage;
     }
 
-    Vector2i hotspot() pure const nothrow
+    vec2i hotspot() pure const nothrow
     {
         return mHotspot;
     }
@@ -34,7 +34,7 @@ public:
 
         return new Cursor(
             AssetManager.load!Image(root.expectChildValue!string("image")),
-            root.expectChildValue!Vector2i("hotspot")
+            root.expectChildValue!vec2i("hotspot")
         );
     }
 }

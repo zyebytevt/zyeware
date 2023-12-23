@@ -30,9 +30,9 @@ package:
             texture = AssetManager.load!Texture2D("core:textures/no-camera.png");
         }
 
-        Renderer2D.beginScene(camera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(camera.projectionMatrix, mat4.identity);
         if ((ZyeWare.upTime.total!"hnsecs" / 5_000_000) % 2 == 0)
-            Renderer2D.drawRectangle(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), Vector2f(0), Vector2f(1), Color.white, texture);
+            Renderer2D.drawRectangle(Rect2f(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), col.white, texture);
         Renderer2D.endScene();
     }
 
@@ -41,7 +41,7 @@ public:
     {
         // Find camera first
         bool foundCamera;
-        Matrix4f projectionMatrix;
+        mat4 projectionMatrix;
         Environment3D environment;
         Transform3DComponent* cameraTransform;
 

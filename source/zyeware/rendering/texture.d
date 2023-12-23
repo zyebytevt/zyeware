@@ -46,11 +46,11 @@ class Texture2D : Texture
 protected:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
-    Vector2i mSize;
+    vec2i mSize;
 
 package(zyeware):
     /// Careful: This will take ownership of the given handle.
-    this(NativeHandle handle, in Vector2i size, in TextureProperties properties = TextureProperties.init) nothrow
+    this(NativeHandle handle, in vec2i size, in TextureProperties properties = TextureProperties.init) nothrow
     {
         mProperties = properties;
         mSize = size;
@@ -80,7 +80,7 @@ public:
         return mNativeHandle;
     }
 
-    const(Vector2i) size() pure const nothrow
+    const(vec2i) size() pure const nothrow
     {
         return mSize;
     }

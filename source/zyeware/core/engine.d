@@ -178,29 +178,29 @@ private static:
 
     void recalculateFramebufferArea() nothrow
     {
-        immutable Vector2i winSize = sMainDisplay.size;
-        immutable Vector2i gameSize = sMainFramebuffer.properties.size;
+        immutable vec2i winSize = sMainDisplay.size;
+        immutable vec2i gameSize = sMainFramebuffer.properties.size;
 
-        Vector2i finalPos, finalSize;
+        vec2i finalPos, finalSize;
 
         final switch (sScaleMode) with (ScaleMode)
         {
         case center:
-            finalPos = Vector2i(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
-            finalSize = Vector2i(gameSize);
+            finalPos = vec2i(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
+            finalSize = vec2i(gameSize);
             break;
 
         case keepAspect:
             immutable float scale = min(cast(float) winSize.x / gameSize.x, cast(float) winSize.y / gameSize.y);
 
-            finalSize = Vector2i(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
-            finalPos = Vector2i(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
+            finalSize = vec2i(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
+            finalPos = vec2i(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
             break;
 
         case fill:
         case changeDisplaySize:
-            finalPos = Vector2i(0);
-            finalSize = Vector2i(winSize);
+            finalPos = vec2i(0);
+            finalSize = vec2i(winSize);
             break;
         }
 
@@ -212,14 +212,14 @@ private static:
         sMainDisplay.update();
 
         // Prepare framebuffer and render application into it.
-        Pal.graphics.api.setViewport(Rect2i(Vector2i.zero, sMainFramebuffer.properties.size));
+        Pal.graphics.api.setViewport(Rect2i(vec2i.zero, sMainFramebuffer.properties.size));
         
         Pal.graphics.api.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
-        Pal.graphics.api.clearScreen(Color.black);
-        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, Rect2i(Vector2i.zero, sMainFramebuffer.properties.size),
+        Pal.graphics.api.clearScreen(col.black);
+        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, Rect2i(vec2i.zero, sMainFramebuffer.properties.size),
             sFramebufferArea);
 
         sMainDisplay.swapBuffers();
@@ -416,13 +416,13 @@ public static:
     /// Changes the display size, respecting various display states with it (e.g. full screen, minimised etc.)
     /// Params:
     ///   size = The new size of the display.
-    void changeDisplaySize(Vector2i size)
+    void changeDisplaySize(vec2i size)
         in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
     {
         if (!sMainDisplay.isMaximized && !sMainDisplay.isMinimized)
-            sMainDisplay.size = Vector2i(size);
+            sMainDisplay.size = vec2i(size);
         
-        framebufferSize = Vector2i(size);
+        framebufferSize = vec2i(size);
     }
 
     /// Registers a callback to be called at the very end of a frame.
@@ -504,13 +504,13 @@ public static:
     }
 
     /// The size of the main framebuffer.
-    Vector2i framebufferSize() nothrow
+    vec2i framebufferSize() nothrow
     {
         return sMainFramebuffer.properties.size;
     }
 
     /// ditto
-    void framebufferSize(Vector2i newSize)
+    void framebufferSize(vec2i newSize)
         in (newSize.x > 0 && newSize.y > 0, "Framebuffer size cannot be negative.")
     {
         FramebufferProperties fbProps = sMainFramebuffer.properties;
@@ -526,12 +526,12 @@ public static:
     /// Params:
     ///     location = The display relative position.
     /// Returns: The converted framebuffer position.
-    Vector2f convertDisplayToFramebufferLocation(Vector2i location) nothrow
+    vec2 convertDisplayToFramebufferLocation(vec2i location) nothrow
     {
         float x = ((location.x - sFramebufferArea.position.x) / sFramebufferArea.size.x) * sMainFramebuffer.properties.size.x;
         float y = ((location.y - sFramebufferArea.position.y) / sFramebufferArea.size.y) * sMainFramebuffer.properties.size.y;
 
-        return Vector2f(x, y);
+        return vec2(x, y);
     }
 
     /// Determines how the displayed framebuffer will be scaled according to the display size and shape.

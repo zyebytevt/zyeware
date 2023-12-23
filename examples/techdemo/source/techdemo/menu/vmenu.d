@@ -87,17 +87,17 @@ public:
         }
     }
 
-    void draw(Vector2f topCenterPos)
+    void draw(vec2 topCenterPos)
     {
         for (size_t i; i < mEntries.length; ++i)
         {
-            Color color;
+            col color;
             if (mEntries[i].disabled)
-                color = Color.darkgray;
+                color = col.darkgray;
             else
-                color = mCursor == i ? Color.yellow : Color.white;
+                color = mCursor == i ? col.yellow : col.white;
 
-            Renderer2D.drawString(mEntries[i].text, mFont, topCenterPos + Vector2f(0, i * mFont.bmFont.common.lineHeight + 4), color, Font.Alignment.center);
+            Renderer2D.drawString(mEntries[i].text, mFont, topCenterPos + vec2(0, i * mFont.bmFont.common.lineHeight + 4), color, Font.Alignment.center);
         }
     }
 }

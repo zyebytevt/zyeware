@@ -35,7 +35,7 @@ public:
     {
         Pal.graphicsDriver.clear();
 
-        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
 
         mRoot.draw(nextFrameTime);
 

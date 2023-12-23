@@ -30,17 +30,17 @@ public:
         void function(NativeHandle shader) nothrow freeShader;
 
         void function(in NativeHandle shader, in string name, in float value) nothrow setShaderUniform1f;
-        void function(in NativeHandle shader, in string name, in Vector2f value) nothrow setShaderUniform2f;
-        void function(in NativeHandle shader, in string name, in Vector3f value) nothrow setShaderUniform3f;
-        void function(in NativeHandle shader, in string name, in Vector4f value) nothrow setShaderUniform4f;
+        void function(in NativeHandle shader, in string name, in vec2 value) nothrow setShaderUniform2f;
+        void function(in NativeHandle shader, in string name, in vec3 value) nothrow setShaderUniform3f;
+        void function(in NativeHandle shader, in string name, in vec4 value) nothrow setShaderUniform4f;
         void function(in NativeHandle shader, in string name, in int value) nothrow setShaderUniform1i;
-        void function(in NativeHandle shader, in string name, in Matrix4f value) nothrow setShaderUniformMat4f;
+        void function(in NativeHandle shader, in string name, in mat4 value) nothrow setShaderUniformMat4f;
 
         void function(Rect2i region) nothrow setViewport;
         void function(RenderFlag flag, bool value) nothrow setRenderFlag;
         bool function(RenderFlag flag) nothrow getRenderFlag;
         size_t function(RenderCapability capability) nothrow getCapability;
-        void function(Color clearColor) nothrow clearScreen;
+        void function(col clearColor) nothrow clearScreen;
 
         void function(in NativeHandle target) nothrow setRenderTarget;
         void function(in NativeHandle framebuffer, Rect2i srcRegion, Rect2i dstRegion) nothrow presentToScreen;
@@ -51,21 +51,21 @@ public:
     {
         void function() initialize;
         void function() cleanup;
-        void function(in Matrix4f projectionMatrix, in Matrix4f viewMatrix) beginScene;
+        void function(in mat4 projectionMatrix, in mat4 viewMatrix) beginScene;
         void function() endScene;
         void function() flush;
-        void function(in Vertex2D[] vertices, in uint[] indices, in Matrix4f transform, in Texture2D texture, in Material material) drawVertices;
-        void function(in Rect2f dimensions, in Matrix4f transform, in Color modulate, in Texture2D texture, in Material material, in Rect2f region) drawRectangle;
-        void function(in string text, in BitmapFont font, in Vector2f position, in Color modulate, ubyte alignment, in Material material) drawString;
-        void function(in wstring text, in BitmapFont font, in Vector2f position, in Color modulate, ubyte alignment, in Material material) drawWString;
-        void function(in dstring text, in BitmapFont font, in Vector2f position, in Color modulate, ubyte alignment, in Material material) drawDString;
+        void function(in Vertex2D[] vertices, in uint[] indices, in mat4 transform, in Texture2D texture, in Material material) drawVertices;
+        void function(in Rect2f dimensions, in mat4 transform, in col modulate, in Texture2D texture, in Material material, in Rect2f region) drawRectangle;
+        void function(in string text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material) drawString;
+        void function(in wstring text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material) drawWString;
+        void function(in dstring text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material) drawDString;
     }
 
     struct Renderer3d
     {
-        void function(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment) beginScene;
+        void function(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment) beginScene;
         void function() end;
-        void function(in Matrix4f transform) submit;
+        void function(in mat4 transform) submit;
     }
 
     Api api;

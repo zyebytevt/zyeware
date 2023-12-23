@@ -23,12 +23,12 @@ public static:
     /// Params:
     ///     clearColor = The color to clear the screen to.
     pragma(inline, true)
-    void clearScreen(in Color clearColor) nothrow
+    void clearScreen(in col clearColor) nothrow
     {
         Pal.graphics.api.clearScreen(clearColor);
     }
 
-    void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix, Environment3D environment)
+    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment)
     {
         Pal.graphics.renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
     }
@@ -38,7 +38,7 @@ public static:
         Pal.graphics.renderer3d.end();
     }
 
-    void submit(in Matrix4f transform)
+    void submit(in mat4 transform)
     {
         Pal.graphics.renderer3d.submit(transform);
     }

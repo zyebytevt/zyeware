@@ -27,12 +27,12 @@ public:
 
         mCamera = new OrthographicCamera(0, 640, 480, 0);
 
-        mFirstTransform = Transform2DComponent(Vector2f(100, 240));
-        mSecondTransform = Transform2DComponent(Vector2f(400, 240));
+        mFirstTransform = Transform2DComponent(vec2(100, 240));
+        mSecondTransform = Transform2DComponent(vec2(400, 240));
 
         mCircleTexture = AssetManager.load!Texture2D("res:sprites/circle.png");
 
-        mSecondShape = new RectangleShape2D(Vector2f(50));
+        mSecondShape = new RectangleShape2D(vec2(50));
         mFirstShape = new CircleShape2D(50);
         //mFirstShape = mSecondShape;
 
@@ -45,7 +45,7 @@ public:
 
         immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
 
-        Vector2f position = mSecondTransform.position;
+        vec2 position = mSecondTransform.position;
         float rotation = mSecondTransform.rotation;
 
         position.x += (InputManager.getActionStrength("ui_right") - InputManager.getActionStrength("ui_left")) * 100f * delta;
@@ -62,13 +62,13 @@ public:
 
     override void draw(in FrameTime nextFrameTime)
     {
-        Renderer2D.clearScreen(Color.black);
+        Renderer2D.clearScreen(col.black);
 
         auto r = Rect2f(-50, -50, 100, 100);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);
-        Color c = collision.isColliding ? Color(0, 1, 0, 1) : Color(1, 0, 0, 1);
+        col c = collision.isColliding ? col(0, 1, 0, 1) : col(1, 0, 0, 1);
 
-        Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
 
         DemoMenu.background.draw();
 

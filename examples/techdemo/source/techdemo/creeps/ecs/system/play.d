@@ -25,39 +25,39 @@ protected:
     Timer mScoreTimer;
     ulong mScore;
 
-    Entity createPlayer(Vector2f position)
+    Entity createPlayer(vec2 position)
     {
         Entity player = mPlayState.entities.create();
 
         player.register!Transform2DComponent(position);
         player.register!PlayerComponent();
-        player.register!SpriteComponent(Vector2f(111/2, 135/2), Vector2f(111/4, 135/4),
+        player.register!SpriteComponent(vec2(111/2, 135/2), vec2(111/4, 135/4),
             TextureAtlas(
                 AssetManager.load!Texture2D("res:creeps/sprites/player.png"),
                 2, 2, 0
             ),
-            Color.white);
+            col.white);
         player.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res:creeps/sprites/player.anim"), "walk", No.autostart);
         player.register!Collision2DComponent(new CircleShape2D(25), 1, 2);
 
         return player;
     }
 
-    Entity createMob(Vector2f position)
+    Entity createMob(vec2 position)
     {
-        immutable Vector2f targetPoint = Vector2f(CreepsMenuState.screenSize)/2 + Vector2f(uniform(-100, 100), uniform(-200, 200));
-        immutable Vector2f motion = (targetPoint - position).normalized * 300;
+        immutable vec2 targetPoint = vec2(CreepsMenuState.screenSize)/2 + vec2(uniform(-100, 100), uniform(-200, 200));
+        immutable vec2 motion = (targetPoint - position).normalized * 300;
 
         Entity mob = mPlayState.entities.create();
         
         mob.register!Transform2DComponent(position);
         mob.register!MobComponent(motion);
-        mob.register!SpriteComponent(Vector2f(132/2, 186/2), Vector2f(132/4, 186/4), 
+        mob.register!SpriteComponent(vec2(132/2, 186/2), vec2(132/4, 186/4), 
             TextureAtlas(
                 AssetManager.load!Texture2D("res:creeps/sprites/creeps.png"),
                 3, 2, 0
             ),
-            Color.white);
+            col.white);
         mob.register!SpriteAnimationComponent(AssetManager.load!SpriteFrames("res:creeps/sprites/creeps.anim"), 
             ["fly", "swim", "walk"][uniform(0, $)], Yes.autostart);
         mob.register!Collision2DComponent(new CircleShape2D(25), 2, 0);
@@ -68,13 +68,13 @@ protected:
     void initScene()
     {
         Entity background = mPlayState.entities.create();
-        background.register!Transform2DComponent(Vector2f(0));
-        background.register!SpriteComponent(Vector2f(480, 720), Vector2f(0), TextureAtlas(null), Color(0.2, 0.38, 0.4));
+        background.register!Transform2DComponent(vec2(0));
+        background.register!SpriteComponent(vec2(480, 720), vec2(0), TextureAtlas(null), col(0.2, 0.38, 0.4));
 
-        createPlayer(Vector2f(240, 360));
+        createPlayer(vec2(240, 360));
 
         Entity camera = mPlayState.entities.create();
-        camera.register!Transform2DComponent(Vector2f(0));
+        camera.register!Transform2DComponent(vec2(0));
         camera.register!CameraComponent(new OrthographicCamera(0, 480, 720, 0), Yes.active);
 
         mSpawnTimer.start();
@@ -99,7 +99,7 @@ public:
         mSpawnTimer = new Timer(dur!"msecs"(500), delegate void(Timer timer)
         {
             immutable float angle = uniform(0f, PI*2);
-            Vector2f position = Vector2f(cos(angle), sin(angle)) * 720f;
+            vec2 position = vec2(cos(angle), sin(angle)) * 720f;
             position.x = clamp(CreepsMenuState.screenSize.x/2 + position.x, 0, CreepsMenuState.screenSize.x);
             position.y = clamp(CreepsMenuState.screenSize.y/2 + position.y, 0, CreepsMenuState.screenSize.y);
 

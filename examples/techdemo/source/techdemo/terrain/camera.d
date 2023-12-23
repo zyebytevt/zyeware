@@ -29,16 +29,16 @@ public:
         foreach (Entity entity, CameraComponent* camera, Transform3DComponent* transform;
             entities.entitiesWith!(CameraComponent, Transform3DComponent))
         {
-            Vector3f newPos = transform.position;
+            vec3 newPos = transform.position;
             scope (exit) transform.position = newPos;
 
-            newPos += Vector3f(sin(mCameraRotation), 0, cos(mCameraRotation)) * 0.25f *
+            newPos += vec3(sin(mCameraRotation), 0, cos(mCameraRotation)) * 0.25f *
                 (InputManager.getActionStrength("pl_backward") - InputManager.getActionStrength("pl_forward"));
 
-            newPos += Vector3f(sin(mCameraRotation - 3.14/2), 0, cos(mCameraRotation - 3.14/2)) * 0.25f *
+            newPos += vec3(sin(mCameraRotation - 3.14/2), 0, cos(mCameraRotation - 3.14/2)) * 0.25f *
                 (InputManager.getActionStrength("pl_strafeleft") - InputManager.getActionStrength("pl_straferight"));
 
-            transform.rotation = Quaternionf.eulerRotation(0, mCameraRotation, 0);
+            transform.rotation = quat.eulerRotation(0, mCameraRotation, 0);
             newPos.y = mTerrain.getHeight(newPos.xz) + 3f;
         }
 

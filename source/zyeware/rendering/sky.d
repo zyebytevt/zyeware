@@ -26,15 +26,15 @@ public:
         mMaterial = new Material(shader);
         mMaterial.setTexture(0, texture);
 
-        immutable static Vector3f[] vertices = [
-            Vector3f(-1, 1, -1),
-            Vector3f(-1, -1, -1),
-            Vector3f(-1, -1, 1),
-            Vector3f(-1, 1, 1),
-            Vector3f(1, 1, -1),
-            Vector3f(1, -1, -1),
-            Vector3f(1, -1, 1),
-            Vector3f(1, 1, 1)
+        immutable static vec3[] vertices = [
+            vec3(-1, 1, -1),
+            vec3(-1, -1, -1),
+            vec3(-1, -1, 1),
+            vec3(-1, 1, 1),
+            vec3(1, 1, -1),
+            vec3(1, -1, -1),
+            vec3(1, -1, 1),
+            vec3(1, 1, 1)
         ];
 
         immutable static uint[] indices = [

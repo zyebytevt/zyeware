@@ -134,12 +134,12 @@ version(none)
 class SpatialGridTechnique2D : BroadPhaseTechnique2D
 {
 protected:
-    Vector2i mGridSize;
+    vec2i mGridSize;
     uint mGridCellSize;
     Entity[][] mEntities;
 
 public:
-    this(Vector2i gridSize, uint gridCellSize)
+    this(vec2i gridSize, uint gridCellSize)
         in (gridSize.x >= 1 && gridSize.y >= 1, "Invalid grid size.")
     {  
         mGridSize = gridSize;
@@ -153,7 +153,7 @@ public:
         const collision = entity.component!Collision2DComponent;
 
         immutable Rect2f bb = collision.shape.getBoundingBox(transform.globalMatrix);
-        immutable Vector2f pos = transform.position;
+        immutable vec2 pos = transform.position;
 
         Rect2i cellExtremes = Rect2i(
             cast(uint) ((pos.x + bb.min.x) / mGridCellSize),
@@ -187,7 +187,7 @@ public:
             foreach (ref Entity entity1; cell)
             {
                 Shape2D shape1 = entity1.component!Collision2DComponent.shape;
-                immutable Matrix4f transform1 = entity1.component!Transform2DComponent.globalMatrix;
+                immutable mat4 transform1 = entity1.component!Transform2DComponent.globalMatrix;
 
                 foreach (ref Entity entity2; cell)
                 {
@@ -199,7 +199,7 @@ public:
                         continue;
 
                     Shape2D shape2 = entity2.component!Collision2DComponent.shape;
-                    immutable Matrix4f transform2 = entity2.component!Transform2DComponent.globalMatrix;
+                    immutable mat4 transform2 = entity2.component!Transform2DComponent.globalMatrix;
 
                     Collision2D c = shape1.checkCollision(transform1, shape2, transform2);
                     if (c.isColliding)

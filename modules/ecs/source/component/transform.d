@@ -21,21 +21,21 @@ import zyeware.ecs;
 struct Transform2DComponent
 {
 private:
-    Vector2f mPosition = void;
+    vec2 mPosition = void;
     float mRotation = void;
-    Vector2f mScale = void;
+    vec2 mScale = void;
     int mZIndex = void;
 
-    Matrix4f mLocalMatrix = void, mGlobalMatrix = void;
+    mat4 mLocalMatrix = void, mGlobalMatrix = void;
 
     Transform2DComponent* mParent;
     Transform2DComponent*[] mChildren;
 
     void recalculateLocalMatrix() pure
     {
-        mLocalMatrix = Matrix4f.translation(position.x, position.y,
-                mZIndex / 100f) * Matrix4f.rotation(-rotation, Vector3f(0, 0,
-                1)) * Matrix4f.scaling(scale.x, scale.y, 1);
+        mLocalMatrix = mat4.translation(position.x, position.y,
+                mZIndex / 100f) * mat4.rotation(-rotation, vec3(0, 0,
+                1)) * mat4.scaling(scale.x, scale.y, 1);
 
         recalculateGlobalMatrix();
     }
@@ -57,7 +57,7 @@ public:
     ///     rotation = The rotation of this transform, in radians.
     ///     scale = The scale of this transform.
     ///     zIndex = The layer of the transform. Lower values are above others.
-    this(in Vector2f position, float rotation = 0, in Vector2f scale = Vector2f(1), int zIndex = 0) pure
+    this(in vec2 position, float rotation = 0, in vec2 scale = vec2(1), int zIndex = 0) pure
     {
         mPosition = position;
         mRotation = rotation;
@@ -70,7 +70,7 @@ public:
 	/// Calculates a transformation matrix with this transform's properties alone.
     /// 
 	/// Returns: The local transformation matrix.
-    Matrix4f localMatrix() pure const nothrow
+    mat4 localMatrix() pure const nothrow
     {
         return mLocalMatrix;
     }
@@ -79,7 +79,7 @@ public:
 	/// of it's parents.
     /// 
 	/// Returns: The global transformation matrix.
-    Matrix4f globalMatrix() pure const nothrow
+    mat4 globalMatrix() pure const nothrow
     {
         return mGlobalMatrix;
     }
@@ -133,32 +133,32 @@ public:
     }
 
     /// The position of this transform.
-    Vector2f position() nothrow pure const 
+    vec2 position() nothrow pure const 
     {
         return mPosition;
     }
 
     /// ditto
-    void position(in Vector2f value) pure
+    void position(in vec2 value) pure
     {
         mPosition = value;
         recalculateLocalMatrix();
     }
 
     /// The global position of this transform.
-    Vector2f globalPosition() nothrow pure const 
+    vec2 globalPosition() nothrow pure const 
     {
         if (mParent)
-            return (mParent.globalMatrix * Vector4f(mPosition, 0, 1)).xy;
+            return (mParent.globalMatrix * vec4(mPosition, 0, 1)).xy;
         else
             return mPosition;
     }
 
     /// ditto
-    void globalPosition(in Vector2f value) pure
+    void globalPosition(in vec2 value) pure
     {
         if (mParent)
-            mPosition = (mParent.globalMatrix.inverse * Vector4f(value, 0, 1)).xy;
+            mPosition = (mParent.globalMatrix.inverse * vec4(value, 0, 1)).xy;
         else
             mPosition = value;
         
@@ -197,19 +197,19 @@ public:
     }
 
     /// The scaling of this transform.
-    Vector2f scale() nothrow  pure const
+    vec2 scale() nothrow  pure const
     {
         return mScale;
     }
 
     /// ditto
-    void scale(in Vector2f value) pure
+    void scale(in vec2 value) pure
     {
         mScale = value;
         recalculateLocalMatrix();
     }
 
-    /*Vector2f globalScale() nothrow pure const
+    /*vec2 globalScale() nothrow pure const
     {
         if (mParent)
             return mParent.globalScale * mScale;
@@ -240,20 +240,20 @@ public:
 struct Transform3DComponent
 {
 private:
-    Vector3f mPosition = void;
+    vec3 mPosition = void;
     quat mRotation = void;
-    Vector3f mScale = void;
+    vec3 mScale = void;
 
-    Matrix4f mLocalMatrix = void, mGlobalMatrix = void;
+    mat4 mLocalMatrix = void, mGlobalMatrix = void;
 
     Transform3DComponent* mParent;
     Transform3DComponent*[] mChildren;
 
     void recalculateLocalMatrix() pure
     {
-        mLocalMatrix = Matrix4f.translation(position.x, position.y,
+        mLocalMatrix = mat4.translation(position.x, position.y,
                 position.z) * rotation.toMatrix!(4,
-                4) * Matrix4f.scaling(scale.x, scale.y, scale.z);
+                4) * mat4.scaling(scale.x, scale.y, scale.z);
 
         recalculateGlobalMatrix();
     }
@@ -274,7 +274,7 @@ public:
     ///     position = The position of this transform.
     ///     rotation = The rotation of this transform, represented as a quaternion.
     ///     scale = The scaling of this transform.
-    this(in Vector3f position, in quat rotation = quat.identity, in Vector3f scale = Vector3f(1)) pure
+    this(in vec3 position, in quat rotation = quat.identity, in vec3 scale = vec3(1)) pure
     {
         mPosition = position;
         mRotation = rotation;
@@ -286,7 +286,7 @@ public:
 	/// Calculates a transformation matrix with this transform's properties alone.
     ///
 	/// Returns: The local transformation matrix.
-    Matrix4f localMatrix() pure const nothrow
+    mat4 localMatrix() pure const nothrow
     {
         return mLocalMatrix;
     }
@@ -295,7 +295,7 @@ public:
 	/// of it's parents.
     /// 
 	/// Returns: The global transformation matrix.
-    Matrix4f globalMatrix() pure const nothrow
+    mat4 globalMatrix() pure const nothrow
     {
         return mGlobalMatrix;
     }
@@ -349,32 +349,32 @@ public:
     }
 
     /// The position of this transform.
-    Vector3f position() pure const nothrow 
+    vec3 position() pure const nothrow 
     {
         return mPosition;
     }
 
     /// ditto
-    void position(in Vector3f value) pure
+    void position(in vec3 value) pure
     {
         mPosition = value;
         recalculateLocalMatrix();
     }
 
     /// The global position of this transform.
-    Vector3f globalPosition() nothrow pure const 
+    vec3 globalPosition() nothrow pure const 
     {
         if (mParent)
-            return (mParent.globalMatrix * Vector4f(mPosition, 1)).xyz;
+            return (mParent.globalMatrix * vec4(mPosition, 1)).xyz;
         else
             return mPosition;
     }
 
     /// ditto
-    void globalPosition(in Vector3f value) pure
+    void globalPosition(in vec3 value) pure
     {
         if (mParent)
-            mPosition = (mParent.globalMatrix.inverse * Vector4f(value, 1)).xyz;
+            mPosition = (mParent.globalMatrix.inverse * vec4(value, 1)).xyz;
         else
             mPosition = value;
         
@@ -395,20 +395,20 @@ public:
     }
 
     /// ditto
-    void eulerRotation(in Vector3f value) pure
+    void eulerRotation(in vec3 value) pure
     {
         mRotation = quat.eulerRotation(value.x, value.y, value.z);
         recalculateLocalMatrix();
     }
 
     /// The scaling of this transform.
-    Vector3f scale() nothrow  pure const
+    vec3 scale() nothrow  pure const
     {
         return mScale;
     }
 
     /// ditto
-    void scale(in Vector3f value) pure
+    void scale(in vec3 value) pure
     {
         mScale = value;
         recalculateLocalMatrix();

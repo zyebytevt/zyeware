@@ -21,16 +21,16 @@ public:
     bool function(in NativeHandle handle, MouseCode code) nothrow isMouseButtonPressed;
     bool function(in NativeHandle handle, size_t gamepadIndex, GamepadButton button) nothrow isGamepadButtonPressed;
     float function(in NativeHandle handle, size_t gamepadIndex, GamepadAxis axis) nothrow getGamepadAxisValue;
-    Vector2i function(in NativeHandle handle) nothrow getCursorPosition;
+    vec2i function(in NativeHandle handle) nothrow getCursorPosition;
 
     void function(NativeHandle handle, bool value) setVSyncEnabled;
     bool function(in NativeHandle handle) nothrow isVSyncEnabled;
 
-    void function(NativeHandle handle, Vector2i value) setPosition;
-    Vector2i function(in NativeHandle handle) nothrow getPosition;
+    void function(NativeHandle handle, vec2i value) setPosition;
+    vec2i function(in NativeHandle handle) nothrow getPosition;
 
-    void function(NativeHandle handle, Vector2i value) setSize;
-    Vector2i function(in NativeHandle handle) nothrow getSize;
+    void function(NativeHandle handle, vec2i value) setSize;
+    vec2i function(in NativeHandle handle) nothrow getSize;
 
     void function(NativeHandle handle, bool value) setFullscreen;
     bool function(in NativeHandle handle) nothrow isFullscreen;

@@ -7,13 +7,13 @@ import zyeware;
 class CircleShape2d : Shape2d
 {
 package(zyeware.physics.shapes):
-    Collision2d isCollidingWithCircle(in Matrix4f thisTransform, in CircleShape2d other, in Matrix4f otherTransform) pure const nothrow
+    Collision2d isCollidingWithCircle(in mat4 thisTransform, in CircleShape2d other, in mat4 otherTransform) pure const nothrow
     {
         Collision2d collision;
 
-        immutable Vector2f myPosition = thisTransform.transformPoint(Vector2f(0));
-        immutable Vector2f otherPosition = otherTransform.transformPoint(Vector2f(0));
-        immutable Vector2f distance = otherPosition - myPosition;
+        immutable vec2 myPosition = thisTransform.transformPoint(vec2(0));
+        immutable vec2 otherPosition = otherTransform.transformPoint(vec2(0));
+        immutable vec2 distance = otherPosition - myPosition;
 
         immutable float distanceSquared = distance.lengthSquared;
 
@@ -41,7 +41,7 @@ public:
         this.radius = radius;
     }
 
-    Collision2d isCollidingWith(in Matrix4f thisTransform, in Shape2d other, in Matrix4f otherTransform) pure const nothrow
+    Collision2d isCollidingWith(in mat4 thisTransform, in Shape2d other, in mat4 otherTransform) pure const nothrow
     {
         if (auto circle = cast(CircleShape2d) other)
             return isCollidingWithCircle(thisTransform, circle, otherTransform);
@@ -51,12 +51,12 @@ public:
         return Collision2d.init;
     }
 
-    Collision2d isRaycastColliding(in Matrix4f thisTransform, in Vector2f rayOrigin, in Vector2f rayDirection, float maxDistance) pure const nothrow
+    Collision2d isRaycastColliding(in mat4 thisTransform, in vec2 rayOrigin, in vec2 rayDirection, float maxDistance) pure const nothrow
     {
         Collision2d result;
 
-        immutable Vector2f center = thisTransform.transformPoint(Vector2f.zero);
-        immutable Vector2f oc = center - rayOrigin;
+        immutable vec2 center = thisTransform.transformPoint(vec2.zero);
+        immutable vec2 oc = center - rayOrigin;
 
         // Calculate the projection of oc onto the ray direction
         immutable float t = dot(oc, rayDirection);
@@ -66,7 +66,7 @@ public:
             return result;
 
         // Calculate the closest point on the ray to the center of the circle
-        immutable Vector2f closestPoint = rayOrigin + rayDirection * t;
+        immutable vec2 closestPoint = rayOrigin + rayDirection * t;
 
         // Calculate the distance between the closest point and the center of the circle
         immutable float distanceSquared = (closestPoint - center).lengthSquared;
@@ -82,15 +82,15 @@ public:
         return result;
     }
 
-    Projection2d project(in Matrix4f thisTransform, in Vector2f axis) pure const nothrow
+    Projection2d project(in mat4 thisTransform, in vec2 axis) pure const nothrow
     {
-        immutable float center = thisTransform.transformPoint(Vector2f(0)).dot(axis);
+        immutable float center = thisTransform.transformPoint(vec2(0)).dot(axis);
         return Projection2d(center - radius, center + radius, axis);
     }
 
-    AABB2 getAABB(in Matrix4f thisTransform) pure const nothrow
+    AABB2 getAABB(in mat4 thisTransform) pure const nothrow
     {
-        immutable Vector2f center = thisTransform.transformPoint(Vector2f.zero);
-        return AABB2(center - Vector2f(radius), center + Vector2f(radius));
+        immutable vec2 center = thisTransform.transformPoint(vec2.zero);
+        return AABB2(center - vec2(radius), center + vec2(radius));
     }
 }

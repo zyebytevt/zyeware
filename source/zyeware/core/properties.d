@@ -37,7 +37,7 @@ struct ProjectProperties
         properties.mainDisplayProperties.title = displayNode.expectChildValue!string("title");
         properties.mainDisplayProperties.resizable = cast(Flag!"resizable") displayNode.getChildValue!bool("resizable", false);
         
-        properties.mainDisplayProperties.size = displayNode.expectChildValue!Vector2i("size");
+        properties.mainDisplayProperties.size = displayNode.expectChildValue!vec2i("size");
 
         if (auto iconNode = displayNode.getChild("icon"))
             properties.mainDisplayProperties.icon = AssetManager.load!Image(iconNode.expectValue!string());

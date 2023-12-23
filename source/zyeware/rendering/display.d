@@ -13,7 +13,7 @@ struct DisplayProperties
 {
     string title = "ZyeWare Engine";
     Flag!"resizable" resizable = Yes.resizable;
-    Vector2i size = Vector2i(1280, 720);
+    vec2i size = vec2i(1280, 720);
     Image icon;
 }
 
@@ -65,7 +65,7 @@ public:
         return Pal.display.getGamepadAxisValue(mNativeHandle, gamepadIdx, axis);
     }
 
-    Vector2i cursorPosition() const nothrow
+    vec2i cursorPosition() const nothrow
     {
         return Pal.display.getCursorPosition(mNativeHandle);
     }
@@ -85,22 +85,22 @@ public:
         return mNativeHandle;
     }
 
-    Vector2i position() const nothrow
+    vec2i position() const nothrow
     {
         return Pal.display.getPosition(mNativeHandle);
     }
 
-    void position(Vector2i value)
+    void position(vec2i value)
     {
         Pal.display.setPosition(mNativeHandle, value);
     }
 
-    Vector2i size() const nothrow
+    vec2i size() const nothrow
     {
         return Pal.display.getSize(mNativeHandle);
     }
 
-    void size(Vector2i value)
+    void size(vec2i value)
     {
         Pal.display.setSize(mNativeHandle, value);
     }

@@ -5,5 +5,5 @@ import zyeware.ecs;
 
 @component struct MobComponent
 {
-    Vector2f motion;
+    vec2 motion;
 }

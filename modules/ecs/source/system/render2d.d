@@ -56,7 +56,7 @@ public:
     {
         // Find camera first
         bool foundCamera;
-        Matrix4f projectionMatrix;
+        mat4 projectionMatrix;
         Transform2DComponent* cameraTransform;
 
         foreach (Entity entity, Transform2DComponent* transform, CameraComponent* camera;
@@ -72,7 +72,7 @@ public:
             }
         }
 
-        Renderer2D.clearScreen(Color.black);
+        Renderer2D.clearScreen(col.black);
 
         if (!foundCamera)
         {

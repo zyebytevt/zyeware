@@ -24,16 +24,16 @@ public:
 
     override void draw(EntityManager entities, in FrameTime nextFrameTime)
     {
-        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
         Renderer2D.drawString(tr("SPOOKY 3D TERRAIN DEMO\nPress arrow keys to move around.\nOptionally, you can use a controller!"),
-            mFont, Vector2f(4));
+            mFont, vec2(4));
 
         version (Profiling)
         {
             auto renderData = Profiler.currentReadData.renderData;
             Renderer2D.drawString(format!"2D rects: %d\nDraw calls: %d\nPolygons: %d"(renderData.rectCount,
                 renderData.drawCalls, renderData.polygonCount),
-                mFont, Vector2f(640, 0), Color.white, Font.Alignment.right);
+                mFont, vec2(640, 0), col.white, Font.Alignment.right);
         }
         
         Renderer2D.endScene();

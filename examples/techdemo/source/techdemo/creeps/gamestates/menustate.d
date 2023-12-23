@@ -16,7 +16,7 @@ protected:
     size_t mIgnoreInputFrames;
 
 public:
-    static immutable Vector2i screenSize = Vector2i(480, 720);
+    static immutable vec2i screenSize = vec2i(480, 720);
 
     this(StateApplication application)
     {
@@ -33,7 +33,7 @@ public:
                 application.pushState(new CreepsPlayState(application));
             else if (InputManager.isActionJustPressed("ui_cancel"))
             {
-                ZyeWare.changeDisplaySize(Vector2i(640, 480));
+                ZyeWare.changeDisplaySize(vec2i(640, 480));
                 application.popState();
             }
         }
@@ -43,13 +43,13 @@ public:
     {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
 
-        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 720), Vector2f(0), Vector2f(1), Color(0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
-        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 149), Vector2f(0, 250 + sin(seconds) * 30f), Vector2f(1), Color.white, mTitleTexture);
+        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 720), vec2(0), vec2(1), col(0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
+        Renderer2D.drawRectangle(Rect2f(0, 0, 480, 149), vec2(0, 250 + sin(seconds) * 30f), vec2(1), col.white, mTitleTexture);
 
         Renderer2D.drawString(tr("Press 'accept' to begin!\nPress 'cancel' to slither back to the main menu.\nArrow keys or controller to move."),
-            mFont, Vector2f(240, 600), Color.white, Font.Alignment.center);
+            mFont, vec2(240, 600), col.white, Font.Alignment.center);
 
         Renderer2D.endScene();
     }

@@ -25,7 +25,7 @@ public static:
     /// Params:
     ///     clearColor = The color to clear the screen to.
     pragma(inline, true)
-    void clearScreen(in Color clearColor) nothrow
+    void clearScreen(in col clearColor) nothrow
     {
         Pal.graphics.api.clearScreen(clearColor);
     }
@@ -35,7 +35,7 @@ public static:
     /// Params:
     ///     projectionMatrix = The projection matrix to use.
     ///     viewMatrix = The view matrix to use.
-    void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
+    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix)
     {
         Pal.graphics.renderer2d.beginScene(projectionMatrix, viewMatrix);
     }
@@ -57,7 +57,7 @@ public static:
     /// Params:
     ///     mesh = The mesh to draw.
     ///     position = 2D transform where to draw the mesh to.
-    void drawMesh(in Mesh2D mesh, in Matrix4f transform)
+    void drawMesh(in Mesh2D mesh, in mat4 transform)
     {
         Pal.graphics.renderer2d.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh.material);
     }
@@ -73,11 +73,11 @@ public static:
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
-    void drawRectangle(in Rect2f dimensions, in Vector2f position, in Vector2f scale, in Color modulate = Color.white,
+    void drawRectangle(in Rect2f dimensions, in vec2 position, in vec2 scale, in col modulate = col.white,
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        Pal.graphics.renderer2d.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
-            * Matrix4f.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
+        Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
+            * mat4.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
     }
 
     /// Draws a rectangle.
@@ -92,11 +92,11 @@ public static:
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
-    void drawRectangle(in Rect2f dimensions, in Vector2f position, in Vector2f scale, float rotation, in Color modulate = Vector4f(1),
+    void drawRectangle(in Rect2f dimensions, in vec2 position, in vec2 scale, float rotation, in col modulate = vec4(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
-        Pal.graphics.renderer2d.drawRectangle(dimensions, Matrix4f.translation(Vector3f(position, 0))
-            * Matrix4f.rotation(rotation, Vector3f(0, 0, 1)) * Matrix4f.scaling(scale.x, scale.y, 1),
+        Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
+            * mat4.rotation(rotation, vec3(0, 0, 1)) * mat4.scaling(scale.x, scale.y, 1),
             modulate, texture, material, region);
     }
 
@@ -109,7 +109,7 @@ public static:
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-    void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
+    void drawRectangle(in Rect2f dimensions, in mat4 transform, in col modulate = vec4(1),
         in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
@@ -125,7 +125,7 @@ public static:
     ///     modulate = The color of the text.
     ///     alignment = The alignment of the text.
     ///     material = The material to use. If `null`, uses the default material.
-    void drawString(T)(in T text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in col modulate = col.white,
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
         if (isSomeString!T)
     {

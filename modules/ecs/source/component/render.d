@@ -21,10 +21,10 @@ import zyeware.ecs;
 @component
 struct SpriteComponent
 {
-    Vector2f size; /// The size of the sprite.
-    Vector2f offset; /// The offset of the sprite.
+    vec2 size; /// The size of the sprite.
+    vec2 offset; /// The offset of the sprite.
     TextureAtlas atlas; /// The texture atlas used for sprite rendering.
-    Color modulate = Color.white; /// The modulation of this sprite.
+    col modulate = col.white; /// The modulation of this sprite.
     Material material = null; /// The material to use for rendering.
     Flag!"hFlip" hFlip; /// If the sprite is horizontally flipped.
     Flag!"vFlip" vFlip; /// If the sprite is vertically flipped.
@@ -86,6 +86,6 @@ public:
 @component
 struct LightComponent
 {
-    Color color; /// The color of the light.
-    Vector3f attenuation; /// The attenuation used.
+    col color; /// The color of the light.
+    vec3 attenuation; /// The attenuation used.
 }

@@ -18,7 +18,7 @@ class TerrainDemo : ECSGameState
 protected:
     AudioSource mAmbienceSource;
 
-    Entity createTree(Vector3f position)
+    Entity createTree(vec3 position)
     {
         Mesh mesh = AssetManager.load!Mesh("res:terraindemo/tree/mesh.obj");
         mesh.material = AssetManager.load!Material("res:terraindemo/tree/material.mtl");
@@ -31,7 +31,7 @@ protected:
         return entity;
     }
 
-    Entity createGrass(Vector3f position)
+    Entity createGrass(vec3 position)
     {
         Mesh mesh = AssetManager.load!Mesh("res:terraindemo/grass/mesh.obj");
         mesh.material = AssetManager.load!Material("res:terraindemo/grass/material.mtl");
@@ -44,7 +44,7 @@ protected:
         return entity;
     }
 
-    Entity createStall(Vector3f position)
+    Entity createStall(vec3 position)
     {
         Mesh mesh = AssetManager.load!Mesh("res:terraindemo/stall/mesh.obj");
         //mesh.material = AssetManager.load!Material("res:terraindemo/stall/material.mtl");
@@ -53,7 +53,7 @@ protected:
 
         entity.register!Transform3DComponent(position);
         entity.register!Render3DComponent(mesh);
-        entity.register!LightComponent(Color(1, 0.5, 0.2, 1), Vector3f(1, 0.01, 0.002));
+        entity.register!LightComponent(col(1, 0.5, 0.2, 1), vec3(1, 0.01, 0.002));
 
         return entity;
     }
@@ -61,9 +61,9 @@ protected:
     Entity createTerrain()
     {
         TerrainProperties properties = {
-            size: Vector2f(256, 256),
+            size: vec2(256, 256),
             blendMap: AssetManager.load!Texture2D("res:terraindemo/terrain/blendmap.png"),
-            textureTiling: Vector2f(10)
+            textureTiling: vec2(10)
         };
         
         properties.textures[0] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/grass.png");
@@ -73,21 +73,21 @@ protected:
 
         Entity terrain = entities.create();
         
-        terrain.register!Transform3DComponent(Vector3f(0));
+        terrain.register!Transform3DComponent(vec3(0));
         terrain.register!Render3DComponent(new Terrain(properties, AssetManager.load!Image("res:terraindemo/terrain/heightmap.png"), 32f));
 
         return terrain;
     }
 
-    Entity createCamera(Vector3f position, Quaternionf rotation)
+    Entity createCamera(vec3 position, quat rotation)
     {
         Entity camera = entities.create();
 
         auto nativeCamera = new PerspectiveCamera(640, 480, 90f, 0.01f, 1000f);
         auto environment = new Environment3D();
 
-        environment.ambientColor = Color(0.1, 0.1, 0.1, 1);
-        environment.fogColor = Color(0.3, 0.4, 0.6, 0.05);
+        environment.ambientColor = col(0.1, 0.1, 0.1, 1);
+        environment.fogColor = col(0.3, 0.4, 0.6, 0.05);
         environment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
 
         camera.register!CameraComponent(nativeCamera, environment, Yes.active);
@@ -109,22 +109,22 @@ public:
         Entity terrainEntity = createTerrain();
         Terrain terrain = cast(Terrain) terrainEntity.component!Render3DComponent.renderable;
 
-        createCamera(Vector3f(128f, 5f, 128f), Quaternionf.identity);
+        createCamera(vec3(128f, 5f, 128f), quat.identity);
 
         Image entitymap = AssetManager.load!Image("res:terraindemo/terrain/entitymap.png");
 
         for (uint y; y < entitymap.size.y; ++y)
             for (uint x; x < entitymap.size.x; ++x)
             {
-                immutable Color pixel = entitymap.getPixel(Vector2i(x, y));
-                immutable Vector2f coords = Vector2f(x * 2f, y * 2f);
+                immutable col pixel = entitymap.getPixel(vec2i(x, y));
+                immutable vec2 coords = vec2(x * 2f, y * 2f);
 
                 if (pixel.r == 1)
-                    createStall(Vector3f(coords.x, terrain.getHeight(coords), coords.y));
+                    createStall(vec3(coords.x, terrain.getHeight(coords), coords.y));
                 if (pixel.g == 1)
-                    createGrass(Vector3f(coords.x, terrain.getHeight(coords), coords.y));
+                    createGrass(vec3(coords.x, terrain.getHeight(coords), coords.y));
                 if (pixel.b == 1)
-                    createTree(Vector3f(coords.x, terrain.getHeight(coords), coords.y));
+                    createTree(vec3(coords.x, terrain.getHeight(coords), coords.y));
             }
 
         systems.register(new CameraSystem(cast(Terrain) terrain));

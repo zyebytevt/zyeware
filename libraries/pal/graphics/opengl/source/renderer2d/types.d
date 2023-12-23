@@ -5,9 +5,9 @@ import zyeware;
 
 struct BatchVertex2D
 {
-    Vector4f position;
-    Vector2f uv;
-    Color color;
+    vec4 position;
+    vec2 uv;
+    col color;
     float textureIndex;
 }
 

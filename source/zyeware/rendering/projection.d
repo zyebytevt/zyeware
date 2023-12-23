@@ -12,7 +12,7 @@ interface Projection
 {
 public:
     /// The projection matrix of this camera.
-    Matrix4f projectionMatrix() pure nothrow;
+    mat4 projectionMatrix() pure nothrow;
 
     /// Calculates a new view matrix based on the given translation.
     /// Params:
@@ -20,9 +20,9 @@ public:
     ///   rotation = The rotation of the camera.
     /// Returns: A newly calculated view matrix.
     pragma(inline, true)
-    static final Matrix4f calculateViewMatrix(Vector3f position, Quaternionf rotation) pure nothrow
+    static final mat4 calculateViewMatrix(vec3 position, quat rotation) pure nothrow
     {
-        return (Matrix4f.translation(position) * rotation.toMatrix!(4, 4)).inverse;
+        return (mat4.translation(position) * rotation.toMatrix!(4, 4)).inverse;
     }
 }
 
@@ -30,7 +30,7 @@ public:
 class OrthographicProjection : Projection
 {
 protected:
-    Matrix4f mProjectionMatrix;
+    mat4 mProjectionMatrix;
 
     float mLeft, mRight, mBottom, mTop, mNear, mFar;
     bool mIsDirty;
@@ -38,7 +38,7 @@ protected:
     pragma(inline, true)
     void recalculateProjectionMatrix() pure nothrow
     {
-        mProjectionMatrix = Matrix4f.orthographic(mLeft, mRight, mBottom, mTop, mNear, mFar);
+        mProjectionMatrix = mat4.orthographic(mLeft, mRight, mBottom, mTop, mNear, mFar);
         mIsDirty = false;
     }
 
@@ -55,7 +55,7 @@ public:
         recalculateProjectionMatrix();
     }
 
-    Matrix4f projectionMatrix() pure nothrow
+    mat4 projectionMatrix() pure nothrow
     {
         if (mIsDirty)
             recalculateProjectionMatrix();
@@ -133,7 +133,7 @@ public:
 class PerspectiveProjection : Projection
 {
 protected:
-    Matrix4f mProjectionMatrix;
+    mat4 mProjectionMatrix;
     bool mIsDirty;
 
     float mWidth;
@@ -144,7 +144,7 @@ protected:
 
     void recalculateProjectionMatrix() pure nothrow
     {
-        mProjectionMatrix = Matrix4f.perspective(mWidth, mHeight, mFov, mNear, mFar);
+        mProjectionMatrix = mat4.perspective(mWidth, mHeight, mFov, mNear, mFar);
         mIsDirty = false;
     }
 
@@ -165,7 +165,7 @@ public:
         recalculateProjectionMatrix();
     }
 
-    Matrix4f projectionMatrix() pure nothrow
+    mat4 projectionMatrix() pure nothrow
     {
         if (mIsDirty)
             recalculateProjectionMatrix();

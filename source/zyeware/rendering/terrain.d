@@ -13,12 +13,12 @@ import zyeware;
 /+
 struct TerrainProperties
 {
-    Vector2f size;
-    Vector2i vertexCount;
+    vec2 size;
+    vec2i vertexCount;
     float[] heightData; // Row-major
     Texture2D[4] textures;
     Texture2D blendMap;
-    Vector2f textureTiling = Vector2f(1);
+    vec2 textureTiling = vec2(1);
 }
 
 class Terrain : Renderable
@@ -39,14 +39,14 @@ protected:
         for (size_t gz; gz < properties.vertexCount.y; ++gz)
             for (size_t gx; gx < properties.vertexCount.x; ++gx)
             {
-                immutable uv = Vector2f(cast(float) gx / (properties.vertexCount.x - 1),
+                immutable uv = vec2(cast(float) gx / (properties.vertexCount.x - 1),
                     cast(float) gz / (properties.vertexCount.y - 1));
 
                 vertices[currentVertex] = Mesh.Vertex(
-                    Vector3f(uv.x * properties.size.x, properties.heightData[currentVertex], uv.y * properties.size.y),
+                    vec3(uv.x * properties.size.x, properties.heightData[currentVertex], uv.y * properties.size.y),
                     uv,
-                    Vector3f(0),
-                    Color.white
+                    vec3(0),
+                    col.white
                 );
 
                 ++currentVertex;
@@ -79,7 +79,7 @@ protected:
         for (uint y; y < heightMap.size.y; ++y)
             for (uint x; x < heightMap.size.x; ++x)
             {
-                immutable Color pixel = heightMap.getPixel(Vector2i(x, y));
+                immutable col pixel = heightMap.getPixel(vec2i(x, y));
                 heightData[currentHeightIndex++] = (pixel.r - pixel.b) * heightScale;
             }
 
@@ -102,7 +102,7 @@ public:
                     ])
                 );
 
-            material.setParameter("textureTiling", Vector2f(properties.textureTiling.x, properties.textureTiling.y));
+            material.setParameter("textureTiling", vec2(properties.textureTiling.x, properties.textureTiling.y));
             
             foreach (size_t gx, const Texture2D texture; properties.textures)
                 material.setTexture(gx, texture);
@@ -145,31 +145,31 @@ public:
         mBufferGroup.dataBuffer.setData(vertices);
     }
 
-    float getHeight(Vector2f coords) const nothrow
+    float getHeight(vec2 coords) const nothrow
     {
         if (coords.x < 0 || coords.y < 0 || coords.x > mProperties.size.x || coords.y > mProperties.size.y)
             return 0;
 
-        immutable Vector2f gridSize = Vector2f(mProperties.size.x / (mProperties.vertexCount.x - 1),
+        immutable vec2 gridSize = vec2(mProperties.size.x / (mProperties.vertexCount.x - 1),
             mProperties.size.y / (mProperties.vertexCount.y - 1));
 
-        immutable Vector2i grid = Vector2i(cast(uint) (coords.x / gridSize.x), cast(uint) (coords.y / gridSize.y));
+        immutable vec2i grid = vec2i(cast(uint) (coords.x / gridSize.x), cast(uint) (coords.y / gridSize.y));
 
-        immutable Vector2f unitGridCoords = Vector2f(fmod(coords.x, gridSize.x) / gridSize.x,
+        immutable vec2 unitGridCoords = vec2(fmod(coords.x, gridSize.x) / gridSize.x,
             fmod(coords.y, gridSize.y) / gridSize.y);
 
         if (unitGridCoords.x <= 1 - unitGridCoords.y)
             return calculateBaryCentricHeight(
-                Vector3f(0, mProperties.heightData[grid.y * mProperties.vertexCount.x + grid.x], 0),
-                Vector3f(1, mProperties.heightData[grid.y * mProperties.vertexCount.x + grid.x + 1], 0),
-                Vector3f(0, mProperties.heightData[(grid.y + 1) * mProperties.vertexCount.x + grid.x], 1),
+                vec3(0, mProperties.heightData[grid.y * mProperties.vertexCount.x + grid.x], 0),
+                vec3(1, mProperties.heightData[grid.y * mProperties.vertexCount.x + grid.x + 1], 0),
+                vec3(0, mProperties.heightData[(grid.y + 1) * mProperties.vertexCount.x + grid.x], 1),
                 unitGridCoords
             );
         else
             return calculateBaryCentricHeight(
-                Vector3f(1, mProperties.heightData[grid.y * mProperties.vertexCount.x + grid.x + 1], 0),
-                Vector3f(1, mProperties.heightData[(grid.y + 1) * mProperties.vertexCount.x + grid.x + 1], 1),
-                Vector3f(0, mProperties.heightData[(grid.y + 1) * mProperties.vertexCount.x + grid.x], 1),
+                vec3(1, mProperties.heightData[grid.y * mProperties.vertexCount.x + grid.x + 1], 0),
+                vec3(1, mProperties.heightData[(grid.y + 1) * mProperties.vertexCount.x + grid.x + 1], 1),
+                vec3(0, mProperties.heightData[(grid.y + 1) * mProperties.vertexCount.x + grid.x], 1),
                 unitGridCoords
             );
     }

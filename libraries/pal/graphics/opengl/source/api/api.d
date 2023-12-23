@@ -545,7 +545,7 @@ size_t getCapability(RenderCapability capability) nothrow
     }
 }
 
-void clearScreen(Color clearColor) nothrow
+void clearScreen(col clearColor) nothrow
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -580,17 +580,17 @@ void setShaderUniform1f(in NativeHandle shader, in string name, in float value) 
     glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
 }
 
-void setShaderUniform2f(in NativeHandle shader, in string name, in Vector2f value) nothrow
+void setShaderUniform2f(in NativeHandle shader, in string name, in vec2 value) nothrow
 {
     glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
 }
 
-void setShaderUniform3f(in NativeHandle shader, in string name, in Vector3f value) nothrow
+void setShaderUniform3f(in NativeHandle shader, in string name, in vec3 value) nothrow
 {
     glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
 }
 
-void setShaderUniform4f(in NativeHandle shader, in string name, in Vector4f value) nothrow
+void setShaderUniform4f(in NativeHandle shader, in string name, in vec4 value) nothrow
 {
     glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value.w);
 }
@@ -600,7 +600,7 @@ void setShaderUniform1i(in NativeHandle shader, in string name, in int value) no
     glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
 }
 
-void setShaderUniformMat4f(in NativeHandle shader, in string name, in Matrix4f value) nothrow
+void setShaderUniformMat4f(in NativeHandle shader, in string name, in mat4 value) nothrow
 {
     glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value.ptr);
 }

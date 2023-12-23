@@ -14,7 +14,7 @@ extern(C) ProjectProperties getProjectProperties()
 
 		mainDisplayProperties: {
 			title: "Skeleton Application",
-			size: Vector2i(800, 600)
+			size: vec2i(800, 600)
 		},
 
 		mainApplication: new SkeletonApplication()
@@ -50,16 +50,16 @@ public:
 
 	override void draw()
 	{
-		Renderer2D.clearScreen(Color.lime);
+		Renderer2D.clearScreen(col.lime);
 
-		Renderer2D.beginScene(mCamera.projectionMatrix, Matrix4f.identity);
-		//Renderer2D.drawRectangle(Rect2f(60, 60, 100, 100), Matrix4f.identity, Color.white, mSprite);
-		//Renderer2D.drawRectangle(Rect2f(120, 60, 200, 200), Matrix4f.identity.rotateX(30), Color.white, mSprite);
-		//Renderer2D.drawRectangle(Rect2f(30, 340, 70, 70), Matrix4f.identity, Color.white, mSprite);
-		//Renderer2D.drawRectangle(Rect2f(300, 520, 30, 40), Matrix4f.identity, Color.white, mSprite);
-		//Renderer2D.drawRectangle(Rect2f(0, 0, 70, 50), Matrix4f.identity, Color.white, mSprite, mWaveyMaterial);
+		Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
+		//Renderer2D.drawRectangle(Rect2f(60, 60, 100, 100), mat4.identity, col.white, mSprite);
+		//Renderer2D.drawRectangle(Rect2f(120, 60, 200, 200), mat4.identity.rotateX(30), col.white, mSprite);
+		//Renderer2D.drawRectangle(Rect2f(30, 340, 70, 70), mat4.identity, col.white, mSprite);
+		//Renderer2D.drawRectangle(Rect2f(300, 520, 30, 40), mat4.identity, col.white, mSprite);
+		//Renderer2D.drawRectangle(Rect2f(0, 0, 70, 50), mat4.identity, col.white, mSprite, mWaveyMaterial);
 		
-		Renderer2D.drawString("Hello world!", mFont, Vector2f(20, 20), Color.white);
+		Renderer2D.drawString("Hello world!", mFont, vec2(20, 20), col.white);
 		Renderer2D.endScene();
 	}
 }

@@ -20,7 +20,7 @@ protected:
         foreach (entity, transform, player, sprite, animation;
             entities.entitiesWith!(Transform2DComponent, PlayerComponent, SpriteComponent, SpriteAnimationComponent))
         {
-            Vector2f velocity = Vector2f(
+            vec2 velocity = vec2(
                 InputManager.getActionStrength("ui_right") - InputManager.getActionStrength("ui_left"),
                 InputManager.getActionStrength("ui_down") - InputManager.getActionStrength("ui_up")
             );
@@ -37,8 +37,8 @@ protected:
             else
                 animation.playing = false;
 
-            Vector2f currentPosition = transform.position;
-            Vector2f currentScale = transform.scale;
+            vec2 currentPosition = transform.position;
+            vec2 currentScale = transform.scale;
             
             currentPosition += velocity * 400f * deltaTime;
             
@@ -49,7 +49,7 @@ protected:
             {
                 if (animation.animation != "walk")
                     animation.animation = "walk";
-                currentScale = Vector2f(velocity.x < 0 ? -1 : 1, 1);
+                currentScale = vec2(velocity.x < 0 ? -1 : 1, 1);
             }
             else
             {

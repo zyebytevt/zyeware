@@ -29,10 +29,10 @@ protected:
     Rebindable!(const(Material)) mMaterial;
 
     pragma(inline, true)
-    static Vector3f calculateSurfaceNormal(Vector3f p1, Vector3f p2, Vector3f p3) nothrow pure
+    static vec3 calculateSurfaceNormal(vec3 p1, vec3 p2, vec3 p3) nothrow pure
     {
-        immutable Vector3f u = p2 - p1;
-        immutable Vector3f v = p3 - p1;
+        immutable vec3 u = p2 - p1;
+        immutable vec3 v = p3 - p1;
 
         return u.cross(v);
     }
@@ -47,10 +47,10 @@ protected:
             Vertex3D* v1 = &vertices[indices[i]], v2 = &vertices[indices[i + 1]], v3 = &vertices[indices[i + 2]];
 
             // If one of the vertices already has a normal, continue on
-            if (v1.normal != Vector3f(0) || v2.normal != Vector3f(0) || v3.normal != Vector3f(0))
+            if (v1.normal != vec3(0) || v2.normal != vec3(0) || v3.normal != vec3(0))
                 continue;
 
-            immutable Vector3f normal = calculateSurfaceNormal(v1.position, v2.position, v3.position);
+            immutable vec3 normal = calculateSurfaceNormal(v1.position, v2.position, v3.position);
 
             v1.normal += normal;
             v2.normal += normal;
@@ -125,9 +125,9 @@ Mesh3D loadFromOBJFile(string path)
     scope(exit) file.close();
     string content = file.readAll!string;
 
-    Vector4f[] positions;
-    Vector2f[] uvs;
-    Vector3f[] normals;
+    vec4[] positions;
+    vec2[] uvs;
+    vec3[] normals;
 
     Vertex3D[] vertices;
     uint[] indices;
@@ -181,7 +181,7 @@ parseLoop:
             if (element.length > 4)
                 w = element[4].to!float;
 
-            positions ~= Vector4f(x, y, z, w);
+            positions ~= vec4(x, y, z, w);
             break;
 
         case "vt": // UV
@@ -197,7 +197,7 @@ parseLoop:
             if (element.length > 2)
                 v = element[2].to!float;
 
-            uvs ~= Vector2f(u, v);
+            uvs ~= vec2(u, v);
             break;
 
         case "vn": // Vertex normal
@@ -207,7 +207,7 @@ parseLoop:
                 continue;
             }
 
-            normals ~= Vector3f(
+            normals ~= vec3(
                 element[1].to!float, element[2].to!float, element[3].to!float
             );
             break;

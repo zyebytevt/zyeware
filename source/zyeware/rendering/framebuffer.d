@@ -27,7 +27,7 @@ struct FramebufferProperties
         texture,
     }
 
-    Vector2i size; /// The size of the framebuffer.
+    vec2i size; /// The size of the framebuffer.
     UsageType usageType = UsageType.swapChainTarget; /// The usage type of the framebuffer.
 }
 

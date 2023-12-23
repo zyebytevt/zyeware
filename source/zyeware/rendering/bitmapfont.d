@@ -42,8 +42,8 @@ public:
     {
         dchar id;
         ubyte pageIndex;
-        Vector2f uv1, uv2;
-        Vector2i size, offset, advance;
+        vec2 uv1, uv2;
+        vec2i size, offset, advance;
     }
 
     /// How a text should be aligned.
@@ -171,13 +171,13 @@ public:
         properties.padding = font.padding;
         properties.spacing = font.spacing;
         properties.pages = font.pages.map!(p => new Image(p.pixels, p.channels,
-            p.bitsPerChannel, Vector2i(p.xsize, p.ysize))).array;
+            p.bitsPerChannel, vec2i(p.xsize, p.ysize))).array;
 
         foreach (ref ZyFont.Glyph c; font.glyphs)
         {
             properties.characters[c.id] = Glyph(c.id, c.page,
-                Vector2f(c.u1, c.v1), Vector2f(c.u2, c.v2), Vector2i(c.xsize, c.ysize),
-                Vector2i(c.xoffset, c.yoffset), Vector2i(c.xadvance, c.yadvance));
+                vec2(c.u1, c.v1), vec2(c.u2, c.v2), vec2i(c.xsize, c.ysize),
+                vec2i(c.xoffset, c.yoffset), vec2i(c.xadvance, c.yadvance));
         }
 
         foreach (ref ZyFont.Kerning k; font.kernings)

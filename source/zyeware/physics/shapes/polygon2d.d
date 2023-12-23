@@ -8,10 +8,10 @@ import zyeware;
 class PolygonShape2d : Shape2d
 {
 protected:
-    Rebindable!(const Vector2f[]) mVertices;
+    Rebindable!(const vec2[]) mVertices;
 
 package(zyeware.physics.shapes):
-    Collision2d isCollidingWithPolygon(in Matrix4f thisTransform, in PolygonShape2d other, in Matrix4f otherTransform) pure const nothrow
+    Collision2d isCollidingWithPolygon(in mat4 thisTransform, in PolygonShape2d other, in mat4 otherTransform) pure const nothrow
     {
         Projection2d rangeA, rangeB;
         Collision2d collision;
@@ -19,7 +19,7 @@ package(zyeware.physics.shapes):
         collision.firstCollider = this;
         collision.secondCollider = other;
 
-        foreach (Vector2f normal; Normals2d(mVertices, thisTransform))
+        foreach (vec2 normal; Normals2d(mVertices, thisTransform))
         {
             rangeA = project(thisTransform, normal);
             rangeB = other.project(otherTransform, normal);
@@ -28,7 +28,7 @@ package(zyeware.physics.shapes):
                 return collision;
         }
 
-        foreach (Vector2f normal; Normals2d(other.mVertices, otherTransform))
+        foreach (vec2 normal; Normals2d(other.mVertices, otherTransform))
         {
             rangeA = project(thisTransform, normal);
             rangeB = other.project(otherTransform, normal);
@@ -41,7 +41,7 @@ package(zyeware.physics.shapes):
         return collision;
     }
 
-    Collision2d isCollidingWithCircle(in Matrix4f transform, in CircleShape2d other, in Matrix4f otherTransform) pure const nothrow
+    Collision2d isCollidingWithCircle(in mat4 transform, in CircleShape2d other, in mat4 otherTransform) pure const nothrow
     {
         Collision2d collision;
         Projection2d rangeA, rangeB;
@@ -49,11 +49,11 @@ package(zyeware.physics.shapes):
         collision.firstCollider = this;
         collision.secondCollider = other;
 
-        immutable Vector2f circlePosition = otherTransform.transformPoint(Vector2f(0));
+        immutable vec2 circlePosition = otherTransform.transformPoint(vec2(0));
 
         for (size_t i; i < mVertices.length; ++i)
         {
-            immutable Vector2f normal = (transform.transformPoint(mVertices[i]) - circlePosition).normalized;
+            immutable vec2 normal = (transform.transformPoint(mVertices[i]) - circlePosition).normalized;
 
             rangeA = project(transform, normal);
             rangeB = other.project(otherTransform, normal);
@@ -62,7 +62,7 @@ package(zyeware.physics.shapes):
                 return collision;
         }
 
-        foreach (Vector2f normal; Normals2d(mVertices, transform))
+        foreach (vec2 normal; Normals2d(mVertices, transform))
         {
             rangeA = project(transform, normal);
             rangeB = other.project(otherTransform, normal);
@@ -76,13 +76,13 @@ package(zyeware.physics.shapes):
     }
 
 public:
-    this(in Vector2f[] vertices) pure
+    this(in vec2[] vertices) pure
         in (vertices && vertices.length >= 3, "Polygon must have at least 3 vertices.")
     {
         mVertices = vertices;
     }
 
-    Collision2d isCollidingWith(in Matrix4f thisTransform, in Shape2d other, in Matrix4f otherTransform) pure const nothrow
+    Collision2d isCollidingWith(in mat4 thisTransform, in Shape2d other, in mat4 otherTransform) pure const nothrow
     {
         if (auto circle = cast(CircleShape2d) other)
             return isCollidingWithCircle(thisTransform, circle, otherTransform);
@@ -92,18 +92,18 @@ public:
         return Collision2d.init;
     }
 
-    Collision2d isRaycastColliding(in Matrix4f thisTransform, in Vector2f rayOrigin, in Vector2f rayDirection, float maxDistance) pure const nothrow
+    Collision2d isRaycastColliding(in mat4 thisTransform, in vec2 rayOrigin, in vec2 rayDirection, float maxDistance) pure const nothrow
     {
         Collision2d result;
-        immutable Vector2f rayEnd = rayOrigin + rayDirection * maxDistance;
+        immutable vec2 rayEnd = rayOrigin + rayDirection * maxDistance;
 
         for (size_t i = 0; i < mVertices.length; ++i)
         {
-            immutable Vector2f vertex1 = thisTransform.transformPoint(mVertices[i]);
-            immutable Vector2f vertex2 = thisTransform.transformPoint(mVertices[(i + 1) % mVertices.length]);
+            immutable vec2 vertex1 = thisTransform.transformPoint(mVertices[i]);
+            immutable vec2 vertex2 = thisTransform.transformPoint(mVertices[(i + 1) % mVertices.length]);
 
-            immutable Vector2f edge = vertex2 - vertex1;
-            immutable Vector2f normal = Vector2f(-edge.y, edge.x);
+            immutable vec2 edge = vertex2 - vertex1;
+            immutable vec2 normal = vec2(-edge.y, edge.x);
 
             immutable Projection2d polygonProjection = project(thisTransform, normal);
             immutable Projection2d rayProjection = Projection2d(rayOrigin.dot(normal), rayEnd.dot(normal), normal);
@@ -125,7 +125,7 @@ public:
         return result; // No collision
     }
 
-    Projection2d project(in Matrix4f thisTransform, in Vector2f axis) pure const nothrow
+    Projection2d project(in mat4 thisTransform, in vec2 axis) pure const nothrow
     {
         float min = thisTransform.transformPoint(mVertices[0]).dot(axis);
         float max = min;
@@ -143,12 +143,12 @@ public:
         return Projection2d(min, max, axis);
     }
 
-    AABB2 getAABB(in Matrix4f thisTransform) pure const nothrow
+    AABB2 getAABB(in mat4 thisTransform) pure const nothrow
     {
-        scope Vector2f[] transformedVertices = new Vector2f[mVertices.length];
+        scope vec2[] transformedVertices = new vec2[mVertices.length];
         scope (exit) destroy(transformedVertices);
 
-        foreach (size_t i, const ref Vector2f vertex; mVertices)
+        foreach (size_t i, const ref vec2 vertex; mVertices)
             transformedVertices[i] = thisTransform.transformPoint(vertex);
 
         return AABB2.fromPoints(transformedVertices);
@@ -160,13 +160,13 @@ public:
 struct Normals2d
 {
 private:
-	Vector2f[] mVertices;
-	Matrix4f mTransform;
-	Vector2f mFirst, mLast;
+	vec2[] mVertices;
+	mat4 mTransform;
+	vec2 mFirst, mLast;
 	bool mDidLast;
 
 public:
-    this(in Vector2f[] vertices, in Matrix4f transform) pure nothrow
+    this(in vec2[] vertices, in mat4 transform) pure nothrow
         in (vertices, "Vertices cannot be null.")
     {
         mVertices = vertices.dup;
@@ -194,9 +194,9 @@ public:
 		return mVertices.empty && mDidLast;
 	}
 
-	Vector2f front() pure const nothrow
+	vec2 front() pure const nothrow
 	{
-		Vector2f a;
+		vec2 a;
 		
         if (mVertices.empty)
 			a = mTransform.transformPoint(mFirst);
@@ -204,6 +204,6 @@ public:
 			a = mTransform.transformPoint(mVertices.front);
         
         const b = mTransform.transformPoint(mLast);
-		return Vector2f(b.y - a.y, a.x - b.x).normalized;
+		return vec2(b.y - a.y, a.x - b.x).normalized;
 	}
 }

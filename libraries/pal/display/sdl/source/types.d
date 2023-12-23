@@ -16,8 +16,8 @@ struct WindowData
 {
 public:
     string title;
-    Vector2i size;
-    Vector2i position;
+    vec2i size;
+    vec2i position;
     bool isFullscreen;
     bool isVSyncEnabled;
     bool isCursorCaptured;

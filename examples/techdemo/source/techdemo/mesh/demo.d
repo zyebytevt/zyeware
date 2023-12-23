@@ -24,7 +24,7 @@ protected:
     Environment3D mEnvironment;
     Mesh mCurrentMesh;
     size_t mCurrentMeshIndex;
-    Matrix4f mViewMatrix;
+    mat4 mViewMatrix;
     Renderer3D.Light[] mLights;
     float mCameraPhi = PI / 2f, mCameraTheta = 0f, mCameraDistance = 5f;
     bool mShouldMoveCamera = false;
@@ -48,11 +48,11 @@ public:
 
     override void tick(in FrameTime frameTime)
     {
-        immutable Vector3f cameraPosition = Vector3f(mCameraDistance * sin(mCameraPhi) * cos(mCameraTheta),
+        immutable vec3 cameraPosition = vec3(mCameraDistance * sin(mCameraPhi) * cos(mCameraTheta),
             mCameraDistance * cos(mCameraPhi),
             mCameraDistance * sin(mCameraPhi) * sin(mCameraTheta));
 
-        mViewMatrix = Matrix4f.lookAt(cameraPosition, Vector3f(0), Vector3f(0, 1, 0));
+        mViewMatrix = mat4.lookAt(cameraPosition, vec3(0), vec3(0, 1, 0));
 
         // Implement controller movement of camera
         {
@@ -101,12 +101,12 @@ public:
         Renderer3D.uploadLights(mLights);
         Renderer3D.begin(mWorldCamera.projectionMatrix, mViewMatrix, mEnvironment);
 
-        Renderer3D.submit(mCurrentMesh.bufferGroup, material, Matrix4f.identity);
+        Renderer3D.submit(mCurrentMesh.bufferGroup, material, mat4.identity);
         Renderer3D.end();
 
-        Renderer2D.beginScene(mUICamera.projectionMatrix, Matrix4f.identity);
+        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
         Renderer2D.drawString(tr("MESH VIEW DEMO\nPress 'left' and 'right' to change mesh.\nClick and drag or use left analog stick to move camera.\nScroll or use right analog stick to zoom in or out."),
-            mFont, Vector2f(4));
+            mFont, vec2(4));
 
         Renderer2D.endScene();
     }
@@ -127,10 +127,10 @@ public:
             mFont = AssetManager.load!Font("core:fonts/internal.fnt");
             mEnvironment = new Environment3D();
             mEnvironment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
-            mEnvironment.ambientColor = Color.black;
+            mEnvironment.ambientColor = col.black;
 
-            mLights ~= Renderer3D.Light(Vector3f(-5, 2, -5), Color.white, Vector3f(1, 0.005, 0.001));
-            mLights ~= Renderer3D.Light(Vector3f(5, -1, 5), Color.gray, Vector3f(1, 0.01, 0.002));
+            mLights ~= Renderer3D.Light(vec3(-5, 2, -5), col.white, vec3(1, 0.005, 0.001));
+            mLights ~= Renderer3D.Light(vec3(5, -1, 5), col.gray, vec3(1, 0.01, 0.002));
         }
     }
 

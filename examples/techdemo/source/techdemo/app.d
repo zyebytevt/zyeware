@@ -14,7 +14,7 @@ extern(C) ProjectProperties getProjectProperties()
 
 		mainDisplayProperties: {
 			title: "ZyeWare Tech Demo",
-			size: Vector2i(640, 480),
+			size: vec2i(640, 480),
 			icon: Image.load(cast(ubyte[]) import("icon.png"))
 		},
 

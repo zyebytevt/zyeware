@@ -18,7 +18,7 @@ protected:
         foreach (Entity entity, Transform2DComponent* transform, ParticleEmitter2DComponent* emitter;
             entities.entitiesWith!(Transform2DComponent, ParticleEmitter2DComponent))
         {
-            immutable Vector2f position = transform.globalPosition + Vector2f(ZyeWare.random.getRange(emitter.region.min.x, emitter.region.max.x),
+            immutable vec2 position = transform.globalPosition + vec2(ZyeWare.random.getRange(emitter.region.min.x, emitter.region.max.x),
                 ZyeWare.random.getRange(emitter.region.min.y, emitter.region.max.y));
             
             mParticles.emit(emitter.typeId, position, emitter.number);

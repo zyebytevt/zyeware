@@ -20,10 +20,10 @@ protected:
     const(ubyte[]) mPixels;
     ubyte mChannels;
     ubyte mBitsPerChannel;
-    Vector2i mSize;
+    vec2i mSize;
 
 public:
-    this(in ubyte[] pixels, ubyte channels, ubyte bitsPerChannel, Vector2i size) pure nothrow
+    this(in ubyte[] pixels, ubyte channels, ubyte bitsPerChannel, vec2i size) pure nothrow
         in (size.x > 0 && size.y > 0, "Image must be at least 1x1.")
         in (pixels && pixels.length == size.x * size.y * channels * (bitsPerChannel / 8), "Invalid amount of pixels.")
         in (channels > 0 && channels <= 4, "Invalid amount of channels.")
@@ -35,10 +35,10 @@ public:
         mSize = size;
     }
 
-    Color getPixel(Vector2i coords) pure const nothrow
+    col getPixel(vec2i coords) pure const nothrow
     {
         if (coords.x < 0 || coords.y < 0 || coords.x >= mSize.x || coords.y >= mSize.y)
-            return Color.black;
+            return col.black;
         
         ubyte r = 0, g = 0, b = 0, a = 255;
         size_t channelStart = (coords.y * mSize.x + coords.x) * mChannels;
@@ -65,7 +65,7 @@ public:
         default:
         }
 
-        return Color(r / 255f, g / 255f, b / 255f, a / 255f);
+        return col(r / 255f, g / 255f, b / 255f, a / 255f);
     }
 
     const(ubyte[]) pixels() pure const nothrow
@@ -83,7 +83,7 @@ public:
         return mBitsPerChannel;
     }
 
-    Vector2i size() pure const nothrow
+    vec2i size() pure const nothrow
     {
         return mSize;
     }
@@ -109,6 +109,6 @@ public:
         immutable int channels = image.type / 3 + 1;
 
         return new Image(image.allPixelsAtOnce.dup, cast(ubyte) channels, cast(ubyte) bitsPerChannel,
-            Vector2i(image.width, image.height));
+            vec2i(image.width, image.height));
     }
 }

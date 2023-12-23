@@ -277,13 +277,13 @@ public:
 class InputEventMouseScroll : InputEventFromDisplay
 {
 protected:
-    Vector2f mOffset;
+    vec2 mOffset;
 
 public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     offset = The amount the mouse wheel was scrolled.
-    this(in Display display, Vector2f offset) pure nothrow
+    this(in Display display, vec2 offset) pure nothrow
     {
         super(display);
 
@@ -293,13 +293,13 @@ public:
     /// This constructor is used for template instantiation.
     /// Params:
     ///     offset = The amount of wheel scrolling to match.
-    this(Vector2f offset) pure nothrow
+    this(vec2 offset) pure nothrow
     {
         this(null, offset);
     }
 
     /// The amount the mouse wheel was scrolled.
-    final Vector2f offset() const pure nothrow
+    final vec2 offset() const pure nothrow
     {
         return mOffset;
     }
@@ -329,15 +329,15 @@ public:
 class InputEventMouseMotion : InputEventFromDisplay
 {
 protected:
-    Vector2f mPosition;
-    Vector2f mRelative;
+    vec2 mPosition;
+    vec2 mRelative;
 
 public:
     /// Params:
     ///     display = The display this event was sent from.
     ///     position = The current cursor position.
     ///     relative = The relative motion of the cursor.
-    this(in Display display, Vector2f position, Vector2f relative) pure nothrow
+    this(in Display display, vec2 position, vec2 relative) pure nothrow
     {
         super(display);
 
@@ -346,13 +346,13 @@ public:
     }
 
     /// The current cursor position.
-    final Vector2f position() const pure nothrow
+    final vec2 position() const pure nothrow
     {
         return mPosition;
     }
 
     /// The relative motion of the cursor.
-    final Vector2f relative() const pure nothrow
+    final vec2 relative() const pure nothrow
     {
         return mRelative;
     }

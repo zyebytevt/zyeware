@@ -33,7 +33,7 @@ protected:
     Parameter[string] mParameters;
 
 public:
-    alias Parameter = SumType!(void[], int, float, Vector2f, Vector3f, Vector4f);
+    alias Parameter = SumType!(void[], int, float, vec2, vec3, vec4);
 
     this(Shader shader, size_t textureSlots = 1)
         in (shader, "Shader cannot be null.")
@@ -196,15 +196,15 @@ public:
                     break;
 
                 case "vec2":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!Vector2f("value"));
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!vec2("value"));
                     break;
 
                 case "vec3":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!Vector3f("value"));
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!vec3("value"));
                     break;
 
                 case "vec4":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!Vector4f("value"));
+                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!vec4("value"));
                     break;
 
                 default:

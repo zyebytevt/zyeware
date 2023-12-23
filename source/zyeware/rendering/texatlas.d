@@ -35,9 +35,9 @@ public:
         );
     }
 
-    Vector2f spriteSize() pure const nothrow
+    vec2 spriteSize() pure const nothrow
     {
-        return Vector2f(
+        return vec2(
             mTexture.size.x / mHFrames,
             mTexture.size.y / mVFrames
         );

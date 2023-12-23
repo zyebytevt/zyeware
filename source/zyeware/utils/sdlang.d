@@ -135,8 +135,8 @@ T unmarshal(T)(in SDLValue value)
 {
     static if (isSomeString!T || isNumeric!T || isBoolean!T || is(T == SysTime) || is(T == Date) || is(T == Duration))
         return cast(T) value;
-    else static if (is(T == Color))
-        return Color(unmarshalVector!Vector4f(value));
+    else static if (is(T == col))
+        return col(unmarshalVector!vec4(value));
     else static if (isVector!T)
         return unmarshalVector!T(value);
     else static if (isArray!T)

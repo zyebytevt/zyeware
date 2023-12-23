@@ -70,9 +70,9 @@ struct Batch
                 (const(void[]) value) {},
                 (int value) { setShaderUniform1i(shader.handle, parameter, value); },
                 (float value) { setShaderUniform1f(shader.handle, parameter, value); },
-                (Vector2f value) { setShaderUniform2f(shader.handle, parameter, value); },
-                (Vector3f value) { setShaderUniform3f(shader.handle, parameter, value); },
-                (Vector4f value) { setShaderUniform4f(shader.handle, parameter, value); }
+                (vec2 value) { setShaderUniform2f(shader.handle, parameter, value); },
+                (vec3 value) { setShaderUniform3f(shader.handle, parameter, value); },
+                (vec4 value) { setShaderUniform4f(shader.handle, parameter, value); }
             );
         }
 
@@ -97,7 +97,7 @@ GlBuffer[2] pRenderBuffers;
 Batch[] pBatches;
 size_t currentMaterialCount = 0;
 
-Matrix4f pProjectionViewMatrix;
+mat4 pProjectionViewMatrix;
 Texture2D pWhiteTexture;
 Material pDefaultMaterial;
 
@@ -138,10 +138,10 @@ void createBuffer(ref GlBuffer buffer)
 }
 
 // TODO: Font rendering needs to be improved.
-void drawStringImpl(T)(in T text, in BitmapFont font, in Vector2f position, in Color modulate, ubyte alignment, in Material material)
+void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in col modulate, ubyte alignment, in Material material)
     if (isSomeString!T)
 {
-    Vector2f cursor = Vector2f.zero;
+    vec2 cursor = vec2.zero;
 
     if (alignment & BitmapFont.Alignment.middle || alignment & BitmapFont.Alignment.bottom)
     {
@@ -178,7 +178,7 @@ void drawStringImpl(T)(in T text, in BitmapFont font, in Vector2f position, in C
                     {
                         const(Texture2D) pageTexture = font.getPageTexture(c.pageIndex);
 
-                        drawRectangle(Rect2f(0, 0, c.size.x, c.size.y), Matrix4f.translation(Vector3f(Vector2f(position + cursor + Vector2f(c.offset.x, c.offset.y)), 0)),
+                        drawRectangle(Rect2f(0, 0, c.size.x, c.size.y), mat4.translation(vec3(vec2(position + cursor + vec2(c.offset.x, c.offset.y)), 0)),
                             modulate, pageTexture, material, Rect2f(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
                     }
 
@@ -211,7 +211,7 @@ void initialize()
     glBindVertexArray(pRenderBuffers[0].vao);
 
     static ubyte[3] pixels = [255, 255, 255];
-    pWhiteTexture = new Texture2D(new Image(pixels, 3, 8, Vector2i(1)), TextureProperties.init);
+    pWhiteTexture = new Texture2D(new Image(pixels, 3, 8, vec2i(1)), TextureProperties.init);
 
     pBatches.length = 1;
     initializeBatch(pBatches[0]);
@@ -238,7 +238,7 @@ void cleanup()
     }
 }
 
-void beginScene(in Matrix4f projectionMatrix, in Matrix4f viewMatrix)
+void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix)
 {
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
@@ -268,7 +268,7 @@ void flush()
     currentMaterialCount = 0;
 }
 
-void drawVertices(in Vertex2D[] vertices, in uint[] indices, in Matrix4f transform,
+void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
     in Texture2D texture = null, in Material material = null)
 {
     const(Material) mat = material ? material : pDefaultMaterial;
@@ -311,7 +311,7 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in Matrix4f transfo
     }
 
     foreach (size_t i, const Vertex2D vertex; vertices)
-        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * Vector4f(vertex.position, 0, 1), vertex.uv, vertex.color, texIdx);
+        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(transform * vec4(vertex.position, 0, 1), vertex.uv, vertex.color, texIdx);
 
     foreach (size_t i, uint index; indices)
         batch.indices[batch.currentIndexCount + i] = cast(uint) batch.currentVertexCount + index;
@@ -320,20 +320,20 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in Matrix4f transfo
     batch.currentIndexCount += indices.length;
 }
 
-void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulate = Vector4f(1),
+void drawRectangle(in Rect2f dimensions, in mat4 transform, in col modulate = vec4(1),
     in Texture2D texture = null, in Material material = null, in Rect2f region = Rect2f(0, 0, 1, 1))
 {
-    static Vector2f[4] quadPositions;
-    quadPositions[0] = Vector2f(dimensions.position.x, dimensions.position.y);
-    quadPositions[1] = Vector2f(dimensions.position.x + dimensions.size.x, dimensions.position.y);
-    quadPositions[2] = Vector2f(dimensions.position.x + dimensions.size.x, dimensions.position.y + dimensions.size.y);
-    quadPositions[3] = Vector2f(dimensions.position.x, dimensions.position.y + dimensions.size.y);
+    static vec2[4] quadPositions;
+    quadPositions[0] = vec2(dimensions.position.x, dimensions.position.y);
+    quadPositions[1] = vec2(dimensions.position.x + dimensions.size.x, dimensions.position.y);
+    quadPositions[2] = vec2(dimensions.position.x + dimensions.size.x, dimensions.position.y + dimensions.size.y);
+    quadPositions[3] = vec2(dimensions.position.x, dimensions.position.y + dimensions.size.y);
 
-    static Vector2f[4] quadUVs;
-    quadUVs[0] = Vector2f(region.position.x, region.position.y);
-    quadUVs[1] = Vector2f(region.position.x + region.size.x, region.position.y);
-    quadUVs[2] = Vector2f(region.position.x + region.size.x, region.position.y + region.size.y);
-    quadUVs[3] = Vector2f(region.position.x, region.position.y + region.size.y);
+    static vec2[4] quadUVs;
+    quadUVs[0] = vec2(region.position.x, region.position.y);
+    quadUVs[1] = vec2(region.position.x + region.size.x, region.position.y);
+    quadUVs[2] = vec2(region.position.x + region.size.x, region.position.y + region.size.y);
+    quadUVs[3] = vec2(region.position.x, region.position.y + region.size.y);
 
     static Vertex2D[4] vertices;
     static uint[6] indices;
@@ -351,19 +351,19 @@ void drawRectangle(in Rect2f dimensions, in Matrix4f transform, in Color modulat
     drawVertices(vertices, indices, transform, texture, material);
 }
 
-void drawString(in string text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+void drawString(in string text, in BitmapFont font, in vec2 position, in col modulate = col.white,
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!string(text, font, position, modulate, alignment, material);
 }
 
-void drawWString(in wstring text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+void drawWString(in wstring text, in BitmapFont font, in vec2 position, in col modulate = col.white,
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!wstring(text, font, position, modulate, alignment, material);
 }
 
-void drawDString(in dstring text, in BitmapFont font, in Vector2f position, in Color modulate = Color.white,
+void drawDString(in dstring text, in BitmapFont font, in vec2 position, in col modulate = col.white,
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!dstring(text, font, position, modulate, alignment, material);

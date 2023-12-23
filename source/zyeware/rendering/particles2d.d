@@ -36,7 +36,7 @@ public:
         mParticles.remove(id);
     }
 
-    void emit(ParticleRegistrationID id, Vector2f position, size_t amount)
+    void emit(ParticleRegistrationID id, vec2 position, size_t amount)
     {
         ParticleContainer* particles = mParticles.get(id, null);
         enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(id));
@@ -87,15 +87,15 @@ public:
             for (size_t i; i < particles.activeParticlesCount; ++i)
             {
                 immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(float) particles.startLifeTimes[i].total!"hnsecs");
-                immutable Vector2f position = particles.positions[i] + particles.velocities[i] * delta;
+                immutable vec2 position = particles.positions[i] + particles.velocities[i] * delta;
 
                 import std.math.traits : isNaN;
 
-                Color color = particles.type.color.interpolate(progression);
+                col color = particles.type.color.interpolate(progression);
                 if (isNaN(color.r) || isNaN(color.g) || isNaN(color.b) || isNaN(color.a))
-                    color = Color.white;
+                    color = col.white;
 
-                Renderer2D.drawRectangle(dimensions, position, Vector2f(particles.sizes[i]), particles.rotations[i],
+                Renderer2D.drawRectangle(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
                     color, particles.type.texture);
             }
         }
@@ -120,7 +120,7 @@ public:
     auto size = Range!float(1, 1);
     Range!Duration lifeTime;
     Gradient color;
-    Vector2f gravity;
+    vec2 gravity;
     auto spriteAngle = Range!float(0, 0);
     auto direction = Range!float(0, PI*2);
     auto speed = Range!float(0, 1);
@@ -130,10 +130,10 @@ public:
 private struct ParticleContainer
 {
     ParticleProperties2D type;
-    Vector2f[] positions;
+    vec2[] positions;
     float[] sizes;
     float[] rotations;
-    Vector2f[] velocities;
+    vec2[] velocities;
     Duration[] lifeTimes;
     Duration[] startLifeTimes;
 
@@ -143,10 +143,10 @@ private struct ParticleContainer
     {
         this.type = cast(ParticleProperties2D) type;
 
-        positions = new Vector2f[count];
+        positions = new vec2[count];
         sizes = new float[count];
         rotations = new float[count];
-        velocities = new Vector2f[count];
+        velocities = new vec2[count];
         lifeTimes = new Duration[count];
         startLifeTimes = new Duration[count];
     }
@@ -161,7 +161,7 @@ private struct ParticleContainer
         startLifeTimes.dispose();
     }
 
-    void add(in Vector2f position)
+    void add(in vec2 position)
     {
         assert(activeParticlesCount < positions.length, "No more free particles.");
 
@@ -171,7 +171,7 @@ private struct ParticleContainer
 
         immutable float speed = ZyeWare.random.getRange(type.speed.min, type.speed.max);
         immutable float direction = ZyeWare.random.getRange(type.direction.min, type.direction.max);
-        velocities[activeParticlesCount] = Vector2f(cos(direction) * speed, sin(direction) * speed);
+        velocities[activeParticlesCount] = vec2(cos(direction) * speed, sin(direction) * speed);
 
         lifeTimes[activeParticlesCount] = hnsecs(ZyeWare.random.getRange(type.lifeTime.min.total!"hnsecs", type.lifeTime.max.total!"hnsecs"));
         startLifeTimes[activeParticlesCount] = lifeTimes[activeParticlesCount];

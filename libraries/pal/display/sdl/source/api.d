@@ -163,8 +163,8 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
         SDL_GetWindowSize(data.handle, &width, &height);
         SDL_GetWindowPosition(data.handle, &x, &y);
 
-        data.size = Vector2i(width, height);
-        data.position = Vector2i(x, y);
+        data.size = vec2i(width, height);
+        data.position = vec2i(x, y);
     }
 
     ++pWindowCount;
@@ -223,12 +223,12 @@ void update(NativeHandle handle)
             switch (ev.window.event)
             {
             case SDL_WINDOWEVENT_SIZE_CHANGED:
-                data.size = Vector2i(ev.window.data1, ev.window.data2);
+                data.size = vec2i(ev.window.data1, ev.window.data2);
                 ZyeWare.emit!DisplayResizedEvent(data.container, data.size);
                 break;
 
             case SDL_WINDOWEVENT_MOVED:
-                data.position = Vector2i(ev.window.data1, ev.window.data2);
+                data.position = vec2i(ev.window.data1, ev.window.data2);
                 ZyeWare.emit!DisplayMovedEvent(data.container, data.position);
                 break;
 
@@ -260,7 +260,7 @@ void update(NativeHandle handle)
             break;
 
         case SDL_MOUSEWHEEL:
-            auto amount = Vector2f(ev.wheel.x, ev.wheel.y);
+            auto amount = vec2(ev.wheel.x, ev.wheel.y);
             if (ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                 amount *= -1;
             
@@ -268,8 +268,8 @@ void update(NativeHandle handle)
             break;
 
         case SDL_MOUSEMOTION:
-            ZyeWare.emit!InputEventMouseMotion(data.container, Vector2f(ev.motion.x, ev.motion.y),
-                Vector2f(ev.motion.xrel, ev.motion.yrel));
+            ZyeWare.emit!InputEventMouseMotion(data.container, vec2(ev.motion.x, ev.motion.y),
+                vec2(ev.motion.xrel, ev.motion.yrel));
             break;
 
         case SDL_CONTROLLERBUTTONUP:
@@ -412,11 +412,11 @@ float getGamepadAxisValue(in NativeHandle handle, size_t gamepadIdx, GamepadAxis
     return SDL_GameControllerGetAxis(pad, sdlAxis) / 32_768f;
 }
 
-Vector2i getCursorPosition(in NativeHandle handle) nothrow
+vec2i getCursorPosition(in NativeHandle handle) nothrow
 {
     int x, y;
     SDL_GetMouseState(&x, &y);
-    return Vector2i(x, y);
+    return vec2i(x, y);
 }
 
 void setVSyncEnabled(NativeHandle handle, bool value) nothrow
@@ -452,28 +452,28 @@ bool isVSyncEnabled(in NativeHandle handle) nothrow
     return data.isVSyncEnabled;
 }
 
-Vector2i getPosition(in NativeHandle handle) nothrow
+vec2i getPosition(in NativeHandle handle) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
     return data.position;
 }
 
-void setPosition(NativeHandle handle, Vector2i value) nothrow
+void setPosition(NativeHandle handle, vec2i value) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetWindowPosition(data.handle, value.x, value.y);
 }
 
-Vector2i getSize(in NativeHandle handle) nothrow
+vec2i getSize(in NativeHandle handle) nothrow
 {
     WindowData* data = cast(WindowData*) handle;
 
     return data.size;
 }
 
-void setSize(NativeHandle handle, Vector2i value) nothrow
+void setSize(NativeHandle handle, vec2i value) nothrow
     in (value.x > 0 && value.y > 0, "Window size cannot be negative.")
 {
     WindowData* data = cast(WindowData*) handle;
