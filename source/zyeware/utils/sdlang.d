@@ -1,15 +1,18 @@
 module zyeware.utils.sdlang;
 
+import std.datetime : SysTime, Date, Duration;
 import std.exception : enforce;
 import std.string : format;
-import std.traits : isNumeric, isSomeString, isArray, isBoolean;
+import std.traits : isNumeric, isSomeString, isArray, isBoolean, isIntegral;
 import std.range : ElementType;
 import std.algorithm : map;
 import std.array : array;
 
 public import sdlite : SDLNode, SDLValue, SDLAttribute, SDLParserException;
 import sdlite;
+
 import inmath.linalg : Vector;
+import inmath.util : isVector;
 
 import zyeware;
 
@@ -48,13 +51,13 @@ T getValue(T)(in SDLNode* parent, T default_ = T.init)
     if (parent.values.length == 0)
         return default_;
 
-    return unmarshal!T(parent.values[0], parent.qualifiedName);
+    return unmarshal!T(parent.values[0]);
 }
 
 T expectValue(T)(in SDLNode* node)
 {
     enforce!ResourceException(node.values.length > 0, format!"Expected value in '%s'."(node.qualifiedName));
-    return unmarshal!T(node.values[0], node.qualifiedName);
+    return unmarshal!T(node.values[0]);
 }
 
 T getChildValue(T)(SDLNode* node, string childName, T default_ = T.init)
@@ -70,7 +73,7 @@ T expectChildValue(T)(SDLNode* parent, string childName)
 T getAttributeValue(T)(in SDLNode* node, string attributeName, T default_ = T.init)
 {
     if (auto attribute = findAttribute(node, attributeName))
-        return unmarshal!T(attribute.value, attribute.qualifiedName);
+        return unmarshal!T(attribute.value);
 
     return default_;
 }
@@ -78,43 +81,12 @@ T getAttributeValue(T)(in SDLNode* node, string attributeName, T default_ = T.in
 T expectAttributeValue(T)(in SDLNode* node, string attributeName)
 {
     if (auto attribute = findAttribute(node, attributeName))
-        return unmarshal!T(attribute.value, attribute.qualifiedName);
+        return unmarshal!T(attribute.value);
     
     throw new ResourceException(format!"Expected attribute '%s' in '%s'."(attributeName, node.qualifiedName));
 }
 
 private:
-
-T unmarshal(T)(in SDLValue value, string qualifiedName)
-{
-    try
-    {
-        static if (isSomeString!T || isNumeric!T || isBoolean!T)
-            return cast(T) value;
-        else static if (is(T == Vector2f))
-            return unmarshalVector!(float, 2)(value, qualifiedName);
-        else static if (is(T == Vector3f))
-            return unmarshalVector!(float, 3)(value, qualifiedName);
-        else static if (is(T == Vector4f))
-            return unmarshalVector!(float, 4)(value, qualifiedName);
-        else static if (is(T == Color))
-            return Color(unmarshalVector!(float, 4)(value, qualifiedName));
-        else static if (is(T == Vector2i))
-            return unmarshalVector!(int, 2)(value, qualifiedName);
-        else static if (is(T == Vector3i))
-            return unmarshalVector!(int, 3)(value, qualifiedName);
-        else static if (is(T == Vector4i))
-            return unmarshalVector!(int, 4)(value, qualifiedName);
-        else static if (isArray!T)
-            return unmarshalArray!(ElementType!T)(value, qualifiedName);
-        else
-            static assert(false, "Cannot unmarshal type " ~ T.stringof);
-    }
-    catch (Exception e)
-    {
-        throw new ResourceException(format!"Failed to unmarshal '%s': %s"(qualifiedName, e.msg));
-    }
-}
 
 const(SDLAttribute)* findAttribute(in SDLNode* node, string attributeName) nothrow
 {
@@ -127,18 +99,72 @@ const(SDLAttribute)* findAttribute(in SDLNode* node, string attributeName) nothr
     return null;
 }
 
-Vector!(T, dimension) unmarshalVector(T, int dimension)(in SDLValue value, string qualifiedName)
+SDLValue marshal(T)(in T value)
 {
-    enum errorMessage = format!"Expected %d-dimensional vector of type %s."(dimension, T.stringof);
+    import std.conv : to;
+
+    static if (isSomeString!T)
+        return SDLValue.text(value.to!string);
+    else static if (is(T == long))
+        return SDLValue.long_(value);
+    else static if (isIntegral!T)
+        return SDLValue.int_(value.to!int);
+    else static if (is(T == double))
+        return SDLValue.double_(value);
+    else static if (is(T == float))
+        return SDLValue.float_(value);
+    else static if (is(T == bool))
+        return SDLValue.bool_(value);
+    else static if (is(T == SysTime))
+        return SDLValue.dateTime(value);
+    else static if (is(T == Date))
+        return SDLValue.date(value);
+    else static if (is(T == Duration))
+        return SDLValue.duration(value);
+    else static if (is(T == ubyte[]))
+        return SDLValue.binary(value);
+    else static if (isVector!T)
+        return marshalArray!(T.vt[])(value.vector);
+    else static if (isArray!T)
+        return marshalArray!T(value);
+    else
+        static assert(false, "Cannot marshal type " ~ T.stringof);
+}
+
+T unmarshal(T)(in SDLValue value)
+{
+    static if (isSomeString!T || isNumeric!T || isBoolean!T || is(T == SysTime) || is(T == Date) || is(T == Duration))
+        return cast(T) value;
+    else static if (is(T == Color))
+        return Color(unmarshalVector!Vector4f(value));
+    else static if (isVector!T)
+        return unmarshalVector!T(value);
+    else static if (isArray!T)
+        return unmarshalArray!T(value);
+    else
+        static assert(false, "Cannot unmarshal type " ~ T.stringof);
+}
+
+SDLValue[] marshalArray(T)(in T value)
+    if (isArray!T)
+{
+    return value.map!((x) => marshal!(ElementType!T)(x)).array;
+}
+
+T unmarshalVector(T)(in SDLValue value)
+    if (isVector!T)
+{
+    enum errorMessage = format!"Expected vector of type %s."(T.stringof);
 
     enforce!ResourceException(value.isArray, errorMessage);
     const(SDLValue)[] values = value.arrayValue;
-    enforce!ResourceException(values.length == dimension, errorMessage);
-    return Vector!(T, dimension)(values.map!((x) => unmarshal!T(x, qualifiedName)).array);
+    enforce!ResourceException(values.length == T.dimension, errorMessage);
+    return T(values.map!((x) => unmarshal!(T.vt)(x)).array);
 }
 
-T[] unmarshalArray(T)(in SDLValue value, string qualifiedName)
+T unmarshalArray(T)(in SDLValue value)
+    if (isArray!T)
 {
     enforce!ResourceException(value.isArray, format!"Expected array of type %s."(T.stringof));
-    return value.arrayValue.map!((x) => unmarshal!T(x, qualifiedName)).array;
+    return value.arrayValue.map!((x) => unmarshal!(ElementType!T)(x)).array;
 }
