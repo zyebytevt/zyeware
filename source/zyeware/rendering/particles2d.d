@@ -93,7 +93,7 @@ public:
 
                 color modulate = particles.type.modulate.interpolate(progression);
                 if (isNaN(modulate.r) || isNaN(modulate.g) || isNaN(modulate.b) || isNaN(modulate.a))
-                    modulate = color.white;
+                    modulate = color("white");
 
                 Renderer2D.drawRectangle(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
                     modulate, particles.type.texture);

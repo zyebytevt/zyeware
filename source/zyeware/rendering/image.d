@@ -38,7 +38,7 @@ public:
     color getPixel(vec2i coords) pure const nothrow
     {
         if (coords.x < 0 || coords.y < 0 || coords.x >= mSize.x || coords.y >= mSize.y)
-            return color.black;
+            return color(1, 0, 1, 1);
         
         ubyte r = 0, g = 0, b = 0, a = 255;
         size_t channelStart = (coords.y * mSize.x + coords.x) * mChannels;

@@ -73,7 +73,7 @@ public static:
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
-    void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, in color modulate = color.white,
+    void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, in color modulate = color("white"),
         in Texture2D texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
@@ -125,7 +125,7 @@ public static:
     ///     modulate = The modulate of the text.
     ///     alignment = The alignment of the text.
     ///     material = The material to use. If `null`, uses the default material.
-    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in color modulate = color.white,
+    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in color modulate = color("white"),
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
         if (isSomeString!T)
     {

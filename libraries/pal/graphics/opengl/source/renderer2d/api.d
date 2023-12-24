@@ -351,19 +351,19 @@ void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = ve
     drawVertices(vertices, indices, transform, texture, material);
 }
 
-void drawString(in string text, in BitmapFont font, in vec2 position, in color modulate = color.white,
+void drawString(in string text, in BitmapFont font, in vec2 position, in color modulate = color("white"),
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!string(text, font, position, modulate, alignment, material);
 }
 
-void drawWString(in wstring text, in BitmapFont font, in vec2 position, in color modulate = color.white,
+void drawWString(in wstring text, in BitmapFont font, in vec2 position, in color modulate = color("white"),
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!wstring(text, font, position, modulate, alignment, material);
 }
 
-void drawDString(in dstring text, in BitmapFont font, in vec2 position, in color modulate = color.white,
+void drawDString(in dstring text, in BitmapFont font, in vec2 position, in color modulate = color("white"),
     ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
 {
     drawStringImpl!dstring(text, font, position, modulate, alignment, material);
