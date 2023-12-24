@@ -4,64 +4,76 @@ import std.algorithm : remove;
 
 import zyeware;
 
-struct Signal(Args...)
+struct Signal(T1...)
 {
 private:
-    struct Callable
+    struct Slot
     {
         union
         {
-            void delegate(Args) dg;
-            void function(Args) fn;
+            void delegate(T1) dg;
+            void function(T1) fn;
         }
+
         bool isDelegate;
         bool isOneShot;
     }
 
-    Callable[] mCallables;
+    Slot[] mSlots;
 
 public:
-    void connect(void delegate(Args) dg, Flag!"oneShot" oneShot = No.oneShot)
+    alias slotidx_t = size_t;
+
+    slotidx_t connect(void delegate(T1) dg, Flag!"oneShot" oneShot = No.oneShot)
     {
-        Callable c;
+        Slot c;
         c.dg = dg;
         c.isDelegate = true;
         c.isOneShot = oneShot;
-        mCallables ~= c;
+        mSlots ~= c;
+
+        return mSlots.length - 1;
     }
 
-    void connect(void function(Args) fn, Flag!"oneShot" oneShot = No.oneShot)
+    slotidx_t connect(void function(T1) fn, Flag!"oneShot" oneShot = No.oneShot)
     {
-        Callable c;
+        Slot c;
         c.fn = fn;
         c.isDelegate = false;
         c.isOneShot = oneShot;
-        mCallables ~= c;
+        mSlots ~= c;
+
+        return mSlots.length - 1;
     }
 
-    void disconnect(void delegate(Args) dg)
+    void disconnect(slotidx_t idx)
     {
-        for (size_t i; i < mCallables.length; ++i)
+        mSlots = mSlots.remove(idx);
+    }
+
+    void disconnect(void delegate(T1) dg)
+    {
+        for (size_t i; i < mSlots.length; ++i)
         {
-            ref auto c = mCallables[i];
+            auto c = &mSlots[i];
 
             if (c.isDelegate && c.dg is dg)
             {
-                mCallables = mCallables.remove(i--);
+                mSlots = mSlots.remove(i);
                 break;
             }
         }
     }
 
-    void disconnect(void function(Args) fn)
+    void disconnect(void function(T1) fn)
     {
-        for (size_t i; i < mCallables.length; ++i)
+        for (size_t i; i < mSlots.length; ++i)
         {
-            ref auto c = mCallables[i];
+            auto c = &mSlots[i];
             
             if (!c.isDelegate && c.fn is fn)
             {
-                mCallables = mCallables.remove(i--);
+                mSlots = mSlots.remove(i);
                 break;
             }
         }
@@ -69,14 +81,14 @@ public:
 
     void disconnectAll()
     {
-        mCallables = [];
+        mSlots = [];
     }
 
-    void emit(Args args)
+    void emit(T1 args)
     {
-        for (size_t i; i < mCallables.length; ++i)
+        for (size_t i; i < mSlots.length; ++i)
         {
-            ref auto c = mCallables[i];
+            auto c = &mSlots[i];
 
             if (c.isDelegate)
                 c.dg(args);
@@ -84,13 +96,16 @@ public:
                 c.fn(args);
 
             if (c.isOneShot)
-                mCallables = mCallables.remove(i--);
+                mSlots = mSlots.remove(i--);
         }
     }
 
     pragma(inline, true)
-    void opCall(Args args)
     {
-        emit(args);
+        void opCall(T1 args) => emit(args);
+        slotidx_t opOpAssign(string op = "+")(void delegate(T1) dg) => connect(dg);
+        slotidx_t opOpAssign(string op = "+")(void function(T1) fn) => connect(fn);
+        void opOpAssign(string op = "-")(void delegate(T1) dg) => disconnect(dg);
+        void opOpAssign(string op = "-")(void function(T1) fn) => disconnect(fn);
     }
 }

@@ -385,6 +385,8 @@ enum MouseCode : ushort
     buttonMiddle = button2
 }
 
+alias GamepadIndex = ushort;
+
 /// Represents an abstract Xbox 360 gamepad button.
 enum GamepadButton
 {

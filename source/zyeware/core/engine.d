@@ -218,7 +218,7 @@ private static:
         sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
-        Pal.graphics.api.clearScreen(color.black);
+        Pal.graphics.api.clearScreen(color("black"));
         Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y),
             sFramebufferArea);
 
@@ -439,10 +439,7 @@ public static:
     }
 
     /// The current application.
-    Application application() nothrow
-    {
-        return sApplication;
-    }
+    Application application() nothrow => sApplication;
 
     /// Sets the current application. It will only be set active after the current frame.
     void application(Application value)
