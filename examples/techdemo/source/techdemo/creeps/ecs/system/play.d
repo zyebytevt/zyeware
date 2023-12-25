@@ -33,7 +33,7 @@ protected:
         player.register!PlayerComponent();
         player.register!SpriteComponent(vec2(111/2, 135/2), vec2(111/4, 135/4),
             TextureAtlas(
-                AssetManager.load!Texture2D("res:creeps/sprites/player.png"),
+                AssetManager.load!Texture2d("res:creeps/sprites/player.png"),
                 2, 2, 0
             ),
             color.white);
@@ -54,7 +54,7 @@ protected:
         mob.register!MobComponent(motion);
         mob.register!SpriteComponent(vec2(132/2, 186/2), vec2(132/4, 186/4), 
             TextureAtlas(
-                AssetManager.load!Texture2D("res:creeps/sprites/creeps.png"),
+                AssetManager.load!Texture2d("res:creeps/sprites/creeps.png"),
                 3, 2, 0
             ),
             color.white);

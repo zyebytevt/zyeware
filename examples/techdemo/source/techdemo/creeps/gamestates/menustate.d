@@ -10,7 +10,7 @@ import techdemo.creeps.gamestates.playstate;
 class CreepsMenuState : AppState
 {
 protected:
-    Texture2D mTitleTexture;
+    Texture2d mTitleTexture;
     OrthographicCamera mCamera;
     BitmapFont mFont;
     size_t mIgnoreInputFrames;
@@ -58,7 +58,7 @@ public:
     {
         if (firstTime)
         {
-            mTitleTexture = AssetManager.load!Texture2D("res:creeps/sprites/title.png");
+            mTitleTexture = AssetManager.load!Texture2d("res:creeps/sprites/title.png");
             mCamera = new OrthographicCamera(0, 480, 720, 0);
             mFont = AssetManager.load!Font("core:fonts/internal.fnt");
 

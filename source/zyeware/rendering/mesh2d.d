@@ -10,10 +10,10 @@ protected:
     const(Vertex2D[]) mVertices;
     const(uint[]) mIndices;
     const(Material) mMaterial;
-    const(Texture2D) mTexture;
+    const(Texture2d) mTexture;
 
 public:
-    this(in Vertex2D[] vertices, in uint[] indices, in Material material, in Texture2D texture)
+    this(in Vertex2D[] vertices, in uint[] indices, in Material material, in Texture2d texture)
     {
         mVertices = vertices;
         mIndices = indices;
@@ -36,7 +36,7 @@ public:
         return mMaterial;
     }
 
-    const(Texture2D) texture() pure const nothrow
+    const(Texture2d) texture() pure const nothrow
     {
         return mTexture;
     }

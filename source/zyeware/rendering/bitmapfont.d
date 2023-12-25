@@ -34,7 +34,7 @@ class BitmapFont
 {
 protected:
     const(BitmapFontProperties) mProperties;
-    Texture2D[] mPageTextures;
+    Texture2d[] mPageTextures;
 
 public:
     /// Information about a single character.
@@ -66,7 +66,7 @@ public:
             mProperties.fontName, mProperties.fontSize);
 
         for (size_t i; i < mProperties.pages.length; ++i)
-            mPageTextures ~= new Texture2D(mProperties.pages[i], mProperties.pageTextureProperties);
+            mPageTextures ~= new Texture2d(mProperties.pages[i], mProperties.pageTextureProperties);
     }
 
     
@@ -126,7 +126,7 @@ public:
         return mProperties.lineHeight * lines;
     }
 
-    const(Texture2D) getPageTexture(size_t index) const nothrow
+    const(Texture2d) getPageTexture(size_t index) const nothrow
     {
         return mPageTextures[index];
     }

@@ -22,12 +22,12 @@ package:
     static void drawNoCameraSprite()
     {
         static Camera camera;
-        static Texture2D texture;
+        static Texture2d texture;
 
         if (!camera)
         {
             camera = new OrthographicCamera(-1, 1, 1, -1);
-            texture = AssetManager.load!Texture2D("core:textures/no-camera.png");
+            texture = AssetManager.load!Texture2d("core:textures/no-camera.png");
         }
 
         Renderer2D.beginScene(camera.projectionMatrix, mat4.identity);

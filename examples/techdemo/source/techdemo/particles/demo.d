@@ -61,7 +61,7 @@ public:
             gradient.addPoint(1, color.yellow);
 
             ParticleProperties2D starType = {
-                texture: AssetManager.load!Texture2D("res:menu/menuStar.png"),
+                texture: AssetManager.load!Texture2d("res:menu/menuStar.png"),
                 gravity: vec2(0, 15),
                 speed: {
                     min: 30f,

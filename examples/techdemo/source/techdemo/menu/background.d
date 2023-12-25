@@ -20,8 +20,8 @@ protected:
         Duration lifeTime;
     }
 
-    Texture2D mStarTexture;
-    Texture2D mBackdrop;
+    Texture2d mStarTexture;
+    Texture2d mBackdrop;
 
     Star[2000] mStars;
     DList!size_t mFreeStars;
@@ -116,8 +116,8 @@ protected:
 public:
     this()
     {
-        mStarTexture = AssetManager.load!Texture2D("res:menu/menuStar.png");
-        mBackdrop = AssetManager.load!Texture2D("res:menu/background.png");
+        mStarTexture = AssetManager.load!Texture2d("res:menu/menuStar.png");
+        mBackdrop = AssetManager.load!Texture2d("res:menu/background.png");
 
         for (size_t i; i < mStars.length; ++i)
             mFreeStars.insertBack(i);

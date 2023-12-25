@@ -11,11 +11,11 @@ import zyeware;
 struct TextureAtlas
 {
 private:
-    Texture2D mTexture;
+    Texture2d mTexture;
     size_t mHFrames, mVFrames;
 
 public:
-    this(Texture2D texture, size_t hFrames, size_t vFrames) pure nothrow
+    this(Texture2d texture, size_t hFrames, size_t vFrames) pure nothrow
     {
         mTexture = texture;
         mHFrames = hFrames;
@@ -43,7 +43,7 @@ public:
         );
     }
 
-    inout(Texture2D) texture() pure inout nothrow
+    inout(Texture2d) texture() pure inout nothrow
     {
         return mTexture;
     }

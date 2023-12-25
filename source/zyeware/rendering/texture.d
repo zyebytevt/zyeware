@@ -41,7 +41,7 @@ interface Texture : NativeObject
 }
 
 @asset(Yes.cache)
-class Texture2D : Texture
+class Texture2d : Texture
 {
 protected:
     NativeHandle mNativeHandle;
@@ -86,7 +86,7 @@ public:
     }
 
     // TODO: Implement ZDL loading of texture properties
-    static Texture2D load(string path)
+    static Texture2d load(string path)
     {
         TextureProperties properties;
         Image img = AssetManager.load!Image(path);
@@ -94,7 +94,7 @@ public:
         if (Vfs.hasFile(path ~ ".props")) // Properties file exists
             parseTextureProperties(path ~ ".props", properties);
 
-        return new Texture2D(img, properties);
+        return new Texture2d(img, properties);
     }
 }
 

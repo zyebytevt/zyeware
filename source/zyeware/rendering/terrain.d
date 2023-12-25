@@ -16,8 +16,8 @@ struct TerrainProperties
     vec2 size;
     vec2i vertexCount;
     float[] heightData; // Row-major
-    Texture2D[4] textures;
-    Texture2D blendMap;
+    Texture2d[4] textures;
+    Texture2d blendMap;
     vec2 textureTiling = vec2(1);
 }
 
@@ -104,7 +104,7 @@ public:
 
             material.setParameter("textureTiling", vec2(properties.textureTiling.x, properties.textureTiling.y));
             
-            foreach (size_t gx, const Texture2D texture; properties.textures)
+            foreach (size_t gx, const Texture2d texture; properties.textures)
                 material.setTexture(gx, texture);
 
             material.setTexture(4, properties.blendMap);

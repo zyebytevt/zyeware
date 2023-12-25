@@ -20,6 +20,8 @@ import bindbc.loader;
 
 import zyeware;
 import zyeware.core.crash;
+import zyeware.core.properties;
+import zyeware.core.dynlib;
 import zyeware.pal;
 
 /// How the main framebuffer should be scaled on resizing.
@@ -98,7 +100,6 @@ private static:
     debug
     {
         bool sIsProcessingDeferred;
-        bool sIsEmittingEvent;
     }
 
     Application createClientApplication()
@@ -131,7 +132,6 @@ private static:
             previous = current;
 
             sApplication.tick();
-            InputManager.tick();
 
             if (sMustUpdateFramebufferDimensions)
             {
@@ -298,6 +298,7 @@ package(zyeware.core) static:
 
         Vfs.initialize();
         AssetManager.initialize();
+        InputMap.initialize();
 
         Vfs.addPackage("main.zpk");
         foreach (string pckPath; parsedArgs.packages)
@@ -339,6 +340,7 @@ package(zyeware.core) static:
         Pal.graphics.api.cleanup();
         Pal.audio.cleanup();
 
+        InputMap.cleanup();
         Vfs.cleanup();
 
         collect();
@@ -363,40 +365,6 @@ public static:
     void quit() nothrow
     {
         sRunning = false;
-    }
-
-    /// Emits an event to the event bus.
-    ///
-    /// Params:
-    ///     E = The event type to send.
-    ///     args = The arguments of the event.
-    pragma(inline, true)
-    void emit(E : Event, Args...)(Args args) nothrow
-    {
-        emit(scoped!E(args).assumeWontThrow);
-    }
-
-    /// Emits an event to the event bus.
-    ///
-    /// Params:
-    ///     ev = The event to send.
-    void emit(in Event ev) nothrow
-        in (ev, "Event to emit cannot be null.")
-    {
-        debug
-        {
-            sIsEmittingEvent = true;
-            scope (exit) sIsEmittingEvent = false;
-        }
-
-        if (auto wev = cast(DisplayResizedEvent) ev)
-            sMustUpdateFramebufferDimensions = true;
-        
-        if (Exception ex = collectException(sApplication.receive(ev)))
-            error("Exception while emitting an event: %s", ex.message);
-
-        if (auto input = cast(InputEvent) ev)
-            InputManager.receive(input).assumeWontThrow;
     }
 
     /// Starts a garbage collection cycle, and clears the cache of dead references.
@@ -557,13 +525,6 @@ public static:
         bool isProcessingDeferred() nothrow
         {
             return sIsProcessingDeferred;
-        }
-
-        /// If the engine is currently emitting any event.
-        /// **This method is only available in debug builds!**
-        bool isEmittingEvent() nothrow
-        {
-            return sIsEmittingEvent;
         }
     }
 }

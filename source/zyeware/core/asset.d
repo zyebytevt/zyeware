@@ -95,18 +95,24 @@ private static:
 package(zyeware.core) static:
     void initialize()
     {
-        import zyeware.rendering : Shader, Image, Texture2D, TextureCubeMap, Mesh3D, BitmapFont, Material, FrameAnimations, Cursor;
+        import zyeware.rendering.shader : Shader;
+        import zyeware.rendering.texture : Texture2d, TextureCubeMap;
+        import zyeware.rendering.mesh3d : Mesh3d;
+        import zyeware.rendering.bitmapfont : BitmapFont;
+        import zyeware.rendering.material : Material;
+        import zyeware.rendering.frameanim : FrameAnimations;
+        import zyeware.rendering.cursor : Cursor;
         import zyeware.core.locale : Locale;
-        import zyeware.audio : AudioBuffer;
+        import zyeware.audio.buffer : AudioBuffer;
 
         register!Shader((path) => cast(Object) Shader.load(path));
-        register!Texture2D((path) => cast(Object) Texture2D.load(path));
+        register!Texture2d((path) => cast(Object) Texture2d.load(path));
         register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
 
         register!AudioBuffer((path) => cast(Object) AudioBuffer.load(path));
 
         register!Image(&Image.load);
-        register!Mesh3D(&Mesh3D.load);
+        register!Mesh3d(&Mesh3d.load);
         register!BitmapFont(&BitmapFont.load);
         register!Material(&Material.load);
         register!Locale(&Locale.load);

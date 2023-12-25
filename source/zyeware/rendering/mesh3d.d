@@ -21,7 +21,7 @@ interface Mesh
 }
 
 @asset(Yes.cache)
-class Mesh3D : Mesh, NativeObject
+class Mesh3d : Mesh, NativeObject
 {
 protected:
     NativeHandle mNativeHandle;
@@ -81,10 +81,10 @@ public:
         return mNativeHandle;
     }
 
-    static Mesh3D load(string path)
+    static Mesh3d load(string path)
         in (path, "Path cannot be null.")
     {
-        Mesh3D mesh;
+        Mesh3d mesh;
 
         switch (path.extension)
         {
@@ -115,7 +115,7 @@ public:
 
 private:
 
-Mesh3D loadFromOBJFile(string path)
+Mesh3d loadFromOBJFile(string path)
     in (path, "Path cannot be null.")
 {
     import std.string : splitLines, strip, startsWith, split;
@@ -269,5 +269,5 @@ parseLoop:
     }
 
     // TODO: Load materials someday
-    return new Mesh3D(vertices, indices, null);
+    return new Mesh3d(vertices, indices, null);
 }

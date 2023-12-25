@@ -7,12 +7,15 @@ import zyeware;
 struct Signal(T1...)
 {
 private:
+    alias delegate_t = void delegate(T1) nothrow;
+    alias function_t = void function(T1) nothrow;
+
     struct Slot
     {
         union
         {
-            void delegate(T1) dg;
-            void function(T1) fn;
+            delegate_t dg;
+            function_t fn;
         }
 
         bool isDelegate;
@@ -24,7 +27,7 @@ private:
 public:
     alias slotidx_t = size_t;
 
-    slotidx_t connect(void delegate(T1) dg, Flag!"oneShot" oneShot = No.oneShot)
+    slotidx_t connect(delegate_t dg, Flag!"oneShot" oneShot = No.oneShot) @trusted pure nothrow
     {
         Slot c;
         c.dg = dg;
@@ -35,7 +38,7 @@ public:
         return mSlots.length - 1;
     }
 
-    slotidx_t connect(void function(T1) fn, Flag!"oneShot" oneShot = No.oneShot)
+    slotidx_t connect(function_t fn, Flag!"oneShot" oneShot = No.oneShot) @trusted pure nothrow
     {
         Slot c;
         c.fn = fn;
@@ -46,12 +49,12 @@ public:
         return mSlots.length - 1;
     }
 
-    void disconnect(slotidx_t idx)
+    void disconnect(slotidx_t idx) @safe pure nothrow
     {
         mSlots = mSlots.remove(idx);
     }
 
-    void disconnect(void delegate(T1) dg)
+    void disconnect(delegate_t dg) @trusted pure nothrow
     {
         for (size_t i; i < mSlots.length; ++i)
         {
@@ -65,7 +68,7 @@ public:
         }
     }
 
-    void disconnect(void function(T1) fn)
+    void disconnect(function_t fn) @trusted pure nothrow
     {
         for (size_t i; i < mSlots.length; ++i)
         {
@@ -79,12 +82,12 @@ public:
         }
     }
 
-    void disconnectAll()
+    void disconnectAll() @safe pure nothrow
     {
         mSlots = [];
     }
 
-    void emit(T1 args)
+    void emit(T1 args) nothrow
     {
         for (size_t i; i < mSlots.length; ++i)
         {
@@ -103,9 +106,9 @@ public:
     pragma(inline, true)
     {
         void opCall(T1 args) => emit(args);
-        slotidx_t opOpAssign(string op = "+")(void delegate(T1) dg) => connect(dg);
-        slotidx_t opOpAssign(string op = "+")(void function(T1) fn) => connect(fn);
-        void opOpAssign(string op = "-")(void delegate(T1) dg) => disconnect(dg);
-        void opOpAssign(string op = "-")(void function(T1) fn) => disconnect(fn);
+        slotidx_t opOpAssign(string op)(delegate_t dg) if (op == "+") => connect(dg);
+        slotidx_t opOpAssign(string op)(function_t fn) if (op == "+") => connect(fn);
+        void opOpAssign(string op)(delegate_t dg) if (op == "-") => disconnect(dg);
+        void opOpAssign(string op)(function_t fn) if (op == "-") => disconnect(fn);
     }
 }

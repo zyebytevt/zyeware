@@ -35,7 +35,7 @@ protected:
     BitmapFont mFont;
     AudioSource mBackSoundSource;
     AudioSource mBGM;
-    Texture2D mLogoTexture;
+    Texture2d mLogoTexture;
 
 public:
     this(StateApplication application)
@@ -46,7 +46,7 @@ public:
         mFont = AssetManager.load!Font("core:fonts/internal.fnt");
         mBackSoundSource = new AudioSource(AudioBus.get("master"));
         mBackSoundSource.buffer = AssetManager.load!AudioBuffer("res:menu/back.ogg");
-        mLogoTexture = AssetManager.load!Texture2D("core:textures/engine-logo.png");
+        mLogoTexture = AssetManager.load!Texture2d("core:textures/engine-logo.png");
 
         if (!sBackground)
             sBackground = new MenuBackground();

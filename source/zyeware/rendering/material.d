@@ -226,7 +226,7 @@ public:
                 switch (type)
                 {
                 case "two":
-                    textures ~= AssetManager.load!Texture2D(textureNode.expectAttributeValue!string("path"));
+                    textures ~= AssetManager.load!Texture2d(textureNode.expectAttributeValue!string("path"));
                     break;
 
                 case "cube":

@@ -54,8 +54,8 @@ public:
         void function(in mat4 projectionMatrix, in mat4 viewMatrix) beginScene;
         void function() endScene;
         void function() flush;
-        void function(in Vertex2D[] vertices, in uint[] indices, in mat4 transform, in Texture2D texture, in Material material) drawVertices;
-        void function(in rect dimensions, in mat4 transform, in color modulate, in Texture2D texture, in Material material, in rect region) drawRectangle;
+        void function(in Vertex2D[] vertices, in uint[] indices, in mat4 transform, in Texture2d texture, in Material material) drawVertices;
+        void function(in rect dimensions, in mat4 transform, in color modulate, in Texture2d texture, in Material material, in rect region) drawRectangle;
         void function(in string text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawString;
         void function(in wstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawWString;
         void function(in dstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawDString;

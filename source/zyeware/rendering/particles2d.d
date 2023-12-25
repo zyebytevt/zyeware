@@ -116,7 +116,7 @@ public:
 struct ParticleProperties2D
 {
 public:
-    Texture2D texture;
+    Texture2d texture;
     auto size = Range!float(1, 1);
     Range!Duration lifeTime;
     Gradient modulate;

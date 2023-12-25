@@ -74,7 +74,7 @@ public static:
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
     void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, in color modulate = color("white"),
-        in Texture2D texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
+        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
             * mat4.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
@@ -93,7 +93,7 @@ public static:
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
     void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, float rotation, in color modulate = vec4(1),
-        in Texture2D texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
+        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
             * mat4.rotation(rotation, vec3(0, 0, 1)) * mat4.scaling(scale.x, scale.y, 1),
@@ -110,7 +110,7 @@ public static:
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = vec4(1),
-        in Texture2D texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
+        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
         Pal.graphics.renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
     }

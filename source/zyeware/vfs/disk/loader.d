@@ -3,8 +3,8 @@ module zyeware.vfs.disk.loader;
 import std.path : baseName;
 import std.file : exists, isDir;
 
-import zyeware.vfs;
-import zyeware.vfs.disk;
+import zyeware;
+import zyeware.vfs.disk.dir : VfsDiskDirectory;
 
 package(zyeware.vfs):
 

@@ -62,14 +62,14 @@ protected:
     {
         TerrainProperties properties = {
             size: vec2(256, 256),
-            blendMap: AssetManager.load!Texture2D("res:terraindemo/terrain/blendmap.png"),
+            blendMap: AssetManager.load!Texture2d("res:terraindemo/terrain/blendmap.png"),
             textureTiling: vec2(10)
         };
         
-        properties.textures[0] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/grass.png");
-        properties.textures[1] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/grassFlowers.png");
-        properties.textures[2] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/mud.png");
-        properties.textures[3] = AssetManager.load!Texture2D("res:terraindemo/terrain/textures/path.png");
+        properties.textures[0] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/grass.png");
+        properties.textures[1] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/grassFlowers.png");
+        properties.textures[2] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/mud.png");
+        properties.textures[3] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/path.png");
 
         Entity terrain = entities.create();
         

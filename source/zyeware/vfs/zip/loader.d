@@ -6,7 +6,7 @@ import std.exception : enforce;
 import std.zip;
 
 import zyeware;
-import zyeware.vfs.zip;
+import zyeware.vfs.zip.dir : VfsZipDirectory;
 
 package(zyeware.vfs):
 

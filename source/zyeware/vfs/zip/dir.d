@@ -6,7 +6,8 @@ import std.exception : enforce;
 import std.path : isRooted;
 
 import zyeware;
-import zyeware.vfs.zip;
+import zyeware.vfs.zip.loader : VfsZipLoader;
+import zyeware.vfs.zip.file : VfsZipFile;
 
 package(zyeware.vfs):
 

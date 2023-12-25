@@ -6,8 +6,7 @@ import std.string : format;
 import std.file : exists, isDir, isFile, dirEntries, SpanMode; 
 
 import zyeware;
-import zyeware.vfs.dir : isWriteMode;
-import zyeware.vfs.disk;
+import zyeware.vfs.disk.file : VfsDiskFile;
 
 package(zyeware.vfs):
 

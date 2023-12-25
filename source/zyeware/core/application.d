@@ -13,25 +13,6 @@ public import zyeware.core.appstate;
 import zyeware;
 import zyeware.utils.collection;
 
-
-/// Represents an application that can be run by ZyeWare.
-/// To write a ZyeWare app, you must inherit from this class and return an
-/// instance of it with the `getProjectProperties` function.
-///
-/// Examples:
-/// --------------------
-/// class MyApplication : Application
-/// {
-///     ...    
-/// }
-///
-/// extern(C) ProjectProperties getProjectProperties();
-/// {
-///     ProjectProperties props;
-///     props.application = new MyApplication();
-///     return props;
-/// }
-/// --------------------
 abstract class Application
 {
 public:
@@ -46,17 +27,6 @@ public:
 
     /// Destroys the application.
     void cleanup() {}
-    
-    /// Handles the specified event in whatever manners seem appropriate.
-    ///
-    /// Params:
-    ///     ev = The event to handle.
-    void receive(in Event ev)
-        in (ev, "Received event cannot be null.")
-    {
-        if (cast(QuitEvent) ev)
-            ZyeWare.quit();
-    }
 }
 
 /// A ZyeWare application that takes care of the game state logic.
@@ -70,15 +40,6 @@ protected:
     GrowableStack!AppState mStateStack;
 
 public:
-    override void receive(in Event ev)
-        in (ev, "Received event cannot be null.")
-    {
-        super.receive(ev);
-
-        if (hasState)
-            currentState.receive(ev);
-    }
-
     override void tick()
     {
         if (hasState)
@@ -101,9 +62,6 @@ public:
     void changeState(AppState state)
         in (state, "Game state cannot be null.")
     {
-        debug if (ZyeWare.isEmittingEvent)
-            warning(deferWarning);
-
         if (hasState)
             mStateStack.pop().onDetach();
         
@@ -123,9 +81,6 @@ public:
     void pushState(AppState state)
         in (state, "Game state cannot be null.")
     {
-        debug if (ZyeWare.isEmittingEvent)
-            warning(deferWarning);
-
         if (hasState)
             currentState.onDetach();
         
@@ -141,9 +96,6 @@ public:
     /// See_Also: ZyeWare.callDeferred
     void popState()
     {
-        debug if (ZyeWare.isEmittingEvent)
-            warning(deferWarning);
-
         if (hasState)
             mStateStack.pop().onDetach();
         

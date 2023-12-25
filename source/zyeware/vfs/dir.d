@@ -9,7 +9,6 @@ import std.exception : enforce;
 import std.string : format;
 
 import zyeware;
-import zyeware.vfs;
 
 /// Represents a virtual directory in the Vfs. Where this directory is
 /// physically located depends on the implementation.

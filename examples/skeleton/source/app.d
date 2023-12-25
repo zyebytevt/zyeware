@@ -26,7 +26,7 @@ extern(C) ProjectProperties getProjectProperties()
 class SkeletonApplication : Application
 {
 protected:
-	Texture2D mSprite;
+	Texture2d mSprite;
 	OrthographicCamera mCamera;
 	Material mWaveyMaterial;
 	BitmapFont mFont;
@@ -38,7 +38,7 @@ public:
 
 		Vfs.addPackage("skeleton.zpk");
 
-		mSprite = AssetManager.load!Texture2D("core:textures/missing.png");
+		mSprite = AssetManager.load!Texture2d("core:textures/missing.png");
 		mCamera = new OrthographicCamera(0, 800, 600, 0);
 		mWaveyMaterial = AssetManager.load!Material("res:waveyChild.mtl");
 		mFont = AssetManager.load!BitmapFont("core:fonts/internal.zfnt");

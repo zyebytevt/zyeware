@@ -26,13 +26,13 @@ struct Batch
 
     BatchVertex2D[] vertices;
     uint[] indices;
-    Rebindable!(const Texture2D)[] textures;
+    Rebindable!(const Texture2d)[] textures;
 
     size_t currentVertexCount = 0;
     size_t currentIndexCount = 0;
     size_t currentTextureCount = 1; // because 0 is the white texture
 
-    size_t getIndexForTexture(in Texture2D texture) nothrow
+    size_t getIndexForTexture(in Texture2d texture) nothrow
     {
         for (size_t i = 1; i < currentTextureCount; ++i)
             if (texture is textures[i])
@@ -98,7 +98,7 @@ Batch[] pBatches;
 size_t currentMaterialCount = 0;
 
 mat4 pProjectionViewMatrix;
-Texture2D pWhiteTexture;
+Texture2d pWhiteTexture;
 Material pDefaultMaterial;
 
 size_t getIndexForMaterial(in Material material) nothrow
@@ -176,7 +176,7 @@ void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color
 
                     if (c.size.x > 0 && c.size.y > 0)
                     {
-                        const(Texture2D) pageTexture = font.getPageTexture(c.pageIndex);
+                        const(Texture2d) pageTexture = font.getPageTexture(c.pageIndex);
 
                         drawRectangle(rect(0, 0, c.size.x, c.size.y), mat4.translation(vec3(vec2(position + cursor + vec2(c.offset.x, c.offset.y)), 0)),
                             modulate, pageTexture, material, rect(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
@@ -194,7 +194,7 @@ void initializeBatch(ref Batch batch)
 {
     batch.vertices = new BatchVertex2D[maxVerticesPerBatch + 2000];
     batch.indices = new uint[maxIndicesPerBatch + 3000];
-    batch.textures = new Rebindable!(const Texture2D)[maxTexturesPerBatch];
+    batch.textures = new Rebindable!(const Texture2d)[maxTexturesPerBatch];
 
     batch.textures[0] = pWhiteTexture;
 }
@@ -211,7 +211,7 @@ void initialize()
     glBindVertexArray(pRenderBuffers[0].vao);
 
     static ubyte[3] pixels = [255, 255, 255];
-    pWhiteTexture = new Texture2D(new Image(pixels, 3, 8, vec2i(1)), TextureProperties.init);
+    pWhiteTexture = new Texture2d(new Image(pixels, 3, 8, vec2i(1)), TextureProperties.init);
 
     pBatches.length = 1;
     initializeBatch(pBatches[0]);
@@ -269,7 +269,7 @@ void flush()
 }
 
 void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
-    in Texture2D texture = null, in Material material = null)
+    in Texture2d texture = null, in Material material = null)
 {
     const(Material) mat = material ? material : pDefaultMaterial;
 
@@ -321,7 +321,7 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
 }
 
 void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = vec4(1),
-    in Texture2D texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
+    in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
 {
     static vec2[4] quadPositions;
     quadPositions[0] = vec2(dimensions.x, dimensions.y);

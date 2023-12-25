@@ -16,8 +16,10 @@ import std.string : fromStringz, format;
 import std.file : mkdirRecurse, thisExePath, exists;
 
 import zyeware;
-import zyeware.vfs.disk : VfsDiskLoader, VfsDiskDirectory;
-import zyeware.vfs.zip : VfsZipLoader, VfsZipDirectory;
+import zyeware.vfs.disk.loader : VfsDiskLoader;
+import zyeware.vfs.disk.dir : VfsDiskDirectory;
+import zyeware.vfs.zip.loader : VfsZipLoader;
+import zyeware.vfs.zip.dir : VfsZipDirectory;
 import zyeware.vfs.dir : VfsCombinedDirectory;
 
 private ubyte[16] md5FromHex(string hexString)

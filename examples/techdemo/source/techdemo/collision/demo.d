@@ -18,7 +18,7 @@ protected:
     Transform2DComponent mSecondTransform;
     Shape2D mFirstShape;
     Shape2D mSecondShape;
-    Texture2D mCircleTexture;
+    Texture2d mCircleTexture;
 
 public:
     this(StateApplication application)
@@ -30,7 +30,7 @@ public:
         mFirstTransform = Transform2DComponent(vec2(100, 240));
         mSecondTransform = Transform2DComponent(vec2(400, 240));
 
-        mCircleTexture = AssetManager.load!Texture2D("res:sprites/circle.png");
+        mCircleTexture = AssetManager.load!Texture2d("res:sprites/circle.png");
 
         mSecondShape = new RectangleShape2D(vec2(50));
         mFirstShape = new CircleShape2D(50);

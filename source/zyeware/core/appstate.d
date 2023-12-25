@@ -9,7 +9,6 @@ public import zyeware.core.application : StateApplication;
 
 import zyeware;
 
-
 /// A game state is used in conjunction with a `StateApplication` instance
 /// to make managing an application with different states easier.
 abstract class AppState
@@ -45,12 +44,6 @@ public:
 
     /// Called when this game state gets detached from a `StateApplication`.
     void onDetach() {}
-    
-    /// Handles the specified event in whatever manners seem appropriate.
-    ///
-    /// Params:
-    ///     ev = The event to handle.
-    void receive(in Event ev) {}
 
     /// The application this game state is registered to.
     inout(StateApplication) application() pure inout nothrow

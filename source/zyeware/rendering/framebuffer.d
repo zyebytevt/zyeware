@@ -56,13 +56,13 @@ public:
         mNativeHandle = Pal.graphics.api.createFramebuffer(mProperties);
     }
 
-    Texture2D getTexture2D()
+    Texture2d getTexture2D()
     {
         enforce!RenderException(mProperties.usageType == FramebufferProperties.UsageType.texture,
             "Framebuffer cannot be used as a texture.");
 
         NativeHandle handle = Pal.graphics.api.getTextureFromFramebuffer(mNativeHandle);
-        return new Texture2D(handle, mProperties.size);
+        return new Texture2d(handle, mProperties.size);
     }
 
     const(NativeHandle) handle() pure const nothrow

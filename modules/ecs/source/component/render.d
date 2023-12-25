@@ -15,9 +15,9 @@ import zyeware.ecs;
 
 
 /// The `SpriteComponent` gives an entity the ability to represent itself
-/// with a `Texture2D` with the given parameters.
+/// with a `Texture2d` with the given parameters.
 ///
-/// See_Also: Texture2D
+/// See_Also: Texture2d
 @component
 struct SpriteComponent
 {
