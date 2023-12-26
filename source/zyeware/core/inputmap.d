@@ -149,35 +149,35 @@ private static:
             action.processInput(input);
     }
 
-    void onKeyPress(KeyCode key) nothrow { processInput(Input.key(key, true)); }
-    void onKeyRelease(KeyCode key) nothrow { processInput(Input.key(key, false)); }
-    void onMouseButtonPress(MouseCode button, size_t clickCount) nothrow { processInput(Input.mouse(button, true)); }
-    void onMouseButtonRelease(MouseCode button) nothrow { processInput(Input.mouse(button, false)); }
-    void onGamepadButtonPress(GamepadIndex index, GamepadButton button) nothrow { processInput(Input.gamepadButton(index, button, true)); }
-    void onGamepadButtonRelease(GamepadIndex index, GamepadButton button) nothrow { processInput(Input.gamepadButton(index, button, false)); }
-    void onGamepadAxisMove(GamepadIndex index, GamepadAxis axis, float value) nothrow { processInput(Input.gamepadAxis(index, axis, value)); }
+    void onKeyboardKeyPressed(KeyCode key) nothrow { processInput(Input.key(key, true)); }
+    void onKeyboardKeyReleased(KeyCode key) nothrow { processInput(Input.key(key, false)); }
+    void onMouseButtonPressed(MouseCode button, size_t clickCount) nothrow { processInput(Input.mouse(button, true)); }
+    void onMouseButtonReleased(MouseCode button) nothrow { processInput(Input.mouse(button, false)); }
+    void onGamepadButtonPressed(GamepadIndex index, GamepadButton button) nothrow { processInput(Input.gamepadButton(index, button, true)); }
+    void onGamepadButtonReleased(GamepadIndex index, GamepadButton button) nothrow { processInput(Input.gamepadButton(index, button, false)); }
+    void onGamepadAxisMoved(GamepadIndex index, GamepadAxis axis, float value) nothrow { processInput(Input.gamepadAxis(index, axis, value)); }
 
 package(zyeware.core) static:
     void initialize() @safe nothrow
     {
-        EventDispatcher.onKeyPress += &onKeyPress;
-        EventDispatcher.onKeyRelease += &onKeyRelease;
-        EventDispatcher.onMouseButtonPress += &onMouseButtonPress;
-        EventDispatcher.onMouseButtonRelease += &onMouseButtonRelease;
-        EventDispatcher.onGamepadButtonPress += &onGamepadButtonPress;
-        EventDispatcher.onGamepadButtonRelease += &onGamepadButtonRelease;
-        EventDispatcher.onGamepadAxisMove += &onGamepadAxisMove;
+        EventDispatcher.keyboardKeyPressed += &onKeyboardKeyPressed;
+        EventDispatcher.keyboardKeyReleased += &onKeyboardKeyReleased;
+        EventDispatcher.mouseButtonPressed += &onMouseButtonPressed;
+        EventDispatcher.mouseButtonReleased += &onMouseButtonReleased;
+        EventDispatcher.gamepadButtonPressed += &onGamepadButtonPressed;
+        EventDispatcher.gamepadButtonReleased += &onGamepadButtonReleased;
+        EventDispatcher.gamepadAxisMoved += &onGamepadAxisMoved;
     }
 
     void cleanup() @safe nothrow
     {
-        EventDispatcher.onKeyPress -= &onKeyPress;
-        EventDispatcher.onKeyRelease -= &onKeyRelease;
-        EventDispatcher.onMouseButtonPress -= &onMouseButtonPress;
-        EventDispatcher.onMouseButtonRelease -= &onMouseButtonRelease;
-        EventDispatcher.onGamepadButtonPress -= &onGamepadButtonPress;
-        EventDispatcher.onGamepadButtonRelease -= &onGamepadButtonRelease;
-        EventDispatcher.onGamepadAxisMove -= &onGamepadAxisMove;
+        EventDispatcher.keyboardKeyPressed -= &onKeyboardKeyPressed;
+        EventDispatcher.keyboardKeyReleased -= &onKeyboardKeyReleased;
+        EventDispatcher.mouseButtonPressed -= &onMouseButtonPressed;
+        EventDispatcher.mouseButtonReleased -= &onMouseButtonReleased;
+        EventDispatcher.gamepadButtonPressed -= &onGamepadButtonPressed;
+        EventDispatcher.gamepadButtonReleased -= &onGamepadButtonReleased;
+        EventDispatcher.gamepadAxisMoved -= &onGamepadAxisMoved;
     }
 
 public static:

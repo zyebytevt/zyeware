@@ -9,7 +9,6 @@ import core.memory : GC;
 import std.algorithm : min;
 import std.typecons : Nullable;
 
-public import zyeware.core.appstate;
 import zyeware;
 import zyeware.utils.collection;
 
@@ -33,13 +32,12 @@ public:
 /// Game states can be set, pushed and popped.
 class StateApplication : Application
 {
-private:
-    enum deferWarning = "Changing game state during event emission can cause instability. Use a deferred call instead.";
-
 protected:
     GrowableStack!AppState mStateStack;
 
 public:
+    Signal!() stateChanged;
+
     override void tick()
     {
         if (hasState)
@@ -68,6 +66,7 @@ public:
         mStateStack.push(state);
         state.onAttach(!state.mWasAlreadyAttached);
         state.mWasAlreadyAttached = true;
+        stateChanged();
         ZyeWare.collect();
     }
 
@@ -87,6 +86,7 @@ public:
         mStateStack.push(state);
         state.onAttach(!state.mWasAlreadyAttached);
         state.mWasAlreadyAttached = true;
+        stateChanged();
         ZyeWare.collect();
     }
 
@@ -101,6 +101,7 @@ public:
         
         currentState.onAttach(!currentState.mWasAlreadyAttached);
         currentState.mWasAlreadyAttached = true;
+        stateChanged();
         ZyeWare.collect();
     }
 
@@ -116,5 +117,52 @@ public:
     bool hasState() const nothrow
     {
         return !mStateStack.empty;
+    }
+}
+
+/// An application state is used in conjunction with a `StateApplication` instance
+/// to make managing an application with different states easier.
+abstract class AppState
+{
+private:
+    StateApplication mApplication;
+    bool mWasAlreadyAttached;
+
+protected:
+    this(StateApplication application) pure nothrow
+        in (application, "Parent application cannot be null.")
+    {
+        mApplication = application;
+    }
+
+public:
+    /// Override this function to perform logic every frame.
+    ///
+    /// Params:
+    ///     frameTime = The time between this frame and the last.
+    abstract void tick();
+
+    /// Override this function to perform rendering.
+    abstract void draw();
+    
+    /// Called when this game state gets attached to a `StateApplication`.
+    ///
+    /// Params:
+    ///     firstTime = Whether it gets attached the first time or not.
+    void onAttach(bool firstTime) {}
+
+    /// Called when this game state gets detached from a `StateApplication`.
+    void onDetach() {}
+
+    /// The application this game state is registered to.
+    inout(StateApplication) application() pure inout nothrow
+    {
+        return mApplication;
+    }
+
+    /// Whether this game state was already attached once or not.
+    bool wasAlreadyAttached() pure const nothrow
+    {
+        return mWasAlreadyAttached;
     }
 }

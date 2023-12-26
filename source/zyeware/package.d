@@ -19,7 +19,6 @@ public
     import zyeware.audio.source;
 
     import zyeware.core.application;
-    import zyeware.core.appstate;
     import zyeware.core.asset;
     import zyeware.core.dispatcher;
     import zyeware.core.engine;

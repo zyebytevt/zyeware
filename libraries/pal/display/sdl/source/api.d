@@ -67,7 +67,7 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
             debug_("Added controller '%s' as gamepad #%d.",
                 name ? name.fromStringz : "<No name>", gamepadIndex);
 
-            EventDispatcher.onGamepadConnect(gamepadIndex);
+            EventDispatcher.gamepadConnected(gamepadIndex);
         }
     }
     else
@@ -95,7 +95,7 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
     debug_("Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
         gamepadIndex);
 
-    EventDispatcher.onGamepadDisconnect(gamepadIndex);
+    EventDispatcher.gamepadDisconnected(gamepadIndex);
 }
 
 ptrdiff_t getGamepadIndex(in WindowData* windowData, SDL_GameController* pad) nothrow
@@ -224,12 +224,12 @@ void update(NativeHandle handle)
             {
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 data.size = vec2i(ev.window.data1, ev.window.data2);
-                EventDispatcher.onDisplayResize(data.container, data.size);
+                EventDispatcher.displayResized(data.container, data.size);
                 break;
 
             case SDL_WINDOWEVENT_MOVED:
                 data.position = vec2i(ev.window.data1, ev.window.data2);
-                EventDispatcher.onDisplayMove(data.container, data.position);
+                EventDispatcher.displayMoved(data.container, data.position);
                 break;
 
             default:
@@ -237,16 +237,16 @@ void update(NativeHandle handle)
             break;
 
         case SDL_QUIT:
-            EventDispatcher.onQuit();
+            EventDispatcher.quitRequested();
             break;
 
         case SDL_KEYUP:
-            EventDispatcher.onKeyRelease(cast(KeyCode) ev.key.keysym.scancode);
+            EventDispatcher.keyboardKeyReleased(cast(KeyCode) ev.key.keysym.scancode);
             break;
 
         case SDL_KEYDOWN:
             if (!ev.key.repeat)
-                EventDispatcher.onKeyPress(cast(KeyCode) ev.key.keysym.scancode);
+                EventDispatcher.keyboardKeyPressed(cast(KeyCode) ev.key.keysym.scancode);
             break;
 
         case SDL_TEXTINPUT:
@@ -256,11 +256,11 @@ void update(NativeHandle handle)
             break;
 
         case SDL_MOUSEBUTTONUP:
-            EventDispatcher.onMouseButtonRelease(cast(MouseCode) ev.button.button);
+            EventDispatcher.mouseButtonReleased(cast(MouseCode) ev.button.button);
             break;
 
         case SDL_MOUSEBUTTONDOWN:
-            EventDispatcher.onMouseButtonPress(cast(MouseCode) ev.button.button, cast(size_t) ev.button.clicks);
+            EventDispatcher.mouseButtonPressed(cast(MouseCode) ev.button.button, cast(size_t) ev.button.clicks);
             break;
 
         case SDL_MOUSEWHEEL:
@@ -268,11 +268,11 @@ void update(NativeHandle handle)
             if (ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                 amount *= -1;
             
-            EventDispatcher.onMouseScroll(amount);
+            EventDispatcher.mouseWheelScrolled(amount);
             break;
 
         case SDL_MOUSEMOTION:
-            EventDispatcher.onMouseMove(vec2(ev.motion.x, ev.motion.y),
+            EventDispatcher.mouseMoved(vec2(ev.motion.x, ev.motion.y),
                 vec2(ev.motion.xrel, ev.motion.yrel));
             break;
 
@@ -302,9 +302,9 @@ void update(NativeHandle handle)
             }
 
             if (ev.cbutton.state == SDL_PRESSED)
-                EventDispatcher.onGamepadButtonPress(getGamepadIndex(data, ev.cbutton.which), button);
+                EventDispatcher.gamepadButtonPressed(getGamepadIndex(data, ev.cbutton.which), button);
             else
-                EventDispatcher.onGamepadButtonRelease(getGamepadIndex(data, ev.cbutton.which), button);
+                EventDispatcher.gamepadButtonReleased(getGamepadIndex(data, ev.cbutton.which), button);
             break;
         
         case SDL_CONTROLLERAXISMOTION:
@@ -322,7 +322,7 @@ void update(NativeHandle handle)
                 break typeSwitch;
             }
 
-            EventDispatcher.onGamepadAxisMove(getGamepadIndex(data, ev.caxis.which), axis,
+            EventDispatcher.gamepadAxisMoved(getGamepadIndex(data, ev.caxis.which), axis,
                 ev.caxis.value / 32_768f);
             break;
 
