@@ -21,12 +21,16 @@ int main()
 {
 	if (!exists("source/zyeware"))
 	{
-		writeln("This program must be run from the root of the ZyeWare repository.");
+		cwriteln("<red>This program must be run from the root of the ZyeWare repository.</red>");
 		return 1;
 	}
 
+	cwritefln("<lgreen>%12s</lgreen> Generating ZyeWare API files.", "Starting");
+
 	SysTime[string] lastKnownModifications;
 	bool[string] filesParsed;
+
+	size_t upToDateCount, outOfDateCount, removedCount;
 
 	// If it exists, get the last modified times from a json
 	if (exists(".apigen.json"))
@@ -57,21 +61,24 @@ int main()
 
 		if (exists(resultFile) && lastKnownModification >= lastModification)
 		{
-			cwritefln("<green>Up-to-date</green>: %s", sourcePath);
+			cwritefln("<green>%12s</green> %s", "Up-to-date", sourcePath);
+			++upToDateCount;
 			continue;
 		}
 
-		cwritefln("<yellow>Generating</yellow>: %s", resultFile);
+		cwritefln("<yellow>%12s</yellow> %s", "Generating", resultFile);
 		mkdirRecurse(resultDir);
 		write(resultFile, generator.generate(readText!string(sourcePath)));
 
+		++outOfDateCount;
 		lastKnownModifications[sourcePath] = lastModification;
 	}
 
 	foreach (string path; filesParsed.keys.filter!(a => !filesParsed[a]))
 	{
-		cwritefln("<red>Removing</red>: %s", path);
+		cwritefln("<red>%12s</red> %s", "Removing", path);
 		remove(path);
+		++removedCount;
 	}
 
 	// Write the last modified times to a json
@@ -80,6 +87,9 @@ int main()
 		root[key] = JSONValue(value.stdTime);
 	auto toSave = JSONValue(root);
 	write(".apigen.json", toJSON(toSave, true));
+
+	cwritefln("<green>%12s</green> <green>%d</green> up-to-date, <yellow>%d</yellow> (re)generated, <red>%d</red> removed.",
+		"Finished", upToDateCount, outOfDateCount, removedCount);
 
 	return 0;
 }

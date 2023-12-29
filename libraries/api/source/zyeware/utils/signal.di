@@ -59,3 +59,39 @@ void opOpAssign(string op)(function_t fn)
 if(op == "-")=> disconnect(fn);
 }
 }
+
+@("Signals") unittest {
+import unit_threaded.assertions;
+
+Signal!int signal;
+
+int result;
+
+void delegate(int x) nothrow delegate1;
+
+void function(int x) nothrow function1;
+
+auto slot1 = signal.connect(delegate1);;
+signal.mSlots.length.should == 1;
+
+auto slot2 = signal.connect(function1);;
+signal.mSlots.length.should == 2;
+signal.emit(20);
+result.should == 20;
+signal.disconnect(delegate1);
+signal.mSlots.length.should == 1;
+signal.disconnect(function1);
+signal.mSlots.length.should == 0;
+slot1 = signal.connect(delegate1);
+slot2 = signal.connect(function1);
+signal.mSlots.length.should == 2;
+signal.disconnect(slot1);
+signal.mSlots.length.should == 1;
+signal.disconnect(slot2);
+signal.mSlots.length.should == 0;
+slot1 = signal.connect(delegate1);
+slot2 = signal.connect(function1);
+signal.mSlots.length.should == 2;
+signal.disconnectAll();
+signal.mSlots.length.should == 0;
+}

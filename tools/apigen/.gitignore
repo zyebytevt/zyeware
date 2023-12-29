@@ -3,6 +3,7 @@ docs.json
 __dummy.html
 docs/
 /apigen
+/zyeware_apigen
 apigen.so
 apigen.dylib
 apigen.dll

@@ -50,6 +50,22 @@ T pop() pure nothrow;
 size_t length() pure const nothrow;
 }
 
+@("GrowableCircularQueue") unittest {
+import unit_threaded.assertions;
+
+auto queue = GrowableCircularQueue!int([1, 2, 3, 4, 5]);;
+queue.length.should == 5;
+queue.empty.should == false;
+queue.front.should == 1;
+queue[2].should == 3;
+queue.push(6);
+queue.length.should == 6;
+queue[5].should == 6;
+queue.pop.should == 1;
+queue.length.should == 5;
+queue.front.should == 2;
+}
+
 struct GrowableStack(T) {
 
 private:
@@ -74,7 +90,27 @@ void push(T item) pure nothrow;
 
 T pop() pure nothrow;
 
-size_t mLength() pure const nothrow;
+size_t length() pure const nothrow;
 
-void mLength(size_t value) pure nothrow;
+void length(size_t value) pure nothrow;
+}
+
+@("GrowableStack") unittest {
+import unit_threaded.assertions;
+
+auto stack = GrowableStack!int(5);;
+stack.length.should == 0;
+stack.empty.should == true;
+stack.push(1);
+stack.length.should == 1;
+stack.peek.should == 1;
+stack.push(2);
+stack.length.should == 2;
+stack.peek.should == 2;
+stack.pop.should == 2;
+stack.length.should == 1;
+stack.peek.should == 1;
+stack.pop.should == 1;
+stack.length.should == 0;
+stack.empty.should == true;
 }
