@@ -173,7 +173,7 @@ public:
         mTransform = transform;
     }
 
-    auto length() pure const nothrow
+    size_t length() pure const nothrow
     {
         return mVertices.length;
     }

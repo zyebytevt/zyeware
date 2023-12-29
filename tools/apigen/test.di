@@ -21,14 +21,10 @@ import zyeware.pal;
 /// How the main framebuffer should be scaled on resizing.
 enum ScaleMode 
  {
-center, /// Keep the original size at the center of the display.
-
-keepAspect, /// Scale with display, but keep the aspect.
-
-fill, /// Fill the display completely.
-
-changeDisplaySize /// Resize the framebuffer itself.
-
+center, Keep the original size at the center of the display.
+keepAspect, Scale with display, but keep the aspect.
+fill, Fill the display completely.
+changeDisplaySize Resize the framebuffer itself.
 }
 
 /// Holds information about passed time since the last frame.

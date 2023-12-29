@@ -49,3 +49,40 @@ vec3 transformPoint(in mat4 transform, in vec3 localPoint) pure nothrow
 {
     return (transform * vec4(localPoint, 1)).xyz;
 }
+
+unittest
+{
+    import std.math : isClose;
+
+    // Test the 2D transform functions
+    {
+        mat4 transform = mat4.identity.translate(vec3(10, 20, 0));
+        vec2 localPoint = vec2(5, 5);
+        vec2 worldPoint = transformPoint(transform, localPoint);
+
+        assert(isClose(worldPoint.x, 15.0));
+        assert(isClose(worldPoint.y, 25.0));
+
+        vec2 inversePoint = inverseTransformPoint(transform, worldPoint);
+
+        assert(isClose(inversePoint.x, localPoint.x));
+        assert(isClose(inversePoint.y, localPoint.y));
+    }
+
+    // Test the 3D transform functions
+    {
+        mat4 transform = mat4.identity.translate(vec3(10, 20, 30));
+        vec3 localPoint = vec3(5, 5, 5);
+        vec3 worldPoint = transformPoint(transform, localPoint);
+
+        assert(isClose(worldPoint.x, 15.0));
+        assert(isClose(worldPoint.y, 25.0));
+        assert(isClose(worldPoint.z, 35.0));
+
+        vec3 inversePoint = inverseTransformPoint(transform, worldPoint);
+
+        assert(isClose(inversePoint.x, localPoint.x));
+        assert(isClose(inversePoint.y, localPoint.y));
+        assert(isClose(inversePoint.z, localPoint.z));
+    }
+}

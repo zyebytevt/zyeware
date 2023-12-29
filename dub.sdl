@@ -12,7 +12,6 @@ dependency "console-colors" version="~>1.1.1"
 dependency "sdlite" version="~>1.2.1"
 dependency "zyeware:zyfont" version="*"
 
-targetType "executable"
 targetPath "out"
 workingDirectory "out"
 
@@ -32,6 +31,8 @@ dflags "-link-defaultlib-shared" "--fvisibility=public" platform="ldc"
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
 
+	targetType "executable"
+
 	dependency "zyeware:pal-audio-openal" version="*"
 	dependency "zyeware:pal-graphics-opengl" version="*"
 	dependency "zyeware:pal-display-sdl" version="*"
@@ -39,11 +40,6 @@ configuration "sdl-opengl" {
 	versions "GL_43" "SDL_205"
 }
 
-buildType "api" {
-	buildOptions "syntaxOnly"
-	buildRequirements "silenceDeprecations"
-	targetType "executable"
-	dflags "-H" "-Hd=libraries/api" "-op" "-allinst"
+configuration "unittest" {
+	dependency "silly" version="~>1.1.1"
 }
-
-versions "ZW_Profiling"

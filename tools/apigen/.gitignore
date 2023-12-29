@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/apigen
+apigen.so
+apigen.dylib
+apigen.dll
+apigen.a
+apigen.lib
+apigen-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
