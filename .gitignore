@@ -7,3 +7,4 @@ out/
 *.a
 .vscode
 dub.selections.json
+.apigen.json

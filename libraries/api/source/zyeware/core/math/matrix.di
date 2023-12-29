@@ -38,3 +38,35 @@ vec3 inverseTransformPoint(in mat4 transform, in vec3 worldPoint) pure nothrow;
 /// 
 /// Returns: The position in world space.
 vec3 transformPoint(in mat4 transform, in vec3 localPoint) pure nothrow;
+
+@("Matrix vector transforms") unittest {
+import unit_threaded.assertions; {
+
+mat4 transform;
+
+vec2 localPoint;
+
+vec2 worldPoint;
+worldPoint.x.should == 15.0;
+worldPoint.y.should == 25.0;
+
+vec2 inversePoint;
+inversePoint.x.should == localPoint.x;
+inversePoint.y.should == localPoint.y;
+} {
+
+mat4 transform;
+
+vec3 localPoint;
+
+vec3 worldPoint;
+worldPoint.x.should == 15.0;
+worldPoint.y.should == 25.0;
+worldPoint.z.should == 35.0;
+
+vec3 inversePoint;
+inversePoint.x.should == localPoint.x;
+inversePoint.y.should == localPoint.y;
+inversePoint.z.should == localPoint.z;
+}
+}

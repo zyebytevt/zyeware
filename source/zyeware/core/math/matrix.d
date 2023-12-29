@@ -50,9 +50,10 @@ vec3 transformPoint(in mat4 transform, in vec3 localPoint) pure nothrow
     return (transform * vec4(localPoint, 1)).xyz;
 }
 
+@("Matrix vector transforms")
 unittest
 {
-    import std.math : isClose;
+    import unit_threaded.assertions;
 
     // Test the 2D transform functions
     {
@@ -60,13 +61,13 @@ unittest
         vec2 localPoint = vec2(5, 5);
         vec2 worldPoint = transformPoint(transform, localPoint);
 
-        assert(isClose(worldPoint.x, 15.0));
-        assert(isClose(worldPoint.y, 25.0));
+        worldPoint.x.should == 15.0;
+        worldPoint.y.should == 25.0;
 
         vec2 inversePoint = inverseTransformPoint(transform, worldPoint);
 
-        assert(isClose(inversePoint.x, localPoint.x));
-        assert(isClose(inversePoint.y, localPoint.y));
+        inversePoint.x.should == localPoint.x;
+        inversePoint.y.should == localPoint.y;
     }
 
     // Test the 3D transform functions
@@ -75,14 +76,14 @@ unittest
         vec3 localPoint = vec3(5, 5, 5);
         vec3 worldPoint = transformPoint(transform, localPoint);
 
-        assert(isClose(worldPoint.x, 15.0));
-        assert(isClose(worldPoint.y, 25.0));
-        assert(isClose(worldPoint.z, 35.0));
+        worldPoint.x.should == 15.0;
+        worldPoint.y.should == 25.0;
+        worldPoint.z.should == 35.0;
 
         vec3 inversePoint = inverseTransformPoint(transform, worldPoint);
 
-        assert(isClose(inversePoint.x, localPoint.x));
-        assert(isClose(inversePoint.y, localPoint.y));
-        assert(isClose(inversePoint.z, localPoint.z));
+        inversePoint.x.should == localPoint.x;
+        inversePoint.y.should == localPoint.y;
+        inversePoint.z.should == localPoint.z;
     }
 }

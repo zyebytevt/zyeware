@@ -24,3 +24,9 @@ return veca.x * vecb.y - veca.y * vecb.x;
 /// 
 /// Returns: The height at the specified position.
 float calculateBaryCentricHeight(vec3 p1, vec3 p2, vec3 p3, vec2 position) pure nothrow;
+
+@("Vector utilities") unittest {
+import unit_threaded.assertions;
+cross2d(vec2(1, 0), vec2(0, 1)).should == 1.0;
+calculateBaryCentricHeight(vec3(0, 0, 0), vec3(1, 1, 0), vec3(0, 1, 1), vec2(0.5, 0.5)).should == 1.0;
+}

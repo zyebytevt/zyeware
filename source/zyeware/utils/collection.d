@@ -44,7 +44,7 @@ public:
     inout(T) opIndex(in size_t i) pure inout nothrow
         in (i < mLength, "OpIndex out of bounds!")
     {
-        return mArray[(mFirst + i) & (mArray.mLength - 1)];
+        return mArray[(mFirst + i) & (mArray.length - 1)];
     }
 
     /// Pushes an item into the queue. Can cause a growth and allocation
@@ -53,10 +53,10 @@ public:
     ///   item = The item to push into the queue.
     void push(T item) pure nothrow
     {
-        if (mLength >= mArray.mLength)
+        if (mLength >= mArray.length)
         { // Double the queue.
-            immutable oldALen = mArray.mLength;
-            mArray.mLength *= 2;
+            immutable oldALen = mArray.length;
+            mArray.length *= 2;
             if (mLast < mFirst)
             {
                 mArray[oldALen .. oldALen + mLast + 1] = mArray[0 .. mLast + 1];
@@ -66,7 +66,7 @@ public:
             }
         }
 
-        mLast = (mLast + 1) & (mArray.mLength - 1);
+        mLast = (mLast + 1) & (mArray.length - 1);
         mArray[mLast] = item;
         mLength++;
     }
@@ -78,7 +78,7 @@ public:
         auto saved = mArray[mFirst];
         static if (hasIndirections!T)
             mArray[mFirst] = T.init; // Help for the GC.
-        mFirst = (mFirst + 1) & (mArray.mLength - 1);
+        mFirst = (mFirst + 1) & (mArray.length - 1);
         mLength--;
         return saved;
     }
@@ -88,6 +88,28 @@ public:
     {
         return mLength;
     }
+}
+
+@("GrowableCircularQueue")
+unittest
+{
+    import unit_threaded.assertions;
+
+    auto queue = GrowableCircularQueue!int([1, 2, 3, 4, 5]);
+
+    queue.length.should == 5;
+    queue.empty.should == false;
+
+    queue.front.should == 1;
+    queue[2].should == 3;
+
+    queue.push(6);
+    queue.length.should == 6;
+    queue[5].should == 6;
+
+    queue.pop.should == 1;
+    queue.length.should == 5;
+    queue.front.should == 2;
 }
 
 struct GrowableStack(T)
@@ -142,12 +164,12 @@ public:
         return saved;
     }
 
-    size_t mLength() pure const nothrow
+    size_t length() pure const nothrow
     {
         return mNextPointer;
     }
 
-    void mLength(size_t value) pure nothrow
+    void length(size_t value) pure nothrow
     {
         mNextPointer = value;
         static if (hasIndirections!T)
@@ -155,9 +177,29 @@ public:
     }
 }
 
-auto removeElement(R, N)(R haystack, N needle)
-    if (isDynamicArray!R)
+@("GrowableStack")
+unittest
 {
-    auto index = haystack.countUntil(needle);
-    return (index != -1) ? haystack.remove(index) : haystack;
+    import unit_threaded.assertions;
+
+    auto stack = GrowableStack!int(5);
+
+    stack.length.should == 0;
+    stack.empty.should == true;
+
+    stack.push(1);
+    stack.length.should == 1;
+    stack.peek.should == 1;
+
+    stack.push(2);
+    stack.length.should == 2;
+    stack.peek.should == 2;
+
+    stack.pop.should == 2;
+    stack.length.should == 1;
+    stack.peek.should == 1;
+
+    stack.pop.should == 1;
+    stack.length.should == 0;
+    stack.empty.should == true;
 }

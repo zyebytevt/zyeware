@@ -7,10 +7,11 @@ module apigen.app;
 
 import std.stdio;
 import std.parallelism : parallel;
-import std.file : dirEntries, SpanMode, exists, mkdirRecurse, readText, write, remove;
+import std.file : dirEntries, SpanMode, exists, mkdirRecurse, readText, write, remove, timeLastModified;
 import std.path : stripExtension, buildNormalizedPath, dirName, baseName;
+import std.datetime : SysTime, unixTimeToStdTime;
 import std.algorithm : filter;
-import std.digest.md : md5Of;
+import std.json;
 
 import consolecolors;
 
@@ -24,44 +25,61 @@ int main()
 		return 1;
 	}
 
+	SysTime[string] lastKnownModifications;
+	bool[string] filesParsed;
+
+	// If it exists, get the last modified times from a json
+	if (exists(".apigen.json"))
+	{
+		JSONValue root = parseJSON(readText(".apigen.json"), 1);
+		foreach (string key, JSONValue value; root.object)
+			lastKnownModifications[key] = SysTime(value.integer);
+	}
+
 	auto generator = new InterfaceFileGenerator();
 
+	// Generate the output directory
 	mkdirRecurse("libraries/api/source/zyeware");
 
-	auto dfiles = dirEntries("source/zyeware", "*.d", SpanMode.depth);
-	bool[string] diFiles;
-
 	foreach (string path; dirEntries("libraries/api/source/zyeware", "*.di", SpanMode.depth))
-	{
-		diFiles[path] = false;
-	}
+		filesParsed[path] = false;
+
+	auto dfiles = dirEntries("source/zyeware", "*.d", SpanMode.depth);
 
 	foreach (sourcePath; parallel(dfiles))
 	{
+		immutable SysTime lastKnownModification = lastKnownModifications.get(sourcePath, SysTime.min);
+		immutable SysTime lastModification = timeLastModified(sourcePath);
+
 		immutable string resultDir = buildNormalizedPath("libraries/api/", dirName(sourcePath));
-		mkdirRecurse(resultDir);
 		immutable string resultFile = buildNormalizedPath(resultDir, stripExtension(baseName(sourcePath)) ~ ".di");
+		filesParsed[resultFile] = true;
 
-		diFiles[resultFile] = true;
-
-		immutable string source = readText!string(sourcePath);
-		immutable string result = generator.generate(source);
-
-		if (exists(resultFile) && md5Of(result) == md5Of(readText!string(resultFile)))
+		if (exists(resultFile) && lastKnownModification >= lastModification)
 		{
 			cwritefln("<green>Up-to-date</green>: %s", sourcePath);
 			continue;
 		}
 
-		cwritefln("<yellow>Generating</yellow>: %s (to %s)", sourcePath, resultFile);
-		write(resultFile, result);
+		cwritefln("<yellow>Generating</yellow>: %s", resultFile);
+		mkdirRecurse(resultDir);
+		write(resultFile, generator.generate(readText!string(sourcePath)));
+
+		lastKnownModifications[sourcePath] = lastModification;
 	}
 
-	foreach (string path; diFiles.keys.filter!(a => !diFiles[a]))
+	foreach (string path; filesParsed.keys.filter!(a => !filesParsed[a]))
 	{
 		cwritefln("<red>Removing</red>: %s", path);
 		remove(path);
 	}
+
+	// Write the last modified times to a json
+	JSONValue[string] root;
+	foreach (string key, SysTime value; lastKnownModifications)
+		root[key] = JSONValue(value.stdTime);
+	auto toSave = JSONValue(root);
+	write(".apigen.json", toJSON(toSave, true));
 
 	return 0;
 }

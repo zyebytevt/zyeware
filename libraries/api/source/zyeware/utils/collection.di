@@ -78,10 +78,3 @@ size_t mLength() pure const nothrow;
 
 void mLength(size_t value) pure nothrow;
 }
-
-auto removeElement(R, N)(R haystack, N needle) 
-if(isDynamicArray!R) {
-
-auto index = haystack.countUntil(needle);;
-return (index != -1) ? haystack.remove(index) : haystack;
-}

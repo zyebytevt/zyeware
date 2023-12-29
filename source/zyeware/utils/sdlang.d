@@ -48,7 +48,7 @@ SDLNode* expectChild(SDLNode* parent, string qualifiedName)
 
 T getValue(T)(in SDLNode* parent, T default_ = T.init)
 {
-    if (parent.values.length == 0)
+    if (!parent.values || parent.values.length == 0)
         return default_;
 
     return unmarshal!T(parent.values[0]);
@@ -62,7 +62,11 @@ T expectValue(T)(in SDLNode* node)
 
 T getChildValue(T)(SDLNode* node, string childName, T default_ = T.init)
 {
-    return getValue!T(getChild(node, childName), default_);
+    auto child = getChild(node, childName);
+    if (!child)
+        return default_;
+    
+    return getValue!T(child, default_);
 }
 
 T expectChildValue(T)(SDLNode* parent, string childName)
@@ -172,4 +176,47 @@ T unmarshalArray(T)(in SDLValue value)
 {
     enforce!ResourceException(value.isArray, format!"Expected array of type %s."(T.stringof));
     return value.arrayValue.map!((x) => unmarshal!(ElementType!T)(x)).array;
+}
+
+@("SDLite convenience functions")
+unittest
+{
+    import unit_threaded.assertions;
+    import std.datetime : SysTime, Date, Duration;
+
+    // Create a root SDLNode
+    auto root = new SDLNode("root");
+    root.values ~= SDLValue.text("rootValue");
+    root.attributes ~= SDLAttribute("rootAttribute", SDLValue.text("rootAttributeValue"));
+
+    // Add a child SDLNode
+    auto child = SDLNode("child");
+    child.values ~= SDLValue.text("childValue");
+    root.children ~= child;
+
+    auto child2 = SDLNode("child2");
+    root.children ~= child2;
+
+    getChild(root, "child").qualifiedName.should == "child";
+    expectChild(root, "child").qualifiedName.should == "child";
+
+    expectChild(root, "non-existant").shouldThrow;
+
+    getValue!string(root, "defaultValue").should == "rootValue";
+    getValue!string(&child2, "defaultValue").should == "defaultValue";
+    
+    expectValue!string(root).should == "rootValue";
+    expectValue!string(&child2).shouldThrow;
+
+    getChildValue!string(root, "child", "defaultValue").should == "childValue";
+    getChildValue!string(root, "non-existant", "defaultValue").should == "defaultValue";
+
+    expectChildValue!string(root, "child").should == "childValue";
+    expectChildValue!string(root, "non-existant").shouldThrow;
+
+    getAttributeValue!string(root, "rootAttribute", "defaultValue").should == "rootAttributeValue";
+    getAttributeValue!string(root, "non-existant", "defaultValue").should == "defaultValue";
+
+    expectAttributeValue!string(root, "rootAttribute").should == "rootAttributeValue";
+    expectAttributeValue!string(root, "non-existant").shouldThrow;
 }

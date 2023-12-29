@@ -18,6 +18,7 @@ workingDirectory "out"
 subPackage "modules/ecs"
 subPackage "examples/techdemo"
 subPackage "tools/zpklink"
+subPackage "tools/apigen"
 
 subPackage "libraries/api"
 subPackage "libraries/zyfont"
@@ -33,6 +34,8 @@ configuration "sdl-opengl" {
 
 	targetType "executable"
 
+	postBuildCommands "dub run zyeware:apigen"
+
 	dependency "zyeware:pal-audio-openal" version="*"
 	dependency "zyeware:pal-graphics-opengl" version="*"
 	dependency "zyeware:pal-display-sdl" version="*"
@@ -42,4 +45,6 @@ configuration "sdl-opengl" {
 
 configuration "unittest" {
 	dependency "silly" version="~>1.1.1"
+	dependency "unit-threaded:assertions" version="~>2.1.7"
+	dependency "unit-threaded:exception" version="~>2.1.7"
 }

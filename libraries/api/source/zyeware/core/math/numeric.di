@@ -2,9 +2,9 @@
 module zyeware.core.math.numeric;
 
 
-public import std.math : abs;
+public import std.math : abs, PI_2;
 public import std.algorithm : clamp;
-import std.traits : isNumeric;
+import std.traits : isNumeric, isFloatingPoint;
 import std.datetime : Duration;
 public import inmath.math : degrees, radians;
 import inmath.util : isVector;
@@ -42,6 +42,7 @@ T invLerp(T)(T a, T b, float v)
 if(isNumeric!T || isVector!T) {
 return (v - a) / (b - a);
 }
+import std.math : fmod;
 
 /// Returns the shortest angular distance between two angles.
 /// 
@@ -50,11 +51,11 @@ return (v - a) / (b - a);
 /// b = The second angle, in radians.
 /// 
 /// Returns: The shortest angular distance, in radians.
-float angleBetween(T)(T a, T b) pure nothrow 
+float angleBetween(T)(T a, T b) nothrow 
 if(isFloatingPoint!T) {
 
 immutable T delta;
-return ((2 * delta) % PI2) - delta;
+return fmod(2 * delta, PI_2) - delta;
 }
 
 /// Converts a duration of time to seconds, represented as a float.
@@ -64,3 +65,14 @@ return ((2 * delta) % PI2) - delta;
 /// 
 /// Returns: The seconds as float.
 pragma(inline, true) float toFloatSeconds(Duration dt) pure nothrow;
+
+@("Numeric helper functions") unittest {
+import std.datetime : seconds;
+import unit_threaded.assertions;
+lerp(0.0, 10.0, 0.5).should == 5.0;
+lerp(5.0f, 15.0f, 0.5).should == 10.0;
+invLerp(0.0, 10.0, 5.0).should == 0.5;
+invLerp(5.0f, 15.0f, 10.0f).should == 0.5;
+angleBetween(0.0, 3.14159).should == 3.14159;
+toFloatSeconds(5.seconds).should == 5.0;
+}
