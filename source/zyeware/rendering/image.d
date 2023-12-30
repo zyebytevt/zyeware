@@ -112,3 +112,26 @@ public:
             vec2i(image.width, image.height));
     }
 }
+
+@("Image")
+unittest
+{
+    import unit_threaded.assertions;
+
+    // Create an Image
+    immutable ubyte[] pixels = [0, 0, 0, 255, 255, 255, 255, 255];
+    ubyte channels = 4;
+    ubyte bitsPerChannel = 8;
+    vec2i size = vec2i(2, 1);
+
+    Image image = new Image(pixels, channels, bitsPerChannel, size);
+    image.pixels.length.should == 8;
+    image.channels.should == 4;
+    image.bitsPerChannel.should == 8;
+    image.size.x.should == 2;
+    image.size.y.should == 1;
+
+    image.getPixel(vec2i(0, 0)).should == color(0, 0, 0, 1);
+    image.getPixel(vec2i(1, 0)).should == color(1, 1, 1, 1);
+    image.getPixel(vec2i(2, 0)).should == color(1, 0, 1, 1);
+}

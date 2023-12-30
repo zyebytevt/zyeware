@@ -3,17 +3,23 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.core.logging.logger;
+module zyeware.core.logger;
 
 import core.stdc.stdio : printf;
 import std.stdio : File, stdout;
+import std.string : format;
 import std.datetime : Duration;
-import std.string : fromStringz;
-import std.traits : isSomeString;
 import std.algorithm : remove, SwapStrategy;
-import std.conv : dtext;
+import std.exception : assumeWontThrow;
 
 import zyeware;
+
+__gshared public Logger logClient;
+__gshared package(zyeware)
+{
+    Logger logCore;
+    Logger logPal;
+}
 
 /// The log level to use for various logs.
 enum LogLevel
@@ -83,9 +89,23 @@ public:
     }
 
     /// Flushes the log sink connected to this log.
-    void flush() 
+    void flush() => mSink.flush();
+
+    pragma(inline, true)
     {
-        mSink.flush();
+        void fatal(dstring message) nothrow => log(LogLevel.fatal, message);
+        void error(dstring message) nothrow => log(LogLevel.error, message);
+        void warning(dstring message) nothrow => log(LogLevel.warning, message);
+        void info(dstring message) nothrow => log(LogLevel.info, message);
+        void debug_(dstring message) nothrow => log(LogLevel.debug_, message);
+        void verbose(dstring message) nothrow => log(LogLevel.verbose, message);
+
+        void fatal(Args...)(dstring message, Args args) => log(LogLevel.fatal, message.format(args).assumeWontThrow);
+        void error(Args...)(dstring message, Args args) => log(LogLevel.error, message.format(args).assumeWontThrow);
+        void warning(Args...)(dstring message, Args args) => log(LogLevel.warning, message.format(args).assumeWontThrow);
+        void info(Args...)(dstring message, Args args) => log(LogLevel.info, message.format(args).assumeWontThrow);
+        void debug_(Args...)(dstring message, Args args) => log(LogLevel.debug_, message.format(args).assumeWontThrow);
+        void verbose(Args...)(dstring message, Args args) => log(LogLevel.verbose, message.format(args).assumeWontThrow);
     }
 }
 

@@ -7,6 +7,9 @@ import std.typecons : Tuple;
 import zyeware;
 import zyeware.utils.sdlang;
 
+alias Interpolatorf = Interpolator!(float, lerp!float);
+alias Interpolatord = Interpolator!(double, lerp!double);
+
 /// The `Interpolator` allows to create various keypoints on a 
 /// one dimensional line, and interpolating between them.
 /// You can supply a custom type and lerping function for various
@@ -41,4 +44,24 @@ void clearPoints() pure nothrow;
 T interpolate(float offset) pure nothrow;
 
 staticauto load(string path);
+}
+
+@("Interpolator") unittest {
+import unit_threaded.assertions;
+
+Interpolatorf interpolator;
+interpolator.addPoint(0.0f, 0.0f);
+interpolator.addPoint(1.0f, 1.0f);
+interpolator.addPoint(0.5f, 0.5f);
+interpolator.mPoints.length.should == 3;
+interpolator.removePoint(1);
+interpolator.mPoints.length.should == 2;
+interpolator.clearPoints();
+interpolator.mPoints.length.should == 0;
+interpolator.addPoint(0.0f, 0.0f);
+interpolator.addPoint(1.0f, 1.0f);
+interpolator.addPoint(0.5f, 0.5f);
+interpolator.mPoints.length.should == 3;
+interpolator.interpolate(0.25f).should == 0.25f;
+interpolator.interpolate(0.75f).should == 0.75f;
 }

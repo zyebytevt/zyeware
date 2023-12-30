@@ -6,6 +6,7 @@
 module zyeware.core.crash;
 
 import std.string : format;
+import std.conv : dtext;
 
 import zyeware;
 
@@ -34,17 +35,17 @@ public:
     {
         import std.string : split, startsWith;
 
-        fatal("==================== Unhandled throwable '%s' ====================",
+        logCore.fatal("==================== Unhandled throwable '%s' ====================",
             typeid(t).toString().split(".")[$-1]);
-        fatal("Details: %s", t.message);
+        logCore.fatal("Details: %s", t.message);
 
         foreach (trace; t.info)
             if (!trace.startsWith("??:?"))
-                info(trace);
+                logCore.info(trace.dtext);
         
-        fatal("------------------------------");
-        fatal("If you suspect that this is a ZyeWare issue, please leave a bug report over at https://github.com/zyebytevt/zyeware!");
-        fatal("=================================================================");
+        logCore.fatal("------------------------------");
+        logCore.fatal("If you suspect that this is a ZyeWare issue, please leave a bug report over at https://github.com/zyebytevt/zyeware!");
+        logCore.fatal("=================================================================");
     }
 }
 
@@ -145,8 +146,8 @@ public:
             showXMessage(t);
         else
         {
-            warning("Could not find appropriate message box application to use.");
-            warning("I hope you're looking at the logs!");
+            logCore.warning("Could not find appropriate message box application to use.");
+            logCore.warning("I hope you're looking at the logs!");
         }
     }
 }

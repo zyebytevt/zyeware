@@ -145,7 +145,7 @@ package(zyeware) static:
         sSchemes["res"] = new VfsCombinedDirectory("res:", []);
         sSchemes["user"] = createUserDir();
 
-        info("Initialized Vfs.");
+        logCore.info("Virtual File System initialized.");
     }
 
     void cleanup() nothrow
@@ -179,7 +179,7 @@ public static:
 
         (cast(VfsCombinedDirectory) sSchemes["res"]).addDirectory(pck);
         sSchemes[scheme] = pck;
-        info("Added package '%s' as '%s'.", path, scheme);
+        logCore.info("Added package '%s' as '%s'.", path, scheme);
         return pck;
     }
 

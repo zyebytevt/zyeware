@@ -65,16 +65,16 @@ void initialize()
 
     enforce!AudioException(alcMakeContextCurrent(pContext), "Failed to make audio context current.");
 
-    info("Initialized OpenAL:");
-    info("    Version: %s", alGetString(AL_VERSION).fromStringz);
-    info("    Vendor: %s", alGetString(AL_VENDOR).fromStringz);
-    info("    Renderer: %s", alGetString(AL_RENDERER).fromStringz);
-    info("    Extensions: %s", alGetString(AL_EXTENSIONS).fromStringz);
+    logPal.info("Initialized OpenAL:");
+    logPal.info("    Version: %s", alGetString(AL_VERSION).fromStringz);
+    logPal.info("    Vendor: %s", alGetString(AL_VENDOR).fromStringz);
+    logPal.info("    Renderer: %s", alGetString(AL_RENDERER).fromStringz);
+    logPal.info("    Extensions: %s", alGetString(AL_EXTENSIONS).fromStringz);
 
     pAudioThread = new AudioThread();
     pAudioThread.start();
 
-    info("Audio thread started.");
+    logPal.info("Audio thread started.");
 }
 
 void loadLibraries()
@@ -89,7 +89,7 @@ void loadLibraries()
     if (alResult != alSupport)
     {
         foreach (info; loader.errors)
-            warning("OpenAL loader: %s", info.message.fromStringz);
+            logPal.warning("OpenAL loader: %s", info.message.fromStringz);
 
         switch (alResult)
         {
@@ -100,7 +100,7 @@ void loadLibraries()
             throw new AudioException("Provided OpenAL shared is corrupted.");
 
         default:
-            warning("Got older OpenAL version than expected. This might lead to errors.");
+            logPal.warning("Got older OpenAL version than expected. This might lead to errors.");
         }
     }
 }
@@ -112,7 +112,7 @@ void cleanup()
     
     alcCloseDevice(pDevice);
 
-    info("Audio thread stopped, OpenAL terminated.");
+    logPal.info("Audio thread stopped, OpenAL terminated.");
 }
 
 NativeHandle createSource(in NativeHandle busHandle)
@@ -308,12 +308,12 @@ void updateSourceBuffers(NativeHandle handle)
                     (int sample)
                     {
                         if (!source.decoder.seekPosition(sample))
-                            warning("Seeking to sample %d failed.", sample);
+                            logPal.warning("Seeking to sample %d failed.", sample);
                     },
                     (ModuleLoopPoint mod)
                     {
                         if (!source.decoder.seekPosition(mod.pattern, mod.row))
-                            warning("Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
+                            logPal.warning("Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
                     }
                 );
 

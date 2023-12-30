@@ -27,14 +27,15 @@ bool isOneShot;
 
 Slot[] mSlots;
 
+ptrdiff_t findSlot(delegate_t dg) @trusted pure nothrow;
+
+ptrdiff_t findSlot(function_t fn) @trusted pure nothrow;
+
 public:
-alias slotidx_t = size_t;
 
-slotidx_t connect(delegate_t dg, Flag!"oneShot" oneShot = No.oneShot) @trusted pure nothrow;
+void connect(delegate_t dg, Flag!"oneShot" oneShot = No.oneShot) @trusted pure;
 
-slotidx_t connect(function_t fn, Flag!"oneShot" oneShot = No.oneShot) @trusted pure nothrow;
-
-void disconnect(slotidx_t idx) @safe pure nothrow;
+void connect(function_t fn, Flag!"oneShot" oneShot = No.oneShot) @trusted pure;
 
 void disconnect(delegate_t dg) @trusted pure nothrow;
 
@@ -46,11 +47,11 @@ void emit(T1 args) nothrow;pragma(inline, true)  {
 
 void opCall(T1 args);
 
-slotidx_t opOpAssign(string op)(delegate_t dg) 
-if(op == "+")=> connect(dg);
+void opOpAssign(string op)(delegate_t dg) 
+if(op == "~")=> connect(dg);
 
-slotidx_t opOpAssign(string op)(function_t fn) 
-if(op == "+")=> connect(fn);
+void opOpAssign(string op)(function_t fn) 
+if(op == "~")=> connect(fn);
 
 void opOpAssign(string op)(delegate_t dg) 
 if(op == "-")=> disconnect(dg);
@@ -70,11 +71,9 @@ int result;
 void delegate(int x) nothrow delegate1;
 
 void function(int x) nothrow function1;
-
-auto slot1 = signal.connect(delegate1);;
+signal.connect(delegate1);
 signal.mSlots.length.should == 1;
-
-auto slot2 = signal.connect(function1);;
+signal.connect(function1);
 signal.mSlots.length.should == 2;
 signal.emit(20);
 result.should == 20;
@@ -82,16 +81,13 @@ signal.disconnect(delegate1);
 signal.mSlots.length.should == 1;
 signal.disconnect(function1);
 signal.mSlots.length.should == 0;
-slot1 = signal.connect(delegate1);
-slot2 = signal.connect(function1);
+signal.connect(delegate1);
+signal.connect(function1);
 signal.mSlots.length.should == 2;
-signal.disconnect(slot1);
-signal.mSlots.length.should == 1;
-signal.disconnect(slot2);
-signal.mSlots.length.should == 0;
-slot1 = signal.connect(delegate1);
-slot2 = signal.connect(function1);
-signal.mSlots.length.should == 2;
+signal.connect(delegate1).shouldThrow;
+signal.connect(function1).shouldThrow;
+signal.connect(cast(signal.delegate_t)null).shouldThrow;
+signal.connect(cast(signal.function_t)null).shouldThrow;
 signal.disconnectAll();
 signal.mSlots.length.should == 0;
 }

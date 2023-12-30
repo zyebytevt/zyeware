@@ -69,7 +69,7 @@ right = 1 << 5
 
 this(in BitmapFontProperties properties) {
 mProperties = properties;
-debug_("Creating bitmap font '%s, %d'...", mProperties.fontName, mProperties.fontSize);
+logCore.debug_("Creating bitmap font '%s, %d'...", mProperties.fontName, mProperties.fontSize);
 
 for (
 

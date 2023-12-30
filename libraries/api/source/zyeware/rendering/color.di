@@ -56,6 +56,36 @@ pragma(inline, true) color darken(float amount) pure const nothrow @nogc;
 static color lerp(color a, color b, float t) pure nothrow;
 }
 
+@("Color") unittest {
+import unit_threaded.assertions;
+
+color c1;
+shouldEqual(c1.vec, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+color c2;
+shouldEqual(c2.vec, vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+vec4 v;
+
+color c3;
+shouldEqual(c3.vec, v);
+
+color c5;
+shouldEqual(c5.vec, vec4(240.0f, 1.0f, 1.0f, 1.0f));
+
+color c4;
+shouldEqual(c4.vec, vec4(0.0f, 0.0f, 1.0f, 1.0f));
+
+color c6;
+shouldEqual(c6.vec, vec4(0.5f, 1.5f, 0.5f, 1.0f));
+
+color c7;
+shouldEqual(c7.vec, vec4(-0.5f, 0.5f, -0.5f, 1.0f));
+
+color c8;
+shouldEqual(c8.vec, vec4(0.5f, 0.5f, 0.0f, 1.0f));
+}
+
 private:
 import std.typecons : Tuple;
 

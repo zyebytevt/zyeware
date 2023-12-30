@@ -36,7 +36,7 @@ public static:
         if (sActiveLocale)
             return sActiveLocale.translate(key, args);
 
-        warning("Tried to translate '%s' without active locale.", key);
+        logCore.warning("Tried to translate '%s' without active locale.", key);
         return key;
     }
 
@@ -58,13 +58,13 @@ public static:
         {
             sLoadedLocales[file.mLocale] = file;
             file.optimize();
-            debug_("Added locale '%s' and optimized translation.", file.mLocale);
+            logCore.info("Added locale '%s' and optimized translation.", file.mLocale);
         }
         else
         {
             locale.mTranslations = locale.mTranslations.byPair.chain(file.mTranslations.byPair).assocArray;
             locale.optimize();
-            debug_("Merged new translations into locale '%s' and optimized translation.",
+            logCore.info("Merged new translations into locale '%s' and optimized translation.",
                 file.mLocale);
         }
     }
@@ -77,7 +77,7 @@ public static:
         in (locale, "Locale cannot be null.")
     {
         if (sLoadedLocales.remove(locale))
-            debug_("Removed locale '%s'.", locale);
+            logCore.debug_("Removed locale '%s'.", locale);
     }
 
     /// All currently loaded locales.
@@ -103,7 +103,7 @@ public static:
         enforce(file, format!"Locale '%s' doesn't have a file loaded."(locale));
 
         sActiveLocale = *file;
-        debug_("Changed locale to '%s'.", locale);
+        logCore.debug_("Changed locale to '%s'.", locale);
     }
 }
 
@@ -243,7 +243,7 @@ public:
                 path ~= child.name;
                 immutable string pathString = path.join(".");
                 locale.addTranslation(pathString, translation);
-                verbose("Locale %s += %s", localeName, pathString);
+                logCore.verbose("Added '%s' to locale %s.", pathString, localeName);
                 path = path[0 .. $ - 1];
             }
         }

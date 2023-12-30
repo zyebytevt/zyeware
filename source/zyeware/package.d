@@ -29,8 +29,7 @@ public
     import zyeware.core.native;
     import zyeware.core.random;
 
-    import zyeware.core.logging.logger;
-    import zyeware.core.logging.core : fatal, error, warning, info, debug_, verbose;
+    import zyeware.core.logger;
 
     import zyeware.core.math.matrix;
     import zyeware.core.math.numeric;

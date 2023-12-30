@@ -62,7 +62,7 @@ public:
     pragma(inline, true)
     color toRgb() const nothrow
     {
-        return color(hsv2rgb(vec));
+        return color(hsv2rgb(vec4(vec.x / 360.0f, vec.y, vec.z, vec.w)));
     }
 
     pragma(inline, true)
@@ -88,6 +88,45 @@ public:
         immutable vec4 result = zyeware.core.math.numeric.lerp(a.vec, b.vec, t);
         return color(result.r, result.g, result.b, result.a);
     }
+}
+
+@("Color")
+unittest
+{
+    import unit_threaded.assertions;
+
+    // Create a color from a hex code
+    color c1 = color("#FF0000");
+    shouldEqual(c1.vec, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+    // Create a color from RGB values
+    color c2 = color(0.0f, 1.0f, 0.0f);
+    shouldEqual(c2.vec, vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+    // Create a color from a vec4
+    vec4 v = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    color c3 = color(v);
+    shouldEqual(c3.vec, v);
+
+    // Convert to HSV
+    color c5 = c3.toHsv();
+    shouldEqual(c5.vec, vec4(240.0f, 1.0f, 1.0f, 1.0f));
+
+    // Convert to RGB
+    color c4 = c5.toRgb();
+    shouldEqual(c4.vec, vec4(0.0f, 0.0f, 1.0f, 1.0f));
+
+    // Brighten
+    color c6 = c2.brighten(0.5f);
+    shouldEqual(c6.vec, vec4(0.5f, 1.5f, 0.5f, 1.0f));
+
+    // Darken
+    color c7 = c2.darken(0.5f);
+    shouldEqual(c7.vec, vec4(-0.5f, 0.5f, -0.5f, 1.0f));
+
+    // Lerp
+    color c8 = color.lerp(c1, c2, 0.5f);
+    shouldEqual(c8.vec, vec4(0.5f, 0.5f, 0.0f, 1.0f));
 }
 
 private:

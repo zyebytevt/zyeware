@@ -8,6 +8,7 @@ module zyeware.pal.graphics.opengl.api.api;
 import std.typecons : Tuple;
 import std.exception : assumeWontThrow;
 import std.string : format, toStringz, fromStringz;
+import std.conv : dtext;
 
 import bindbc.opengl;
 
@@ -67,45 +68,47 @@ static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum seve
 
     switch (type)
     {
-        case GL_DEBUG_TYPE_ERROR:
-            typeName = "Error";
-            break;
-        
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            typeName = "Deprecated Behavior";
-            break;
-        
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            typeName = "Undefined Behavior";
-            break;
+    case GL_DEBUG_TYPE_ERROR:
+        typeName = "Error";
+        break;
+    
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        typeName = "Deprecated Behavior";
+        break;
+    
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        typeName = "Undefined Behavior";
+        break;
 
-        case GL_DEBUG_TYPE_PERFORMANCE:
-            typeName = "Performance";
-            break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        typeName = "Performance";
+        break;
 
-        case GL_DEBUG_TYPE_OTHER:
-        default:
-            return;
+    case GL_DEBUG_TYPE_OTHER:
+    default:
+        return;
     }
 
     switch (severity)
     {
-        case GL_DEBUG_SEVERITY_LOW:
-            info("%s: %s", typeName, cast(string) message[0..length]);
-            break;
+    case GL_DEBUG_SEVERITY_LOW:
+        logLevel = LogLevel.info;
+        break;
 
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            warning("%s: %s", typeName, cast(string) message[0..length]);
-            break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        logLevel = LogLevel.warning;
+        break;
 
-        case GL_DEBUG_SEVERITY_HIGH:
-            error("%s: %s", typeName, cast(string) message[0..length]);
-            break;
+    case GL_DEBUG_SEVERITY_HIGH:
+        logLevel = LogLevel.error;
+        break;
 
-        default:
-            debug_("%s: %s", typeName, cast(string) message[0..length]);
-            break;
+    default:
+        logLevel = LogLevel.debug_;
+        break;
     }
+
+    logPal.log(logLevel, format!"%s: %s"d(typeName, message.fromStringz).assumeWontThrow);
 }
 
 void initialize()
@@ -120,7 +123,7 @@ void initialize()
     if (glResult != glSupport)
     {
         foreach (info; loader.errors)
-            warning("OpenGL loader: %s", info.message.fromStringz);
+            logPal.warning("OpenGL loader: %s", info.message.fromStringz);
 
         switch (glResult)
         {
@@ -134,11 +137,11 @@ void initialize()
             throw new GraphicsException("No OpenGL context available.");
 
         default:
-            warning("Got older OpenGL version than expected. This might lead to errors.");
+            logPal.warning("Got older OpenGL version than expected. This might lead to errors.");
         }
     }
 
-    debug_("OpenGL dynamic library loaded.");
+    logPal.debug_("OpenGL dynamic library loaded.");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -171,12 +174,12 @@ void initialize()
         pFlagValues[cast(size_t) RenderFlag.wireframe] = resultInt == GL_LINE;
     }
 
-    info("Initialized OpenGL:");
-    info("    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
-    info("    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
-    info("    Version: %s", glGetString(GL_VERSION).fromStringz);
-    info("    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
-    info("    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
+    logPal.info("Initialized OpenGL:");
+    logPal.info("    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
+    logPal.info("    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
+    logPal.info("    Version: %s", glGetString(GL_VERSION).fromStringz);
+    logPal.info("    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
+    logPal.info("    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
 }
 
 void cleanup()

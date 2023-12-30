@@ -128,3 +128,35 @@ public:
         return frameAnims;
     }
 }
+
+@("Frame animations")
+unittest
+{
+    import unit_threaded.assertions;
+
+    // Create a FrameAnimations
+    FrameAnimations frameAnims = new FrameAnimations();
+
+    // Add an animation
+    FrameAnimations.Animation animation;
+    animation.name = "test";
+    animation.frames = [FrameAnimations.Frame(0, dur!"msecs"(100))];
+    animation.isLooping = true;
+    animation.hFlip = false;
+    animation.vFlip = false;
+    frameAnims.addAnimation("test", animation);
+    frameAnims.mAnimations.length.should == 1;
+
+    // Get the animation
+    FrameAnimations.Animation* retrievedAnimation = frameAnims.getAnimation("test");
+    retrievedAnimation.should.not == null;
+    retrievedAnimation.name.should == "test";
+    retrievedAnimation.frames.length.should == 1;
+    retrievedAnimation.isLooping.should == true;
+    retrievedAnimation.hFlip.should == false;
+    retrievedAnimation.vFlip.should == false;
+
+    // Remove the animation
+    frameAnims.removeAnimation("test");
+    frameAnims.mAnimations.length.should == 0;
+}

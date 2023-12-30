@@ -96,7 +96,7 @@ void onGamepadAxisMoved(GamepadIndex index, GamepadAxis axis, float value) nothr
 
 package(zyeware.core) static:
 
-void initialize() @safe nothrow;
+void initialize() @safe;
 
 void cleanup() @safe nothrow;
 

@@ -46,3 +46,25 @@ static Image load(string path);
 
 static Image load(in ubyte[] data);
 }
+
+@("Image") unittest {
+import unit_threaded.assertions;
+
+immutable ubyte[] pixels;
+
+ubyte channels;
+
+ubyte bitsPerChannel;
+
+vec2i size;
+
+Image image;
+image.pixels.length.should == 8;
+image.channels.should == 4;
+image.bitsPerChannel.should == 8;
+image.size.x.should == 2;
+image.size.y.should == 1;
+image.getPixel(vec2i(0, 0)).should == color(0, 0, 0, 1);
+image.getPixel(vec2i(1, 0)).should == color(1, 1, 1, 1);
+image.getPixel(vec2i(2, 0)).should == color(1, 0, 1, 1);
+}

@@ -60,3 +60,28 @@ Animation* getAnimation(string name) pure;
 
 static FrameAnimations load(string path);
 }
+
+@("Frame animations") unittest {
+import unit_threaded.assertions;
+
+FrameAnimations frameAnims;
+
+FrameAnimations.Animation animation;
+animation.name = "test";
+animation.frames = [FrameAnimations.Frame(0, dur!"msecs"(100))];
+animation.isLooping = true;
+animation.hFlip = false;
+animation.vFlip = false;
+frameAnims.addAnimation("test", animation);
+frameAnims.mAnimations.length.should == 1;
+
+FrameAnimations.Animation* retrievedAnimation;
+retrievedAnimation.should.not == null;
+retrievedAnimation.name.should == "test";
+retrievedAnimation.frames.length.should == 1;
+retrievedAnimation.isLooping.should == true;
+retrievedAnimation.hFlip.should == false;
+retrievedAnimation.vFlip.should == false;
+frameAnims.removeAnimation("test");
+frameAnims.mAnimations.length.should == 0;
+}

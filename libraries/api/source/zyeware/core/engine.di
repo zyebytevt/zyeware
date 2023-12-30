@@ -68,6 +68,8 @@ string[] packages;
 
 LogLevel coreLogLevel;
 
+LogLevel palLogLevel;
+
 LogLevel clientLogLevel;
 
 string graphicsDriver;

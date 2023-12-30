@@ -52,7 +52,7 @@ struct ProjectProperties
 
                 if (libraryOs == OS.unknown)
                 {
-                    warning("Ignoring 'unknown' main-library definition.");
+                    logCore.warning("Ignoring 'unknown' main-library definition.");
                     continue;
                 }
 

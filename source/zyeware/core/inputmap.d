@@ -158,15 +158,15 @@ private static:
     void onGamepadAxisMoved(GamepadIndex index, GamepadAxis axis, float value) nothrow { processInput(Input.gamepadAxis(index, axis, value)); }
 
 package(zyeware.core) static:
-    void initialize() @safe nothrow
+    void initialize() @safe
     {
-        EventDispatcher.keyboardKeyPressed += &onKeyboardKeyPressed;
-        EventDispatcher.keyboardKeyReleased += &onKeyboardKeyReleased;
-        EventDispatcher.mouseButtonPressed += &onMouseButtonPressed;
-        EventDispatcher.mouseButtonReleased += &onMouseButtonReleased;
-        EventDispatcher.gamepadButtonPressed += &onGamepadButtonPressed;
-        EventDispatcher.gamepadButtonReleased += &onGamepadButtonReleased;
-        EventDispatcher.gamepadAxisMoved += &onGamepadAxisMoved;
+        EventDispatcher.keyboardKeyPressed ~= &onKeyboardKeyPressed;
+        EventDispatcher.keyboardKeyReleased ~= &onKeyboardKeyReleased;
+        EventDispatcher.mouseButtonPressed ~= &onMouseButtonPressed;
+        EventDispatcher.mouseButtonReleased ~= &onMouseButtonReleased;
+        EventDispatcher.gamepadButtonPressed ~= &onGamepadButtonPressed;
+        EventDispatcher.gamepadButtonReleased ~= &onGamepadButtonReleased;
+        EventDispatcher.gamepadAxisMoved ~= &onGamepadAxisMoved;
     }
 
     void cleanup() @safe nothrow
@@ -195,7 +195,7 @@ public static:
     {
         if (auto action = getAction(name))
         {
-            warning("Cannot add action '%s' as it already exists.", name);
+            logCore.warning("Cannot add action '%s' as it already exists.", name);
             return action;
         }
 

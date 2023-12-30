@@ -3,6 +3,7 @@ module zyeware.core.crash;
 
 
 import std.string : format;
+import std.conv : dtext;
 import zyeware;
 
 /// A `CrashHandler` is responsible for gracefully handling an unhandled `Throwable`.

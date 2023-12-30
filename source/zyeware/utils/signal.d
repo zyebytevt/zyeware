@@ -24,62 +24,69 @@ private:
 
     Slot[] mSlots;
 
-public:
-    alias slotidx_t = size_t;
-
-    slotidx_t connect(delegate_t dg, Flag!"oneShot" oneShot = No.oneShot) @trusted pure nothrow
-    {
-        Slot c;
-        c.dg = dg;
-        c.isDelegate = true;
-        c.isOneShot = oneShot;
-        mSlots ~= c;
-
-        return mSlots.length - 1;
-    }
-
-    slotidx_t connect(function_t fn, Flag!"oneShot" oneShot = No.oneShot) @trusted pure nothrow
-    {
-        Slot c;
-        c.fn = fn;
-        c.isDelegate = false;
-        c.isOneShot = oneShot;
-        mSlots ~= c;
-
-        return mSlots.length - 1;
-    }
-
-    void disconnect(slotidx_t idx) @safe pure nothrow
-    {
-        mSlots = mSlots.remove(idx);
-    }
-
-    void disconnect(delegate_t dg) @trusted pure nothrow
+    ptrdiff_t findSlot(delegate_t dg) @trusted pure nothrow
     {
         for (size_t i; i < mSlots.length; ++i)
         {
             auto c = &mSlots[i];
 
             if (c.isDelegate && c.dg is dg)
-            {
-                mSlots = mSlots.remove(i);
-                break;
-            }
+                return i;
         }
+
+        return -1;
     }
 
-    void disconnect(function_t fn) @trusted pure nothrow
+    ptrdiff_t findSlot(function_t fn) @trusted pure nothrow
     {
         for (size_t i; i < mSlots.length; ++i)
         {
             auto c = &mSlots[i];
-            
+
             if (!c.isDelegate && c.fn is fn)
-            {
-                mSlots = mSlots.remove(i);
-                break;
-            }
+                return i;
         }
+
+        return -1;
+    }
+
+public:
+    void connect(delegate_t dg, Flag!"oneShot" oneShot = No.oneShot) @trusted pure
+    {
+        enforce!CoreException(dg, "Delegate cannot be null.");
+        enforce!CoreException(findSlot(dg) == -1, "Delegate already connected.");
+
+        Slot c;
+        c.dg = dg;
+        c.isDelegate = true;
+        c.isOneShot = oneShot;
+        mSlots ~= c;
+    }
+
+    void connect(function_t fn, Flag!"oneShot" oneShot = No.oneShot) @trusted pure
+    {
+        enforce!CoreException(fn, "Function cannot be null.");
+        enforce!CoreException(findSlot(fn) == -1, "Function already connected.");
+        
+        Slot c;
+        c.fn = fn;
+        c.isDelegate = false;
+        c.isOneShot = oneShot;
+        mSlots ~= c;
+    }
+
+    void disconnect(delegate_t dg) @trusted pure nothrow
+    {
+        immutable idx = findSlot(dg);
+        if (idx >= 0)
+            mSlots = mSlots.remove(idx);
+    }
+
+    void disconnect(function_t fn) @trusted pure nothrow
+    {
+        immutable idx = findSlot(fn);
+        if (idx >= 0)
+            mSlots = mSlots.remove(idx);
     }
 
     void disconnectAll() @safe pure nothrow
@@ -106,8 +113,8 @@ public:
     pragma(inline, true)
     {
         void opCall(T1 args) => emit(args);
-        slotidx_t opOpAssign(string op)(delegate_t dg) if (op == "+") => connect(dg);
-        slotidx_t opOpAssign(string op)(function_t fn) if (op == "+") => connect(fn);
+        void opOpAssign(string op)(delegate_t dg) if (op == "~") => connect(dg);
+        void opOpAssign(string op)(function_t fn) if (op == "~") => connect(fn);
         void opOpAssign(string op)(delegate_t dg) if (op == "-") => disconnect(dg);
         void opOpAssign(string op)(function_t fn) if (op == "-") => disconnect(fn);
     }
@@ -130,10 +137,10 @@ unittest
 
     void function(int x) nothrow function1 = (x) { };
 
-    auto slot1 = signal.connect(delegate1);
+    signal.connect(delegate1);
     signal.mSlots.length.should == 1;
 
-    auto slot2 = signal.connect(function1);
+    signal.connect(function1);
     signal.mSlots.length.should == 2;
 
     // Emit the signal
@@ -149,20 +156,17 @@ unittest
     signal.mSlots.length.should == 0;
 
     // Connect the delegate and function again
-    slot1 = signal.connect(delegate1);
-    slot2 = signal.connect(function1);
+    signal.connect(delegate1);
+    signal.connect(function1);
     signal.mSlots.length.should == 2;
 
-    // Disconnect using the slot index
-    signal.disconnect(slot1);
-    signal.mSlots.length.should == 1;
-    signal.disconnect(slot2);
-    signal.mSlots.length.should == 0;
+    // Reconnecting same delegate and function should throw
+    signal.connect(delegate1).shouldThrow;
+    signal.connect(function1).shouldThrow;
 
-    // Connect the delegate and function again
-    slot1 = signal.connect(delegate1);
-    slot2 = signal.connect(function1);
-    signal.mSlots.length.should == 2;
+    // Connecting null should throw
+    signal.connect(cast(signal.delegate_t) null).shouldThrow;
+    signal.connect(cast(signal.function_t) null).shouldThrow;
 
     // Disconnect all
     signal.disconnectAll();

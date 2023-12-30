@@ -66,6 +66,7 @@ private static:
         string[] packages; /// The packages to load.
 
         LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
+        LogLevel palLogLevel = LogLevel.verbose; /// The log level for the PAL logger.
         LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
         string graphicsDriver = "opengl"; /// The graphics driver to use.
@@ -241,6 +242,7 @@ private static:
                 "game", "The packages to load.", &parsed.packages,
                 "loglevel-core", "The minimum log level for engine logs to be displayed.", &parsed.coreLogLevel,
                 "loglevel-client", "The minimum log level for game logs to be displayed.", &parsed.clientLogLevel,
+                "loglevel-pal", "The minimum log level for the PAL logs to be displayed.", &parsed.palLogLevel,
                 "graphics-driver", "The graphics driver to use.", &parsed.graphicsDriver,
                 "audio-driver", "The audio driver to use.", &parsed.audioDriver,
                 "display-driver", "The display driver to use.", &parsed.displayDriver,
@@ -280,13 +282,12 @@ package(zyeware.core) static:
         ParsedArgs parsedArgs = parseCmdArgs(args);
 
         // Initialize profiler and logger before anything else.
-        import zyeware.core.logging.core : initCoreLogger;
-        import zyeware.core.logging.client : initClientLogger;
+        auto sink = new ColorLogSink();
+        logCore = new Logger(sink, parsedArgs.coreLogLevel, "Core");
+        logClient = new Logger(sink, parsedArgs.clientLogLevel, "Client");
+        logPal = new Logger(sink, parsedArgs.palLogLevel, "PAL");
 
-        initCoreLogger(parsedArgs.coreLogLevel);
-        initClientLogger(parsedArgs.clientLogLevel);
-
-        info("ZyeWare Game Engine v%s", engineVersion.toString());
+        logCore.info("ZyeWare Game Engine v%s", engineVersion.toString());
 
         // Initialize crash handler afterwards because it relies on the logger.
         version (linux)
@@ -372,12 +373,12 @@ public static:
     {
         immutable size_t memoryBeforeCollection = GC.stats().usedSize;
 
-        debug_("Running garbage collector...");
+        logCore.debug_("Running garbage collector...");
         GC.collect();
         AssetManager.cleanCache();
         GC.minimize();
 
-        debug_("Finished garbage collection, freed %s.",
+        logCore.debug_("Finished garbage collection, freed %s.",
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 
