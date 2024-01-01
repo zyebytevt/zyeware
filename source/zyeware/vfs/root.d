@@ -37,6 +37,7 @@ private ubyte[16] md5FromHex(string hexString)
     return result;
 }
 
+@expose
 struct Vfs
 {
 private static:
@@ -48,7 +49,7 @@ private static:
     bool sPortableMode;
 
     pragma(inline, true)
-    VfsDirectory getScheme(string scheme)
+    VfsDirectory getScheme(string scheme) 
         in (scheme, "Scheme cannot be null.")
     {
         VfsDirectory dir = sSchemes.get(scheme, null);
@@ -159,7 +160,7 @@ public static:
     ///
     /// Params:
     ///     loader: The loader to register.
-    void registerLoader(VfsLoader loader) nothrow
+    @expose void registerLoader(VfsLoader loader) nothrow
         in (loader)
     {
         sLoaders ~= loader;
@@ -169,7 +170,7 @@ public static:
     ///
     /// Params:
     ///     path: The real path to the package.
-    VfsDirectory addPackage(string path)
+    @expose VfsDirectory addPackage(string path)
         in (path, "Path cannot be null")
     {
         immutable string scheme = std.path.stripExtension(std.path.baseName(path));
@@ -188,7 +189,7 @@ public static:
     /// Params:
     ///   name = The path to the file.
     ///   mode = The mode to open the file in.
-    VfsFile open(string name, VfsFile.Mode mode = VfsFile.Mode.read)
+    @expose VfsFile open(string name, VfsFile.Mode mode = VfsFile.Mode.read)
         in (name, "Name cannot be null.")
     {
         VfsFile file = getFile(name);
@@ -201,42 +202,42 @@ public static:
     /// Params:
     ///   name = The name of the file. Can be arbitrary.
     ///   data = The data of the file.
-    VfsFile openFromMemory(string name, in ubyte[] data)
+    @expose VfsFile openFromMemory(string name, in ubyte[] data)
     {
         import zyeware.vfs.memory.file : VfsMemoryFile;
 
         return new VfsMemoryFile(name, data);
-    }
+    } 
 
-    VfsFile getFile(string name)
+    @expose VfsFile getFile(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
         return getScheme(splitResult[0]).getFile(splitResult[2]);
     }
 
-    VfsDirectory getDirectory(string name)
+    @expose VfsDirectory getDirectory(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
         return getScheme(splitResult[0]).getDirectory(splitResult[2]);
     }
 
-    bool hasFile(string name)
+    @expose bool hasFile(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
         return getScheme(splitResult[0]).hasFile(splitResult[2]);
     }
 
-    bool hasDirectory(string name)
+    @expose bool hasDirectory(string name)
         in (name, "Name cannot be null.")
     {
         immutable splitResult = splitPath(name);
         return getScheme(splitResult[0]).hasDirectory(splitResult[2]);
     }
 
-    bool portableMode() nothrow
+    @expose bool portableMode() nothrow
     {
         return sPortableMode;
     }

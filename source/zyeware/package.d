@@ -76,3 +76,6 @@ public
     import zyeware.vfs.root;
     import zyeware.vfs.utils;
 }
+
+struct expose {}
+struct conceal {}
