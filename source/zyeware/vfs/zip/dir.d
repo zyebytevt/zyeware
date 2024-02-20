@@ -6,15 +6,15 @@ import std.exception : enforce;
 import std.path : isRooted;
 
 import zyeware;
-import zyeware.vfs.zip.loader : VfsZipLoader;
-import zyeware.vfs.zip.file : VfsZipFile;
+import zyeware.vfs.zip.loader : ZipPackageLoader;
+import zyeware.vfs.zip.file : ZipFile;
 
 package(zyeware.vfs):
 
-class VfsZipDirectory : VfsDirectory
+class ZipDirectory : Directory
 {
 protected:
-    alias FileNode = VfsZipLoader.FileNode;
+    alias FileNode = ZipPackageLoader.FileNode;
 
     enum NodeType
     {
@@ -91,7 +91,7 @@ package(zyeware.vfs):
     }
 
 public:
-    override VfsDirectory getDirectory(string name) const
+    override Directory getDirectory(string name) const
         in (name, "Name cannot be null.")
     {
         enforce!VfsException(!isRooted(name), "Directory name cannot be rooted.");
@@ -100,10 +100,10 @@ public:
         immutable string newPath = buildPath(mPath, name);
 
         enforce!VfsException(!newRoot.member, format!"'%s' is not a directory."(newPath));
-        return new VfsZipDirectory(newPath, mArchive, newRoot);
+        return new ZipDirectory(newPath, mArchive, newRoot);
     }
 
-    override VfsFile getFile(string name) const
+    override File getFile(string name) const
         in (name, "Name cannot be null.")
     {
         enforce!VfsException(!isRooted(name), "File name cannot be rooted.");
@@ -115,7 +115,7 @@ public:
 
         // After examination, it seems that the ZipArchive instance
         // isn't actually modified, so casting to mutable is safe. Probably.
-        return new VfsZipFile(newPath, cast(ZipArchive) mArchive, fileNode.member);
+        return new ZipFile(newPath, cast(ZipArchive) mArchive, fileNode.member);
     }
 
     override bool hasDirectory(string name) const nothrow

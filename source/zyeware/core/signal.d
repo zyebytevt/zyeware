@@ -1,90 +1,67 @@
-module zyeware.utils.signal;
+module zyeware.core.signal;
 
 import std.algorithm : remove;
+import std.meta : AliasSeq, staticIndexOf;
+import std.sumtype : SumType, match;
 
 import zyeware;
 
 struct Signal(T1...)
 {
 private:
-    alias delegate_t = void delegate(T1) nothrow;
-    alias function_t = void function(T1) nothrow;
+    alias delegate_t = void delegate(T1);
+    alias delegate_nothrow_t = void delegate(T1) nothrow;
+    alias function_t = void function(T1);
+    alias function_nothrow_t = void function(T1) nothrow;
+
+    alias callbacks_t = AliasSeq!(
+        delegate_t,
+        delegate_nothrow_t,
+        function_t,
+        function_nothrow_t
+    );
 
     struct Slot
     {
-        union
-        {
-            delegate_t dg;
-            function_t fn;
-        }
-
-        bool isDelegate;
+        SumType!callbacks_t callback;
         bool isOneShot;
     }
 
     Slot[] mSlots;
 
-    ptrdiff_t findSlot(delegate_t dg) @trusted pure nothrow
+    ptrdiff_t findSlot(T)(T callback) @trusted pure nothrow
     {
         for (size_t i; i < mSlots.length; ++i)
         {
             auto c = &mSlots[i];
 
-            if (c.isDelegate && c.dg is dg)
-                return i;
-        }
+            immutable ptrdiff_t result = c.callback.match!(
+                (T cb) => cb is callback ? i : -1,
+                _ => -1
+            );
 
-        return -1;
-    }
-
-    ptrdiff_t findSlot(function_t fn) @trusted pure nothrow
-    {
-        for (size_t i; i < mSlots.length; ++i)
-        {
-            auto c = &mSlots[i];
-
-            if (!c.isDelegate && c.fn is fn)
-                return i;
+            if (result != -1)
+                return result;
         }
 
         return -1;
     }
 
 public:
-    void connect(delegate_t dg, Flag!"oneShot" oneShot = No.oneShot) @trusted pure
+    void connect(T)(T callback, Flag!"oneShot" oneShot = No.oneShot) @trusted pure
     {
-        enforce!CoreException(dg, "Delegate cannot be null.");
-        enforce!CoreException(findSlot(dg) == -1, "Delegate already connected.");
+        enforce!CoreException(callback, "Delegate cannot be null.");
+        enforce!CoreException(findSlot(callback) == -1, "Delegate already connected.");
 
         Slot c;
-        c.dg = dg;
-        c.isDelegate = true;
+        c.callback = callback;
         c.isOneShot = oneShot;
         mSlots ~= c;
     }
 
-    void connect(function_t fn, Flag!"oneShot" oneShot = No.oneShot) @trusted pure
+    void disconnect(T)(T callback) @trusted pure nothrow
     {
-        enforce!CoreException(fn, "Function cannot be null.");
-        enforce!CoreException(findSlot(fn) == -1, "Function already connected.");
-        
-        Slot c;
-        c.fn = fn;
-        c.isDelegate = false;
-        c.isOneShot = oneShot;
-        mSlots ~= c;
-    }
-
-    void disconnect(delegate_t dg) @trusted pure nothrow
-    {
-        immutable idx = findSlot(dg);
-        if (idx >= 0)
-            mSlots = mSlots.remove(idx);
-    }
-
-    void disconnect(function_t fn) @trusted pure nothrow
-    {
-        immutable idx = findSlot(fn);
+        immutable idx = findSlot(callback);
         if (idx >= 0)
             mSlots = mSlots.remove(idx);
     }
@@ -94,16 +71,18 @@ public:
         mSlots = [];
     }
 
-    void emit(T1 args) nothrow
+    void emit(T1 args)
     {
         for (size_t i; i < mSlots.length; ++i)
         {
             auto c = &mSlots[i];
 
-            if (c.isDelegate)
-                c.dg(args);
-            else
-                c.fn(args);
+            c.callback.match!(
+                (delegate_nothrow_t dg) => dg(args),
+                (delegate_t dg) => dg(args),
+                (function_nothrow_t fn) => fn(args),
+                (function_t fn) => fn(args),
+            );
 
             if (c.isOneShot)
                 mSlots = mSlots.remove(i--);
@@ -113,10 +92,6 @@ public:
     pragma(inline, true)
     {
         void opCall(T1 args) => emit(args);
-        void opOpAssign(string op)(delegate_t dg) if (op == "~") => connect(dg);
-        void opOpAssign(string op)(function_t fn) if (op == "~") => connect(fn);
-        void opOpAssign(string op)(delegate_t dg) if (op == "-") => disconnect(dg);
-        void opOpAssign(string op)(function_t fn) if (op == "-") => disconnect(fn);
     }
 }
 

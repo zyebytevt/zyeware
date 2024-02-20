@@ -6,11 +6,11 @@ import std.string : format;
 import std.file : exists, isDir, isFile, dirEntries, SpanMode; 
 
 import zyeware;
-import zyeware.vfs.disk.file : VfsDiskFile;
+import zyeware.vfs.disk.file : DiskFile;
 
 package(zyeware.vfs):
 
-class VfsDiskDirectory : VfsDirectory
+class DiskDirectory : Directory
 {
 protected:
     immutable string mDiskPath;
@@ -24,7 +24,7 @@ package(zyeware.vfs):
     }
 
 public:
-    override VfsDirectory getDirectory(string name) const
+    override Directory getDirectory(string name) const
         in (name, "Name cannot be null.")
     {
         enforce!VfsException(!std.path.isRooted(name), "Subdirectory name cannot be rooted.");
@@ -32,10 +32,10 @@ public:
         immutable string newPath = buildPath(mPath, name);
 
         enforce!VfsException(hasDirectory(name), format!"Subdirectory '%s' not found."(newPath));
-        return new VfsDiskDirectory(newPath, std.path.buildPath(mDiskPath, name));
+        return new DiskDirectory(newPath, std.path.buildPath(mDiskPath, name));
     }
 
-    override VfsFile getFile(string name) const
+    override File getFile(string name) const
         in (name, "Name cannot be null.")
     {
         enforce!VfsException(!std.path.isRooted(name), "File name cannot be rooted.");
@@ -43,7 +43,7 @@ public:
         immutable string newPath = buildPath(mPath, name);
 
         enforce!VfsException(hasFile(name), format!"File '%s' not found."(newPath));
-        return new VfsDiskFile(newPath, std.path.buildPath(mDiskPath, name));
+        return new DiskFile(newPath, std.path.buildPath(mDiskPath, name));
     }
 
     override bool hasDirectory(string name) const nothrow

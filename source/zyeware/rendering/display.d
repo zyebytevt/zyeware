@@ -21,10 +21,10 @@ class Display : NativeObject
 {
 protected:
     NativeHandle mNativeHandle;
-    DisplayProperties mProperties;
+    const DisplayProperties mProperties;
 
 public:
-    this(DisplayProperties properties)
+    this(in DisplayProperties properties)
     {
         mProperties = properties;
         mNativeHandle = Pal.display.createDisplay(properties, this);

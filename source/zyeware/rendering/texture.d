@@ -91,7 +91,7 @@ public:
         TextureProperties properties;
         Image img = AssetManager.load!Image(path);
 
-        if (Vfs.hasFile(path ~ ".props")) // Properties file exists
+        if (Files.hasFile(path ~ ".props")) // Properties file exists
             parseTextureProperties(path ~ ".props", properties);
 
         return new Texture2d(img, properties);
@@ -137,7 +137,7 @@ public:
         static foreach (size_t i, string side; ["right", "left", "top", "bottom", "front", "back"])
             images[i] = AssetManager.load!Image(root.expectChildValue!string(side));
 
-        if (Vfs.hasFile(path ~ ".props")) // Properties file exists
+        if (Files.hasFile(path ~ ".props")) // Properties file exists
             parseTextureProperties(path ~ ".props", properties);
 
         return new TextureCubeMap(images, properties);

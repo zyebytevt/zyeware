@@ -5,17 +5,10 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.main;
 
-import core.stdc.stdlib;
-import core.runtime : Runtime;
-import core.thread : rt_moduleTlsCtor, rt_moduleTlsDtor;
-
-import std.stdio : stderr;
-
-import bindbc.loader;
-
 import zyeware;
-import zyeware.core.dynlib : cleanDynamicLibraries;
-import zyeware.core.application;
+import zyeware.core.project;
+
+extern (C) ProjectProperties getProjectProperties();
 
 version (unittest)
 {
@@ -27,7 +20,7 @@ else
     {
         try
         {
-            ZyeWare.initialize(args);
+            ZyeWare.initialize(args, getProjectProperties());
             ZyeWare.start();
             ZyeWare.cleanup();
             
@@ -35,16 +28,10 @@ else
         }
         catch (Throwable t)
         {
-            if (ZyeWare.crashHandler)
-                ZyeWare.crashHandler.show(t);
-            else
-                stderr.writeln(t.toString());
+            import zyeware.crashhandler : showCrashHandler;
+            showCrashHandler(t);
 
             return 1;
-        }
-        finally
-        {
-            cleanDynamicLibraries();
         }
     }
 }

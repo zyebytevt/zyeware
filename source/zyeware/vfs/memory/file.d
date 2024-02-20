@@ -6,7 +6,7 @@ import zyeware;
 
 package(zyeware.vfs):
 
-class VfsMemoryFile : VfsFile
+class MemoryFile : File
 {
 protected:
     const(ubyte[]) mData;
@@ -77,7 +77,7 @@ public:
         return false;
     }
 
-    override void open(VfsFile.Mode mode)
+    override void open(File.Mode mode)
     {
         if (isOpened)
             return;

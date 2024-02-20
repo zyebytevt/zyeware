@@ -12,17 +12,15 @@ import core.memory;
 
 import std.exception : enforce, assumeWontThrow, collectException;
 import std.string : format, fromStringz, toStringz;
-import std.typecons : scoped;
+import std.typecons : scoped, Rebindable;
 import std.datetime : Duration, dur;
 import std.algorithm : min;
 
-import bindbc.loader;
-
 import zyeware;
-import zyeware.core.crash;
-import zyeware.core.properties;
-import zyeware.core.dynlib;
+import zyeware.core.project;
 import zyeware.pal;
+import zyeware.core.main;
+import zyeware.core.cmdargs;
 
 /// How the main framebuffer should be scaled on resizing.
 enum ScaleMode
@@ -61,22 +59,8 @@ struct ZyeWare
     @disable this(this);
 
 private static:
-    struct ParsedArgs
-    {
-        string[] packages; /// The packages to load.
+    alias DeferCallable = void delegate();
 
-        LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
-        LogLevel palLogLevel = LogLevel.verbose; /// The log level for the PAL logger.
-        LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
-
-        string graphicsDriver = "opengl"; /// The graphics driver to use.
-        string audioDriver = "openal"; /// The audio driver to use.
-        string displayDriver = "sdl"; /// The display driver to use.
-    }
-
-    alias DeferFunc = void delegate();
-
-    SharedLib sApplicationLibrary;
     Display sMainDisplay;
     Application sApplication;
 
@@ -90,10 +74,9 @@ private static:
     ScaleMode sScaleMode;
     bool sMustUpdateFramebufferDimensions;
 
-    ProjectProperties sProjectProperties;
+    Rebindable!(const ProjectProperties) sProjectProperties;
 
-    DeferFunc[16] sDeferredFunctions;
-    size_t sDeferredFunctionsCount;
+    DeferCallable[] sDeferredFunctions;
 
     bool sRunning;
     float sTimeScale = 1f;
@@ -102,24 +85,7 @@ private static:
     {
         bool sIsProcessingDeferred;
     }
-
-    Application createClientApplication()
-    {
-        import std.system : os;
-
-        string* path = os in sProjectProperties.appLibraries;
-        enforce!CoreException(path, "No application library declared for this platform.");
-
-        sApplicationLibrary = loadDynamicLibrary(*path);
-
-        Application function() createApplication;
-        sApplicationLibrary.bindSymbol(cast(void**) &createApplication, "createApplication");
-
-        enforce!CoreException(createApplication, "Could not find 'createApplication' function in application library.");
-
-        return createApplication();
-    }
-
+    
     void runMainLoop()
     {
         MonoTime previous = MonoTime.currTime;
@@ -152,13 +118,13 @@ private static:
                     scope (exit) sIsProcessingDeferred = false;
                 }
 
-                for (size_t i; i < sDeferredFunctionsCount; ++i)
+                for (size_t i; i < sDeferredFunctions.length; ++i)
                 {
                     // After invoking set to null so that no references keep lingering.
                     sDeferredFunctions[i]();
                     sDeferredFunctions[i] = null;
                 }
-                sDeferredFunctionsCount = 0;
+                sDeferredFunctions.length = 0;
             }
 
             // Wait until the target frame rate is reached.
@@ -219,95 +185,41 @@ private static:
         sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
-        Pal.graphics.api.clearScreen(color("black"));
+        Pal.graphics.api.clearScreen(color(0, 0, 0));
         Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y),
             sFramebufferArea);
 
         sMainDisplay.swapBuffers();
     }
 
-    ParsedArgs parseCmdArgs(string[] args)
-    {
-        import std.getopt : getopt, defaultGetoptPrinter, config;
-        import std.stdio : writeln, writefln;
-        import std.traits : EnumMembers;
-        import core.stdc.stdlib : exit;
-
-        ParsedArgs parsed;
-
-        try
-        {
-            auto helpInfo = getopt(args,
-                config.passThrough,
-                "game", "The packages to load.", &parsed.packages,
-                "loglevel-core", "The minimum log level for engine logs to be displayed.", &parsed.coreLogLevel,
-                "loglevel-client", "The minimum log level for game logs to be displayed.", &parsed.clientLogLevel,
-                "loglevel-pal", "The minimum log level for the PAL logs to be displayed.", &parsed.palLogLevel,
-                "graphics-driver", "The graphics driver to use.", &parsed.graphicsDriver,
-                "audio-driver", "The audio driver to use.", &parsed.audioDriver,
-                "display-driver", "The display driver to use.", &parsed.displayDriver,
-            );
-
-            if (helpInfo.helpWanted)
-            {
-                defaultGetoptPrinter(format!"ZyeWare Game Engine v%s"(engineVersion), helpInfo.options);
-                writeln("If no arguments are given, the selection of said options are to the disgression of the game developer.");
-                writeln("All arguments not understood by the engine are passed through to the game.");
-                writeln("------------------------------------------");
-                writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
-                writefln("Available graphics drivers: %(%s, %)", Pal.registeredGraphicsDrivers());
-                writefln("Available audio drivers: %(%s, %)", Pal.registeredAudioDrivers());
-                writefln("Available display drivers: %(%s, %)", Pal.registeredDisplayDrivers());
-                exit(0);
-            }
-        }
-        catch (Exception ex)
-        {
-            writeln("Could not parse arguments: ", ex.message);
-            writeln("Please use -h or --help to show information about the command line arguments.");
-            exit(1);
-        }
-
-        return parsed;
-    }
-
 package(zyeware.core) static:
-    CrashHandler crashHandler;
-
-    void initialize(string[] args)
+    void initialize(string[] args, in ProjectProperties projectProperties)
     {
         sStartupTime = MonoTime.currTime;
 
         GC.disable();
-        ParsedArgs parsedArgs = parseCmdArgs(args);
+        auto parsedArgs = CommandLineArguments.parse(args);
 
         // Initialize profiler and logger before anything else.
         auto sink = new ColorLogSink();
-        logCore = new Logger(sink, parsedArgs.coreLogLevel, "Core");
-        logClient = new Logger(sink, parsedArgs.clientLogLevel, "Client");
-        logPal = new Logger(sink, parsedArgs.palLogLevel, "PAL");
+
+        Logger.create("core", new Logger(sink, parsedArgs.coreLogLevel, "Core"));
+        Logger.create("client", new Logger(sink, parsedArgs.clientLogLevel, "Client"));
+        Logger.create("pal", new Logger(sink, parsedArgs.palLogLevel, "PAL"));
 
         logCore.info("ZyeWare Game Engine v%s", engineVersion.toString());
 
-        // Initialize crash handler afterwards because it relies on the logger.
-        version (linux)
-            crashHandler = new LinuxDefaultCrashHandler();
-        else version (Windows)
-            crashHandler = new WindowsDefaultCrashHandler();
-        else
-            crashHandler = new DefaultCrashHandler();
-
-        Vfs.initialize();
+        Files.initialize();
         AssetManager.initialize();
         InputMap.initialize();
 
-        Vfs.addPackage("main.zpk");
+        Files.addPackage("main.zpk");
         foreach (string pckPath; parsedArgs.packages)
-            Vfs.addPackage(pckPath);
+            Files.addPackage(pckPath);
 
-        sProjectProperties = ProjectProperties.load("res:zyeware.conf");
-        sApplication = createClientApplication();
-        enforce!CoreException(sApplication, "Main application cannot be null.");
+        sProjectProperties = projectProperties;
+        sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
+        enforce!CoreException(sApplication, "Failed to create main application.");
         
         Pal.loadAudioDriver(parsedArgs.audioDriver);
         Pal.loadDisplayDriver(parsedArgs.displayDriver);
@@ -342,7 +254,7 @@ package(zyeware.core) static:
         Pal.audio.cleanup();
 
         InputMap.cleanup();
-        Vfs.cleanup();
+        Files.cleanup();
 
         collect();
 
@@ -398,7 +310,7 @@ public static:
     ///
     /// Params:
     ///     func = The deferred callback.
-    void callDeferred(DeferFunc func)
+    void callDeferred(DeferCallable func)
     {
         debug enforce!CoreException(!sIsProcessingDeferred, "Cannot defer calls while processing deferred calls!");
         enforce!CoreException(sDeferredFunctionsCount < sDeferredFunctions.length,

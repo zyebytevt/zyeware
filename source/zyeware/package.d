@@ -28,6 +28,7 @@ public
     import zyeware.core.locale;
     import zyeware.core.native;
     import zyeware.core.random;
+    import zyeware.core.signal;
 
     import zyeware.core.logger;
 
@@ -68,7 +69,6 @@ public
     import zyeware.utils.format;
     import zyeware.utils.memory;
     import zyeware.utils.sdlang;
-    import zyeware.utils.signal;
 
     import zyeware.vfs.dir;
     import zyeware.vfs.file;
@@ -76,6 +76,3 @@ public
     import zyeware.vfs.root;
     import zyeware.vfs.utils;
 }
-
-struct expose {}
-struct conceal {}

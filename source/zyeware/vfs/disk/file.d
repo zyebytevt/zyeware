@@ -10,7 +10,7 @@ import zyeware;
 
 package(zyeware.vfs):
 
-class VfsDiskFile : VfsFile
+class DiskFile : File
 {
 protected:
     string mDiskPath;
@@ -84,13 +84,13 @@ public:
         return isOpened && fflush(mStream) == 0;
     }
 
-    override void open(VfsFile.Mode mode)
+    override void open(File.Mode mode)
     {
         if (isOpened)
             return;
 
         const(char)* modeStr;
-        final switch (mode) with (VfsFile.Mode)
+        final switch (mode) with (File.Mode)
         {
         case read:
             modeStr = "rb";

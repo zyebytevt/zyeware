@@ -10,9 +10,9 @@ import std.string : format;
 
 import zyeware;
 
-/// Represents a virtual directory in the Vfs. Where this directory is
+/// Represents a virtual directory in the Files. Where this directory is
 /// physically located depends on the implementation.
-abstract class VfsDirectory
+abstract class Directory
 {
 protected:
     string mPath;
@@ -24,14 +24,14 @@ protected:
 
 public:
     /// Retrieve a subdirectory by it's name.
-    /// Returns: The requested VfsDirectory.
+    /// Returns: The requested Directory.
     /// Throws: VfsException for invalid paths or if the directory cannot be found.
-    abstract VfsDirectory getDirectory(string name);
+    abstract Directory getDirectory(string name);
 
     /// Retrieve a file inside this directory by it's name.
-    /// Returns: The requested VfsFile.
+    /// Returns: The requested File.
     /// Throws: VfsException for invalid paths or if the file cannot be found.
-    abstract VfsFile getFile(string name);
+    abstract File getFile(string name);
 
     /// Returns `true` if the subdirectory with the given name exists, `false` otherwise.
     abstract bool hasDirectory(string name) const nothrow;
@@ -53,35 +53,35 @@ public:
 
 package(zyeware.vfs):
 
-bool isWriteMode(VfsFile.Mode mode) pure nothrow
+bool isWriteMode(File.Mode mode) pure nothrow
 {
-    return mode == VfsFile.Mode.append || mode == VfsFile.Mode.readWrite
-        || mode == VfsFile.Mode.writeRead || mode == VfsFile.Mode.write;
+    return mode == File.Mode.append || mode == File.Mode.readWrite
+        || mode == File.Mode.writeRead || mode == File.Mode.write;
 }
 
-class VfsCombinedDirectory : VfsDirectory
+class StackDirectory : Directory
 {
 protected:
-    VfsDirectory[] mDirectories;
+    Directory[] mDirectories;
 
 package:
-    this(string path, VfsDirectory[] directories) pure nothrow
+    this(string path, Directory[] directories) pure nothrow
     {
         super(path);
         mDirectories = directories;
     }
 
-    void addDirectory(VfsDirectory directory) pure nothrow
+    void addDirectory(Directory directory) pure nothrow
         in (directory, "Directory cannot be null.")
     {
         mDirectories ~= directory;
     }
 
 public:
-    override VfsDirectory getDirectory(string name)
+    override Directory getDirectory(string name)
         in (name, "Name cannot be null.")
     {
-        VfsDirectory[] foundDirectories;
+        Directory[] foundDirectories;
 
         foreach_reverse (dir; mDirectories)
             if (dir.hasDirectory(name))
@@ -89,10 +89,10 @@ public:
 
         enforce!VfsException(foundDirectories.length > 0, format!"Directory '%s' not found."(name));
 
-        return new VfsCombinedDirectory(buildPath(mPath, name), foundDirectories);
+        return new StackDirectory(buildPath(mPath, name), foundDirectories);
     }
 
-    override VfsFile getFile(string name)
+    override File getFile(string name)
         in (name, "Name cannot be null.")
     {
         foreach_reverse (dir; mDirectories)

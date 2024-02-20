@@ -1,8 +1,0 @@
-name "apigen"
-description "Generates DI files for the ZyeWare public API"
-authors "ZyeByte"
-copyright "Copyright © 2023, ZyeByte"
-license "LGPL-3.0"
-dependency "libdparse" path="../../libdparse"
-dependency "console-colors" version="~>1.1.1"
-workingDirectory "../.."

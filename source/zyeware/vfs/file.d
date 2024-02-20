@@ -13,9 +13,9 @@ import std.exception : enforce;
 
 import zyeware;
 
-/// Represents a virtual file in the Vfs. Where this file is
+/// Represents a virtual file in the Files. Where this file is
 /// physically located depends on the implementation.
-abstract class VfsFile
+abstract class File
 {
 protected:
     string mPath;
@@ -73,7 +73,7 @@ public:
     /// Flushes all writing operations to disk.
     abstract bool flush() nothrow;
     /// Opens the file with the given access mode.
-    abstract void open(VfsFile.Mode mode);
+    abstract void open(File.Mode mode);
     /// Closes the file. Afterwards, no further operations should be taken on this file.
     abstract void close() nothrow;
 

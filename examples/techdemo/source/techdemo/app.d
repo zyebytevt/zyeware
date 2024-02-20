@@ -47,9 +47,9 @@ public:
 	{
 		ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
-		Vfs.addPackage("techdemo.zpk");
+		Files.addPackage("techdemo.zpk");
 
-		VfsDirectory locales = Vfs.getDirectory("res:locales");
+		Directory locales = Files.getDirectory("res:locales");
 		foreach (string localeFile; locales.files)
 			TranslationManager.addLocale(AssetManager.load!Translation(locales.fullname ~ "/" ~ localeFile));
 

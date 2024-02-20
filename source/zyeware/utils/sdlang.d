@@ -18,7 +18,7 @@ import zyeware;
 
 SDLNode* loadSdlDocument(string path)
 {
-    VfsFile file = Vfs.open(path);
+    File file = Files.open(path);
     scope (exit) file.close();
 
     auto root = new SDLNode("root");

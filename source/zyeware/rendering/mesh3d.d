@@ -96,7 +96,7 @@ public:
             throw new RenderException(format!"Could not find suitable mesh loader for '%s'."(path));
         }
 
-        if (Vfs.hasFile(path ~ ".props")) // Properties file exists
+        if (Files.hasFile(path ~ ".props")) // Properties file exists
         {
             try
             {
@@ -121,7 +121,7 @@ Mesh3d loadFromOBJFile(string path)
     import std.string : splitLines, strip, startsWith, split;
     import std.conv : to;
 
-    VfsFile file = Vfs.open(path);
+    File file = Files.open(path);
     scope(exit) file.close();
     string content = file.readAll!string;
 

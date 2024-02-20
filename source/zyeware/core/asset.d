@@ -24,7 +24,7 @@ private template isAsset(E)
     import std.traits : hasUDA;
 
     static if(__traits(compiles, hasUDA!(E, asset)))
-        enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test"));// && is(E : Object);
+        enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test"));
     else
         enum bool isAsset = false;
 }

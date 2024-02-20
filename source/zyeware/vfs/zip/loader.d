@@ -6,11 +6,11 @@ import std.exception : enforce;
 import std.zip;
 
 import zyeware;
-import zyeware.vfs.zip.dir : VfsZipDirectory;
+import zyeware.vfs.zip.dir : ZipDirectory;
 
 package(zyeware.vfs):
 
-class VfsZipLoader : VfsLoader
+class ZipPackageLoader : PackageLoader
 {
 package(zyeware.vfs):
     struct FileNode
@@ -21,7 +21,7 @@ package(zyeware.vfs):
     }
 
 public:
-    VfsDirectory load(string diskPath, string scheme) const
+    Directory load(string diskPath, string scheme) const
         in (diskPath && scheme)
     {
         ZipArchive archive = new ZipArchive(read(diskPath));
@@ -52,7 +52,7 @@ public:
             current.member = member;
         }
 
-        return new VfsZipDirectory(scheme ~ ':', archive, root);
+        return new ZipDirectory(scheme ~ ':', archive, root);
     }
 
     bool eligable(string diskPath) const

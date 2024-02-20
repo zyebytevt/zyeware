@@ -81,7 +81,7 @@ public:
 
                 foreach (ref Include include; includes)
                 {
-                    VfsFile includeFile = Vfs.open(cast(string) include.path);
+                    File includeFile = Files.open(cast(string) include.path);
                     char[] includeSource = cast(char[]) includeFile.readAll!string;
                     includeFile.close();
 
@@ -101,7 +101,7 @@ public:
         void loadShader(string filePath, ShaderProperties.ShaderType type)
         {
             logCore.verbose("Loading external shader source '%s'...", filePath);
-            VfsFile shaderFile = Vfs.open(filePath);
+            File shaderFile = Files.open(filePath);
             scope(exit) shaderFile.close();
 
             properties.sources[type] = parseIncludes(shaderFile.readAll!string);
