@@ -21,7 +21,7 @@ public static:
     /// Clears the screen.
     ///
     /// Params:
-    ///     clearColor = The modulate to clear the screen to.
+    ///     clearColor = The color to clear the screen with.
     pragma(inline, true)
     void clearScreen(in color clearColor) nothrow {
         Pal.graphics.api.clearScreen(clearColor);
@@ -30,9 +30,11 @@ public static:
     /// Starts batching render commands. Must be called before any rendering is done.
     ///
     /// Params:
-    ///     projectionMatrix = The projection matrix to use.
-    ///     viewMatrix = The view matrix to use.
-    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix) {
+    ///     camera = The camera to use. If `null`, uses a default projection.
+    void beginScene(in Camera camera) {
+        immutable mat4 projectionMatrix = camera ? camera.getProjectionMatrix() : mat4.orthographic(0, 1, 1, 0, -1, 1);
+        immutable mat4 viewMatrix = camera ? camera.getViewMatrix() : mat4.identity;
+
         Pal.graphics.renderer2d.beginScene(projectionMatrix, viewMatrix);
     }
 

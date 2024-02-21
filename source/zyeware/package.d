@@ -45,6 +45,7 @@ public {
     import zyeware.physics.shapes.shape2d;
 
     import zyeware.rendering.bitmapfont;
+    import zyeware.rendering.camera;
     import zyeware.rendering.color;
     import zyeware.rendering.cursor;
     import zyeware.rendering.display;
@@ -56,7 +57,6 @@ public {
     import zyeware.rendering.mesh2d;
     import zyeware.rendering.mesh3d;
     import zyeware.rendering.particles2d;
-    import zyeware.rendering.projection;
     import zyeware.rendering.renderer2d;
     import zyeware.rendering.renderer3d;
     import zyeware.rendering.shader;

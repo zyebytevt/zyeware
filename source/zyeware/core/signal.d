@@ -81,6 +81,16 @@ public:
     }
 
     pragma(inline, true) {
+        void opOpAssign(string op, T)(T callback) @trusted pure {
+            // I have specifically chosen += instead of ~= because C# also uses += for events.
+            static if (op == "+")
+                connect(callback);
+            else static if (op == "-")
+                disconnect(callback);
+            else
+                static assert(0, "Invalid operator.");
+        }
+
         void opCall(T1 args) => emit(args);
     }
 }
