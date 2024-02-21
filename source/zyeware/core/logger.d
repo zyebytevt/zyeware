@@ -39,11 +39,34 @@ private immutable string[] levelNames = [
 final class Logger
 {
 private:
-    __gshared static Logger[string] sLoggers;
+    __gshared static Logger sCoreLogger, sClientLogger;
 
     LogSink mSink;
     LogLevel mLogLevel;
     string mName;
+
+    static string catchError(lazy string formatted) pure nothrow
+    {
+        try
+        {
+            return formatted;
+        }
+        catch (Exception ex)
+        {
+            return "<error formatting>";
+        }
+    }
+
+package(zyeware):
+    static void initialize(Logger core, Logger client) nothrow
+        in (core && client, "Cannot set null as loggers.")
+    {
+        sCoreLogger = core;
+        sClientLogger = client;
+    }
+
+    pragma(inline, true)
+    static Logger core() nothrow => sCoreLogger;
 
 public:
     /// Params:
@@ -66,7 +89,7 @@ public:
         if (level > mLogLevel)
             return;
 
-        mSink.log(LogSink.LogData(
+        mSink.log(LogSink.LogMessage(
             mName,
             level,
             ZyeWare.upTime,
@@ -86,31 +109,24 @@ public:
         void debug_(string message) nothrow => log(LogLevel.debug_, message);
         void verbose(string message) nothrow => log(LogLevel.verbose, message);
 
-        void fatal(Args...)(string message, Args args) nothrow => log(LogLevel.fatal, message.format(args).assumeWontThrow);
-        void error(Args...)(string message, Args args) nothrow => log(LogLevel.error, message.format(args).assumeWontThrow);
-        void warning(Args...)(string message, Args args) nothrow => log(LogLevel.warning, message.format(args).assumeWontThrow);
-        void info(Args...)(string message, Args args) nothrow => log(LogLevel.info, message.format(args).assumeWontThrow);
-        void debug_(Args...)(string message, Args args) nothrow => log(LogLevel.debug_, message.format(args).assumeWontThrow);
-        void verbose(Args...)(string message, Args args) nothrow => log(LogLevel.verbose, message.format(args).assumeWontThrow);
-    }
-
-    static void create(string id, Logger logger)
-    {
-        enforce!CoreException(id !in sLoggers, format!"Logger with id '%s' already exists!"(id));
-        sLoggers[id] = logger;
+        void fatal(Args...)(string message, Args args) nothrow => log(LogLevel.fatal, catchError(message.format(args)));
+        void error(Args...)(string message, Args args) nothrow => log(LogLevel.error, catchError(message.format(args)));
+        void warning(Args...)(string message, Args args) nothrow => log(LogLevel.warning, catchError(message.format(args)));
+        void info(Args...)(string message, Args args) nothrow => log(LogLevel.info, catchError(message.format(args)));
+        void debug_(Args...)(string message, Args args) nothrow => log(LogLevel.debug_, catchError(message.format(args)));
+        void verbose(Args...)(string message, Args args) nothrow => log(LogLevel.verbose, catchError(message.format(args)));
     }
 
     pragma(inline, true)
-    static Logger get(string id) nothrow => sLoggers[id];
+    static Logger client() nothrow => sClientLogger;
 }
 
 /// Represents a sink to write a message into. This can be either a file, a console,
 /// a in-game display, etc.
-abstract class LogSink
+interface LogSink
 {
-public:
     /// The data that should be logged.
-    struct LogData
+    struct LogMessage
     {
         string loggerName; /// The name of the logger.
         LogLevel level; /// The log level of the message.
@@ -121,10 +137,10 @@ public:
     /// Logs the given data.
     /// Params:
     ///   data = The data to log.
-    abstract void log(in LogData data) nothrow;
+    void log(in LogMessage data) nothrow;
 
     /// Flushes the current sink.
-    abstract void flush();
+    void flush();
 }
 
 final class CombinedLogSink : LogSink
@@ -160,7 +176,7 @@ public:
             }
     }
 
-    override void log(in LogData data) nothrow
+    override void log(in LogMessage data) nothrow
     {
         foreach (sink; mSinks)
             sink.log(data);
@@ -187,7 +203,7 @@ public:
         mFile = file;
     }
 
-    override void log(in LogData data) nothrow
+    override void log(in LogMessage data) nothrow
     {
         mFile.writefln("%3$-7s %2$-6s %1$7.1f | %4$s", data.uptime.toFloatSeconds, data.loggerName,
             levelNames[data.level - 1], data.message).collectException;
@@ -205,7 +221,7 @@ class ColorLogSink : LogSink
     import consolecolors;
 
 public:
-    override void log(in LogData data) nothrow
+    override void log(in LogMessage data) nothrow
     {
         static immutable string[] levelColors = ["magenta", "red", "yellow", "blue", "green", "gray"];
 

@@ -160,24 +160,24 @@ private static:
 package(zyeware.core) static:
     void initialize() @safe
     {
-        EventDispatcher.keyboardKeyPressed ~= &onKeyboardKeyPressed;
-        EventDispatcher.keyboardKeyReleased ~= &onKeyboardKeyReleased;
-        EventDispatcher.mouseButtonPressed ~= &onMouseButtonPressed;
-        EventDispatcher.mouseButtonReleased ~= &onMouseButtonReleased;
-        EventDispatcher.gamepadButtonPressed ~= &onGamepadButtonPressed;
-        EventDispatcher.gamepadButtonReleased ~= &onGamepadButtonReleased;
-        EventDispatcher.gamepadAxisMoved ~= &onGamepadAxisMoved;
+        EventDispatcher.keyboardKeyPressed.connect(&onKeyboardKeyPressed);
+        EventDispatcher.keyboardKeyReleased.connect(&onKeyboardKeyReleased);
+        EventDispatcher.mouseButtonPressed.connect(&onMouseButtonPressed);
+        EventDispatcher.mouseButtonReleased.connect(&onMouseButtonReleased);
+        EventDispatcher.gamepadButtonPressed.connect(&onGamepadButtonPressed);
+        EventDispatcher.gamepadButtonReleased.connect(&onGamepadButtonReleased);
+        EventDispatcher.gamepadAxisMoved.connect(&onGamepadAxisMoved);
     }
 
     void cleanup() @safe nothrow
     {
-        EventDispatcher.keyboardKeyPressed -= &onKeyboardKeyPressed;
-        EventDispatcher.keyboardKeyReleased -= &onKeyboardKeyReleased;
-        EventDispatcher.mouseButtonPressed -= &onMouseButtonPressed;
-        EventDispatcher.mouseButtonReleased -= &onMouseButtonReleased;
-        EventDispatcher.gamepadButtonPressed -= &onGamepadButtonPressed;
-        EventDispatcher.gamepadButtonReleased -= &onGamepadButtonReleased;
-        EventDispatcher.gamepadAxisMoved -= &onGamepadAxisMoved;
+        EventDispatcher.keyboardKeyPressed.disconnect(&onKeyboardKeyPressed);
+        EventDispatcher.keyboardKeyReleased.disconnect(&onKeyboardKeyReleased);
+        EventDispatcher.mouseButtonPressed.disconnect(&onMouseButtonPressed);
+        EventDispatcher.mouseButtonReleased.disconnect(&onMouseButtonReleased);
+        EventDispatcher.gamepadButtonPressed.disconnect(&onGamepadButtonPressed);
+        EventDispatcher.gamepadButtonReleased.disconnect(&onGamepadButtonReleased);
+        EventDispatcher.gamepadAxisMoved.disconnect(&onGamepadAxisMoved);
     }
 
 public static:
@@ -195,7 +195,7 @@ public static:
     {
         if (auto action = getAction(name))
         {
-            logCore.warning("Cannot add action '%s' as it already exists.", name);
+            Logger.core.warning("Cannot add action '%s' as it already exists.", name);
             return action;
         }
 

@@ -29,6 +29,7 @@ public
     import zyeware.core.native;
     import zyeware.core.random;
     import zyeware.core.signal;
+    import zyeware.core.project;
 
     import zyeware.core.logger;
 

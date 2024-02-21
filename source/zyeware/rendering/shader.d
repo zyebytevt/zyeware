@@ -57,7 +57,7 @@ public:
     static Shader load(string path)
         in (path, "Path cannot be null.")
     {
-        logCore.debug_("Loading shader '%s'...", path);
+        Logger.core.debug_("Loading shader '%s'...", path);
 
         string parseIncludes(string source)
         {
@@ -100,7 +100,7 @@ public:
 
         void loadShader(string filePath, ShaderProperties.ShaderType type)
         {
-            logCore.verbose("Loading external shader source '%s'...", filePath);
+            Logger.core.verbose("Loading external shader source '%s'...", filePath);
             File shaderFile = Files.open(filePath);
             scope(exit) shaderFile.close();
 

@@ -105,7 +105,7 @@ public:
             }
             catch (Exception ex)
             {
-                logCore.warning("Failed to parse properties file for '%s': %s", path, ex.message);
+                Logger.core.warning("Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 
@@ -153,13 +153,13 @@ parseLoop:
         case "o": // Object name
             if (element.length < 2)
             {
-                logCore.warning("Malformed object name in '%s' at line %d.", path, lineNr);
+                Logger.core.warning("Malformed object name in '%s' at line %d.", path, lineNr);
                 continue;
             }
 
             if (currentObjectName)
             {
-                logCore.info("Loading OBJs with multiple objects currently not supported. ('%s')", path);
+                Logger.core.info("Loading OBJs with multiple objects currently not supported. ('%s')", path);
                 break parseLoop;
             }
 
@@ -169,7 +169,7 @@ parseLoop:
         case "v": // Vertex position
             if (element.length < 4)
             {
-                logCore.warning("Malformed vertex element in '%s' at line %d.", path, lineNr);
+                Logger.core.warning("Malformed vertex element in '%s' at line %d.", path, lineNr);
                 continue;
             }
 
@@ -187,7 +187,7 @@ parseLoop:
         case "vt": // UV
             if (element.length < 2)
             {
-                logCore.warning("Malformed UV element in '%s' at line %d.", path, lineNr);
+                Logger.core.warning("Malformed UV element in '%s' at line %d.", path, lineNr);
                 continue;
             }
 
@@ -203,7 +203,7 @@ parseLoop:
         case "vn": // Vertex normal
             if (element.length < 4)
             {
-                logCore.warning("Malformed normal element in '%s' at line %d.", path, lineNr);
+                Logger.core.warning("Malformed normal element in '%s' at line %d.", path, lineNr);
                 continue;
             }
 
@@ -264,7 +264,7 @@ parseLoop:
             break;
 
         default:
-            logCore.debug_("Unrecognized element '%s' in '%s' at line %d.", element[0], path, lineNr);
+            Logger.core.debug_("Unrecognized element '%s' in '%s' at line %d.", element[0], path, lineNr);
         }
     }
 

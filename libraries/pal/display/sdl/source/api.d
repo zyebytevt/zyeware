@@ -8,7 +8,7 @@ module zyeware.pal.display.sdl.api;
 import core.stdc.string : memcpy;
 
 import std.string : fromStringz, toStringz, format;
-import std.exception : enforce, assumeWontThrow;
+import std.exception : enforce, assumeWontThrow, collectException;
 import std.typecons : scoped, Rebindable;
 import std.math : isClose;
 import std.utf : decode;
@@ -29,10 +29,10 @@ package(zyeware.pal.display.sdl):
 size_t pWindowCount = 0;
 
 extern(C)
-static void logFunctionCallback(void* userdata, int category, SDL_LogPriority priority, const char* message) nothrow
+static void logFunctionCallback(void* userdata, int category, SDL_LogPriority priority, stringz message) nothrow
 {
     LogLevel logLevel;
-    immutable dstring dmsg = message.fromStringz.dtext.assumeWontThrow;
+    immutable string msg = message.fromStringz.idup;
 
     switch (priority)
     {
@@ -45,7 +45,7 @@ static void logFunctionCallback(void* userdata, int category, SDL_LogPriority pr
     default:
     }
 
-    logPal.log(logLevel, dmsg);
+    Logger.core.log(logLevel, msg);
 }
 
 void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
@@ -53,7 +53,7 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
     SDL_GameController* pad = SDL_GameControllerOpen(cast(int) joyIdx);
     if (SDL_GameControllerGetAttached(pad) == 1)
     {
-        const char* name = SDL_GameControllerName(pad);
+        stringz name = SDL_GameControllerName(pad);
 
         size_t gamepadIndex;
         for (; gamepadIndex < windowData.gamepads.length; ++gamepadIndex)
@@ -66,18 +66,18 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
         if (gamepadIndex == windowData.gamepads.length) // Too many controllers
         {
             SDL_GameControllerClose(pad);
-            logPal.warning("Failed to add controller: Too many controllers attached.");
+            Logger.core.warning("Failed to add controller: Too many controllers attached.");
         }
         else
         {
-            logPal.debug_("Added controller '%s' as gamepad #%d.",
+            Logger.core.debug_("Added controller '%s' as gamepad #%d.",
                 name ? name.fromStringz : "<No name>", gamepadIndex);
 
-            EventDispatcher.gamepadConnected(gamepadIndex);
+            EventDispatcher.gamepadConnected(gamepadIndex).collectException;
         }
     }
     else
-        logPal.warning("Failed to add controller: %s.", SDL_GetError().fromStringz);
+        Logger.core.warning("Failed to add controller: %s.", SDL_GetError().fromStringz);
 }
 
 void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
@@ -86,7 +86,7 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
     if (!pad)
         return;
 
-    const char* name = SDL_GameControllerName(pad);
+    stringz name = SDL_GameControllerName(pad);
 
     SDL_GameControllerClose(pad);
 
@@ -98,10 +98,10 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
             break;
         }
 
-    logPal.debug_("Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
+    Logger.core.debug_("Removed controller '%s' (was #%d).", name ? name.fromStringz : "<No name>",
         gamepadIndex);
 
-    EventDispatcher.gamepadDisconnected(gamepadIndex);
+    EventDispatcher.gamepadDisconnected(gamepadIndex).collectException;
 }
 
 ptrdiff_t getGamepadIndex(in WindowData* windowData, SDL_GameController* pad) nothrow
@@ -121,7 +121,7 @@ ptrdiff_t getGamepadIndex(in WindowData* windowData, int instanceId) nothrow
 // TODO: This is still very much dependent on OpenGL, look for a way to make it more generic
 NativeHandle createDisplay(in DisplayProperties properties, in Display container)
 {
-    logPal.info("Creating SDL window '%s', requested size %s...", properties.title, properties.size);
+    Logger.core.info("Creating SDL window '%s', requested size %s...", properties.title, properties.size);
 
     if (pWindowCount == 0)
     {
@@ -135,7 +135,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-        logPal.debug_("SDL initialized.");
+        Logger.core.debug_("SDL initialized.");
     }
 
     WindowData* data = new WindowData;
@@ -156,7 +156,7 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     data.glContext = SDL_GL_CreateContext(data.handle);
     enforce!GraphicsException(data.glContext, format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
 
-    logPal.debug_("OpenGL context created.");
+    Logger.core.debug_("OpenGL context created.");
 
     data.isVSyncEnabled = SDL_GL_GetSwapInterval() != 0;
 
@@ -190,14 +190,14 @@ void loadLibraries()
     if (sdlResult != sdlSupport)
     {
         foreach (info; loader.errors)
-            logPal.warning("SDL loader: %s", info.message.fromStringz);
+            Logger.core.warning("SDL loader: %s", info.message.fromStringz);
 
         if (sdlResult == SDLSupport.noLibrary)
             throw new GraphicsException("Could not find SDL shared library.");
         else if (sdlResult == SDLSupport.badLibrary)
             throw new GraphicsException("Provided SDL shared library is corrupted.");
         else
-            logPal.warning("Got older SDL version than expected. This might lead to errors.");
+            Logger.core.warning("Got older SDL version than expected. This might lead to errors.");
     }
 }
 
@@ -439,7 +439,7 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow
     {
         if (SDL_GL_SetSwapInterval(-1) == -1 && SDL_GL_SetSwapInterval(1) == -1)
         {
-            logPal.warning("Failed to enable VSync: %s.", SDL_GetError().fromStringz);
+            Logger.core.warning("Failed to enable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
@@ -449,7 +449,7 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow
     {
         if (SDL_GL_SetSwapInterval(0) == -1)
         {
-            logPal.warning("Failed to disable VSync: %s.", SDL_GetError().fromStringz);
+            Logger.core.warning("Failed to disable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
@@ -693,7 +693,7 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
             return;
         }
 
-        logPal.warning("Failed to capture mouse: %s.", SDL_GetError().fromStringz);
+        Logger.core.warning("Failed to capture mouse: %s.", SDL_GetError().fromStringz);
     }
     else
     {
@@ -703,7 +703,7 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
             return;
         }
 
-        logPal.warning("Failed to release mouse: %s.", SDL_GetError().fromStringz);
+        Logger.core.warning("Failed to release mouse: %s.", SDL_GetError().fromStringz);
     }
 }
 

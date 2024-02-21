@@ -63,9 +63,9 @@ private static:
 
         // Otherwise, load asset
         if (weakref)
-            logCore.debug_("Asset '%s' (%s) got collected, reloading...", uid.path, uid.typeFQN);
+            Logger.core.debug_("Asset '%s' (%s) got collected, reloading...", uid.path, uid.typeFQN);
         else
-            logCore.debug_("Loading asset '%s' (%s)...", uid.path, uid.typeFQN);
+            Logger.core.debug_("Loading asset '%s' (%s)...", uid.path, uid.typeFQN);
 
         Object asset = loader.callback(uid.path);
         assert(asset, format!"Loader for '%s' returned null!"(uid.typeFQN));
@@ -119,7 +119,7 @@ package(zyeware.core) static:
         register!FrameAnimations(&FrameAnimations.load);
         register!Cursor(&Cursor.load);
 
-        logCore.debug_("Initialized default asset loaders.");
+        Logger.core.debug_("Initialized default asset loaders.");
     }
 
     void cleanup()
@@ -188,7 +188,7 @@ public static:
             if (weakref.alive)
                 weakref.target.dispose();
 
-        logCore.info("Freed all assets.");
+        Logger.core.info("Freed all assets.");
     }
 
     /// Cleans the cache from assets that have already been garbage collected.
@@ -201,11 +201,11 @@ public static:
             if (!sCache[key].alive)
             {
                 sCache.remove(key).assumeWontThrow;
-                logCore.verbose("Uncaching '%s' (%s)...", key.path, key.typeFQN);
+                Logger.core.verbose("Uncaching '%s' (%s)...", key.path, key.typeFQN);
                 ++cleaned;
             }
         }
 
-        logCore.debug_("%d assets cleaned from cache.", cleaned);
+        Logger.core.debug_("%d assets cleaned from cache.", cleaned);
     }
 }

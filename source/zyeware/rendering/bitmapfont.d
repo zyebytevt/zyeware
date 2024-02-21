@@ -13,7 +13,6 @@ import std.string : format;
 import zyeware.zyfont;
 import zyeware;
 
-
 struct BitmapFontProperties
 {
     string fontName;
@@ -62,7 +61,7 @@ public:
     {
         mProperties = properties;
 
-        logCore.debug_("Creating bitmap font '%s, %d'...",
+        Logger.core.debug_("Creating bitmap font '%s, %d'...",
             mProperties.fontName, mProperties.fontSize);
 
         for (size_t i; i < mProperties.pages.length; ++i)

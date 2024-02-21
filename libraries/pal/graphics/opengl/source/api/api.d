@@ -29,7 +29,7 @@ version (Windows)
 {
     extern (Windows)
     static void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-        const(char)* message, void* userParam) nothrow
+        stringz message, void* userParam) nothrow
     {
         errorCallbackImpl(source, type, id, severity, length, message, userParam);
     }
@@ -38,7 +38,7 @@ else
 {
     extern (C)
     static void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-        const(char)* message, void* userParam) nothrow
+        stringz message, void* userParam) nothrow
     {
         errorCallbackImpl(source, type, id, severity, length, message, userParam);
     }
@@ -59,7 +59,7 @@ uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string nam
 
 pragma(inline, true)
 static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-    const(char)* message, void* userParam) nothrow
+    stringz message, void* userParam) nothrow
 {
     glGetError();
 
@@ -108,7 +108,7 @@ static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum seve
         break;
     }
 
-    logPal.log(logLevel, format!"%s: %s"d(typeName, message.fromStringz).assumeWontThrow);
+    Logger.core.log(logLevel, format!"%s: %s"(typeName, message.fromStringz).assumeWontThrow);
 }
 
 void initialize()
@@ -123,7 +123,7 @@ void initialize()
     if (glResult != glSupport)
     {
         foreach (info; loader.errors)
-            logPal.warning("OpenGL loader: %s", info.message.fromStringz);
+            Logger.core.warning("OpenGL loader: %s", info.message.fromStringz);
 
         switch (glResult)
         {
@@ -137,11 +137,11 @@ void initialize()
             throw new GraphicsException("No OpenGL context available.");
 
         default:
-            logPal.warning("Got older OpenGL version than expected. This might lead to errors.");
+            Logger.core.warning("Got older OpenGL version than expected. This might lead to errors.");
         }
     }
 
-    logPal.debug_("OpenGL dynamic library loaded.");
+    Logger.core.debug_("OpenGL dynamic library loaded.");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -174,12 +174,12 @@ void initialize()
         pFlagValues[cast(size_t) RenderFlag.wireframe] = resultInt == GL_LINE;
     }
 
-    logPal.info("Initialized OpenGL:");
-    logPal.info("    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
-    logPal.info("    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
-    logPal.info("    Version: %s", glGetString(GL_VERSION).fromStringz);
-    logPal.info("    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
-    logPal.info("    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
+    Logger.core.info("Initialized OpenGL:");
+    Logger.core.info("    Vendor: %s", glGetString(GL_VENDOR).fromStringz);
+    Logger.core.info("    Renderer: %s", glGetString(GL_RENDERER).fromStringz);
+    Logger.core.info("    Version: %s", glGetString(GL_VERSION).fromStringz);
+    Logger.core.info("    GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz);
+    Logger.core.info("    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
 }
 
 void cleanup()
@@ -389,7 +389,7 @@ NativeHandle createShader(in ShaderProperties properties)
 
         uint shaderID = glCreateShader(shaderType);
 
-        const char* sourcePtr = cast(char*) source.ptr;
+        stringz sourcePtr = cast(char*) source.ptr;
 
         glShaderSource(shaderID, 1, &sourcePtr, null);
         glCompileShader(shaderID);

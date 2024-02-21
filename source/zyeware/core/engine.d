@@ -52,6 +52,8 @@ struct Version
     }
 }
 
+alias stringz = const(char)*;
+
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
 struct ZyeWare
 {
@@ -80,11 +82,7 @@ private static:
 
     bool sRunning;
     float sTimeScale = 1f;
-
-    debug
-    {
-        bool sIsProcessingDeferred;
-    }
+    bool sIsProcessingDeferred;
     
     void runMainLoop()
     {
@@ -203,11 +201,12 @@ package(zyeware.core) static:
         // Initialize profiler and logger before anything else.
         auto sink = new ColorLogSink();
 
-        Logger.create("core", new Logger(sink, parsedArgs.coreLogLevel, "Core"));
-        Logger.create("client", new Logger(sink, parsedArgs.clientLogLevel, "Client"));
-        Logger.create("pal", new Logger(sink, parsedArgs.palLogLevel, "PAL"));
+        Logger.initialize(
+            new Logger(sink, parsedArgs.coreLogLevel, "Core"),
+            new Logger(sink, parsedArgs.clientLogLevel, "Client")
+        );
 
-        logCore.info("ZyeWare Game Engine v%s", engineVersion.toString());
+        Logger.core.info("ZyeWare Game Engine v%s", engineVersion.toString());
 
         Files.initialize();
         AssetManager.initialize();
@@ -257,8 +256,6 @@ package(zyeware.core) static:
         Files.cleanup();
 
         collect();
-
-        sApplicationLibrary.unload();
     }
 
     void start()
@@ -285,12 +282,12 @@ public static:
     {
         immutable size_t memoryBeforeCollection = GC.stats().usedSize;
 
-        logCore.debug_("Running garbage collector...");
+        Logger.core.debug_("Running garbage collector...");
         GC.collect();
         AssetManager.cleanCache();
         GC.minimize();
 
-        logCore.debug_("Finished garbage collection, freed %s.",
+        Logger.core.debug_("Finished garbage collection, freed %s.",
             bytesToString(memoryBeforeCollection - GC.stats().usedSize));
     }
 
@@ -312,11 +309,9 @@ public static:
     ///     func = The deferred callback.
     void callDeferred(DeferCallable func)
     {
-        debug enforce!CoreException(!sIsProcessingDeferred, "Cannot defer calls while processing deferred calls!");
-        enforce!CoreException(sDeferredFunctionsCount < sDeferredFunctions.length,
-            format!"Cannot have more than %d deferred functions!"(sDeferredFunctions.length));
+        enforce!CoreException(!sIsProcessingDeferred, "Cannot defer calls while processing deferred calls!");
 
-        sDeferredFunctions[sDeferredFunctionsCount++] = func;
+        sDeferredFunctions ~= func;
     }
 
     /// The current application.

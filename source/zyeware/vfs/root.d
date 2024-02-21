@@ -89,7 +89,7 @@ private static:
                 import core.sys.posix.unistd : getuid;
                 import core.sys.posix.pwd : getpwuid;
 
-                const(char)* homedir;
+                stringz homedir;
 
                 synchronized
                 {
@@ -145,7 +145,7 @@ package(zyeware) static:
         sSchemes["res"] = new StackDirectory("res:", []);
         sSchemes["user"] = createUserDir();
 
-        logCore.info("Virtual File System initialized.");
+        Logger.core.info("Virtual File System initialized.");
     }
 
     void cleanup() nothrow
@@ -179,7 +179,7 @@ public static:
 
         (cast(StackDirectory) sSchemes["res"]).addDirectory(pck);
         sSchemes[scheme] = pck;
-        logCore.info("Added package '%s' as '%s'.", path, scheme);
+        Logger.core.info("Added package '%s' as '%s'.", path, scheme);
         return pck;
     }
 

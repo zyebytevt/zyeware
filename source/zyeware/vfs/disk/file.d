@@ -89,7 +89,7 @@ public:
         if (isOpened)
             return;
 
-        const(char)* modeStr;
+        stringz modeStr;
         final switch (mode) with (File.Mode)
         {
         case read:

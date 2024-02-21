@@ -86,11 +86,11 @@ public:
             }
             catch (Exception ex)
             {
-                logCore.warning("Failed to parse properties file for '%s': %s", path, ex.message);
+                Logger.core.warning("Failed to parse properties file for '%s': %s", path, ex.message);
             }
         }
 
-        logCore.debug_("Loaded file '%s' into memory for streaming.", path);
+        Logger.core.debug_("Loaded file '%s' into memory for streaming.", path);
 
         return new AudioBuffer(rawFileData, properties);
     }

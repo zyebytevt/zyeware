@@ -49,21 +49,21 @@ package(zyeware) static:
         in (name in sGraphicsLoaders, "GraphicsDriver " ~ name ~ " not registered")
     {
         sGraphics = sGraphicsLoaders[name]();
-        logPal.info("Set graphics driver '%s' active.", name);
+        Logger.core.info("Set graphics driver '%s' active.", name);
     }
 
     void loadDisplayDriver(string name) nothrow
         in (name in sDisplayLoaders, "DisplayDriver " ~ name ~ " not registered")
     {
         sDisplay = sDisplayLoaders[name]();
-        logPal.info("Set display driver '%s' active.", name);
+        Logger.core.info("Set display driver '%s' active.", name);
     }
 
     void loadAudioDriver(string name) nothrow
         in (name in sAudioLoaders, "AudioDriver " ~ name ~ " not registered")
     {
         sAudio = sAudioLoaders[name]();
-        logPal.info("Set audio driver '%s' active.", name);
+        Logger.core.info("Set audio driver '%s' active.", name);
     }
 
     string[] registeredGraphicsDrivers() nothrow

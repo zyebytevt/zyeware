@@ -1,5 +1,7 @@
 module skeleton.app;
 
+import std.traits : fullyQualifiedName;
+
 import zyeware;
 
 import zyeware.core.application;
@@ -17,7 +19,7 @@ extern(C) ProjectProperties getProjectProperties()
 			size: vec2i(800, 600)
 		},
 
-		mainApplication: new SkeletonApplication()
+		mainApplication: fullyQualifiedName!SkeletonApplication
 	};
 
 	return properties;
@@ -27,19 +29,19 @@ class SkeletonApplication : Application
 {
 protected:
 	Texture2d mSprite;
-	OrthographicCamera mCamera;
 	Material mWaveyMaterial;
 	BitmapFont mFont;
+	OrthographicProjection mCamera;
 
 public:
 	override void initialize()
 	{
-		ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
+		ZyeWare.scaleMode = ScaleMode.keepAspect;
 
 		Files.addPackage("skeleton.zpk");
 
 		mSprite = AssetManager.load!Texture2d("core:textures/missing.png");
-		mCamera = new OrthographicCamera(0, 800, 600, 0);
+		mCamera = new OrthographicProjection(0, 800, 600, 0);
 		mWaveyMaterial = AssetManager.load!Material("res:waveyChild.mtl");
 		mFont = AssetManager.load!BitmapFont("core:fonts/internal.zfnt");
 	}
@@ -50,7 +52,7 @@ public:
 
 	override void draw()
 	{
-		Renderer2D.clearScreen(color.lime);
+		Renderer2D.clearScreen(color("lime"));
 
 		Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
 		//Renderer2D.drawRectangle(rect(60, 60, 100, 100), mat4.identity, color.white, mSprite);
@@ -59,7 +61,7 @@ public:
 		//Renderer2D.drawRectangle(rect(300, 520, 30, 40), mat4.identity, color.white, mSprite);
 		//Renderer2D.drawRectangle(rect(0, 0, 70, 50), mat4.identity, color.white, mSprite, mWaveyMaterial);
 		
-		Renderer2D.drawString("Hello world!", mFont, vec2(20, 20), color.white);
+		Renderer2D.drawString("Hello world!", mFont, vec2(20, 20), color("white"));
 		Renderer2D.endScene();
 	}
 }
