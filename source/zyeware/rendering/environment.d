@@ -7,7 +7,6 @@ module zyeware.rendering.environment;
 
 import zyeware;
 
-
 struct Environment3D
 {
     Mesh3d sky;

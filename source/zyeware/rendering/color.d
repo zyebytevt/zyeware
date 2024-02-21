@@ -15,38 +15,179 @@ alias Gradient = Interpolator!(color, color.lerp);
 struct color
 {
 public:
+    static immutable aliceblue = color(0.94, 0.97, 1);
+    static immutable antiquewhite = color(0.98, 0.92, 0.84);
+    static immutable aqua = color(0, 1, 1);
+    static immutable aquamarine = color(0.5, 1, 0.83);
+    static immutable azure = color(0.94, 1, 1);
+    static immutable beige = color(0.96, 0.96, 0.86);
+    static immutable bisque = color(1, 0.89, 0.77);
+    static immutable black = color(0, 0, 0);
+    static immutable blanchedalmond = color(1, 0.92, 0.8);
+    static immutable blue = color(0, 0, 1);
+    static immutable blueviolet = color(0.54, 0.17, 0.89);
+    static immutable brown = color(0.65, 0.16, 0.16);
+    static immutable burlywood = color(0.87, 0.72, 0.53);
+    static immutable cadetblue = color(0.37, 0.62, 0.63);
+    static immutable chartreuse = color(0.5, 1, 0);
+    static immutable chocolate = color(0.82, 0.41, 0.12);
+    static immutable coral = color(1, 0.5, 0.31);
+    static immutable cornflower = color(0.39, 0.58, 0.93);
+    static immutable cornsilk = color(1, 0.97, 0.86);
+    static immutable crimson = color(0.86, 0.08, 0.24);
+    static immutable cyan = color(0, 1, 1);
+    static immutable darkblue = color(0, 0, 0.55);
+    static immutable darkcyan = color(0, 0.55, 0.55);
+    static immutable darkgoldenrod = color(0.72, 0.53, 0.04);
+    static immutable darkgray = color(0.66, 0.66, 0.66);
+    static immutable darkgreen = color(0, 0.39, 0);
+    static immutable darkkhaki = color(0.74, 0.72, 0.42);
+    static immutable darkmagenta = color(0.55, 0, 0.55);
+    static immutable darkolivegreen = color(0.33, 0.42, 0.18);
+    static immutable darkorange = color(1, 0.55, 0);
+    static immutable darkorchid = color(0.6, 0.2, 0.8);
+    static immutable darkred = color(0.55, 0, 0);
+    static immutable darksalmon = color(0.91, 0.59, 0.48);
+    static immutable darkseagreen = color(0.56, 0.74, 0.56);
+    static immutable darkslateblue = color(0.28, 0.24, 0.55);
+    static immutable darkslategray = color(0.18, 0.31, 0.31);
+    static immutable darkturquoise = color(0, 0.81, 0.82);
+    static immutable darkviolet = color(0.58, 0, 0.83);
+    static immutable deeppink = color(1, 0.08, 0.58);
+    static immutable deepskyblue = color(0, 0.75, 1);
+    static immutable dimgray = color(0.41, 0.41, 0.41);
+    static immutable dodgerblue = color(0.12, 0.56, 1);
+    static immutable firebrick = color(0.7, 0.13, 0.13);
+    static immutable floralwhite = color(1, 0.98, 0.94);
+    static immutable forestgreen = color(0.13, 0.55, 0.13);
+    static immutable fuchsia = color(1, 0, 1);
+    static immutable gainsboro = color(0.86, 0.86, 0.86);
+    static immutable ghostwhite = color(0.97, 0.97, 1);
+    static immutable gold = color(1, 0.84, 0);
+    static immutable goldenrod = color(0.85, 0.65, 0.13);
+    static immutable grape = color(0.435, 0.177, 0.659);
+    static immutable gray = color(0.75, 0.75, 0.75);
+    static immutable green = color(0, 1, 0);
+    static immutable greenyellow = color(0.68, 1, 0.18);
+    static immutable honeydew = color(0.94, 1, 0.94);
+    static immutable hotpink = color(1, 0.41, 0.71);
+    static immutable indianred = color(0.8, 0.36, 0.36);
+    static immutable indigo = color(0.29, 0, 0.51);
+    static immutable ivory = color(1, 1, 0.94);
+    static immutable khaki = color(0.94, 0.9, 0.55);
+    static immutable lavender = color(0.9, 0.9, 0.98);
+    static immutable lavenderblush = color(1, 0.94, 0.96);
+    static immutable lawngreen = color(0.49, 0.99, 0);
+    static immutable lemonchiffon = color(1, 0.98, 0.8);
+    static immutable lightblue = color(0.68, 0.85, 0.9);
+    static immutable lightcoral = color(0.94, 0.5, 0.5);
+    static immutable lightcyan = color(0.88, 1, 1);
+    static immutable lightgoldenrod = color(0.98, 0.98, 0.82);
+    static immutable lightgray = color(0.83, 0.83, 0.83);
+    static immutable lightgreen = color(0.56, 0.93, 0.56);
+    static immutable lightpink = color(1, 0.71, 0.76);
+    static immutable lightsalmon = color(1, 0.63, 0.48);
+    static immutable lightseagreen = color(0.13, 0.7, 0.67);
+    static immutable lightskyblue = color(0.53, 0.81, 0.98);
+    static immutable lightslategray = color(0.47, 0.53, 0.6);
+    static immutable lightsteelblue = color(0.69, 0.77, 0.87);
+    static immutable lightyellow = color(1, 1, 0.88);
+    static immutable lime = color(0, 1, 0);
+    static immutable limegreen = color(0.2, 0.8, 0.2);
+    static immutable linen = color(0.98, 0.94, 0.9);
+    static immutable magenta = color(1, 0, 1);
+    static immutable maroon = color(0.69, 0.19, 0.38);
+    static immutable mediumaquamarine = color(0.4, 0.8, 0.67);
+    static immutable mediumblue = color(0, 0, 0.8);
+    static immutable mediumorchid = color(0.73, 0.33, 0.83);
+    static immutable mediumpurple = color(0.58, 0.44, 0.86);
+    static immutable mediumseagreen = color(0.24, 0.7, 0.44);
+    static immutable mediumslateblue = color(0.48, 0.41, 0.93);
+    static immutable mediumspringgreen = color(0, 0.98, 0.6);
+    static immutable mediumturquoise = color(0.28, 0.82, 0.8);
+    static immutable mediumvioletred = color(0.78, 0.08, 0.52);
+    static immutable midnightblue = color(0.1, 0.1, 0.44);
+    static immutable mintcream = color(0.96, 1, 0.98);
+    static immutable mistyrose = color(1, 0.89, 0.88);
+    static immutable moccasin = color(1, 0.89, 0.71);
+    static immutable navajowhite = color(1, 0.87, 0.68);
+    static immutable navyblue = color(0, 0, 0.5);
+    static immutable oldlace = color(0.99, 0.96, 0.9);
+    static immutable olive = color(0.5, 0.5, 0);
+    static immutable olivedrab = color(0.42, 0.56, 0.14);
+    static immutable orange = color(1, 0.65, 0);
+    static immutable orangered = color(1, 0.27, 0);
+    static immutable orchid = color(0.85, 0.44, 0.84);
+    static immutable palegoldenrod = color(0.93, 0.91, 0.67);
+    static immutable palegreen = color(0.6, 0.98, 0.6);
+    static immutable paleturquoise = color(0.69, 0.93, 0.93);
+    static immutable palevioletred = color(0.86, 0.44, 0.58);
+    static immutable papayawhip = color(1, 0.94, 0.84);
+    static immutable peachpuff = color(1, 0.85, 0.73);
+    static immutable peru = color(0.8, 0.52, 0.25);
+    static immutable pink = color(1, 0.75, 0.8);
+    static immutable plum = color(0.87, 0.63, 0.87);
+    static immutable powderblue = color(0.69, 0.88, 0.9);
+    static immutable purple = color(0.63, 0.13, 0.94);
+    static immutable rebeccapurple = color(0.4, 0.2, 0.6);
+    static immutable red = color(1, 0, 0);
+    static immutable rosybrown = color(0.74, 0.56, 0.56);
+    static immutable royalblue = color(0.25, 0.41, 0.88);
+    static immutable saddlebrown = color(0.55, 0.27, 0.07);
+    static immutable salmon = color(0.98, 0.5, 0.45);
+    static immutable sandybrown = color(0.96, 0.64, 0.38);
+    static immutable seagreen = color(0.18, 0.55, 0.34);
+    static immutable seashell = color(1, 0.96, 0.93);
+    static immutable sienna = color(0.63, 0.32, 0.18);
+    static immutable silver = color(0.75, 0.75, 0.75);
+    static immutable skyblue = color(0.53, 0.81, 0.92);
+    static immutable slateblue = color(0.42, 0.35, 0.8);
+    static immutable slategray = color(0.44, 0.5, 0.56);
+    static immutable snow = color(1, 0.98, 0.98);
+    static immutable springgreen = color(0, 1, 0.5);
+    static immutable steelblue = color(0.27, 0.51, 0.71);
+    static immutable tan = color(0.82, 0.71, 0.55);
+    static immutable teal = color(0, 0.5, 0.5);
+    static immutable thistle = color(0.85, 0.75, 0.85);
+    static immutable tomato = color(1, 0.39, 0.28);
+    static immutable turquoise = color(0.25, 0.88, 0.82);
+    static immutable violet = color(0.93, 0.51, 0.93);
+    static immutable webgray = color(0.5, 0.5, 0.5);
+    static immutable webgreen = color(0, 0.5, 0);
+    static immutable webmaroon = color(0.5, 0, 0);
+    static immutable webpurple = color(0.5, 0, 0.5);
+    static immutable wheat = color(0.96, 0.87, 0.7);
+    static immutable white = color(1, 1, 1);
+    static immutable whitesmoke = color(0.96, 0.96, 0.96);
+    static immutable yellow = color(1, 1, 0);
+    static immutable yellowgreen = color(0.6, 0.8, 0.2);
+
     vec4 vec;
     alias vec this;
 
-    this(string name) pure
+    this(string hexcode) pure
     {
-        enforce!GraphicsException(name && name.length > 0, "Invalid color name or hexcode.");
+        enforce!GraphicsException(hexcode && hexcode.length > 0, "Invalid hexcode.");
 
-        if (name[0] == '#')
+        if (hexcode[0] == '#')
         {
-            name = name[1 .. $];
+            hexcode = hexcode[1 .. $];
 
-            enforce!GraphicsException(name.length >= 6, format!"Invalid color hexcode '%s'."(name));
+            enforce!GraphicsException(hexcode.length >= 6, format!"Invalid color hexcode '%s'."(hexcode));
 
-            vec.r = name[0..2].to!ubyte(16) / 255.0;
-            vec.g = name[2..4].to!ubyte(16) / 255.0;
-            vec.b = name[4..6].to!ubyte(16) / 255.0;
-            vec.a = name.length > 6 ? name[6..8].to!ubyte(16) / 255.0 : 1.0;
+            vec.r = hexcode[0..2].to!ubyte(16) / 255.0;
+            vec.g = hexcode[2..4].to!ubyte(16) / 255.0;
+            vec.b = hexcode[4..6].to!ubyte(16) / 255.0;
+            vec.a = hexcode.length > 6 ? hexcode[6..8].to!ubyte(16) / 255.0 : 1.0;
         }
-        else
-        {
-        outer:
-            switch (name.toLower)
-            {
-                static foreach (data; predefinedColors)
-                {
-                    mixin(format!"case \"%s\": vec = vec4(%f, %f, %f, 1.0); break outer;"(data.name, data.rgb.x, data.rgb.y, data.rgb.z));
-                }
+    }
 
-            default:
-                throw new GraphicsException(format!"Invalid color name '%s'."(name));
-            }
-        }
+    this(uint color) @safe pure nothrow @nogc
+    {
+        vec.r = ((color >> 16) & 0xFF) / 255.0;
+        vec.g = ((color >> 8) & 0xFF) / 255.0;
+        vec.b = (color & 0xFF) / 255.0;
+        vec.a = ((color >> 24) & 0xFF) / 255.0;
     }
 
     this(float r, float g, float b, float a = 1f) @safe pure nothrow @nogc
@@ -127,160 +268,11 @@ unittest
     // Lerp
     color c8 = color.lerp(c1, c2, 0.5f);
     shouldEqual(c8.vec, vec4(0.5f, 0.5f, 0.0f, 1.0f));
+
+    // uint constructor
+    color c10 = color(0xFF804020);
+    c10.r.should == 0.5019607843137255f;
+    c10.g.should == 0.25098039215686274f;
+    c10.b.should == 0.12549019607843137f;
+    c10.a.should == 1.0f;
 }
-
-private:
-
-import std.typecons : Tuple;
-
-alias NamedColor = Tuple!(string, "name", vec3, "rgb");
-
-// Many thanks to the Godot engine for providing these values!
-enum predefinedColors = [
-    NamedColor("aliceblue", vec3(0.94, 0.97, 1)),
-    NamedColor("antiquewhite", vec3(0.98, 0.92, 0.84)),
-    NamedColor("aqua", vec3(0, 1, 1)),
-    NamedColor("aquamarine", vec3(0.5, 1, 0.83)),
-    NamedColor("azure", vec3(0.94, 1, 1)),
-    NamedColor("beige", vec3(0.96, 0.96, 0.86)),
-    NamedColor("bisque", vec3(1, 0.89, 0.77)),
-    NamedColor("black", vec3(0, 0, 0)),
-    NamedColor("blanchedalmond", vec3(1, 0.92, 0.8)),
-    NamedColor("blue", vec3(0, 0, 1)),
-    NamedColor("blueviolet", vec3(0.54, 0.17, 0.89)),
-    NamedColor("brown", vec3(0.65, 0.16, 0.16)),
-    NamedColor("burlywood", vec3(0.87, 0.72, 0.53)),
-    NamedColor("cadetblue", vec3(0.37, 0.62, 0.63)),
-    NamedColor("chartreuse", vec3(0.5, 1, 0)),
-    NamedColor("chocolate", vec3(0.82, 0.41, 0.12)),
-    NamedColor("coral", vec3(1, 0.5, 0.31)),
-    NamedColor("cornflower", vec3(0.39, 0.58, 0.93)),
-    NamedColor("cornsilk", vec3(1, 0.97, 0.86)),
-    NamedColor("crimson", vec3(0.86, 0.08, 0.24)),
-    NamedColor("cyan", vec3(0, 1, 1)),
-    NamedColor("darkblue", vec3(0, 0, 0.55)),
-    NamedColor("darkcyan", vec3(0, 0.55, 0.55)),
-    NamedColor("darkgoldenrod", vec3(0.72, 0.53, 0.04)),
-    NamedColor("darkgray", vec3(0.66, 0.66, 0.66)),
-    NamedColor("darkgreen", vec3(0, 0.39, 0)),
-    NamedColor("darkkhaki", vec3(0.74, 0.72, 0.42)),
-    NamedColor("darkmagenta", vec3(0.55, 0, 0.55)),
-    NamedColor("darkolivegreen", vec3(0.33, 0.42, 0.18)),
-    NamedColor("darkorange", vec3(1, 0.55, 0)),
-    NamedColor("darkorchid", vec3(0.6, 0.2, 0.8)),
-    NamedColor("darkred", vec3(0.55, 0, 0)),
-    NamedColor("darksalmon", vec3(0.91, 0.59, 0.48)),
-    NamedColor("darkseagreen", vec3(0.56, 0.74, 0.56)),
-    NamedColor("darkslateblue", vec3(0.28, 0.24, 0.55)),
-    NamedColor("darkslategray", vec3(0.18, 0.31, 0.31)),
-    NamedColor("darkturquoise", vec3(0, 0.81, 0.82)),
-    NamedColor("darkviolet", vec3(0.58, 0, 0.83)),
-    NamedColor("deeppink", vec3(1, 0.08, 0.58)),
-    NamedColor("deepskyblue", vec3(0, 0.75, 1)),
-    NamedColor("dimgray", vec3(0.41, 0.41, 0.41)),
-    NamedColor("dodgerblue", vec3(0.12, 0.56, 1)),
-    NamedColor("firebrick", vec3(0.7, 0.13, 0.13)),
-    NamedColor("floralwhite", vec3(1, 0.98, 0.94)),
-    NamedColor("forestgreen", vec3(0.13, 0.55, 0.13)),
-    NamedColor("fuchsia", vec3(1, 0, 1)),
-    NamedColor("gainsboro", vec3(0.86, 0.86, 0.86)),
-    NamedColor("ghostwhite", vec3(0.97, 0.97, 1)),
-    NamedColor("gold", vec3(1, 0.84, 0)),
-    NamedColor("goldenrod", vec3(0.85, 0.65, 0.13)),
-    NamedColor("gray", vec3(0.75, 0.75, 0.75)),
-    NamedColor("green", vec3(0, 1, 0)),
-    NamedColor("greenyellow", vec3(0.68, 1, 0.18)),
-    NamedColor("honeydew", vec3(0.94, 1, 0.94)),
-    NamedColor("hotpink", vec3(1, 0.41, 0.71)),
-    NamedColor("indianred", vec3(0.8, 0.36, 0.36)),
-    NamedColor("indigo", vec3(0.29, 0, 0.51)),
-    NamedColor("ivory", vec3(1, 1, 0.94)),
-    NamedColor("khaki", vec3(0.94, 0.9, 0.55)),
-    NamedColor("lavender", vec3(0.9, 0.9, 0.98)),
-    NamedColor("lavenderblush", vec3(1, 0.94, 0.96)),
-    NamedColor("lawngreen", vec3(0.49, 0.99, 0)),
-    NamedColor("lemonchiffon", vec3(1, 0.98, 0.8)),
-    NamedColor("lightblue", vec3(0.68, 0.85, 0.9)),
-    NamedColor("lightcoral", vec3(0.94, 0.5, 0.5)),
-    NamedColor("lightcyan", vec3(0.88, 1, 1)),
-    NamedColor("lightgoldenrod", vec3(0.98, 0.98, 0.82)),
-    NamedColor("lightgray", vec3(0.83, 0.83, 0.83)),
-    NamedColor("lightgreen", vec3(0.56, 0.93, 0.56)),
-    NamedColor("lightpink", vec3(1, 0.71, 0.76)),
-    NamedColor("lightsalmon", vec3(1, 0.63, 0.48)),
-    NamedColor("lightseagreen", vec3(0.13, 0.7, 0.67)),
-    NamedColor("lightskyblue", vec3(0.53, 0.81, 0.98)),
-    NamedColor("lightslategray", vec3(0.47, 0.53, 0.6)),
-    NamedColor("lightsteelblue", vec3(0.69, 0.77, 0.87)),
-    NamedColor("lightyellow", vec3(1, 1, 0.88)),
-    NamedColor("lime", vec3(0, 1, 0)),
-    NamedColor("limegreen", vec3(0.2, 0.8, 0.2)),
-    NamedColor("linen", vec3(0.98, 0.94, 0.9)),
-    NamedColor("magenta", vec3(1, 0, 1)),
-    NamedColor("maroon", vec3(0.69, 0.19, 0.38)),
-    NamedColor("mediumaquamarine", vec3(0.4, 0.8, 0.67)),
-    NamedColor("mediumblue", vec3(0, 0, 0.8)),
-    NamedColor("mediumorchid", vec3(0.73, 0.33, 0.83)),
-    NamedColor("mediumpurple", vec3(0.58, 0.44, 0.86)),
-    NamedColor("mediumseagreen", vec3(0.24, 0.7, 0.44)),
-    NamedColor("mediumslateblue", vec3(0.48, 0.41, 0.93)),
-    NamedColor("mediumspringgreen", vec3(0, 0.98, 0.6)),
-    NamedColor("mediumturquoise", vec3(0.28, 0.82, 0.8)),
-    NamedColor("mediumvioletred", vec3(0.78, 0.08, 0.52)),
-    NamedColor("midnightblue", vec3(0.1, 0.1, 0.44)),
-    NamedColor("mintcream", vec3(0.96, 1, 0.98)),
-    NamedColor("mistyrose", vec3(1, 0.89, 0.88)),
-    NamedColor("moccasin", vec3(1, 0.89, 0.71)),
-    NamedColor("navajowhite", vec3(1, 0.87, 0.68)),
-    NamedColor("navyblue", vec3(0, 0, 0.5)),
-    NamedColor("oldlace", vec3(0.99, 0.96, 0.9)),
-    NamedColor("olive", vec3(0.5, 0.5, 0)),
-    NamedColor("olivedrab", vec3(0.42, 0.56, 0.14)),
-    NamedColor("orange", vec3(1, 0.65, 0)),
-    NamedColor("orangered", vec3(1, 0.27, 0)),
-    NamedColor("orchid", vec3(0.85, 0.44, 0.84)),
-    NamedColor("palegoldenrod", vec3(0.93, 0.91, 0.67)),
-    NamedColor("palegreen", vec3(0.6, 0.98, 0.6)),
-    NamedColor("paleturquoise", vec3(0.69, 0.93, 0.93)),
-    NamedColor("palevioletred", vec3(0.86, 0.44, 0.58)),
-    NamedColor("papayawhip", vec3(1, 0.94, 0.84)),
-    NamedColor("peachpuff", vec3(1, 0.85, 0.73)),
-    NamedColor("peru", vec3(0.8, 0.52, 0.25)),
-    NamedColor("pink", vec3(1, 0.75, 0.8)),
-    NamedColor("plum", vec3(0.87, 0.63, 0.87)),
-    NamedColor("powderblue", vec3(0.69, 0.88, 0.9)),
-    NamedColor("purple", vec3(0.63, 0.13, 0.94)),
-    NamedColor("rebeccapurple", vec3(0.4, 0.2, 0.6)),
-    NamedColor("red", vec3(1, 0, 0)),
-    NamedColor("rosybrown", vec3(0.74, 0.56, 0.56)),
-    NamedColor("royalblue", vec3(0.25, 0.41, 0.88)),
-    NamedColor("saddlebrown", vec3(0.55, 0.27, 0.07)),
-    NamedColor("salmon", vec3(0.98, 0.5, 0.45)),
-    NamedColor("sandybrown", vec3(0.96, 0.64, 0.38)),
-    NamedColor("seagreen", vec3(0.18, 0.55, 0.34)),
-    NamedColor("seashell", vec3(1, 0.96, 0.93)),
-    NamedColor("sienna", vec3(0.63, 0.32, 0.18)),
-    NamedColor("silver", vec3(0.75, 0.75, 0.75)),
-    NamedColor("skyblue", vec3(0.53, 0.81, 0.92)),
-    NamedColor("slateblue", vec3(0.42, 0.35, 0.8)),
-    NamedColor("slategray", vec3(0.44, 0.5, 0.56)),
-    NamedColor("snow", vec3(1, 0.98, 0.98)),
-    NamedColor("springgreen", vec3(0, 1, 0.5)),
-    NamedColor("steelblue", vec3(0.27, 0.51, 0.71)),
-    NamedColor("tan", vec3(0.82, 0.71, 0.55)),
-    NamedColor("teal", vec3(0, 0.5, 0.5)),
-    NamedColor("thistle", vec3(0.85, 0.75, 0.85)),
-    NamedColor("tomato", vec3(1, 0.39, 0.28)),
-    NamedColor("turquoise", vec3(0.25, 0.88, 0.82)),
-    NamedColor("violet", vec3(0.93, 0.51, 0.93)),
-    NamedColor("webgray", vec3(0.5, 0.5, 0.5)),
-    NamedColor("webgreen", vec3(0, 0.5, 0)),
-    NamedColor("webmaroon", vec3(0.5, 0, 0)),
-    NamedColor("webpurple", vec3(0.5, 0, 0.5)),
-    NamedColor("wheat", vec3(0.96, 0.87, 0.7)),
-    NamedColor("white", vec3(1, 1, 1)),
-    NamedColor("whitesmoke", vec3(0.96, 0.96, 0.96)),
-    NamedColor("yellow", vec3(1, 1, 0)),
-    NamedColor("yellowgreen", vec3(0.6, 0.8, 0.2)),
-    NamedColor("grape", vec3(111/255.0, 45/255.0, 168/255.0))
-];
