@@ -3,11 +3,9 @@ module techdemo.app;
 import zyeware;
 import zyeware.core.application;
 
-
 import techdemo.menu.menu;
 
-extern(C) ProjectProperties getProjectProperties()
-{
+extern (C) ProjectProperties getProjectProperties() {
 	ProjectProperties props = {
 		authorName: "ZyeByte",
 		projectName: "ZyeWare Sandbox",
@@ -21,66 +19,61 @@ extern(C) ProjectProperties getProjectProperties()
 		mainApplication: new TechDemoApplication()
 	};
 
-    return props;
+	return props;
 }
 
-class EmptyApplication : Application
-{
+class EmptyApplication : Application {
 public:
-	override void initialize()
-	{
+	override void initialize() {
 	}
 
-	override void tick()
-	{
+	override void tick() {
 	}
 
-	override void draw()
-	{
+	override void draw() {
 	}
 }
 
-class TechDemoApplication : StateApplication
-{
+class TechDemoApplication : StateApplication {
 public:
-	override void initialize()
-	{
+	override void initialize() {
 		ZyeWare.scaleMode = ZyeWare.ScaleMode.keepAspect;
 
 		Files.addPackage("techdemo.zpk");
 
 		Directory locales = Files.getDirectory("res:locales");
 		foreach (string localeFile; locales.files)
-			TranslationManager.addLocale(AssetManager.load!Translation(locales.fullname ~ "/" ~ localeFile));
+			TranslationManager.addLocale(
+				AssetManager.load!Translation(locales.fullname ~ "/" ~ localeFile));
 
 		TranslationManager.locale = "en";
 
 		InputManager.addAction("ui_up", 0.2f)
 			.addInput(new InputEventKey(KeyCode.up))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.dpadUp));
-		
+
 		InputManager.addAction("ui_left", 0.2f)
 			.addInput(new InputEventKey(KeyCode.left))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.dpadLeft));
-		
+
 		InputManager.addAction("ui_right", 0.2f)
 			.addInput(new InputEventKey(KeyCode.right))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.dpadRight));
-		
+
 		InputManager.addAction("ui_down", 0.2f)
 			.addInput(new InputEventKey(KeyCode.down))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.dpadDown));
-		
+
 		InputManager.addAction("ui_cancel")
 			.addInput(new InputEventKey(KeyCode.escape))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.b));
-		
+
 		InputManager.addAction("ui_accept")
 			.addInput(new InputEventKey(KeyCode.enter))
 			.addInput(new InputEventGamepadButton(0, GamepadButton.a));
 
 		ZyeWare.mainDisplay.cursor = AssetManager.load!Cursor("core:cursors/arrow.cursor");
 
-        changeState(new DemoMenu(this));
+		changeState(new DemoMenu(this));
 	}
 }

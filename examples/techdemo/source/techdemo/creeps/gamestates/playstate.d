@@ -7,7 +7,6 @@ import std.random : uniform;
 
 import zyeware;
 
-
 import zyeware.ecs;
 
 import techdemo.creeps.ecs.component.player;
@@ -16,18 +15,14 @@ import techdemo.creeps.ecs.system.player;
 import techdemo.creeps.ecs.system.mob;
 import techdemo.creeps.ecs.system.play;
 
-class CreepsPlayState : ECSGameState
-{
+class CreepsPlayState : ECSGameState {
 public:
-    this(StateApplication application)
-    {
+    this(StateApplication application) {
         super(application);
     }
 
-    override void onAttach(bool firstTime)
-    {
-        if (firstTime)
-        {
+    override void onAttach(bool firstTime) {
+        if (firstTime) {
             systems.register(new Render2DSystem());
             systems.register(new Collision2DSystem(new BruteForceTechnique2D()));
 

@@ -27,27 +27,23 @@ a normal reference if placed in GC block without $(D NO_SCAN) attribute.
 
 Tip: This behaves like C#'s short weak reference or Java's weak reference.
 */
-final class WeakReference(T) if (isWeakReferenceable!T)
-{
+final class WeakReference(T) if (isWeakReferenceable!T) {
 	/* Create weak reference for $(D target).
 
 	Preconditions:
 	$(D target !is null)
 	*/
 	this(T target)
-	in
-	{
+	in {
 		assert(target);
 	}
-	do
-	{
+	do {
 		_data.target = target;
 		rt_attachDisposeEvent(_targetToObj(target), &onTargetDisposed);
 	}
 
 	/// Determines whether referenced object is finalized.
-	bool alive() const
-	{
+	bool alive() const {
 		return !!atomicLoad(_data.ptr);
 	}
 
@@ -56,45 +52,38 @@ final class WeakReference(T) if (isWeakReferenceable!T)
 	thus creating a strong reference to it.
 	Returns null otherwise.
 	*/
-	inout(T) target() inout
-	{
+	inout(T) target() inout {
 		return _data.getTarget();
 	}
 
-	~this()
-	{
+	~this() {
 		// This is a really dirty solution to the problem, but since
 		// this *only* happens when the application exits, I suppose
 		// I can catch it without major consequences.
 		import core.exception : InvalidMemoryOperationError;
-		try
-		{
-			if (T t = target)
-			{
+
+		try {
+			if (T t = target) {
 				rt_detachDisposeEvent(_targetToObj(t), &onTargetDisposed);
 			}
+		} catch (InvalidMemoryOperationError e) {
 		}
-		catch (InvalidMemoryOperationError e)
-		{}
 	}
 
 private:
 	shared ubyte[T.sizeof] _dataStore;
 
-	ref inout(_WeakData!T) _data() inout
-	{
+	ref inout(_WeakData!T) _data() inout {
 		return _dataStore.viewAs!(_WeakData!T);
 	}
 
-	void onTargetDisposed(Object)
-	{
+	void onTargetDisposed(Object) {
 		atomicStore(_data.ptr, cast(shared void*) null);
 	}
 }
 
 /// Convenience function that returns a $(D WeakReference!T) object for $(D target).
-WeakReference!T weakReference(T)(T target) if (isWeakReferenceable!T)
-{
+WeakReference!T weakReference(T)(T target) if (isWeakReferenceable!T) {
 	return new WeakReference!T(target);
 }
 
@@ -102,21 +91,18 @@ private:
 
 alias DisposeEvt = void delegate(Object);
 
-extern (C)
-{
+extern (C) {
 	Object _d_toObject(void* p);
 	void rt_attachDisposeEvent(Object obj, DisposeEvt evt);
 	void rt_detachDisposeEvent(Object obj, DisposeEvt evt);
 }
 
-union _WeakData(T) if (isWeakReferenceable!T)
-{
+union _WeakData(T) if (isWeakReferenceable!T) {
 	T target;
 	shared void* ptr;
 
 	// Returns referenced object if it isn't finalized.
-	inout(T) getTarget() inout
-	{
+	inout(T) getTarget() inout {
 		auto ptr = cast(inout shared void*) atomicLoad( /*de-inout*/ (cast(const) this).ptr);
 		if (!ptr)
 			return null;
@@ -136,19 +122,16 @@ union _WeakData(T) if (isWeakReferenceable!T)
 	}
 }
 
-inout(Object) _targetToObj(T)(inout T t) if (is(T == class) || is(T == interface))
-{
+inout(Object) _targetToObj(T)(inout T t) if (is(T == class) || is(T == interface)) {
 	return cast(inout(Object)) t;
 }
 
-inout(To) viewAs(To, From)(inout(From) val) @system
-{
+inout(To) viewAs(To, From)(inout(From) val) @system {
 	return val.viewAs!To;
 }
 
 /// ditto
-ref inout(To) viewAs(To, From)(ref inout(From) val) @system
-{
+ref inout(To) viewAs(To, From)(ref inout(From) val) @system {
 	static assert(To.sizeof == From.sizeof, format("Type size mismatch in `viewAs`: %s.sizeof(%s) != %s.sizeof(%s)",
 			To.stringof, To.sizeof, From.stringof, From.sizeof));
 	return *cast(inout(To)*)&val;

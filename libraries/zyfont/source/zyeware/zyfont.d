@@ -5,45 +5,39 @@ import std.bitmanip;
 
 private:
 
-void writePString(LengthType = uint)(ref ubyte[] buffer, string text)
-{
-	buffer.writePrimitive(cast(LengthType) text.length);
+void writePString(LengthType = uint)(ref ubyte[] buffer, string text) {
+    buffer.writePrimitive(cast(LengthType) text.length);
     buffer ~= cast(ubyte[]) text;
 }
 
-char[] readPString(LengthType = uint)(ref ubyte[] buffer)
-{
-	LengthType length = buffer.readPrimitive!LengthType;
-	char[] str = new char[length];
+char[] readPString(LengthType = uint)(ref ubyte[] buffer) {
+    LengthType length = buffer.readPrimitive!LengthType;
+    char[] str = new char[length];
 
     char[] result = cast(char[]) buffer[0 .. length];
     buffer = buffer[length .. $];
 
-	return result;
+    return result;
 }
 
-void writePrimitive(T)(ref ubyte[] buffer, T value)
-{
+void writePrimitive(T)(ref ubyte[] buffer, T value) {
     import std.bitmanip : write, Endian;
 
-	buffer.length += T.sizeof;
-	write!(T, Endian.littleEndian)(buffer, value, buffer.length - T.sizeof);
+    buffer.length += T.sizeof;
+    write!(T, Endian.littleEndian)(buffer, value, buffer.length - T.sizeof);
 }
 
-T readPrimitive(T)(ref ubyte[] buffer)
-{
-	return read!(T, Endian.littleEndian)(buffer);
+T readPrimitive(T)(ref ubyte[] buffer) {
+    return read!(T, Endian.littleEndian)(buffer);
 }
 
 public:
 
-struct ZyFont
-{
+struct ZyFont {
 public:
     enum fileMagic = cast(ubyte[]) "ZFNT1";
 
-    struct Glyph
-    {
+    struct Glyph {
         dchar id;
         ubyte page;
         ushort xsize, ysize;
@@ -52,14 +46,12 @@ public:
         short xadvance, yadvance;
     }
 
-    struct Kerning
-    {
+    struct Kerning {
         dchar first, second;
         short amount;
     }
 
-    struct Page
-    {
+    struct Page {
         ubyte channels;
         ubyte bitsPerChannel;
         int xsize, ysize;
@@ -77,11 +69,10 @@ public:
     Kerning[] kernings;
     Page[] pages;
 
-    static ZyFont deserialize(in ubyte[] data)
-    {
+    static ZyFont deserialize(in ubyte[] data) {
         auto range = cast(ubyte[]) data[];
-        
-        if (range.length < 5 || range[0..5] != fileMagic)
+
+        if (range.length < 5 || range[0 .. 5] != fileMagic)
             throw new Exception("Invalid file magic");
 
         range = cast(ubyte[]) uncompress(range[5 .. $]);
@@ -92,15 +83,14 @@ public:
         result.isBold = readPrimitive!bool(range);
         result.isItalic = readPrimitive!bool(range);
         result.lineHeight = readPrimitive!short(range);
-        
+
         result.padding = range[0 .. 4];
         result.spacing = range[4 .. 6];
         range = range[6 .. $];
 
         immutable uint glyphCount = readPrimitive!uint(range);
         result.glyphs = new Glyph[glyphCount];
-        foreach (ref Glyph glyph; result.glyphs)
-        {
+        foreach (ref Glyph glyph; result.glyphs) {
             glyph.id = readPrimitive!dchar(range);
             glyph.page = readPrimitive!ubyte(range);
             glyph.xsize = readPrimitive!ushort(range);
@@ -117,8 +107,7 @@ public:
 
         immutable uint kerningCount = readPrimitive!uint(range);
         result.kernings = new Kerning[kerningCount];
-        foreach (ref Kerning kerning; result.kernings)
-        {
+        foreach (ref Kerning kerning; result.kernings) {
             kerning.first = readPrimitive!dchar(range);
             kerning.second = readPrimitive!dchar(range);
             kerning.amount = readPrimitive!short(range);
@@ -126,14 +115,14 @@ public:
 
         immutable uint pageCount = readPrimitive!uint(range);
         result.pages = new Page[pageCount];
-        foreach (ref Page page; result.pages)
-        {
+        foreach (ref Page page; result.pages) {
             page.channels = readPrimitive!ubyte(range);
             page.bitsPerChannel = readPrimitive!ubyte(range);
             page.xsize = readPrimitive!int(range);
             page.ysize = readPrimitive!int(range);
 
-            immutable size_t pixelCount = page.channels * (page.bitsPerChannel / 8)
+            immutable size_t pixelCount = page.channels * (
+                page.bitsPerChannel / 8)
                 * page.xsize * page.ysize;
 
             page.pixels = range[0 .. pixelCount];
@@ -143,8 +132,7 @@ public:
         return result;
     }
 
-    ubyte[] serialize()
-    {
+    ubyte[] serialize() {
         ubyte[] result;
 
         writePString(result, name);
@@ -156,8 +144,7 @@ public:
         result ~= spacing;
 
         writePrimitive(result, cast(uint) glyphs.length);
-        foreach (ref Glyph glyph; glyphs)
-        {
+        foreach (ref Glyph glyph; glyphs) {
             writePrimitive(result, glyph.id);
             writePrimitive(result, glyph.page);
             writePrimitive(result, glyph.xsize);
@@ -173,16 +160,14 @@ public:
         }
 
         writePrimitive(result, cast(uint) kernings.length);
-        foreach (ref Kerning kerning; kernings)
-        {
+        foreach (ref Kerning kerning; kernings) {
             writePrimitive(result, kerning.first);
             writePrimitive(result, kerning.second);
             writePrimitive(result, kerning.amount);
         }
 
         writePrimitive(result, cast(uint) pages.length);
-        foreach (ref Page page; pages)
-        {
+        foreach (ref Page page; pages) {
             writePrimitive(result, page.channels);
             writePrimitive(result, page.bitsPerChannel);
             writePrimitive(result, page.xsize);

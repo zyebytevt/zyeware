@@ -11,8 +11,7 @@ import std.exception : enforce;
 import zyeware;
 import zyeware.pal.pal;
 
-struct Renderer3D
-{
+struct Renderer3D {
     @disable this();
     @disable this(this);
 
@@ -22,23 +21,19 @@ public static:
     /// Params:
     ///     clearColor = The modulate to clear the screen to.
     pragma(inline, true)
-    void clearScreen(in color clearColor) nothrow
-    {
+    void clearScreen(in color clearColor) nothrow {
         Pal.graphics.api.clearScreen(clearColor);
     }
 
-    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment)
-    {
+    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment) {
         Pal.graphics.renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
     }
 
-    void end()
-    {
+    void end() {
         Pal.graphics.renderer3d.end();
     }
 
-    void submit(in mat4 transform)
-    {
+    void submit(in mat4 transform) {
         Pal.graphics.renderer3d.submit(transform);
     }
 }

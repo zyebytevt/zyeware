@@ -23,8 +23,7 @@ import zyeware.core.cmdargs;
 import zyeware.pal.pal;
 
 /// How the main framebuffer should be scaled on resizing.
-enum ScaleMode
-{
+enum ScaleMode {
     center, /// Keep the original size at the center of the display.
     keepAspect, /// Scale with display, but keep the aspect.
     fill, /// Fill the display completely.
@@ -32,22 +31,19 @@ enum ScaleMode
 }
 
 /// Holds information about passed time since the last frame.
-struct FrameTime
-{
+struct FrameTime {
     Duration deltaTime; /// Time between this frame and the last.
     Duration unscaledDeltaTime; /// Time between this frame and the last, without being multiplied by `ZyeWare.timeScale`.
 }
 
 /// Holds information about a SemVer version.
-struct Version
-{
+struct Version {
     int major; /// The major release version.
     int minor; /// The minor release version.
     int patch; /// The patch version.
     string prerelease; /// Any additional version declarations, e.g. "alpha".
 
-    string toString() immutable pure
-    {
+    string toString() immutable pure {
         return format!"%d.%d.%d%s"(major, minor, patch, prerelease ? "-" ~ prerelease : "");
     }
 }
@@ -55,8 +51,7 @@ struct Version
 alias stringz = const(char)*;
 
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
-struct ZyeWare
-{
+struct ZyeWare {
     @disable this();
     @disable this(this);
 
@@ -83,26 +78,23 @@ private static:
     bool sRunning;
     float sTimeScale = 1f;
     bool sIsProcessingDeferred;
-    
-    void runMainLoop()
-    {
+
+    void runMainLoop() {
         MonoTime previous = MonoTime.currTime;
 
-        while (sRunning)
-        {
+        while (sRunning) {
             immutable MonoTime current = MonoTime.currTime;
             immutable Duration elapsed = current - previous;
-            
-            sFrameTime = FrameTime(dur!"hnsecs"(cast(long) (elapsed.total!"hnsecs" * sTimeScale)), elapsed);
+
+            sFrameTime = FrameTime(dur!"hnsecs"(cast(long)(elapsed.total!"hnsecs" * sTimeScale)), elapsed);
             previous = current;
 
             sApplication.tick();
 
-            if (sMustUpdateFramebufferDimensions)
-            {
+            if (sMustUpdateFramebufferDimensions) {
                 if (sScaleMode == ScaleMode.changeDisplaySize)
                     framebufferSize = sMainDisplay.size;
-                
+
                 recalculateFramebufferArea();
             }
 
@@ -110,14 +102,13 @@ private static:
 
             // Call all registered deferred functions at the end of the frame.
             {
-                debug
-                {
+                debug {
                     sIsProcessingDeferred = true;
-                    scope (exit) sIsProcessingDeferred = false;
+                    scope (exit)
+                        sIsProcessingDeferred = false;
                 }
 
-                for (size_t i; i < sDeferredFunctions.length; ++i)
-                {
+                for (size_t i; i < sDeferredFunctions.length; ++i) {
                     // After invoking set to null so that no references keep lingering.
                     sDeferredFunctions[i]();
                     sDeferredFunctions[i] = null;
@@ -132,8 +123,7 @@ private static:
         }
     }
 
-    void createFramebuffer()
-    {
+    void createFramebuffer() {
         FramebufferProperties fbProps;
         fbProps.size = sMainDisplay.size;
         sMainFramebuffer = new Framebuffer(fbProps);
@@ -141,24 +131,23 @@ private static:
         recalculateFramebufferArea();
     }
 
-    void recalculateFramebufferArea() nothrow
-    {
+    void recalculateFramebufferArea() nothrow {
         immutable vec2i winSize = sMainDisplay.size;
         immutable vec2i gameSize = sMainFramebuffer.properties.size;
 
         vec2i finalPos, finalSize;
 
-        final switch (sScaleMode) with (ScaleMode)
-        {
+        final switch (sScaleMode) with (ScaleMode) {
         case center:
             finalPos = vec2i(winSize.x / 2 - gameSize.x / 2, winSize.y / 2 - gameSize.y / 2);
             finalSize = vec2i(gameSize);
             break;
 
         case keepAspect:
-            immutable float scale = min(cast(float) winSize.x / gameSize.x, cast(float) winSize.y / gameSize.y);
+            immutable float scale = min(cast(float) winSize.x / gameSize.x, cast(float) winSize.y / gameSize
+                    .y);
 
-            finalSize = vec2i(cast(int) (gameSize.x * scale), cast(int) (gameSize.y * scale));
+            finalSize = vec2i(cast(int)(gameSize.x * scale), cast(int)(gameSize.y * scale));
             finalPos = vec2i(winSize.x / 2 - finalSize.x / 2, winSize.y / 2 - finalSize.y / 2);
             break;
 
@@ -169,30 +158,31 @@ private static:
             break;
         }
 
-        sFramebufferArea = recti(finalPos.x, finalPos.y, finalPos.x + finalSize.x, finalPos.y + finalSize.y);
+        sFramebufferArea = recti(finalPos.x, finalPos.y, finalPos.x + finalSize.x, finalPos.y + finalSize
+                .y);
     }
 
-    void drawFramebuffer()
-    {
+    void drawFramebuffer() {
         sMainDisplay.update();
 
         // Prepare framebuffer and render application into it.
-        Pal.graphics.api.setViewport(recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y));
-        
+        Pal.graphics.api.setViewport(recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer
+                .properties.size.y));
+
         Pal.graphics.api.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw();
         Pal.graphics.api.setRenderTarget(null);
 
         Pal.graphics.api.clearScreen(color(0, 0, 0));
-        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y),
+        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, recti(0, 0, sMainFramebuffer.properties.size.x, sMainFramebuffer
+                .properties.size.y),
             sFramebufferArea);
 
         sMainDisplay.swapBuffers();
     }
 
 package(zyeware.core) static:
-    void initialize(string[] args, in ProjectProperties projectProperties)
-    {
+    void initialize(string[] args, in ProjectProperties projectProperties) {
         sStartupTime = MonoTime.currTime;
 
         GC.disable();
@@ -219,13 +209,13 @@ package(zyeware.core) static:
         sProjectProperties = projectProperties;
         sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
         enforce!CoreException(sApplication, "Failed to create main application.");
-        
+
         Pal.initialize();
 
         Pal.loadAudioDriver(parsedArgs.audioDriver);
         Pal.loadDisplayDriver(parsedArgs.displayDriver);
         Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);
-        
+
         // Creates a new display and render context.
         sRandom = new RandomNumberGenerator();
         targetFrameRate = sProjectProperties.targetFrameRate;
@@ -244,12 +234,11 @@ package(zyeware.core) static:
         sApplication.initialize();
     }
 
-    void cleanup()
-    {
+    void cleanup() {
         sMainDisplay.destroy();
         sMainFramebuffer.destroy();
         sApplication.cleanup();
-        
+
         Pal.graphics.renderer2d.cleanup();
         Pal.graphics.api.cleanup();
         Pal.audio.cleanup();
@@ -260,8 +249,7 @@ package(zyeware.core) static:
         collect();
     }
 
-    void start()
-    {
+    void start() {
         if (sRunning)
             return;
 
@@ -274,14 +262,12 @@ public static:
     immutable Version engineVersion = Version(0, 6, 0, "alpha");
 
     /// Stops the main loop and quits the engine.
-    void quit() nothrow
-    {
+    void quit() nothrow {
         sRunning = false;
     }
 
     /// Starts a garbage collection cycle, and clears the cache of dead references.
-    void collect() nothrow
-    {
+    void collect() nothrow {
         immutable size_t memoryBeforeCollection = GC.stats().usedSize;
 
         Logger.core.debug_("Running garbage collector...");
@@ -297,11 +283,10 @@ public static:
     /// Params:
     ///   size = The new size of the display.
     void changeDisplaySize(vec2i size)
-        in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
-    {
+    in (size.x > 0 && size.y > 0, "Application size cannot be negative.") {
         if (!sMainDisplay.isMaximized && !sMainDisplay.isMinimized)
             sMainDisplay.size = vec2i(size);
-        
+
         framebufferSize = vec2i(size);
     }
 
@@ -309,8 +294,7 @@ public static:
     ///
     /// Params:
     ///     func = The deferred callback.
-    void callDeferred(DeferCallable func)
-    {
+    void callDeferred(DeferCallable func) {
         enforce!CoreException(!sIsProcessingDeferred, "Cannot defer calls while processing deferred calls!");
 
         sDeferredFunctions ~= func;
@@ -320,8 +304,7 @@ public static:
     Application application() nothrow => sApplication;
 
     /// Sets the current application. It will only be set active after the current frame.
-    void application(Application value)
-    {
+    void application(Application value) {
         callDeferred(() {
             if (sApplication)
                 sApplication.cleanup();
@@ -334,60 +317,51 @@ public static:
     }
 
     /// The duration the engine is already running.
-    Duration upTime() nothrow
-    {
+    Duration upTime() nothrow {
         return MonoTime.currTime - sStartupTime;
     }
 
     /// The target framerate to hit. This is not a guarantee.
-    void targetFrameRate(int fps) 
-        in (fps > 0, "Target FPS must be greater than 0.")
-    {
-        sWaitTime = dur!"msecs"(cast(int) (1000f / cast(float) fps));
+    void targetFrameRate(int fps)
+    in (fps > 0, "Target FPS must be greater than 0.") {
+        sWaitTime = dur!"msecs"(cast(int)(1000f / cast(float) fps));
     }
 
     /// The current time scale. This controls the speed of the game, assuming
     /// all `tick` methods use the `deltaTime` member of the given `FrameTime`.
     ///
     /// See_Also: FrameTime
-    float timeScale() nothrow
-    {
+    float timeScale() nothrow {
         return sTimeScale;
     }
 
     /// ditto
     void timeScale(float value) nothrow
-        in (value != float.nan, "Timescale value was nan.")
-    {
+    in (value != float.nan, "Timescale value was nan.") {
         sTimeScale = value;
     }
 
-    FrameTime frameTime() nothrow
-    {
+    FrameTime frameTime() nothrow {
         return sFrameTime;
     }
 
-    RandomNumberGenerator random() nothrow
-    {
+    RandomNumberGenerator random() nothrow {
         return sRandom;
     }
 
     /// The main display of the engine.
-    Display mainDisplay() nothrow
-    {
+    Display mainDisplay() nothrow {
         return sMainDisplay;
     }
 
     /// The size of the main framebuffer.
-    vec2i framebufferSize() nothrow
-    {
+    vec2i framebufferSize() nothrow {
         return sMainFramebuffer.properties.size;
     }
 
     /// ditto
     void framebufferSize(vec2i newSize)
-        in (newSize.x > 0 && newSize.y > 0, "Framebuffer size cannot be negative.")
-    {
+    in (newSize.x > 0 && newSize.y > 0, "Framebuffer size cannot be negative.") {
         FramebufferProperties fbProps = sMainFramebuffer.properties;
         fbProps.size = newSize;
 
@@ -401,39 +375,35 @@ public static:
     /// Params:
     ///     location = The display relative position.
     /// Returns: The converted framebuffer position.
-    vec2 convertDisplayToFramebufferLocation(vec2i location) nothrow
-    {
-        float x = ((location.x - sFramebufferArea.x) / sFramebufferArea.width) * sMainFramebuffer.properties.size.x;
-        float y = ((location.y - sFramebufferArea.y) / sFramebufferArea.height) * sMainFramebuffer.properties.size.y;
+    vec2 convertDisplayToFramebufferLocation(vec2i location) nothrow {
+        float x = ((location.x - sFramebufferArea.x) / sFramebufferArea.width) * sMainFramebuffer
+            .properties.size.x;
+        float y = ((location.y - sFramebufferArea.y) / sFramebufferArea.height) * sMainFramebuffer
+            .properties.size.y;
 
         return vec2(x, y);
     }
 
     /// Determines how the displayed framebuffer will be scaled according to the display size and shape.
-    ScaleMode scaleMode() nothrow
-    {
+    ScaleMode scaleMode() nothrow {
         return sScaleMode;
     }
 
     /// ditto
-    void scaleMode(ScaleMode value) nothrow
-    {
+    void scaleMode(ScaleMode value) nothrow {
         sScaleMode = value;
     }
 
     /// The `ProjectProperties` the engine was started with.
     /// See_Also: ProjectProperties
-    const(ProjectProperties) projectProperties() nothrow @nogc
-    {
+    const(ProjectProperties) projectProperties() nothrow @nogc {
         return sProjectProperties;
     }
 
-    debug
-    {
+    debug {
         /// If the engine is currently processing deferred calls.
         /// **This method is only available in debug builds!**
-        bool isProcessingDeferred() nothrow
-        {
+        bool isProcessingDeferred() nothrow {
             return sIsProcessingDeferred;
         }
     }

@@ -3,9 +3,8 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl.types; version(ZW_PAL_SDL):
-
-import std.typecons : Rebindable;
+module zyeware.pal.display.sdl.types;
+version (ZW_PAL_SDL)  : import std.typecons : Rebindable;
 
 import bindbc.sdl;
 
@@ -13,8 +12,7 @@ import zyeware;
 
 package:
 
-struct WindowData
-{
+struct WindowData {
 public:
     string title;
     vec2i size;

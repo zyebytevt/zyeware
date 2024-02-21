@@ -2,8 +2,7 @@ module zyeware.core.cmdargs;
 
 import zyeware;
 
-struct CommandLineArguments
-{
+struct CommandLineArguments {
     string[] packages; /// The packages to load.
 
     LogLevel coreLogLevel = LogLevel.verbose; /// The log level for the core logger.
@@ -14,8 +13,7 @@ struct CommandLineArguments
     string audioDriver = "openal"; /// The audio driver to use.
     string displayDriver = "sdl"; /// The display driver to use.
 
-    static CommandLineArguments parse(string[] args)
-    {
+    static CommandLineArguments parse(string[] args) {
         import std.getopt : getopt, defaultGetoptPrinter, config;
         import std.stdio : writeln, writefln;
         import std.traits : EnumMembers;
@@ -23,8 +21,7 @@ struct CommandLineArguments
 
         CommandLineArguments parsed;
 
-        try
-        {
+        try {
             auto helpInfo = getopt(args,
                 config.passThrough,
                 "game", "The packages to load.", &parsed.packages,
@@ -35,21 +32,22 @@ struct CommandLineArguments
                 "display-driver", "The display driver to use.", &parsed.displayDriver,
             );
 
-            if (helpInfo.helpWanted)
-            {
-                defaultGetoptPrinter(format!"ZyeWare Game Engine v%s"(ZyeWare.engineVersion), helpInfo.options);
+            if (helpInfo.helpWanted) {
+                defaultGetoptPrinter(format!"ZyeWare Game Engine v%s"(ZyeWare.engineVersion), helpInfo
+                        .options);
                 writeln("If no arguments are given, the selection of said options are to the disgression of the game developer.");
-                writeln("All arguments not understood by the engine are passed through to the game.");
+                writeln(
+                    "All arguments not understood by the engine are passed through to the game.");
                 writeln("------------------------------------------");
-                writefln("Available log levels: %(%s, %)", [EnumMembers!LogLevel]);
+                writefln("Available log levels: %(%s, %)", [
+                    EnumMembers!LogLevel
+                ]);
                 //writefln("Available graphics drivers: %(%s, %)", Pal.registeredGraphicsDrivers());
                 //writefln("Available audio drivers: %(%s, %)", Pal.registeredAudioDrivers());
                 //writefln("Available display drivers: %(%s, %)", Pal.registeredDisplayDrivers());
                 exit(0);
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             writeln("Could not parse arguments: ", ex.message);
             writeln("Please use -h or --help to show information about the command line arguments.");
             exit(1);

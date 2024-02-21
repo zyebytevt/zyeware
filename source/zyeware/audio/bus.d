@@ -11,13 +11,11 @@ import zyeware;
 import zyeware.pal.pal;
 
 /// Controls the mixing of various sounds which are assigned to this audio bus, 
-class AudioBus : NativeObject
-{
+class AudioBus : NativeObject {
 private:
     static AudioBus[string] sAudioBuses;
 
-    this(string name)
-    {
+    this(string name) {
         mName = name;
         mNativeHandle = Pal.audio.createBus(name);
     }
@@ -27,53 +25,44 @@ protected:
     NativeHandle mNativeHandle;
 
 public:
-    ~this()
-    {
+     ~this() {
         Pal.audio.freeBus(mNativeHandle);
 
         sAudioBuses.remove(mName);
     }
-    
+
     /// The name of this audio bus, as registered in the audio subsystem.
-    string name() const nothrow
-    {
+    string name() const nothrow {
         return mName;
     }
 
     /// The volume of this audio bus, ranging from 0 to 1.
-    float volume() const nothrow
-    {
+    float volume() const nothrow {
         return Pal.audio.getBusVolume(mNativeHandle);
     }
 
     /// ditto
-    void volume(float value)
-    {
+    void volume(float value) {
         Pal.audio.setBusVolume(mNativeHandle, clamp(value, 0.0f, 1.0f));
     }
 
-    const(NativeHandle) handle() pure const nothrow
-    {
+    const(NativeHandle) handle() pure const nothrow {
         return mNativeHandle;
     }
 
-    static AudioBus create(string name)
-    {
+    static AudioBus create(string name) {
         return sAudioBuses[name] = new AudioBus(name);
     }
 
-    static void remove(string name)
-    {
+    static void remove(string name) {
         auto bus = name in sAudioBuses;
-        if (bus)
-        {
+        if (bus) {
             sAudioBuses.remove(name);
             destroy(*bus);
         }
     }
 
-    static AudioBus get(string name) nothrow
-    {
+    static AudioBus get(string name) nothrow {
         auto bus = name in sAudioBuses;
         return bus ? *bus : null;
     }

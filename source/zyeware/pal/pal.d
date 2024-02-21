@@ -10,8 +10,7 @@ import zyeware.pal.generic.drivers;
 
 package(zyeware):
 
-struct Pal
-{
+struct Pal {
     @disable this();
     @disable this(this);
 
@@ -30,69 +29,59 @@ package(zyeware.pal) static:
     alias AudioDriverLoader = void function(ref AudioDriver) nothrow;
 
 package(zyeware) static:
-    void initialize() nothrow
-    {
-        version(ZW_PAL_OPENGL)
+    void initialize() nothrow {
+        version (ZW_PAL_OPENGL)
             sGraphicsLoaders["opengl"] = &imported!"zyeware.pal.graphics.opengl.init".load;
 
-        version(ZW_PAL_OPENAL)
+        version (ZW_PAL_OPENAL)
             sAudioLoaders["openal"] = &imported!"zyeware.pal.audio.openal.init".load;
 
-        version(ZW_PAL_SDL)
+        version (ZW_PAL_SDL)
             sDisplayLoaders["sdl"] = &imported!"zyeware.pal.display.sdl.init".load;
     }
 
     void loadGraphicsDriver(string name) nothrow
-        in (name in sGraphicsLoaders, "GraphicsDriver " ~ name ~ " not registered")
-    {
+    in (name in sGraphicsLoaders, "GraphicsDriver " ~ name ~ " not registered") {
         sGraphicsLoaders[name](sGraphics);
         Logger.core.info("Set graphics driver '%s' active.", name);
     }
 
     void loadDisplayDriver(string name) nothrow
-        in (name in sDisplayLoaders, "DisplayDriver " ~ name ~ " not registered")
-    {
+    in (name in sDisplayLoaders, "DisplayDriver " ~ name ~ " not registered") {
         sDisplayLoaders[name](sDisplay);
         Logger.core.info("Set display driver '%s' active.", name);
     }
 
     void loadAudioDriver(string name) nothrow
-        in (name in sAudioLoaders, "AudioDriver " ~ name ~ " not registered")
-    {
+    in (name in sAudioLoaders, "AudioDriver " ~ name ~ " not registered") {
         sAudioLoaders[name](sAudio);
         Logger.core.info("Set audio driver '%s' active.", name);
     }
 
-    string[] registeredGraphicsDrivers() nothrow
-    {
+    string[] registeredGraphicsDrivers() nothrow {
         return sGraphicsLoaders.keys;
     }
 
-    string[] registeredDisplayDrivers() nothrow
-    {
+    string[] registeredDisplayDrivers() nothrow {
         return sDisplayLoaders.keys;
     }
 
-    string[] registeredAudioDrivers() nothrow
-    {
+    string[] registeredAudioDrivers() nothrow {
         return sAudioLoaders.keys;
     }
 
     pragma(inline, true)
-    ref const(GraphicsDriver) graphics() nothrow
-    {
+    ref const(GraphicsDriver) graphics() nothrow {
         return sGraphics;
     }
 
     pragma(inline, true)
-    ref const(DisplayDriver) display() nothrow
-    {
+    ref const(DisplayDriver) display() nothrow {
         return sDisplay;
     }
 
     pragma(inline, true)
-    ref const(AudioDriver) audio() nothrow
-    {
+    ref const(AudioDriver) audio() nothrow {
         return sAudio;
     }
 }

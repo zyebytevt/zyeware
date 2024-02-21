@@ -9,11 +9,10 @@
 /// developing a game with ZyeWare.
 module zyeware;
 
-public
-{
+public {
     import std.typecons : Flag, Yes, No;
     import std.exception : enforce;
-    
+
     import zyeware.audio.buffer;
     import zyeware.audio.bus;
     import zyeware.audio.source;

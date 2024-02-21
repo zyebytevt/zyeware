@@ -6,12 +6,9 @@ import zyeware;
 import zyeware.core.appstate;
 import zyeware.ecs;
 
-
-
 import techdemo.menu.menu;
 
-class CollisionDemo : AppState
-{
+class CollisionDemo : AppState {
 protected:
     OrthographicCamera mCamera;
     Transform2DComponent mFirstTransform;
@@ -21,8 +18,7 @@ protected:
     Texture2d mCircleTexture;
 
 public:
-    this(StateApplication application)
-    {
+    this(StateApplication application) {
         super(application);
 
         mCamera = new OrthographicCamera(0, 640, 480, 0);
@@ -36,11 +32,11 @@ public:
         mFirstShape = new CircleShape2D(50);
         //mFirstShape = mSecondShape;
 
-        Logger.client.log(LogLevel.debug_, "%(%s, %)", (cast(RectangleShape2D) mSecondShape).vertices);
+        Logger.client.log(LogLevel.debug_, "%(%s, %)", (cast(RectangleShape2D) mSecondShape)
+                .vertices);
     }
 
-    override void tick()
-    {
+    override void tick() {
         DemoMenu.background.tick();
 
         immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
@@ -48,8 +44,10 @@ public:
         vec2 position = mSecondTransform.position;
         float rotation = mSecondTransform.rotation;
 
-        position.x += (InputManager.getActionStrength("ui_right") - InputManager.getActionStrength("ui_left")) * 100f * delta;
-        position.y += (InputManager.getActionStrength("ui_down") - InputManager.getActionStrength("ui_up")) * 100f * delta;
+        position.x += (InputManager.getActionStrength(
+                "ui_right") - InputManager.getActionStrength("ui_left")) * 100f * delta;
+        position.y += (InputManager.getActionStrength(
+                "ui_down") - InputManager.getActionStrength("ui_up")) * 100f * delta;
 
         mSecondTransform.position = position;
         mSecondTransform.rotation = rotation;
@@ -60,12 +58,12 @@ public:
             application.popState();
     }
 
-    override void draw(in FrameTime nextFrameTime)
-    {
+    override void draw(in FrameTime nextFrameTime) {
         Renderer2D.clearScreen(color.black);
 
         auto r = rect(-50, -50, 100, 100);
-        Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform.globalMatrix);
+        Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform
+                .globalMatrix);
         color c = collision.isColliding ? color(0, 1, 0, 1) : color(1, 0, 0, 1);
 
         Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);

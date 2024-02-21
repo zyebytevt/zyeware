@@ -3,8 +3,7 @@ module zyeware.vfs.utils;
 import std.string : indexOf, lastIndexOf;
 import std.array : Appender;
 
-string getScheme(string path) pure
-{
+string getScheme(string path) pure {
     immutable ptrdiff_t index = path.indexOf(':');
 
     if (index == -1)
@@ -13,8 +12,7 @@ string getScheme(string path) pure
     return path[0 .. index];
 }
 
-string stripScheme(string path) pure
-{
+string stripScheme(string path) pure {
     immutable ptrdiff_t index = path.indexOf(':');
 
     if (index == -1)
@@ -23,8 +21,7 @@ string stripScheme(string path) pure
     return path[index + 1 .. $];
 }
 
-string getExtension(string path) pure
-{
+string getExtension(string path) pure {
     immutable ptrdiff_t index = path.lastIndexOf('.');
 
     if (index == -1)
@@ -33,8 +30,7 @@ string getExtension(string path) pure
     return path[index + 1 .. $];
 }
 
-string stripExtension(string path) pure
-{
+string stripExtension(string path) pure {
     immutable ptrdiff_t index = path.lastIndexOf('.');
 
     if (index == -1)
@@ -43,8 +39,7 @@ string stripExtension(string path) pure
     return path[0 .. index];
 }
 
-string getBasename(string path) pure
-{
+string getBasename(string path) pure {
     immutable ptrdiff_t index = path.lastIndexOf('/');
 
     if (index == -1)
@@ -53,8 +48,7 @@ string getBasename(string path) pure
     return path[index + 1 .. $];
 }
 
-string getDirname(string path) pure
-{
+string getDirname(string path) pure {
     immutable ptrdiff_t index = path.lastIndexOf('/');
 
     if (index == -1)
@@ -63,16 +57,14 @@ string getDirname(string path) pure
     return path[0 .. index];
 }
 
-string buildPath(string[] paths...) pure nothrow
-{
+string buildPath(string[] paths...) pure nothrow {
     Appender!string result = "";
 
-    foreach (string path; paths)
-    {
+    foreach (string path; paths) {
         if (!path)
             continue;
-        
-        immutable char lastChar = result[].length > 0 ? result[][$-1] : '/';
+
+        immutable char lastChar = result[].length > 0 ? result[][$ - 1] : '/';
 
         if (lastChar != '/' && lastChar != ':')
             result ~= '/';

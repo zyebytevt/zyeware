@@ -14,16 +14,14 @@ import zyeware;
 import zyeware.core.weakref;
 
 /// UDA to mark an asset to be loaded.
-struct asset
-{
+struct asset {
     Flag!"cache" cache = Yes.cache; /// If this asset should be cached.
 }
 
-private template isAsset(E)
-{
+private template isAsset(E) {
     import std.traits : hasUDA;
 
-    static if(__traits(compiles, hasUDA!(E, asset)))
+    static if (__traits(compiles, hasUDA!(E, asset)))
         enum bool isAsset = hasUDA!(E, asset) && __traits(compiles, cast(E) E.load("test"));
     else
         enum bool isAsset = false;
@@ -33,14 +31,12 @@ private template isAsset(E)
 /// it will not invoke a loader again as long as the reference in memory is valid.
 /// The `AssetManager` will only keep weak references, e.g. it will not keep an unused
 /// asset from being collected by the GC.
-struct AssetManager
-{
+struct AssetManager {
     @disable this();
     @disable this(this);
 
 private static:
-    struct AssetUID
-    {
+    struct AssetUID {
         string typeFQN;
         string path;
     }
@@ -51,8 +47,7 @@ private static:
     LoadFunction[string] sLoaders;
     WeakReference!Object[AssetUID] sCache;
 
-    Object load(in AssetUID uid)
-    {
+    Object load(in AssetUID uid) {
         LoadFunction* loader = uid.typeFQN in sLoaders;
         enforce!CoreException(loader, format!"'%s' was not registered as an asset."(uid.typeFQN));
 
@@ -76,25 +71,21 @@ private static:
         return asset;
     }
 
-    void register(string fqn, LoadCallback callback, bool cache)
-    {
+    void register(string fqn, LoadCallback callback, bool cache) {
         sLoaders[fqn] = LoadFunction(callback, cache);
     }
 
-    bool unregister(string fqn)
-    {
+    bool unregister(string fqn) {
         return sLoaders.remove(fqn);
     }
 
-    bool isCached(in AssetUID uid) nothrow
-    {
+    bool isCached(in AssetUID uid) nothrow {
         auto weakref = sCache.get(uid, null).assumeWontThrow;
         return weakref && weakref.alive;
     }
 
 package(zyeware.core) static:
-    void initialize()
-    {
+    void initialize() {
         import zyeware.rendering.shader : Shader;
         import zyeware.rendering.texture : Texture2d, TextureCubeMap;
         import zyeware.rendering.mesh3d : Mesh3d;
@@ -122,8 +113,7 @@ package(zyeware.core) static:
         Logger.core.debug_("Initialized default asset loaders.");
     }
 
-    void cleanup()
-    {
+    void cleanup() {
         freeAll();
     }
 
@@ -137,10 +127,8 @@ public static:
     /// 
     /// Returns: The loaded asset.
     pragma(inline, true)
-    T load(T)(string path)
-        if (isAsset!T)
-        in (path, "Path cannot be null.")
-    {
+    T load(T)(string path) if (isAsset!T)
+    in (path, "Path cannot be null.") {
         return cast(T) load(AssetUID(fullyQualifiedName!T, path));
     }
 
@@ -148,10 +136,9 @@ public static:
     /// 
     /// Params:
     ///     T = The asset type to register.
-    void register(T)(LoadCallback callback)
-        if (isAsset!T)
-    {
+    void register(T)(LoadCallback callback) if (isAsset!T) {
         import std.traits : getUDAs;
+
         auto data = getUDAs!(T, asset)[0];
 
         register(fullyQualifiedName!T, callback, data.cache);
@@ -163,9 +150,7 @@ public static:
     ///     T = The asset type to unregister.
     /// 
     /// Returns: If the loader has been removed.
-    bool unregister(T)()
-        if (isAsset!T)
-    {
+    bool unregister(T)() if (isAsset!T) {
         return unregister(fullyQualifiedName!T);
     }
 
@@ -175,15 +160,13 @@ public static:
     ///     T = The type of asset.
     ///     path = The path of the file to check.
     bool isCached(T)(string path) nothrow
-        if (isAsset!T)
-        in (path, "Path cannot be null.")
-    {
+    if (isAsset!T)
+    in (path, "Path cannot be null.") {
         return isCached(AssetUID(fullyQualifiedName!T, path));
     }
 
     /// Destroys all cached assets.
-    void freeAll()
-    {
+    void freeAll() {
         foreach (weakref; sCache.values)
             if (weakref.alive)
                 weakref.target.dispose();
@@ -192,14 +175,11 @@ public static:
     }
 
     /// Cleans the cache from assets that have already been garbage collected.
-    void cleanCache() nothrow
-    {
+    void cleanCache() nothrow {
         size_t cleaned;
 
-        foreach (AssetUID key; sCache.keys)
-        {
-            if (!sCache[key].alive)
-            {
+        foreach (AssetUID key; sCache.keys) {
+            if (!sCache[key].alive) {
                 sCache.remove(key).assumeWontThrow;
                 Logger.core.verbose("Uncaching '%s' (%s)...", key.path, key.typeFQN);
                 ++cleaned;

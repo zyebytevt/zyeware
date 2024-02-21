@@ -30,41 +30,35 @@ enum component;
  * - have the UDA $(D component)
  * - must contain fields without $(D shared) qualifier
  */
-template isComponent(C)
-{
+template isComponent(C) {
     import std.meta : allSatisfy;
     import std.traits : RepresentationTypeTuple, isMutable, hasUDA;
 
     enum bool isNotShared(F) = !is(F == shared);
     static if (__traits(compiles, hasUDA!(C, component)))
         enum bool isComponent = (is(C == struct) || is(C == union)) &&
-                                hasUDA!(C, component) &&
-                                allSatisfy!(isNotShared,
-                                            RepresentationTypeTuple!C);
+            hasUDA!(C, component) &&
+            allSatisfy!(isNotShared,
+                RepresentationTypeTuple!C);
     else
         enum bool isComponent = false;
 }
 
-template areComponents(CList...)
-{
+template areComponents(CList...) {
     import std.meta : allSatisfy;
+
     enum bool areComponents = allSatisfy!(isComponent, CList);
 }
 
-
-struct BaseComponentCounter
-{
+struct BaseComponentCounter {
     static size_t counter = 0;
 }
 
-struct ComponentCounter(Derived)
-{
+struct ComponentCounter(Derived) {
 public:
-    static size_t getId()
-    {
+    static size_t getId() {
         static size_t counter = -1;
-        if (counter == -1)
-        {
+        if (counter == -1) {
             counter = mBaseComponentCounter.counter;
             mBaseComponentCounter.counter++;
         }
@@ -76,16 +70,13 @@ private:
     BaseComponentCounter mBaseComponentCounter;
 }
 
-
 //******************************************************************************
 //***** UNIT-TESTS
 //******************************************************************************
 
 ///
-unittest
-{
-    @component struct TestComponent0
-    {
+unittest {
+    @component struct TestComponent0 {
         int a, b;
     }
 
@@ -94,10 +85,9 @@ unittest
         string str;
     }
 
-    @component union TestComponent2
-    {
+    @component union TestComponent2 {
         float f;
-        uint  u;
+        uint u;
     }
 
     static assert(!isComponent!int);

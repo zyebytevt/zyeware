@@ -7,25 +7,21 @@ module zyeware.rendering.texatlas;
 
 import zyeware;
 
-
-struct TextureAtlas
-{
+struct TextureAtlas {
 private:
     Texture2d mTexture;
     size_t mHFrames, mVFrames;
 
 public:
-    this(Texture2d texture, size_t hFrames, size_t vFrames) pure nothrow
-    {
+    this(Texture2d texture, size_t hFrames, size_t vFrames) pure nothrow {
         mTexture = texture;
         mHFrames = hFrames;
         mVFrames = vFrames;
     }
 
-    rect getRegionForFrame(size_t frame) pure const nothrow
-    {
-        immutable float x1 = cast(float) (frame % mHFrames) / mHFrames;
-        immutable float y1 = cast(float) (frame / mHFrames) / mVFrames;
+    rect getRegionForFrame(size_t frame) pure const nothrow {
+        immutable float x1 = cast(float)(frame % mHFrames) / mHFrames;
+        immutable float y1 = cast(float)(frame / mHFrames) / mVFrames;
 
         return rect(
             x1,
@@ -35,16 +31,14 @@ public:
         );
     }
 
-    vec2 spriteSize() pure const nothrow
-    {
+    vec2 spriteSize() pure const nothrow {
         return vec2(
             mTexture.size.x / mHFrames,
             mTexture.size.y / mVFrames
         );
     }
 
-    inout(Texture2d) texture() pure inout nothrow
-    {
+    inout(Texture2d) texture() pure inout nothrow {
         return mTexture;
     }
 }

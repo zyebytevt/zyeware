@@ -7,7 +7,6 @@ module zyeware.rendering.sky;
 
 import zyeware;
 
-
 /+
 
 class Skybox : Renderable

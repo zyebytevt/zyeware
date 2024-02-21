@@ -9,7 +9,6 @@ import std.math : fmod;
 
 import zyeware;
 
-
 /+
 struct TerrainProperties
 {

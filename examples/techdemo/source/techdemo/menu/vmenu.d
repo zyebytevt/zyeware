@@ -4,10 +4,7 @@ import std.typecons : Tuple;
 
 import zyeware;
 
-
-
-class VerticalMenu
-{
+class VerticalMenu {
 protected:
     const BitmapFont mFont;
     Entry[] mEntries;
@@ -17,8 +14,7 @@ protected:
     AudioSource mSource;
 
 public:
-    struct Entry
-    {
+    struct Entry {
         alias Callback = void delegate();
 
         string text;
@@ -27,8 +23,7 @@ public:
         Callback onSelected;
     }
 
-    this(Entry[] entries, in BitmapFont font)
-    {
+    this(Entry[] entries, in BitmapFont font) {
         mEntries = entries;
         mFont = font;
 
@@ -39,13 +34,10 @@ public:
         mSource = new AudioSource(AudioBus.get("master"));
     }
 
-    void handleActionEvent(InputEventAction action)
-    {
-        if (action.isPressed) switch (action.action)
-        {
+    void handleActionEvent(InputEventAction action) {
+        if (action.isPressed) switch (action.action) {
         case "ui_up":
-            do
-            {
+            do {
                 mCursor -= 1;
                 if (mCursor < 0)
                     mCursor += mEntries.length;
@@ -60,8 +52,7 @@ public:
             break;
 
         case "ui_down":
-            do
-            {
+            do {
                 mCursor += 1;
                 if (mCursor >= mEntries.length)
                     mCursor -= mEntries.length;
@@ -87,17 +78,16 @@ public:
         }
     }
 
-    void draw(vec2 topCenterPos)
-    {
-        for (size_t i; i < mEntries.length; ++i)
-        {
+    void draw(vec2 topCenterPos) {
+        for (size_t i; i < mEntries.length; ++i) {
             color modulate;
             if (mEntries[i].disabled)
                 modulate = color.darkgray;
             else
                 modulate = mCursor == i ? color.yellow : color.white;
 
-            Renderer2D.drawString(mEntries[i].text, mFont, topCenterPos + vec2(0, i * mFont.bmFont.common.lineHeight + 4), modulate, Font.Alignment.center);
+            Renderer2D.drawString(mEntries[i].text, mFont, topCenterPos + vec2(0, i * mFont.bmFont.common.lineHeight + 4), modulate, Font
+                    .Alignment.center);
         }
     }
 }

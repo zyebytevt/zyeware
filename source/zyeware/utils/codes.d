@@ -7,8 +7,7 @@ module zyeware.utils.codes;
 
 // From SDL_scancode.h
 /// Represents a physical key.
-enum KeyCode : ushort
-{
+enum KeyCode : ushort {
     unknown = 0,
 
     /**
@@ -196,7 +195,7 @@ enum KeyCode : ushort
     menu = 118,
     select = 119,
     stop = 120,
-    again = 121,   /**< redo */
+    again = 121, /**< redo */
     undo = 122,
     cut = 123,
     copy = 124,
@@ -205,10 +204,10 @@ enum KeyCode : ushort
     mute = 127,
     volumeup = 128,
     volumedown = 129,
-/* not sure whether there's a reason to enable these */
-/*     lockingcapslock = 130,  */
-/*     lockingnumlock = 131, */
-/*     lockingscrolllock = 132, */
+    /* not sure whether there's a reason to enable these */
+    /*     lockingcapslock = 130,  */
+    /*     lockingnumlock = 131, */
+    /*     lockingscrolllock = 132, */
     kpComma = 133,
     kpEqualsas400 = 134,
 
@@ -301,12 +300,12 @@ enum KeyCode : ushort
     rightAlt = 230, /**< alt gr, option */
     rightMeta = 231, /**< windows, command (apple), meta */
 
-    mode = 257,    /**< I'm not sure if this is really not covered
+    mode = 257, /**< I'm not sure if this is really not covered
                                  *   by any of the above, but since there's a
                                  *   special KMOD_MODE for it I'm adding it here
                                  */
 
-    /* @} *//* Usage page 0x07 */
+    /* @} */ /* Usage page 0x07 */
 
     /**
      *  \name Usage page 0x0C
@@ -333,7 +332,7 @@ enum KeyCode : ushort
     acRefresh = 273,
     acBookmarks = 274,
 
-    /* @} *//* Usage page 0x0C */
+    /* @} */ /* Usage page 0x0C */
 
     /**
      *  \name Walther keys
@@ -355,7 +354,7 @@ enum KeyCode : ushort
     app1 = 283,
     app2 = 284,
 
-    /* @} *//* Walther keys */
+    /* @} */ /* Walther keys */
 
     /**
      *  \name Usage page 0x0C (additional media keys)
@@ -369,8 +368,7 @@ enum KeyCode : ushort
 }
 
 /// Represents a mouse button.
-enum MouseCode : ushort
-{
+enum MouseCode : ushort {
     button0 = 0,
     button1 = 1,
     button2 = 2,
@@ -388,8 +386,7 @@ enum MouseCode : ushort
 alias GamepadIndex = size_t;
 
 /// Represents an abstract Xbox 360 gamepad button.
-enum GamepadButton
-{
+enum GamepadButton {
     a,
     b,
     x,
@@ -412,8 +409,7 @@ enum GamepadButton
 }
 
 /// Represents a gamepad axis.
-enum GamepadAxis
-{
+enum GamepadAxis {
     leftX,
     leftY,
     rightX,

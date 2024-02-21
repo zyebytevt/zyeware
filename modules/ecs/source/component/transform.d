@@ -18,8 +18,7 @@ import zyeware.ecs;
 /// world transformation. This is a base component necessary for most
 /// other components.
 @component
-struct Transform2DComponent
-{
+struct Transform2DComponent {
 private:
     vec2 mPosition = void;
     float mRotation = void;
@@ -31,17 +30,15 @@ private:
     Transform2DComponent* mParent;
     Transform2DComponent*[] mChildren;
 
-    void recalculateLocalMatrix() pure
-    {
+    void recalculateLocalMatrix() pure {
         mLocalMatrix = mat4.translation(position.x, position.y,
-                mZIndex / 100f) * mat4.rotation(-rotation, vec3(0, 0,
+            mZIndex / 100f) * mat4.rotation(-rotation, vec3(0, 0,
                 1)) * mat4.scaling(scale.x, scale.y, 1);
 
         recalculateGlobalMatrix();
     }
 
-    void recalculateGlobalMatrix() pure
-    {
+    void recalculateGlobalMatrix() pure {
         if (mParent)
             mGlobalMatrix = mParent.mGlobalMatrix * mLocalMatrix;
         else
@@ -57,8 +54,7 @@ public:
     ///     rotation = The rotation of this transform, in radians.
     ///     scale = The scale of this transform.
     ///     zIndex = The layer of the transform. Lower values are above others.
-    this(in vec2 position, float rotation = 0, in vec2 scale = vec2(1), int zIndex = 0) pure
-    {
+    this(in vec2 position, float rotation = 0, in vec2 scale = vec2(1), int zIndex = 0) pure {
         mPosition = position;
         mRotation = rotation;
         mScale = scale;
@@ -67,50 +63,43 @@ public:
         recalculateLocalMatrix();
     }
 
-	/// Calculates a transformation matrix with this transform's properties alone.
+    /// Calculates a transformation matrix with this transform's properties alone.
     /// 
-	/// Returns: The local transformation matrix.
-    mat4 localMatrix() pure const nothrow
-    {
+    /// Returns: The local transformation matrix.
+    mat4 localMatrix() pure const nothrow {
         return mLocalMatrix;
     }
 
-	/// Calculates a transformation matrix and multiplies it with the ones
-	/// of it's parents.
+    /// Calculates a transformation matrix and multiplies it with the ones
+    /// of it's parents.
     /// 
-	/// Returns: The global transformation matrix.
-    mat4 globalMatrix() pure const nothrow
-    {
+    /// Returns: The global transformation matrix.
+    mat4 globalMatrix() pure const nothrow {
         return mGlobalMatrix;
     }
 
-	/// The parent of this transform.
+    /// The parent of this transform.
     /// 
-	/// Throws: `ComponentException` in case of cyclic transform parenting.
-    Transform2DComponent* parent() pure nothrow
-    {
+    /// Throws: `ComponentException` in case of cyclic transform parenting.
+    Transform2DComponent* parent() pure nothrow {
         return mParent;
     }
 
     /// ditto
-    void parent(Transform2DComponent* parent) pure
-    {
+    void parent(Transform2DComponent* parent) pure {
         // Check if we ourselves are a parent of our future parent
         Transform2DComponent* check = parent;
-        while (check)
-        {
+        while (check) {
             enforce!ComponentException(check != &this,
-                    "Cyclic Transform2D parenting! (&this = %08X, parent = %08X).".format(&this,
-                        parent));
+                "Cyclic Transform2D parenting! (&this = %08X, parent = %08X).".format(&this,
+                    parent));
             check = check.mParent;
         }
 
         // If a parent exists, we need to remove us from there.
-        if (mParent)
-        {
+        if (mParent) {
             for (size_t i; i < mParent.mChildren.length; ++i)
-                if (mParent.mChildren[i] == &this)
-                {
+                if (mParent.mChildren[i] == &this) {
                     mParent.mChildren.remove(i);
                     break;
                 }
@@ -127,27 +116,23 @@ public:
     }
 
     /// Returns all children of this transform.
-    const(Transform2DComponent*[]) children() const pure nothrow 
-    {
+    const(Transform2DComponent*[]) children() const pure nothrow {
         return mChildren;
     }
 
     /// The position of this transform.
-    vec2 position() nothrow pure const 
-    {
+    vec2 position() nothrow pure const {
         return mPosition;
     }
 
     /// ditto
-    void position(in vec2 value) pure
-    {
+    void position(in vec2 value) pure {
         mPosition = value;
         recalculateLocalMatrix();
     }
 
     /// The global position of this transform.
-    vec2 globalPosition() nothrow pure const 
-    {
+    vec2 globalPosition() nothrow pure const {
         if (mParent)
             return (mParent.globalMatrix * vec4(mPosition, 0, 1)).xy;
         else
@@ -155,40 +140,35 @@ public:
     }
 
     /// ditto
-    void globalPosition(in vec2 value) pure
-    {
+    void globalPosition(in vec2 value) pure {
         if (mParent)
             mPosition = (mParent.globalMatrix.inverse * vec4(value, 0, 1)).xy;
         else
             mPosition = value;
-        
+
         recalculateLocalMatrix();
         recalculateGlobalMatrix();
     }
 
     /// The rotation of this transform, in radians.
-    float rotation() nothrow  pure const
-    {
+    float rotation() nothrow pure const {
         return mRotation;
     }
 
     /// ditto
-    void rotation(float value) pure
-    {
+    void rotation(float value) pure {
         mRotation = value;
         recalculateLocalMatrix();
     }
 
-    float globalRotation() nothrow pure const
-    {
+    float globalRotation() nothrow pure const {
         if (mParent)
             return mParent.globalRotation() + mRotation;
         else
             return mRotation;
     }
 
-    void globalRotation(float value) pure
-    {
+    void globalRotation(float value) pure {
         // TODO: Check with unittest!
         if (mParent)
             mRotation = value - mParent.globalRotation;
@@ -197,14 +177,12 @@ public:
     }
 
     /// The scaling of this transform.
-    vec2 scale() nothrow  pure const
-    {
+    vec2 scale() nothrow pure const {
         return mScale;
     }
 
     /// ditto
-    void scale(in vec2 value) pure
-    {
+    void scale(in vec2 value) pure {
         mScale = value;
         recalculateLocalMatrix();
     }
@@ -218,14 +196,12 @@ public:
     }*/
 
     /// The layer of the transform. Lower values are above others.
-    int zIndex() nothrow  pure const
-    {
+    int zIndex() nothrow pure const {
         return mZIndex;
     }
 
     /// ditto
-    void zIndex(int value) pure
-    {
+    void zIndex(int value) pure {
         mZIndex = value;
         recalculateLocalMatrix();
     }
@@ -237,8 +213,7 @@ public:
 /// world transformation. This is a base component necessary for most
 /// other components.
 @component
-struct Transform3DComponent
-{
+struct Transform3DComponent {
 private:
     vec3 mPosition = void;
     quat mRotation = void;
@@ -249,17 +224,15 @@ private:
     Transform3DComponent* mParent;
     Transform3DComponent*[] mChildren;
 
-    void recalculateLocalMatrix() pure
-    {
+    void recalculateLocalMatrix() pure {
         mLocalMatrix = mat4.translation(position.x, position.y,
-                position.z) * rotation.toMatrix!(4,
-                4) * mat4.scaling(scale.x, scale.y, scale.z);
+            position.z) * rotation.toMatrix!(4,
+            4) * mat4.scaling(scale.x, scale.y, scale.z);
 
         recalculateGlobalMatrix();
     }
 
-    void recalculateGlobalMatrix() pure
-    {
+    void recalculateGlobalMatrix() pure {
         if (mParent)
             mGlobalMatrix = mParent.mGlobalMatrix * mLocalMatrix;
         else
@@ -274,59 +247,51 @@ public:
     ///     position = The position of this transform.
     ///     rotation = The rotation of this transform, represented as a quaternion.
     ///     scale = The scaling of this transform.
-    this(in vec3 position, in quat rotation = quat.identity, in vec3 scale = vec3(1)) pure
-    {
+    this(in vec3 position, in quat rotation = quat.identity, in vec3 scale = vec3(1)) pure {
         mPosition = position;
         mRotation = rotation;
         mScale = scale;
 
         recalculateLocalMatrix();
     }
-    
-	/// Calculates a transformation matrix with this transform's properties alone.
+
+    /// Calculates a transformation matrix with this transform's properties alone.
     ///
-	/// Returns: The local transformation matrix.
-    mat4 localMatrix() pure const nothrow
-    {
+    /// Returns: The local transformation matrix.
+    mat4 localMatrix() pure const nothrow {
         return mLocalMatrix;
     }
 
-	/// Calculates a transformation matrix and multiplies it with the ones
-	/// of it's parents.
+    /// Calculates a transformation matrix and multiplies it with the ones
+    /// of it's parents.
     /// 
-	/// Returns: The global transformation matrix.
-    mat4 globalMatrix() pure const nothrow
-    {
+    /// Returns: The global transformation matrix.
+    mat4 globalMatrix() pure const nothrow {
         return mGlobalMatrix;
     }
-    
-	/// The parent of this transform.
+
+    /// The parent of this transform.
     /// 
-	/// Throws: `ComponentException` in case of cyclic transform parenting.
-    Transform3DComponent* parent() pure nothrow
-    {
+    /// Throws: `ComponentException` in case of cyclic transform parenting.
+    Transform3DComponent* parent() pure nothrow {
         return mParent;
     }
 
     /// ditto
-    void parent(Transform3DComponent* parent)
-    {
+    void parent(Transform3DComponent* parent) {
         // Check if we ourselves are a parent of our future parent
         Transform3DComponent* check = parent;
-        while (check)
-        {
+        while (check) {
             enforce!ComponentException(check != &this,
-                    "Cyclic Transform3D parenting! (&this = %08X, parent = %08X).".format(&this,
-                        parent));
+                "Cyclic Transform3D parenting! (&this = %08X, parent = %08X).".format(&this,
+                    parent));
             check = check.mParent;
         }
 
         // If a parent exists, we need to remove us from there.
-        if (mParent)
-        {
+        if (mParent) {
             for (size_t i; i < mParent.mChildren.length; ++i)
-                if (mParent.mChildren[i] == &this)
-                {
+                if (mParent.mChildren[i] == &this) {
                     mParent.mChildren.remove(i);
                     break;
                 }
@@ -343,27 +308,23 @@ public:
     }
 
     /// Returns all children of this transform.
-    const(Transform3DComponent*[]) children() const pure nothrow 
-    {
+    const(Transform3DComponent*[]) children() const pure nothrow {
         return mChildren;
     }
 
     /// The position of this transform.
-    vec3 position() pure const nothrow 
-    {
+    vec3 position() pure const nothrow {
         return mPosition;
     }
 
     /// ditto
-    void position(in vec3 value) pure
-    {
+    void position(in vec3 value) pure {
         mPosition = value;
         recalculateLocalMatrix();
     }
 
     /// The global position of this transform.
-    vec3 globalPosition() nothrow pure const 
-    {
+    vec3 globalPosition() nothrow pure const {
         if (mParent)
             return (mParent.globalMatrix * vec4(mPosition, 1)).xyz;
         else
@@ -371,45 +332,39 @@ public:
     }
 
     /// ditto
-    void globalPosition(in vec3 value) pure
-    {
+    void globalPosition(in vec3 value) pure {
         if (mParent)
             mPosition = (mParent.globalMatrix.inverse * vec4(value, 1)).xyz;
         else
             mPosition = value;
-        
+
         recalculateGlobalMatrix();
     }
 
     /// The rotation of this transform, as a quaternion.
-    quat rotation() nothrow  pure const
-    {
+    quat rotation() nothrow pure const {
         return mRotation;
     }
 
     /// ditto
-    void rotation(in quat value) pure
-    {
+    void rotation(in quat value) pure {
         mRotation = value;
         recalculateLocalMatrix();
     }
 
     /// ditto
-    void eulerRotation(in vec3 value) pure
-    {
+    void eulerRotation(in vec3 value) pure {
         mRotation = quat.eulerRotation(value.x, value.y, value.z);
         recalculateLocalMatrix();
     }
 
     /// The scaling of this transform.
-    vec3 scale() nothrow  pure const
-    {
+    vec3 scale() nothrow pure const {
         return mScale;
     }
 
     /// ditto
-    void scale(in vec3 value) pure
-    {
+    void scale(in vec3 value) pure {
         mScale = value;
         recalculateLocalMatrix();
     }

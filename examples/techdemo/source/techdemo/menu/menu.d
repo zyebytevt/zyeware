@@ -8,9 +8,6 @@ import std.datetime : Duration, dur;
 
 import zyeware;
 
-
-
-
 import techdemo.menu.vmenu;
 import techdemo.menu.background;
 import techdemo.creeps.gamestates.menustate;
@@ -23,8 +20,7 @@ import techdemo.gui.demo;
 
 private static immutable vec2 screenCenter = vec2(320, 240);
 
-class DemoMenu : AppState
-{
+class DemoMenu : AppState {
 protected:
     static size_t sCurrentLocale = 0;
     static MenuBackground sBackground;
@@ -38,8 +34,7 @@ protected:
     Texture2d mLogoTexture;
 
 public:
-    this(StateApplication application)
-    {
+    this(StateApplication application) {
         super(application);
 
         mUICamera = new OrthographicCamera(0, 640, 480, 0);
@@ -54,7 +49,8 @@ public:
         if (!sVersionString)
             sVersionString = "ZyeWare v" ~ ZyeWare.engineVersion.toString;
 
-        mMainMenu = new VerticalMenu([
+        mMainMenu = new VerticalMenu(
+            [
             VerticalMenu.Entry(tr("Dodge the Creeps! (Godot Tutorial)"), false, () {
                 mBGM.pause();
                 ZyeWare.callDeferred(() => application.pushState(new CreepsMenuState(application)));
@@ -85,7 +81,9 @@ public:
             }),
 
             VerticalMenu.Entry(tr("Simulate Crash (Demonstrate crash handler)"), false, () {
-                ZyeWare.callDeferred(() { throw new Exception("This is a simulated crash."); });
+                ZyeWare.callDeferred(() {
+                    throw new Exception("This is a simulated crash.");
+                });
             }),
 
             VerticalMenu.Entry(tr("Run Garbage Collector"), false, () {
@@ -100,20 +98,17 @@ public:
         ], mFont);
     }
 
-    override void tick(in FrameTime frameTime)
-    {
+    override void tick(in FrameTime frameTime) {
         sBackground.tick(frameTime.deltaTime);
 
         import zyeware.core.debugging;
 
-        foreach (const ref Profiler.Result result; Profiler.currentReadData.results)
-        {
+        foreach (const ref Profiler.Result result; Profiler.currentReadData.results) {
             Logger.client.log(LogLevel.debug_, "%s: %s", result.name, result.duration);
         }
     }
 
-    override void draw(in FrameTime nextFrameTime)
-    {
+    override void draw(in FrameTime nextFrameTime) {
         Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
 
         sBackground.draw();
@@ -122,7 +117,7 @@ public:
 
         Renderer2D.drawRectangle(rect(120.95, 70 + logoYOffset, 398.1, 115.2),
             mat4.identity, color.white, mLogoTexture);
-        
+
         mMainMenu.draw(vec2(320, 200));
 
         Renderer2D.drawString(tr("Welcome!\nPress arrow keys to move cursor, 'return' to select.\nInside a demo, press 'escape' to return here."),
@@ -140,8 +135,7 @@ public:
         Renderer2D.endScene();
     }
 
-    override void receive(in Event event)
-    {
+    override void receive(in Event event) {
         if (auto actionEvent = cast(InputEventAction) event)
             mMainMenu.handleActionEvent(actionEvent);
 
@@ -149,17 +143,13 @@ public:
             Logger.client.log(LogLevel.debug_, "DChar: %s", textEvent.codepoint);
     }
 
-    override void onAttach(bool firstTime)
-    {
-        if (!firstTime)
-        {
+    override void onAttach(bool firstTime) {
+        if (!firstTime) {
             mBackSoundSource.play();
 
             if (mBGM.state == SourceState.paused)
                 mBGM.play();
-        }
-        else
-        {
+        } else {
             mBGM = new AudioSource(AudioBus.get("master"));
             mBGM.volume = 0.4f;
             mBGM.buffer = AssetManager.load!AudioBuffer("res:pixels-bgm.ogg");
@@ -168,9 +158,7 @@ public:
         }
     }
 
-    static MenuBackground background()
-    {
+    static MenuBackground background() {
         return sBackground;
     }
 }
-

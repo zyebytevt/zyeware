@@ -34,8 +34,7 @@ import zyeware;
 import zyeware.ecs;
 
 /// How a system handles pause mode.
-enum PauseMode
-{
+enum PauseMode {
     stopped, /// Does not tick the system during pause.
     process /// Ticks the system during pause.
 }
@@ -44,32 +43,27 @@ enum PauseMode
  * Enum allowing to give special order of a system when registering it to the
  * $(D SystemManager).
  */
-struct Order
-{
+struct Order {
 public:
     /// Fisrt place in the list.
-    static auto first()
-    {
+    static auto first() {
         return Order(true, null);
     }
     /// Last place in the list.
-    static auto last()
-    {
+    static auto last() {
         return Order(false, null);
     }
     /// Place before $(D system) in the list.
-    static auto before(S : System)(S system)
-    {
-        return Order(true, cast(System)system);
+    static auto before(S : System)(S system) {
+        return Order(true, cast(System) system);
     }
     /// Place after $(D system) in the list.
-    static auto after(S : System)(S system)
-    {
-        return Order(false, cast(System)system);
+    static auto after(S : System)(S system) {
+        return Order(false, cast(System) system);
     }
 
 private:
-    bool   mIsFirstOrBefore;
+    bool mIsFirstOrBefore;
     System mSystem;
 }
 
@@ -77,46 +71,39 @@ private:
  * System abstract class. System classes may derive from it and override
  * $(D prepare), $(D run) or $(D unprepare).
  */
-abstract class System
-{
+abstract class System {
 protected:
     PauseMode mPauseMode;
 
     /**
      * Prepare any data for the frame before a proper run.
      */
-    void preTick(EntityManager entities, EventManager events, in FrameTime frameTime)
-    {
+    void preTick(EntityManager entities, EventManager events, in FrameTime frameTime) {
     }
 
     /**
      * Called by the system-manager anytime its method run is called.
      */
-    void tick(EntityManager entities, EventManager events, in FrameTime frameTime)
-    {
+    void tick(EntityManager entities, EventManager events, in FrameTime frameTime) {
     }
 
     /**
      * Unprepare any data for the frame after the run.
      */
-    void postTick(EntityManager entities, EventManager events, in FrameTime frameTime)
-    {
+    void postTick(EntityManager entities, EventManager events, in FrameTime frameTime) {
     }
 
     /**
      * Draw a frame.
      */
-    void draw(EntityManager entities, in FrameTime nextFrameTime)
-    {
+    void draw(EntityManager entities, in FrameTime nextFrameTime) {
     }
 
-    void receive(in Event ev)
-    {
+    void receive(in Event ev) {
     }
 
 public:
-    this(PauseMode pauseMode = PauseMode.stopped)
-    {
+    this(PauseMode pauseMode = PauseMode.stopped) {
         mPauseMode = pauseMode;
     }
 
@@ -126,8 +113,7 @@ public:
      * Throw:
      * - A $(D SystemException) if the system is not registered.
      */
-    final void reorder(Order order)
-    {
+    final void reorder(Order order) {
         enforce!SystemException(mManager !is null);
 
         auto sr = mManager.mSystems[].find(this);
@@ -141,35 +127,29 @@ public:
     /**
      * Name of system (given once at the registration by the system-manager).
      */
-    final string name() const
-    {
+    final string name() const {
         return mName;
     }
 
-    PauseMode pauseMode() pure const nothrow
-    {
+    PauseMode pauseMode() pure const nothrow {
         return mPauseMode;
     }
 
-    inout(SystemManager) manager() pure inout nothrow
-    {
+    inout(SystemManager) manager() pure inout nothrow {
         return mManager;
     }
 
 private:
-    string        mName;
+    string mName;
     SystemManager mManager;
 }
-
 
 /**
  * Entry point for systems. Allow to register systems.
  */
-class SystemManager
-{
+class SystemManager {
 public:
-    this(EntityManager entityManager, EventManager eventManager)
-    {
+    this(EntityManager entityManager, EventManager eventManager) {
         mEntityManager = entityManager;
         mEventManager = eventManager;
     }
@@ -179,27 +159,24 @@ public:
      *
      * Throws: SystemException if the system was already registered.
      */
-    void register(S : System)
-                 (S system,
-                  Order order = Order.last,
-                  Flag!"AutoSubscribe" flag = Yes.AutoSubscribe)
-    {
+    void register(S : System)(S system,
+        Order order = Order.last,
+        Flag!"AutoSubscribe" flag = Yes.AutoSubscribe) {
         // Check system is not already registered
         auto sr = mSystems[].find(system);
         enforce!SystemException(sr.empty);
 
         insert(system, order);
 
-        auto s = cast(System)system;
-        s.mName = S.stringof ~ format("@%04x", cast(ushort)cast(void*)system);
+        auto s = cast(System) system;
+        s.mName = S.stringof ~ format("@%04x", cast(ushort) cast(void*) system);
         s.mManager = this;
 
         // auto-subscribe to events
-        if (flag)
-        {
+        if (flag) {
             import std.traits : InterfacesTuple;
-            foreach (Interface ; InterfacesTuple!S)
-            {
+
+            foreach (Interface; InterfacesTuple!S) {
                 static if (is(Interface : IReceiver!E, E))
                     mEventManager.subscribe!E(system);
             }
@@ -207,9 +184,7 @@ public:
     }
 
     /// ditto
-    void register(S : System)
-                 (S system, Flag!"AutoSubscribe" flag)
-    {
+    void register(S : System)(S system, Flag!"AutoSubscribe" flag) {
         register(system, Order.last, flag);
     }
 
@@ -219,21 +194,19 @@ public:
      * Throws: SystemException if the system was not registered.
      */
     void unregister(S : System)(S system,
-                                Flag!"AutoSubscribe" flag = Yes.AutoSubscribe)
-    {
+        Flag!"AutoSubscribe" flag = Yes.AutoSubscribe) {
         auto sr = mSystems[].find(system);
         enforce!SystemException(!sr.empty);
 
         mSystems.linearRemove(sr.take(1));
 
-        auto s = cast(System)system;
+        auto s = cast(System) system;
         s.mManager = null;
 
-        if (flag)
-        {
+        if (flag) {
             import std.traits : InterfacesTuple;
-            foreach (Interface ; InterfacesTuple!S)
-            {
+
+            foreach (Interface; InterfacesTuple!S) {
                 static if (is(Interface : IReceiver!E, E))
                     mEventManager.unsubscribe!E(system);
             }
@@ -245,8 +218,7 @@ public:
      *
      * They are prepared in the order that they were registered.
      */
-    void preTick(in FrameTime frameTime)
-    {
+    void preTick(in FrameTime frameTime) {
         foreach (sys; mSystems)
             sys.preTick(mEntityManager, mEventManager, frameTime);
     }
@@ -256,8 +228,7 @@ public:
      *
      * They are run in the order that they were registered.
      */
-    void tick(in FrameTime frameTime)
-    {
+    void tick(in FrameTime frameTime) {
         foreach (sys; mSystems)
             sys.tick(mEntityManager, mEventManager, frameTime);
     }
@@ -267,8 +238,7 @@ public:
      *
      * They are unprepared in the reverse order that they were registered.
      */
-    void postTick(in FrameTime frameTime)
-    {
+    void postTick(in FrameTime frameTime) {
         foreach_reverse (sys; mSystems)
             sys.postTick(mEntityManager, mEventManager, frameTime);
     }
@@ -276,21 +246,18 @@ public:
     /**
      * Prepare, run and unprepare all the registered systems.
      */
-    void tickFull(in FrameTime frameTime)
-    {
+    void tickFull(in FrameTime frameTime) {
         preTick(frameTime);
         tick(frameTime);
         postTick(frameTime);
     }
 
-    void draw(in FrameTime nextFrameTime)
-    {
+    void draw(in FrameTime nextFrameTime) {
         foreach (sys; mSystems)
             sys.draw(mEntityManager, nextFrameTime);
     }
 
-    void receive(in Event ev)
-    {
+    void receive(in Event ev) {
         foreach (sys; mSystems)
             sys.receive(ev);
     }
@@ -298,71 +265,56 @@ public:
     /**
      * Return a bidirectional range on the list of the registered systems.
      */
-    auto opSlice()
-    {
+    auto opSlice() {
         return mSystems[];
     }
 
-    inout(EntityManager) entityManager() pure inout nothrow
-    {
+    inout(EntityManager) entityManager() pure inout nothrow {
         return mEntityManager;
     }
 
-    inout(EventManager) eventManager() pure inout nothrow
-    {
+    inout(EventManager) eventManager() pure inout nothrow {
         return mEventManager;
     }
 
 private:
-    void insert(System system, Order order)
-    {
-        if (order == Order.first)
-        {
-            mSystems.insertFront(cast(System)system);
-        }
-        else if (order == Order.last)
-        {
-            mSystems.insertBack(cast(System)system);
-        }
-        else if (order.mIsFirstOrBefore)
-        {
+    void insert(System system, Order order) {
+        if (order == Order.first) {
+            mSystems.insertFront(cast(System) system);
+        } else if (order == Order.last) {
+            mSystems.insertBack(cast(System) system);
+        } else if (order.mIsFirstOrBefore) {
             auto or = mSystems[].find(order.mSystem);
             enforce!SystemException(!or.empty);
-            mSystems.insertBefore(or, cast(System)system);
-        }
-        else //if (!order.mIsFirstOrBefore)
+            mSystems.insertBefore(or, cast(System) system);
+        } else //if (!order.mIsFirstOrBefore)
         {
             auto or = mSystems[];
             enforce!SystemException(!or.empty);
             //xxx dodgy, but DList's are tricky
-            while (or.back != order.mSystem)
-            {
+            while (or.back != order.mSystem) {
                 or.popBack();
                 enforce!SystemException(!or.empty);
             }
-            mSystems.insertAfter(or, cast(System)system);
+            mSystems.insertAfter(or, cast(System) system);
         }
     }
 
-    EntityManager   mEntityManager;
-    EventManager    mEventManager;
-    DList!System    mSystems;
+    EntityManager mEntityManager;
+    EventManager mEventManager;
+    DList!System mSystems;
 }
-
 
 //******************************************************************************
 //***** UNIT-TESTS
 //******************************************************************************
 
 // validate ordering
-unittest
-{
-    class MySys0 : System
-    {
+unittest {
+    class MySys0 : System {
     }
 
-    class MySys1 : System
-    {
+    class MySys1 : System {
     }
 
     auto entities = new EntityManager();
@@ -424,15 +376,11 @@ unittest
     auto sysNB = new MySys1;
 
     assert(collectException!SystemException(
-            systems.register(sys1))
-            !is null);
+            systems.register(sys1)) !is null);
     assert(collectException!SystemException(
-            systems.unregister(sysNA))
-            !is null);
+            systems.unregister(sysNA)) !is null);
     assert(collectException!SystemException(
-            systems.register(sysNA, Order.after(sysNB)))
-            !is null);
+            systems.register(sysNA, Order.after(sysNB))) !is null);
     assert(collectException!SystemException(
-            systems.register(sysNA, Order.before(sysNB)))
-            !is null);
+            systems.register(sysNA, Order.before(sysNB))) !is null);
 }

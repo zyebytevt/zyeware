@@ -17,8 +17,7 @@ import zyeware;
 alias tr = LocaleManager.translate;
 
 /// Responsible for managing loaded locales and translating requests.
-struct LocaleManager
-{
+struct LocaleManager {
 private static:
     Locale[string] sLoadedLocales;
     Locale sActiveLocale;
@@ -31,8 +30,7 @@ public static:
     ///
     /// Returns: The translated string, or `key` if it couldn't be translated.
     string translate(string key, Variant[string] args = null) nothrow
-        in (key, "Key cannot be null.")
-    {
+    in (key, "Key cannot be null.") {
         if (sActiveLocale)
             return sActiveLocale.translate(key, args);
 
@@ -48,21 +46,18 @@ public static:
     ///
     /// See_Also: Translation
     void addLocale(Locale file) nothrow
-        in (file, "Translation cannot be null.")
-    {
+    in (file, "Translation cannot be null.") {
         import std.range : chain, byPair, assocArray;
 
         Locale locale = sLoadedLocales.get(file.mLocale, null).assumeWontThrow;
 
-        if (!locale)
-        {
+        if (!locale) {
             sLoadedLocales[file.mLocale] = file;
             file.optimize();
             Logger.core.info("Added locale '%s' and optimized translation.", file.mLocale);
-        }
-        else
-        {
-            locale.mTranslations = locale.mTranslations.byPair.chain(file.mTranslations.byPair).assocArray;
+        } else {
+            locale.mTranslations = locale.mTranslations.byPair.chain(file.mTranslations.byPair)
+                .assocArray;
             locale.optimize();
             Logger.core.info("Merged new translations into locale '%s' and optimized translation.",
                 file.mLocale);
@@ -74,21 +69,18 @@ public static:
     /// Params:
     ///     locale = The locale name to unregister.
     void removeLocale(string locale) nothrow
-        in (locale, "Locale cannot be null.")
-    {
+    in (locale, "Locale cannot be null.") {
         if (sLoadedLocales.remove(locale))
             Logger.core.debug_("Removed locale '%s'.", locale);
     }
 
     /// All currently loaded locales.
-    string[] allLocales() nothrow
-    {
+    string[] allLocales() nothrow {
         return sLoadedLocales.keys;
     }
 
     /// The currently active locale.
-    string locale() nothrow
-    {
+    string locale() nothrow {
         if (!sActiveLocale)
             return null;
 
@@ -97,8 +89,7 @@ public static:
 
     /// ditto
     void locale(string locale)
-        in (locale, "Locale cannot be null.")
-    {
+    in (locale, "Locale cannot be null.") {
         Locale* file = locale in sLoadedLocales;
         enforce(file, format!"Locale '%s' doesn't have a file loaded."(locale));
 
@@ -108,8 +99,7 @@ public static:
 }
 
 @asset(Yes.cache)
-class Locale
-{
+class Locale {
 protected:
     string mLocale;
     Translation[string] mTranslations;
@@ -120,8 +110,7 @@ public:
     ///     translations = Key-to-language translations in an AA.
     ///     assetRemaps = The resource remaps in an AA.
     this(string locale)
-        in (locale, "Locale cannot be null.")
-    {
+    in (locale, "Locale cannot be null.") {
         mLocale = locale;
     }
 
@@ -131,9 +120,8 @@ public:
     ///     key = The key.
     ///     translation = The translation it should correspond to.
     void addTranslation(string key, Translation translation) nothrow
-        in (key, "Key cannot be null.")
-        in (translation, "Translation cannot be null.")
-    {
+    in (key, "Key cannot be null.")
+    in (translation, "Translation cannot be null.") {
         mTranslations[key] = translation;
     }
 
@@ -142,14 +130,12 @@ public:
     /// Params:
     ///     key = The key of the translation to remove.
     void removeTranslation(string key) nothrow
-        in (key, "Key cannot be null.")
-    {
+    in (key, "Key cannot be null.") {
         mTranslations.remove(key);
     }
 
     /// Tries to optimize all further key lookups.
-    void optimize() nothrow
-    {
+    void optimize() nothrow {
         mTranslations = mTranslations.rehash;
     }
 
@@ -160,8 +146,7 @@ public:
     ///
     /// Returns: The translation, or `key` if it doesn't exist.
     string translate(string key, Variant[string] args = null) const nothrow
-        in (key, "Key cannot be null.")
-    {
+    in (key, "Key cannot be null.") {
         const(Translation)* translation = key in mTranslations;
         if (!translation)
             return "[" ~ key ~ " NOT FOUND]";
@@ -170,8 +155,7 @@ public:
     }
 
     /// The ISO 639-1 name of this locale.
-    string locale() const nothrow
-    {
+    string locale() const nothrow {
         return mLocale;
     }
 
@@ -180,31 +164,26 @@ public:
     /// Params:
     ///     path = The path of the file to load.
     static Locale load(string path)
-        in (path, "Path cannot be null.")
-    {
+    in (path, "Path cannot be null.") {
         SDLNode* root = loadSdlDocument(path);
 
         immutable string localeName = root.expectChildValue!string("locale");
 
         auto locale = new Locale(localeName);
 
-        void parseGroup(SDLNode* current, string[] path)
-        {
-            for (size_t i; i < current.children.length; ++i)
-            {
+        void parseGroup(SDLNode* current, string[] path) {
+            for (size_t i; i < current.children.length; ++i) {
                 SDLNode* child = &current.children[i];
                 if (child.qualifiedName == "locale")
                     continue;
 
                 Translation translation;
-                
-                switch (child.getAttributeValue!string("type", "simple"))
-                {
+
+                switch (child.getAttributeValue!string("type", "simple")) {
                 case "plural":
                     Translation[Plurality] translations;
 
-                    for (size_t j; j < child.children.length; ++j)
-                    {
+                    for (size_t j; j < child.children.length; ++j) {
                         SDLNode* pluralNode = &child.children[j];
 
                         Plurality plurality = pluralNode.name.to!Plurality;
@@ -213,7 +192,7 @@ public:
                         if (value.indexOf('{') != -1)
                             translations[plurality] = new PlaceholderTranslation(value);
                         else
-                            translations[plurality] = new LiteralTranslation(value);    
+                            translations[plurality] = new LiteralTranslation(value);
                     }
 
                     enforce!ResourceException(Plurality.other in translations, "Plural translations must contain 'other'.");
@@ -223,8 +202,7 @@ public:
 
                 default:
                     // This child is a sub-group
-                    if (child.values.length == 0 && child.children.length > 0)
-                    {
+                    if (child.values.length == 0 && child.children.length > 0) {
                         path ~= child.name;
                         parseGroup(child, path);
                         path = path[0 .. $ - 1];
@@ -254,8 +232,7 @@ public:
     }
 }
 
-enum Plurality
-{
+enum Plurality {
     zero,
     one,
     two,
@@ -266,49 +243,40 @@ enum Plurality
 
 private:
 
-abstract class Translation
-{
+abstract class Translation {
 public:
     abstract string get(Variant[string] args) const nothrow;
 }
 
-final class LiteralTranslation : Translation
-{
+final class LiteralTranslation : Translation {
 private:
     string mText;
 
 public:
     this(string text)
-        in (text, "Text cannot be null.")
-    {
+    in (text, "Text cannot be null.") {
         mText = text;
     }
 
-    override string get(Variant[string] args) const nothrow
-    {
+    override string get(Variant[string] args) const nothrow {
         return mText;
     }
 }
 
-final class PlaceholderTranslation : Translation
-{
+final class PlaceholderTranslation : Translation {
 private:
-    struct TextNode
-    {
+    struct TextNode {
         bool isPlaceholder;
         string value;
     }
 
     TextNode[] mNodes;
 
-    void parse(string text) nothrow
-    {
+    void parse(string text) nothrow {
         size_t index = 0;
-        
-        while (index < text.length)
-        {
-            if (text[index] == '{')
-            {
+
+        while (index < text.length) {
+            if (text[index] == '{') {
                 immutable size_t start = index + 1;
                 while (index < text.length && text[index] != '}')
                     ++index;
@@ -317,9 +285,7 @@ private:
                 node.isPlaceholder = true;
                 node.value = text[start .. index++];
                 mNodes ~= node;
-            }
-            else
-            {
+            } else {
                 immutable size_t start = index;
                 while (index < text.length && text[index] != '{')
                     ++index;
@@ -334,28 +300,25 @@ private:
 
 public:
     this(string text)
-        in (text, "Text cannot be null.")
-    {
+    in (text, "Text cannot be null.") {
         parse(text);
     }
 
-    override string get(Variant[string] args) const nothrow
-    {
+    override string get(Variant[string] args) const nothrow {
         Appender!string result;
 
-        foreach (const ref node; mNodes)
-        {
+        foreach (const ref node; mNodes) {
             if (!node.isPlaceholder)
                 result ~= node.value;
-            else
-            {
+            else {
                 Variant* value = args ? node.value in args : null;
                 if (!value)
                     result ~= "[" ~ node.value ~ " PLACEHOLDER NOT FOUND]";
-                else
-                {
-                    try result ~= value.toString();
-                    catch (Exception) result ~= "[" ~ node.value ~ " ERRORED OUT]";
+                else {
+                    try
+                        result ~= value.toString();
+                    catch (Exception)
+                        result ~= "[" ~ node.value ~ " ERRORED OUT]";
                 }
             }
         }
@@ -364,27 +327,23 @@ public:
     }
 }
 
-final class PluralTranslation : Translation
-{
+final class PluralTranslation : Translation {
 private:
     Translation[Plurality] mTranslations;
 
 public:
     this(Translation[Plurality] translations)
-        in (translations, "Translations cannot be null.")
-        in (Plurality.other in translations, "Translations must contain 'other'.")
-    {
+    in (translations, "Translations cannot be null.")
+    in (Plurality.other in translations, "Translations must contain 'other'.") {
         mTranslations = translations;
     }
 
-    override string get(Variant[string] args) const nothrow
-    {
+    override string get(Variant[string] args) const nothrow {
         Variant* value = args ? "count" in args : null;
         if (!value)
             return "[count PLACEHOLDER NOT GIVEN]";
 
-        try
-        {
+        try {
             int count = value.coerce!int;
             Plurality plurality;
 
@@ -406,9 +365,7 @@ public:
                 return mTranslations[Plurality.other].get(args);
 
             return translation.get(args);
-        }
-        catch (Exception)
-        {
+        } catch (Exception) {
             return "[count ERROR]";
         }
     }

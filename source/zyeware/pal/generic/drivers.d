@@ -7,8 +7,7 @@ module zyeware.pal.generic.drivers;
 
 import zyeware;
 
-struct AudioDriver
-{
+struct AudioDriver {
 public:
     void function() initialize;
     void function() loadLibraries;
@@ -45,8 +44,7 @@ public:
     void function(NativeHandle handle) updateSourceBuffers;
 }
 
-struct DisplayDriver
-{
+struct DisplayDriver {
 public:
     NativeHandle function(in DisplayProperties properties, in Display container) createDisplay;
     void function(NativeHandle handle) destroyDisplay;
@@ -109,11 +107,9 @@ public:
     string function(in NativeHandle handle) getClipboardString;
 }
 
-struct GraphicsDriver
-{
+struct GraphicsDriver {
 public:
-    struct Api
-    {
+    struct Api {
         void function() initialize;
         void function() cleanup;
 
@@ -147,8 +143,7 @@ public:
         NativeHandle function(in NativeHandle framebuffer) nothrow getTextureFromFramebuffer;
     }
 
-    struct Renderer2d
-    {
+    struct Renderer2d {
         void function() initialize;
         void function() cleanup;
         void function(in mat4 projectionMatrix, in mat4 viewMatrix) beginScene;
@@ -161,8 +156,7 @@ public:
         void function(in dstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawDString;
     }
 
-    struct Renderer3d
-    {
+    struct Renderer3d {
         void function(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment) beginScene;
         void function() end;
         void function(in mat4 transform) submit;

@@ -15,8 +15,7 @@ import std.exception : assumeWontThrow, collectException;
 import zyeware;
 
 /// The log level to use for various logs.
-enum LogLevel
-{
+enum LogLevel {
     off, /// No logs should go through. This is only useful for setting a "minimum log level."
     fatal, /// Extremely severe incidents which almost certainly are followed by a crash.
     error, /// Severe incidents that can impact the stability of the application.
@@ -36,8 +35,7 @@ private immutable string[] levelNames = [
 ];
 
 /// Represents a single logger.
-final class Logger
-{
+final class Logger {
 private:
     __gshared static Logger sCoreLogger, sClientLogger;
 
@@ -45,22 +43,17 @@ private:
     LogLevel mLogLevel;
     string mName;
 
-    static string catchError(lazy string formatted) pure nothrow
-    {
-        try
-        {
+    static string catchError(lazy string formatted) pure nothrow {
+        try {
             return formatted;
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             return "<error formatting>";
         }
     }
 
 package(zyeware):
     static void initialize(Logger core, Logger client) nothrow
-        in (core && client, "Cannot set null as loggers.")
-    {
+    in (core && client, "Cannot set null as loggers.") {
         sCoreLogger = core;
         sClientLogger = client;
     }
@@ -73,8 +66,7 @@ public:
     ///   sink = The log sink to use for writing messages.
     ///   logLevel = The minimum log level that should be logged.
     ///   name = The name of the logger.
-    this(LogSink sink, LogLevel logLevel, string name) pure nothrow
-    {
+    this(LogSink sink, LogLevel logLevel, string name) pure nothrow {
         mSink = sink;
         mLogLevel = logLevel;
         mName = name;
@@ -84,24 +76,22 @@ public:
     /// Params:
     ///   level = The log level the message should be written as.
     ///   message = The message itself.
-    void log(LogLevel level, string message) nothrow
-    {
+    void log(LogLevel level, string message) nothrow {
         if (level > mLogLevel)
             return;
 
         mSink.log(LogSink.LogMessage(
-            mName,
-            level,
-            ZyeWare.upTime,
-            message
+                mName,
+                level,
+                ZyeWare.upTime,
+                message
         ));
     }
 
     /// Flushes the log sink connected to this log.
     void flush() => mSink.flush();
 
-    pragma(inline, true)
-    {
+    pragma(inline, true) {
         void fatal(string message) nothrow => log(LogLevel.fatal, message);
         void error(string message) nothrow => log(LogLevel.error, message);
         void warning(string message) nothrow => log(LogLevel.warning, message);
@@ -109,12 +99,18 @@ public:
         void debug_(string message) nothrow => log(LogLevel.debug_, message);
         void verbose(string message) nothrow => log(LogLevel.verbose, message);
 
-        void fatal(Args...)(string message, Args args) nothrow => log(LogLevel.fatal, catchError(message.format(args)));
-        void error(Args...)(string message, Args args) nothrow => log(LogLevel.error, catchError(message.format(args)));
-        void warning(Args...)(string message, Args args) nothrow => log(LogLevel.warning, catchError(message.format(args)));
-        void info(Args...)(string message, Args args) nothrow => log(LogLevel.info, catchError(message.format(args)));
-        void debug_(Args...)(string message, Args args) nothrow => log(LogLevel.debug_, catchError(message.format(args)));
-        void verbose(Args...)(string message, Args args) nothrow => log(LogLevel.verbose, catchError(message.format(args)));
+        void fatal(Args...)(string message, Args args) nothrow => log(LogLevel.fatal, catchError(
+                message.format(args)));
+        void error(Args...)(string message, Args args) nothrow => log(LogLevel.error, catchError(
+                message.format(args)));
+        void warning(Args...)(string message, Args args) nothrow => log(LogLevel.warning, catchError(
+                message.format(args)));
+        void info(Args...)(string message, Args args) nothrow => log(LogLevel.info, catchError(
+                message.format(args)));
+        void debug_(Args...)(string message, Args args) nothrow => log(LogLevel.debug_, catchError(
+                message.format(args)));
+        void verbose(Args...)(string message, Args args) nothrow => log(LogLevel.verbose, catchError(
+                message.format(args)));
     }
 
     pragma(inline, true)
@@ -123,11 +119,9 @@ public:
 
 /// Represents a sink to write a message into. This can be either a file, a console,
 /// a in-game display, etc.
-interface LogSink
-{
+interface LogSink {
     /// The data that should be logged.
-    struct LogMessage
-    {
+    struct LogMessage {
         string loggerName; /// The name of the logger.
         LogLevel level; /// The log level of the message.
         Duration uptime; /// The engine uptime this message was sent.
@@ -143,22 +137,19 @@ interface LogSink
     void flush();
 }
 
-final class CombinedLogSink : LogSink
-{
+final class CombinedLogSink : LogSink {
 private:
     LogSink[] mSinks;
 
 public:
     /// Params:
     ///   sinks = The sinks to combine.
-    this(LogSink[] sinks)
-    {
+    this(LogSink[] sinks) {
         mSinks = sinks;
     }
 
     /// Add a log sink to this logger.
-    void addSink(LogSink sink) @trusted pure
-    {
+    void addSink(LogSink sink) @trusted pure {
         mSinks ~= sink;
     }
 
@@ -166,64 +157,56 @@ public:
     /// If the given sink doesn't exist, nothing happens.
     /// Params:
     ///   sink = The sink to remove.
-    void removeSink(LogSink sink) @trusted
-    {
+    void removeSink(LogSink sink) @trusted {
         for (size_t i; i < mSinks.length; ++i)
-            if (mSinks[i] == sink)
-            {
+            if (mSinks[i] == sink) {
                 mSinks.remove!(SwapStrategy.stable)(i);
                 return;
             }
     }
 
-    override void log(in LogMessage data) nothrow
-    {
+    override void log(in LogMessage data) nothrow {
         foreach (sink; mSinks)
             sink.log(data);
     }
 
-    override void flush()
-    {
+    override void flush() {
         foreach (sink; mSinks)
             sink.flush();
     }
 }
 
 /// Represents a log sink that logs into a real file.
-class FileLogSink : LogSink
-{
+class FileLogSink : LogSink {
 protected:
     File mFile;
 
 public:
     /// Params:
     ///   file = The file to log into.
-    this(File file)
-    {
+    this(File file) {
         mFile = file;
     }
 
-    override void log(in LogMessage data) nothrow
-    {
+    override void log(in LogMessage data) nothrow {
         mFile.writefln("%3$-7s %2$-6s %1$7.1f | %4$s", data.uptime.toFloatSeconds, data.loggerName,
             levelNames[data.level - 1], data.message).collectException;
     }
 
-    override void flush()
-    {
+    override void flush() {
         mFile.flush();
     }
 }
 
 /// Represents a sink that writes in modulate to stdout.
-class ColorLogSink : LogSink
-{
+class ColorLogSink : LogSink {
     import consolecolors;
 
 public:
-    override void log(in LogMessage data) nothrow
-    {
-        static immutable string[] levelColors = ["magenta", "red", "yellow", "blue", "green", "gray"];
+    override void log(in LogMessage data) nothrow {
+        static immutable string[] levelColors = [
+            "magenta", "red", "yellow", "blue", "green", "gray"
+        ];
 
         size_t upSeconds = data.uptime.total!"seconds";
 
@@ -231,8 +214,7 @@ public:
             data.loggerName, upSeconds / 60, upSeconds % 60, data.message).collectException;
     }
 
-    override void flush() 
-    {
+    override void flush() {
         stdout.flush();
     }
 }

@@ -10,11 +10,9 @@ import std.exception : enforce;
 import zyeware;
 import zyeware.pal.pal;
 
-struct FramebufferProperties
-{
+struct FramebufferProperties {
     /// Determines how the framebuffer is used later on.
-    enum UsageType
-    {
+    enum UsageType {
         /// The framebuffer is used as a swapchain target.
         /// This means that the framebuffer will be presented to the screen.
         /// This is the default usage type.
@@ -30,33 +28,28 @@ struct FramebufferProperties
     UsageType usageType = UsageType.swapChainTarget; /// The usage type of the framebuffer.
 }
 
-class Framebuffer : NativeObject
-{
+class Framebuffer : NativeObject {
 protected:
     NativeHandle mNativeHandle;
     FramebufferProperties mProperties;
 
 public:
-    this(in FramebufferProperties properties)
-    {
+    this(in FramebufferProperties properties) {
         mProperties = properties;
         mNativeHandle = Pal.graphics.api.createFramebuffer(mProperties);
     }
 
-    ~this()
-    {
+    ~this() {
         Pal.graphics.api.freeFramebuffer(mNativeHandle);
     }
 
-    void recreate(in FramebufferProperties properties)
-    {
+    void recreate(in FramebufferProperties properties) {
         mProperties = properties;
         Pal.graphics.api.freeFramebuffer(mNativeHandle);
         mNativeHandle = Pal.graphics.api.createFramebuffer(mProperties);
     }
 
-    Texture2d getTexture2D()
-    {
+    Texture2d getTexture2D() {
         enforce!RenderException(mProperties.usageType == FramebufferProperties.UsageType.texture,
             "Framebuffer cannot be used as a texture.");
 
@@ -64,13 +57,11 @@ public:
         return new Texture2d(handle, mProperties.size);
     }
 
-    const(NativeHandle) handle() pure const nothrow
-    {
+    const(NativeHandle) handle() pure const nothrow {
         return mNativeHandle;
     }
 
-    const(FramebufferProperties) properties() pure const nothrow
-    {
+    const(FramebufferProperties) properties() pure const nothrow {
         return mProperties;
     }
 }

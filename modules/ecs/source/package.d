@@ -5,8 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs;
 
-public
-{
+public {
     import zyeware.ecs.core;
     import zyeware.ecs.component;
     import zyeware.ecs.system;

@@ -16,10 +16,8 @@ import inmath.linalg;
 import zyeware;
 import zyeware.pal.pal;
 
-struct ShaderProperties
-{
-    enum ShaderType
-    {
+struct ShaderProperties {
+    enum ShaderType {
         vertex,
         fragment,
         geometry,
@@ -30,47 +28,40 @@ struct ShaderProperties
 }
 
 @asset(Yes.cache)
-class Shader : NativeObject
-{
+class Shader : NativeObject {
 protected:
     NativeHandle mNativeHandle;
     ShaderProperties mProperties;
 
 public:
-    this(ShaderProperties properties)
-    {
+    this(ShaderProperties properties) {
         mProperties = properties;
         mNativeHandle = Pal.graphics.api.createShader(properties);
     }
 
-    ~this()
-    {
+    ~this() {
         Pal.graphics.api.freeShader(mNativeHandle);
     }
 
-    const(NativeHandle) handle() pure const nothrow
-    {
+    const(NativeHandle) handle() pure const nothrow {
         return mNativeHandle;
     }
 
     static Shader load(string path)
-        in (path, "Path cannot be null.")
-    {
+    in (path, "Path cannot be null.") {
         Logger.core.debug_("Loading shader '%s'...", path);
 
-        string parseIncludes(string source)
-        {
+        string parseIncludes(string source) {
             enum includeRegex = ctRegex!("^#include \"(.*)\"$", "m");
 
             char[] mutableSource = source.dup;
             alias Include = Tuple!(char[], "path", size_t, "position", size_t, "length");
-            
+
             Include[] includes;
             ptrdiff_t offset;
             size_t includeIterations;
 
-            do
-            {
+            do {
                 enforce!GraphicsException(++includeIterations < 100,
                     "Too many iterations, possible infinite include recursion.");
 
@@ -78,8 +69,7 @@ public:
                 foreach (m; matchAll(mutableSource, includeRegex))
                     includes ~= Include(m[1], m.pre.length, m.hit.length);
 
-                foreach (ref Include include; includes)
-                {
+                foreach (ref Include include; includes) {
                     File includeFile = Files.open(cast(string) include.path);
                     char[] includeSource = cast(char[]) includeFile.readAll!string;
                     includeFile.close();
@@ -90,18 +80,19 @@ public:
                     mutableSource.replaceInPlace(from, to, includeSource);
                     offset += cast(ptrdiff_t) includeSource.length - include.length;
                 }
-            } while (includes.length > 0);
+            }
+            while (includes.length > 0);
 
             return mutableSource.idup;
         }
 
         ShaderProperties properties;
 
-        void loadShader(string filePath, ShaderProperties.ShaderType type)
-        {
+        void loadShader(string filePath, ShaderProperties.ShaderType type) {
             Logger.core.verbose("Loading external shader source '%s'...", filePath);
             File shaderFile = Files.open(filePath);
-            scope(exit) shaderFile.close();
+            scope (exit)
+                shaderFile.close();
 
             properties.sources[type] = parseIncludes(shaderFile.readAll!string);
         }
@@ -111,10 +102,8 @@ public:
         import std.traits : EnumMembers;
         import std.conv : to;
 
-        static foreach (type; EnumMembers!(ShaderProperties.ShaderType))
-        {
-            if (SDLNode* shaderTypeNode = root.getChild(type.to!string))
-            {
+        static foreach (type; EnumMembers!(ShaderProperties.ShaderType)) {
+            if (SDLNode* shaderTypeNode = root.getChild(type.to!string)) {
                 immutable string shaderPath = shaderTypeNode.expectValue!string();
                 loadShader(shaderPath, type);
             }

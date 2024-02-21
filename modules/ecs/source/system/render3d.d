@@ -8,24 +8,18 @@ module zyeware.ecs.system.render3d;
 import zyeware;
 import zyeware.ecs;
 
-
-version(none):
-
-/// This system is responsible for rendering all entities with `RenderComponent`s
+version (none)  : /// This system is responsible for rendering all entities with `RenderComponent`s
 /// to the screen.
 ///
 /// See_Also: RenderComponent
-class Render3DSystem : System
-{
+class Render3DSystem : System {
 package:
     pragma(inline, true)
-    static void drawNoCameraSprite()
-    {
+    static void drawNoCameraSprite() {
         static Camera camera;
         static Texture2d texture;
 
-        if (!camera)
-        {
+        if (!camera) {
             camera = new OrthographicCamera(-1, 1, 1, -1);
             texture = AssetManager.load!Texture2d("core:textures/no-camera.png");
         }
@@ -37,8 +31,7 @@ package:
     }
 
 public:
-    override void draw(EntityManager entities, in FrameTime nextFrameTime) const
-    {
+    override void draw(EntityManager entities, in FrameTime nextFrameTime) const {
         // Find camera first
         bool foundCamera;
         mat4 projectionMatrix;
@@ -46,10 +39,8 @@ public:
         Transform3DComponent* cameraTransform;
 
         foreach (Entity entity, Transform3DComponent* transform, CameraComponent* camera;
-            entities.entitiesWith!(Transform3DComponent, CameraComponent))
-        {
-            if (camera.active)
-            {
+            entities.entitiesWith!(Transform3DComponent, CameraComponent)) {
+            if (camera.active) {
                 foundCamera = true;
 
                 projectionMatrix = camera.camera.projectionMatrix;
@@ -61,8 +52,7 @@ public:
 
         Pal.graphicsDriver.clear();
 
-        if (!foundCamera || !environment)
-        {
+        if (!foundCamera || !environment) {
             drawNoCameraSprite();
             return;
         }
@@ -71,10 +61,10 @@ public:
         size_t lightPointer = 0;
 
         foreach (Entity entity, Transform3DComponent* transform, LightComponent* light;
-            entities.entitiesWith!(Transform3DComponent, LightComponent))
-        {
-            lights[lightPointer++] = Renderer3D.Light(transform.globalPosition, light.modulate, light.attenuation);
-            
+            entities.entitiesWith!(Transform3DComponent, LightComponent)) {
+            lights[lightPointer++] = Renderer3D.Light(transform.globalPosition, light.modulate, light
+                    .attenuation);
+
             if (lightPointer == lights.length)
                 break;
         }
@@ -84,8 +74,7 @@ public:
         Renderer3D.begin(projectionMatrix, cameraTransform.globalMatrix.inverse, environment);
 
         foreach (Entity entity, Transform3DComponent* transform, Render3DComponent* renderable;
-            entities.entitiesWith!(Transform3DComponent, Render3DComponent))
-        {
+            entities.entitiesWith!(Transform3DComponent, Render3DComponent)) {
             Renderer3D.submit(renderable.renderable, transform.globalMatrix);
         }
 

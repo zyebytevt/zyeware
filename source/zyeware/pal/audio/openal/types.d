@@ -3,22 +3,19 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.types; version(ZW_PAL_OPENAL):
-
-import audioformats;
+module zyeware.pal.audio.openal.types;
+version (ZW_PAL_OPENAL)  : import audioformats;
 
 import zyeware.pal.generic.types.audio;
 
 package:
 
-struct BufferData
-{
+struct BufferData {
     const(ubyte[]) encodedMemory;
     LoopPoint loopPoint;
 }
 
-struct SourceData
-{
+struct SourceData {
     uint id;
     uint[] bufferIds;
     short[] processingBuffer;
@@ -35,8 +32,7 @@ struct SourceData
     const(BusData)* bus;
 }
 
-struct BusData
-{
+struct BusData {
     string name;
     float volume = 1f;
 }

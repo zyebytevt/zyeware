@@ -12,13 +12,11 @@ import zyeware;
 
 /// Represents a virtual directory in the Files. Where this directory is
 /// physically located depends on the implementation.
-abstract class Directory
-{
+abstract class Directory {
 protected:
     string mPath;
 
-    this(string path) pure nothrow
-    {
+    this(string path) pure nothrow {
         mPath = path;
     }
 
@@ -45,42 +43,36 @@ public:
     /// Returns the names of all subdirectories inside this directory.
     abstract immutable(string[]) directories() const;
 
-    string path() pure const nothrow
-    {
+    string path() pure const nothrow {
         return mPath;
     }
 }
 
 package(zyeware.vfs):
 
-bool isWriteMode(File.Mode mode) pure nothrow
-{
+bool isWriteMode(File.Mode mode) pure nothrow {
     return mode == File.Mode.append || mode == File.Mode.readWrite
         || mode == File.Mode.writeRead || mode == File.Mode.write;
 }
 
-class StackDirectory : Directory
-{
+class StackDirectory : Directory {
 protected:
     Directory[] mDirectories;
 
 package:
-    this(string path, Directory[] directories) pure nothrow
-    {
+    this(string path, Directory[] directories) pure nothrow {
         super(path);
         mDirectories = directories;
     }
 
     void addDirectory(Directory directory) pure nothrow
-        in (directory, "Directory cannot be null.")
-    {
+    in (directory, "Directory cannot be null.") {
         mDirectories ~= directory;
     }
 
 public:
     override Directory getDirectory(string name)
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         Directory[] foundDirectories;
 
         foreach_reverse (dir; mDirectories)
@@ -93,8 +85,7 @@ public:
     }
 
     override File getFile(string name)
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         foreach_reverse (dir; mDirectories)
             if (dir.hasFile(name))
                 return dir.getFile(name);
@@ -103,8 +94,7 @@ public:
     }
 
     override bool hasDirectory(string name) const nothrow
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         foreach_reverse (dir; mDirectories)
             if (dir.hasDirectory(name))
                 return true;
@@ -113,8 +103,7 @@ public:
     }
 
     override bool hasFile(string name) const nothrow
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         foreach_reverse (dir; mDirectories)
             if (dir.hasFile(name))
                 return true;
@@ -122,8 +111,7 @@ public:
         return false;
     }
 
-    override immutable(string[]) files() const
-    {
+    override immutable(string[]) files() const {
         int[string] files;
 
         foreach_reverse (dir; mDirectories)
@@ -133,8 +121,7 @@ public:
         return files.keys.idup;
     }
 
-    override immutable(string[]) directories() const
-    {
+    override immutable(string[]) directories() const {
         int[string] directories;
 
         foreach_reverse (dir; mDirectories)

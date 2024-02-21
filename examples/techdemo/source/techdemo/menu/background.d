@@ -8,14 +8,11 @@ import std.random : uniform;
 
 import zyeware;
 
-
 private static immutable vec2 screenCenter = vec2(320, 240);
 
-class MenuBackground
-{
+class MenuBackground {
 protected:
-    struct Star
-    {
+    struct Star {
         vec2 position;
         Duration lifeTime;
     }
@@ -27,19 +24,16 @@ protected:
     DList!size_t mFreeStars;
     SList!size_t mActiveStars;
 
-    void processStarPattern(Duration frameTime)
-    {
+    void processStarPattern(Duration frameTime) {
         static size_t currentPattern = 0;
         static Duration currentPatternDuration;
 
-        while (!frameTime.isNegative)
-        {
+        while (!frameTime.isNegative) {
             immutable Duration stepDur = dur!"msecs"(10);
             currentPatternDuration += stepDur;
             immutable float patternSecs = currentPatternDuration.total!"msecs" / 1000f;
 
-            final switch (currentPattern)
-            {
+            final switch (currentPattern) {
             case 0: // Morphing circle
                 static int timer;
 
@@ -48,27 +42,26 @@ protected:
                 immutable float morphValueY = 0.7 + cos(patternSecs) * 0.3;
 
                 timer -= stepDur.total!"msecs";
-                
-                if (timer <= 0)
-                {
-                    for (float angle = 0f; angle < PI*2; angle += 0.08)
+
+                if (timer <= 0) {
+                    for (float angle = 0f; angle < PI * 2; angle += 0.08)
                         spawn(screenCenter.x + cos(angle) * distance * morphValueX,
                             screenCenter.y + sin(angle) * distance * morphValueY);
-                    
+
                     timer = 150;
                 }
                 break;
 
             case 1: // Weird
                 static immutable float[][] data = [
-                    [ 4f, 150f, 7f, 50f ],
-                    [ 6f, 50f, 3f, 150f ],
-                    [ 9f, 90f, 6f, 110f ],
-                    [ 7f, 20f, 1f, 200f ],
-                    [ 1f, 40f, 4f, 130f ],
-                    [ 2f, 120f, 3f, 170f ],
-                    [ 3f, 110f, 2f, 90f ],
-                    [ 4f, 200f, 1f, 180f ],
+                    [4f, 150f, 7f, 50f],
+                    [6f, 50f, 3f, 150f],
+                    [9f, 90f, 6f, 110f],
+                    [7f, 20f, 1f, 200f],
+                    [1f, 40f, 4f, 130f],
+                    [2f, 120f, 3f, 170f],
+                    [3f, 110f, 2f, 90f],
+                    [4f, 200f, 1f, 180f],
                 ];
 
                 for (size_t i; i < data.length; ++i)
@@ -79,8 +72,7 @@ protected:
                 break;
 
             case 2: // Starfield
-                float rand()
-                {
+                float rand() {
                     return uniform(-0.5f, 0.5f) * uniform(0f, 1f);
                 }
 
@@ -91,12 +83,13 @@ protected:
             case 3:
                 immutable float angle = patternSecs * 2f + sin(patternSecs * 5f);
                 immutable float distance = 100f + cos(patternSecs) * 25f;
-                immutable vec2 spawnPos = screenCenter + vec2(cos(patternSecs * 2f) * 100f, sin(patternSecs) * 50f);
+                immutable vec2 spawnPos = screenCenter + vec2(cos(patternSecs * 2f) * 100f, sin(
+                        patternSecs) * 50f);
 
                 for (int i; i < 4; ++i)
                     spawn(
-                        spawnPos.x + cos(angle + (PI/2) * i) * distance,
-                        spawnPos.y + sin(angle + (PI/2) * i) * distance
+                        spawnPos.x + cos(angle + (PI / 2) * i) * distance,
+                        spawnPos.y + sin(angle + (PI / 2) * i) * distance
                     );
                 break;
             }
@@ -104,8 +97,7 @@ protected:
             frameTime -= stepDur;
         }
 
-        if (currentPatternDuration > dur!"seconds"(10))
-        {
+        if (currentPatternDuration > dur!"seconds"(10)) {
             if (++currentPattern >= 4)
                 currentPattern = 0;
 
@@ -114,8 +106,7 @@ protected:
     }
 
 public:
-    this()
-    {
+    this() {
         mStarTexture = AssetManager.load!Texture2d("res:menu/menuStar.png");
         mBackdrop = AssetManager.load!Texture2d("res:menu/background.png");
 
@@ -123,8 +114,7 @@ public:
             mFreeStars.insertBack(i);
     }
 
-    void spawn(float x, float y)
-    {
+    void spawn(float x, float y) {
         if (mFreeStars.empty)
             return;
 
@@ -136,16 +126,14 @@ public:
         mActiveStars.insertFront(nextFreeStar);
     }
 
-    void tick(Duration frameTime)
-    {
+    void tick(Duration frameTime) {
         processStarPattern(frameTime);
 
         immutable float delta = frameTime.toFloatSeconds;
 
         size_t[] starIndicesToRemove;
 
-        foreach (size_t starIndex; mActiveStars)
-        {
+        foreach (size_t starIndex; mActiveStars) {
             vec2* position = &mStars[starIndex].position;
 
             mStars[starIndex].lifeTime += frameTime;
@@ -161,21 +149,19 @@ public:
                 starIndicesToRemove ~= starIndex;
         }
 
-        foreach (size_t starIndex; starIndicesToRemove)
-        {
+        foreach (size_t starIndex; starIndicesToRemove) {
             mActiveStars.linearRemoveElement(starIndex);
             mFreeStars.insertBack(starIndex);
         }
     }
 
-    void draw()
-    {
+    void draw() {
         immutable float upTime = ZyeWare.upTime.toFloatSeconds;
-        Renderer2D.drawRectangle(rect(-10, -10, 660, 500), vec2(cos(upTime * 0.5f) * 10f, sin(upTime) * 10f),
+        Renderer2D.drawRectangle(rect(-10, -10, 660, 500), vec2(cos(upTime * 0.5f) * 10f, sin(
+                upTime) * 10f),
             vec2(1), color.white, mBackdrop);
 
-        foreach (size_t starIndex; mActiveStars)
-        {
+        foreach (size_t starIndex; mActiveStars) {
             immutable float lifeTimeSecs = mStars[starIndex].lifeTime.toFloatSeconds;
             immutable float alpha = 1 - lifeTimeSecs / 10f;
 

@@ -10,25 +10,19 @@ import zyeware.core.project;
 
 extern (C) ProjectProperties getProjectProperties();
 
-version (unittest)
-{
+version (unittest) {
     // Keep free for the Silly test runner.
-}
-else
-{
-    int main(string[] args)
-    {
-        try
-        {
+} else {
+    int main(string[] args) {
+        try {
             ZyeWare.initialize(args, getProjectProperties());
             ZyeWare.start();
             ZyeWare.cleanup();
-            
+
             return 0;
-        }
-        catch (Throwable t)
-        {
+        } catch (Throwable t) {
             import zyeware.crashhandler : showCrashHandler;
+
             showCrashHandler(t);
 
             return 1;

@@ -3,9 +3,8 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.api; version(ZW_PAL_OPENAL):
-
-import std.sumtype : match;
+module zyeware.pal.audio.openal.api;
+version (ZW_PAL_OPENAL)  : import std.sumtype : match;
 import std.exception : enforce;
 import std.algorithm : remove;
 import std.string : fromStringz;
@@ -32,32 +31,29 @@ __gshared SourceData*[] pSources;
 // This function is essentially noGC, but it's not marked as such because the array
 // is initialized the first time the function is called.
 size_t readShortsFromDecoder(ref AudioStream decoder, ref short[] buffer)
-    in (decoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.")
-{
+in (decoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.") {
     static float[] readBuffer;
     if (!readBuffer)
         readBuffer = new float[audioBufferSize];
 
-    size_t readCount = decoder.readSamplesFloat(&readBuffer[0], cast(int)(readBuffer.length/decoder.getNumChannels()))
+    size_t readCount = decoder.readSamplesFloat(&readBuffer[0], cast(int)(
+            readBuffer.length / decoder.getNumChannels()))
         * decoder.getNumChannels();
 
     for (size_t i; i < readCount; ++i)
-        buffer[i] = cast(short) (readBuffer[i] * short.max);
+        buffer[i] = cast(short)(readBuffer[i] * short.max);
 
     return readCount;
 }
 
-void updateSourcesWithBus(in BusData* bus)
-{
-    foreach (source; pSources)
-    {
+void updateSourcesWithBus(in BusData* bus) {
+    foreach (source; pSources) {
         if (source.bus is bus)
             alSourcef(source.id, AL_GAIN, source.volume * bus.volume);
     }
 }
 
-void initialize()
-{
+void initialize() {
     loadLibraries();
 
     enforce!AudioException(pDevice = alcOpenDevice(null), "Failed to create audio device.");
@@ -77,8 +73,7 @@ void initialize()
     Logger.core.info("Audio thread started.");
 }
 
-void loadLibraries()
-{
+void loadLibraries() {
     import loader = bindbc.loader.sharedlib;
     import std.string : fromStringz;
 
@@ -86,13 +81,11 @@ void loadLibraries()
         return;
 
     immutable alResult = loadOpenAL();
-    if (alResult != alSupport)
-    {
+    if (alResult != alSupport) {
         foreach (info; loader.errors)
             Logger.core.warning("OpenAL loader: %s", info.message.fromStringz);
 
-        switch (alResult)
-        {
+        switch (alResult) {
         case ALSupport.noLibrary:
             throw new AudioException("Could not find OpenAL shared library.");
 
@@ -100,23 +93,22 @@ void loadLibraries()
             throw new AudioException("Provided OpenAL shared is corrupted.");
 
         default:
-            Logger.core.warning("Got older OpenAL version than expected. This might lead to errors.");
+            Logger.core.warning(
+                "Got older OpenAL version than expected. This might lead to errors.");
         }
     }
 }
 
-void cleanup()
-{
+void cleanup() {
     pAudioThread.stop();
     pAudioThread.join();
-    
+
     alcCloseDevice(pDevice);
 
     Logger.core.info("Audio thread stopped, OpenAL terminated.");
 }
 
-NativeHandle createSource(in NativeHandle busHandle)
-{
+NativeHandle createSource(in NativeHandle busHandle) {
     auto source = new SourceData();
 
     source.bufferIds = new uint[audioBufferCount];
@@ -132,8 +124,7 @@ NativeHandle createSource(in NativeHandle busHandle)
     return cast(NativeHandle) source;
 }
 
-void freeSource(NativeHandle handle)
-{
+void freeSource(NativeHandle handle) {
     auto source = cast(SourceData*) handle;
 
     if (source.decoder.isOpenForReading())
@@ -145,10 +136,8 @@ void freeSource(NativeHandle handle)
     destroy(source.bufferIds);
     destroy(source.processingBuffer);
 
-    for (size_t i; i < pSources.length; ++i)
-    {
-        if (pSources[i] is source)
-        {
+    for (size_t i; i < pSources.length; ++i) {
+        if (pSources[i] is source) {
             pSources.remove(i);
             break;
         }
@@ -157,45 +146,38 @@ void freeSource(NativeHandle handle)
     destroy(source);
 }
 
-NativeHandle createBuffer(in ubyte[] encodedMemory, in AudioProperties properties)
-{
+NativeHandle createBuffer(in ubyte[] encodedMemory, in AudioProperties properties) {
     return cast(NativeHandle) new BufferData(encodedMemory, properties.loopPoint);
 }
 
-void freeBuffer(NativeHandle handle)
-{
+void freeBuffer(NativeHandle handle) {
     destroy(handle);
 }
 
-NativeHandle createBus(string name)
-{
+NativeHandle createBus(string name) {
     pBusses[name] = BusData(name);
-    return cast(NativeHandle) (name in pBusses);
+    return cast(NativeHandle)(name in pBusses);
 }
 
-void freeBus(NativeHandle handle)
-{
+void freeBus(NativeHandle handle) {
     auto bus = cast(BusData*) handle;
     pBusses.remove(bus.name);
     destroy(bus);
 }
 
-void setBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint)
-{
+void setBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint) {
     auto buffer = cast(BufferData*) handle;
 
     buffer.loopPoint = loopPoint;
 }
 
-LoopPoint getBufferLoopPoint(in NativeHandle handle) nothrow
-{
+LoopPoint getBufferLoopPoint(in NativeHandle handle) nothrow {
     auto buffer = cast(BufferData*) handle;
 
     return buffer.loopPoint;
 }
 
-void setSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle)
-{
+void setSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle) {
     auto source = cast(SourceData*) sourceHandle;
 
     if (source.state != SourceState.stopped)
@@ -208,33 +190,29 @@ void setSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle)
         throw new AudioException(source.decoder.errorMessage);
 }
 
-void setSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle)
-{
+void setSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle) {
     auto source = cast(SourceData*) sourceHandle;
     auto bus = cast(const(BusData*)) busHandle;
 
     source.bus = bus;
 }
 
-void playSource(NativeHandle handle)
-{
+void playSource(NativeHandle handle) {
     auto source = cast(SourceData*) handle;
 
     if (source.state == SourceState.playing)
         stopSource(handle);
 
-    if (source.state == SourceState.stopped)
-    {
+    if (source.state == SourceState.stopped) {
         size_t lastReadLength;
-        for (size_t i; i < source.bufferIds.length; ++i)
-        {
+        for (size_t i; i < source.bufferIds.length; ++i) {
             lastReadLength = readShortsFromDecoder(source.decoder, source.processingBuffer);
-            
+
             alBufferData(source.bufferIds[i],
                 source.decoder.getNumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-                &source.processingBuffer[0], cast(int) (lastReadLength * short.sizeof),
+                &source.processingBuffer[0], cast(int)(lastReadLength * short.sizeof),
                 cast(int) source.decoder.getSamplerate());
-            
+
             alSourceQueueBuffers(source.id, 1, &source.bufferIds[i]);
         }
     }
@@ -243,8 +221,7 @@ void playSource(NativeHandle handle)
     alSourcePlay(source.id);
 }
 
-void pauseSource(NativeHandle handle)
-{
+void pauseSource(NativeHandle handle) {
     auto source = cast(SourceData*) handle;
 
     if (source.state != SourceState.playing)
@@ -254,8 +231,7 @@ void pauseSource(NativeHandle handle)
     alSourcePause(source.id);
 }
 
-void stopSource(NativeHandle handle)
-{
+void stopSource(NativeHandle handle) {
     auto source = cast(SourceData*) handle;
 
     if (source.state == SourceState.stopped)
@@ -269,16 +245,14 @@ void stopSource(NativeHandle handle)
 
     int bufferCount;
     alGetSourcei(source.id, AL_BUFFERS_QUEUED, &bufferCount);
-    
-    for (size_t i; i < bufferCount; ++i)
-    {
+
+    for (size_t i; i < bufferCount; ++i) {
         uint removedBuffer;
         alSourceUnqueueBuffers(source.id, 1, &removedBuffer);
     }
 }
 
-void updateSourceBuffers(NativeHandle handle)
-{
+void updateSourceBuffers(NativeHandle handle) {
     auto source = cast(SourceData*) handle;
 
     if (source.state != SourceState.playing)
@@ -293,42 +267,37 @@ void updateSourceBuffers(NativeHandle handle)
     int bufferCount;
     alGetSourcei(source.id, AL_BUFFERS_QUEUED, &bufferCount);
 
-    while (processedCount > 0)
-    {
+    while (processedCount > 0) {
         uint removedBuffer;
         alSourceUnqueueBuffers(source.id, 1, &removedBuffer);
 
         size_t lastReadLength = readShortsFromDecoder(source.decoder, source.processingBuffer);
 
-        if (lastReadLength <= 0)
-        {
-            if (source.isLooping)
-            {
+        if (lastReadLength <= 0) {
+            if (source.isLooping) {
                 source.bufferData.loopPoint.match!(
-                    (int sample)
-                    {
-                        if (!source.decoder.seekPosition(sample))
-                            Logger.core.warning("Seeking to sample %d failed.", sample);
-                    },
-                    (ModuleLoopPoint mod)
-                    {
-                        if (!source.decoder.seekPosition(mod.pattern, mod.row))
-                            Logger.core.warning("Seeking to pattern %d, row %d failed.", mod.pattern, mod.row);
-                    }
+                    (int sample) {
+                    if (!source.decoder.seekPosition(sample))
+                        Logger.core.warning("Seeking to sample %d failed.", sample);
+                },
+                    (ModuleLoopPoint mod) {
+                    if (!source.decoder.seekPosition(mod.pattern, mod.row))
+                        Logger.core.warning("Seeking to pattern %d, row %d failed.", mod.pattern, mod
+                            .row);
+                }
                 );
 
                 lastReadLength = readShortsFromDecoder(source.decoder, source.processingBuffer);
-            }
-            else
-            {
+            } else {
                 stopSource(handle);
                 return;
             }
         }
 
         alBufferData(removedBuffer,
-            source.decoder.getNumChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-            &source.processingBuffer[0], cast(int) (lastReadLength * short.sizeof),
+            source.decoder.getNumChannels() == 1 ? AL_FORMAT_MONO16
+                : AL_FORMAT_STEREO16,
+            &source.processingBuffer[0], cast(int)(lastReadLength * short.sizeof),
             cast(int) source.decoder.getSamplerate());
 
         alSourceQueueBuffers(source.id, 1, &removedBuffer);
@@ -337,67 +306,58 @@ void updateSourceBuffers(NativeHandle handle)
     }
 }
 
-void setSourceVolume(NativeHandle handle, float volume)
-{
+void setSourceVolume(NativeHandle handle, float volume) {
     auto source = cast(SourceData*) handle;
 
     source.volume = volume;
     alSourcef(source.id, AL_GAIN, volume * source.bus.volume);
 }
 
-void setSourcePitch(NativeHandle handle, float pitch)
-{
+void setSourcePitch(NativeHandle handle, float pitch) {
     auto source = cast(SourceData*) handle;
 
     source.pitch = pitch;
     alSourcef(source.id, AL_PITCH, pitch);
 }
 
-void setSourceLooping(NativeHandle handle, bool isLooping)
-{
+void setSourceLooping(NativeHandle handle, bool isLooping) {
     auto source = cast(SourceData*) handle;
 
     source.isLooping = isLooping;
 }
 
-float getSourceVolume(in NativeHandle handle) nothrow
-{
+float getSourceVolume(in NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     return source.volume;
 }
 
-float getSourcePitch(in NativeHandle handle) nothrow
-{
+float getSourcePitch(in NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     return source.pitch;
 }
 
-bool isSourceLooping(in NativeHandle handle) nothrow
-{
+bool isSourceLooping(in NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     return source.isLooping;
 }
 
-SourceState getSourceState(in NativeHandle handle) nothrow
-{
+SourceState getSourceState(in NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     return source.state;
 }
 
-void setBusVolume(NativeHandle handle, float volume)
-{
+void setBusVolume(NativeHandle handle, float volume) {
     auto bus = cast(BusData*) handle;
 
     bus.volume = volume;
     updateSourcesWithBus(bus);
 }
 
-float getBusVolume(in NativeHandle handle) nothrow
-{
+float getBusVolume(in NativeHandle handle) nothrow {
     auto bus = cast(BusData*) handle;
 
     return bus.volume;

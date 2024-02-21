@@ -4,11 +4,9 @@ import std.math : sqrt;
 
 import zyeware;
 
-class CircleShape2d : Shape2d
-{
+class CircleShape2d : Shape2d {
 package(zyeware.physics.shapes):
-    Collision2d isCollidingWithCircle(in mat4 thisTransform, in CircleShape2d other, in mat4 otherTransform) pure const nothrow
-    {
+    Collision2d isCollidingWithCircle(in mat4 thisTransform, in CircleShape2d other, in mat4 otherTransform) pure const nothrow {
         Collision2d collision;
 
         immutable vec2 myPosition = thisTransform.transformPoint(vec2(0));
@@ -36,13 +34,11 @@ package(zyeware.physics.shapes):
 public:
     float radius = 0;
 
-    this(in float radius)
-    {
+    this(in float radius) {
         this.radius = radius;
     }
 
-    Collision2d isCollidingWith(in mat4 thisTransform, in Shape2d other, in mat4 otherTransform) pure const nothrow
-    {
+    Collision2d isCollidingWith(in mat4 thisTransform, in Shape2d other, in mat4 otherTransform) pure const nothrow {
         if (auto circle = cast(CircleShape2d) other)
             return isCollidingWithCircle(thisTransform, circle, otherTransform);
         else if (auto polygon = cast(PolygonShape2d) other)
@@ -51,8 +47,7 @@ public:
         return Collision2d.init;
     }
 
-    Collision2d isRaycastColliding(in mat4 thisTransform, in vec2 rayOrigin, in vec2 rayDirection, float maxDistance) pure const nothrow
-    {
+    Collision2d isRaycastColliding(in mat4 thisTransform, in vec2 rayOrigin, in vec2 rayDirection, float maxDistance) pure const nothrow {
         Collision2d result;
 
         immutable vec2 center = thisTransform.transformPoint(vec2.zero);
@@ -72,8 +67,7 @@ public:
         immutable float distanceSquared = (closestPoint - center).lengthSquared;
 
         // Check if the ray intersects the circle
-        if (distanceSquared <= radius * radius)
-        {
+        if (distanceSquared <= radius * radius) {
             result.isColliding = true;
             result.point = closestPoint;
             result.normal = (closestPoint - center) / sqrt(distanceSquared);
@@ -82,14 +76,12 @@ public:
         return result;
     }
 
-    Projection2d project(in mat4 thisTransform, in vec2 axis) pure const nothrow
-    {
+    Projection2d project(in mat4 thisTransform, in vec2 axis) pure const nothrow {
         immutable float center = thisTransform.transformPoint(vec2(0)).dot(axis);
         return Projection2d(center - radius, center + radius, axis);
     }
 
-    AABB2 getAABB(in mat4 thisTransform) pure const nothrow
-    {
+    AABB2 getAABB(in mat4 thisTransform) pure const nothrow {
         immutable vec2 center = thisTransform.transformPoint(vec2.zero);
         return AABB2(center - vec2(radius), center + vec2(radius));
     }

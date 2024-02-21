@@ -11,33 +11,30 @@ import zyeware.zyfont;
 import bmfont;
 import gamut;
 
-void convert(string sourceFile, string outputFile)
-{
+void convert(string sourceFile, string outputFile) {
     Font bmFont = parseFnt(readText(sourceFile));
-    
+
     Image[] pages;
-    foreach (pagePath; bmFont.pages)
-    {
+    foreach (pagePath; bmFont.pages) {
         pages.length += 1;
 
-        pages[$-1].loadFromFile(pagePath);
-        enforce(pages[$-1].isValid, format!"Failed to load page '%s'."(pagePath));
+        pages[$ - 1].loadFromFile(pagePath);
+        enforce(pages[$ - 1].isValid, format!"Failed to load page '%s'."(pagePath));
 
-        pages[$-1].setLayout(gamut.LAYOUT_GAPLESS | gamut.LAYOUT_VERT_STRAIGHT);
+        pages[$ - 1].setLayout(gamut.LAYOUT_GAPLESS | gamut.LAYOUT_VERT_STRAIGHT);
     }
 
     ZyFont font;
 
     font.name = bmFont.info.fontName;
     font.size = bmFont.info.fontSize;
-    font.isBold = cast(bool) (bmFont.info.bitField & 0b1000);
-    font.isItalic = cast(bool) (bmFont.info.bitField & 0b0100);
+    font.isBold = cast(bool)(bmFont.info.bitField & 0b1000);
+    font.isItalic = cast(bool)(bmFont.info.bitField & 0b0100);
     font.lineHeight = bmFont.common.lineHeight;
     font.padding = bmFont.info.padding;
     font.spacing = bmFont.info.spacing;
 
-    foreach (Font.Char c; bmFont.chars)
-    {
+    foreach (Font.Char c; bmFont.chars) {
         font.glyphs ~= ZyFont.Glyph(
             c.id,
             c.page,
@@ -54,8 +51,7 @@ void convert(string sourceFile, string outputFile)
         );
     }
 
-    foreach (Font.Kerning k; bmFont.kernings)
-    {
+    foreach (Font.Kerning k; bmFont.kernings) {
         font.kernings ~= ZyFont.Kerning(
             k.first,
             k.second,
@@ -63,8 +59,7 @@ void convert(string sourceFile, string outputFile)
         );
     }
 
-    foreach (ref Image page; pages)
-    {
+    foreach (ref Image page; pages) {
         immutable int bitsPerChannel = (page.type % 3 + 1) * 8;
         immutable int channels = page.type / 3 + 1;
 

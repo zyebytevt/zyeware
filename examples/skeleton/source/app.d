@@ -7,9 +7,7 @@ import zyeware;
 import zyeware.core.application;
 import zyeware.core.main;
 
-
-extern(C) ProjectProperties getProjectProperties()
-{
+extern (C) ProjectProperties getProjectProperties() {
 	ProjectProperties properties = {
 		authorName: "ZyeByte",
 		projectName: "Skeleton",
@@ -25,8 +23,7 @@ extern(C) ProjectProperties getProjectProperties()
 	return properties;
 }
 
-class SkeletonApplication : Application
-{
+class SkeletonApplication : Application {
 protected:
 	Texture2d mSprite;
 	//Material mWaveyMaterial;
@@ -34,8 +31,7 @@ protected:
 	OrthographicProjection mCamera;
 
 public:
-	override void initialize()
-	{
+	override void initialize() {
 		ZyeWare.scaleMode = ScaleMode.keepAspect;
 
 		mSprite = AssetManager.load!Texture2d("core:textures/missing.png");
@@ -44,12 +40,10 @@ public:
 		mFont = AssetManager.load!BitmapFont("core:fonts/internal.zfnt");
 	}
 
-	override void tick()
-	{
+	override void tick() {
 	}
 
-	override void draw()
-	{
+	override void draw() {
 		Renderer2D.clearScreen(color("lime"));
 
 		Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
@@ -58,7 +52,7 @@ public:
 		//Renderer2D.drawRectangle(rect(30, 340, 70, 70), mat4.identity, color.white, mSprite);
 		//Renderer2D.drawRectangle(rect(300, 520, 30, 40), mat4.identity, color.white, mSprite);
 		//Renderer2D.drawRectangle(rect(0, 0, 70, 50), mat4.identity, color.white, mSprite, mWaveyMaterial);
-		
+
 		Renderer2D.drawString("Hello world!", mFont, vec2(20, 20), color("white"));
 		Renderer2D.endScene();
 	}

@@ -1,14 +1,12 @@
-module zyeware.pal.graphics.opengl.init; version(ZW_PAL_OPENGL):
-
-import zyeware.pal.generic.drivers;
+module zyeware.pal.graphics.opengl.init;
+version (ZW_PAL_OPENGL)  : import zyeware.pal.generic.drivers;
 
 import api = zyeware.pal.graphics.opengl.api.api;
 import r2d = zyeware.pal.graphics.opengl.renderer2d.api;
 
 package(zyeware.pal):
 
-void load(ref GraphicsDriver driver) nothrow
-{
+void load(ref GraphicsDriver driver) nothrow {
     driver.api.initialize = &api.initialize;
     driver.api.cleanup = &api.cleanup;
     driver.api.createMesh = &api.createMesh;

@@ -11,13 +11,11 @@ import zyeware.vfs.zip.file : ZipFile;
 
 package(zyeware.vfs):
 
-class ZipDirectory : Directory
-{
+class ZipDirectory : Directory {
 protected:
     alias FileNode = ZipPackageLoader.FileNode;
 
-    enum NodeType
-    {
+    enum NodeType {
         invalid,
         directory,
         file
@@ -25,19 +23,16 @@ protected:
 
     FileNode* mRoot;
 
-    NodeType getNodeType(string path) pure const nothrow
-    {
+    NodeType getNodeType(string path) pure const nothrow {
         FileNode* current = cast(FileNode*) mRoot;
-        foreach (string part; path.split("/"))
-        {
-            switch (part)
-            {
+        foreach (string part; path.split("/")) {
+            switch (part) {
             case "..":
                 if (!current.parent)
                     return NodeType.invalid;
                 current = current.parent;
                 break;
-            
+
             case ".":
                 break;
 
@@ -54,18 +49,15 @@ protected:
     }
 
     FileNode* traversePath(string path) pure const
-        in (path, "Path cannot be null.")
-    {
+    in (path, "Path cannot be null.") {
         FileNode* current = cast(FileNode*) mRoot;
-        foreach (string part; path.split("/"))
-        {
-            switch (part)
-            {
+        foreach (string part; path.split("/")) {
+            switch (part) {
             case "..":
                 enforce!VfsException(current.parent, "Cannot go above root directory.");
                 current = current.parent;
                 break;
-            
+
             case ".":
                 break;
 
@@ -83,8 +75,7 @@ protected:
 package(zyeware.vfs):
     const ZipArchive mArchive;
 
-    this(string name, in ZipArchive archive, FileNode* root) pure nothrow
-    {
+    this(string name, in ZipArchive archive, FileNode* root) pure nothrow {
         super(name);
         mArchive = archive;
         mRoot = root;
@@ -92,8 +83,7 @@ package(zyeware.vfs):
 
 public:
     override Directory getDirectory(string name) const
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         enforce!VfsException(!isRooted(name), "Directory name cannot be rooted.");
         FileNode* newRoot = traversePath(name);
 
@@ -104,8 +94,7 @@ public:
     }
 
     override File getFile(string name) const
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         enforce!VfsException(!isRooted(name), "File name cannot be rooted.");
         FileNode* fileNode = traversePath(name);
 
@@ -119,25 +108,21 @@ public:
     }
 
     override bool hasDirectory(string name) const nothrow
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         return getNodeType(name) == NodeType.directory;
     }
 
     override bool hasFile(string name) const nothrow
-        in (name, "Name cannot be null.")
-    {
+    in (name, "Name cannot be null.") {
         return getNodeType(name) == NodeType.file;
     }
 
     // TODO: Implement new files and directories methods
-    override immutable(string[]) files() const
-    {
+    override immutable(string[]) files() const {
         return [];
     }
 
-    override immutable(string[]) directories() const
-    {
+    override immutable(string[]) directories() const {
         return [];
     }
 }

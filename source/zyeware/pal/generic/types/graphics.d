@@ -5,8 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.pal.generic.types.graphics;
 
-enum RenderFlag
-{
+enum RenderFlag {
     depthTesting, /// Whether to use depth testing or not.
     depthBufferWriting, /// Whether to write to the depth buffer when drawing.
     culling, /// Whether culling is enabled or not.
@@ -14,7 +13,6 @@ enum RenderFlag
     wireframe /// Whether to render in wireframe or not.
 }
 
-enum RenderCapability
-{
+enum RenderCapability {
     maxTextureSlots /// How many texture slots are available to use. 
 }

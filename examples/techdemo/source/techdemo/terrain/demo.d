@@ -6,20 +6,14 @@ import std.string : format;
 import zyeware;
 import zyeware.ecs;
 
-
-
 import techdemo.terrain.gui;
 import techdemo.terrain.camera;
 
-version(none):
-
-class TerrainDemo : ECSGameState
-{
+version (none)  : class TerrainDemo : ECSGameState {
 protected:
     AudioSource mAmbienceSource;
 
-    Entity createTree(vec3 position)
-    {
+    Entity createTree(vec3 position) {
         Mesh mesh = AssetManager.load!Mesh("res:terraindemo/tree/mesh.obj");
         mesh.material = AssetManager.load!Material("res:terraindemo/tree/material.mtl");
 
@@ -31,8 +25,7 @@ protected:
         return entity;
     }
 
-    Entity createGrass(vec3 position)
-    {
+    Entity createGrass(vec3 position) {
         Mesh mesh = AssetManager.load!Mesh("res:terraindemo/grass/mesh.obj");
         mesh.material = AssetManager.load!Material("res:terraindemo/grass/material.mtl");
 
@@ -44,8 +37,7 @@ protected:
         return entity;
     }
 
-    Entity createStall(vec3 position)
-    {
+    Entity createStall(vec3 position) {
         Mesh mesh = AssetManager.load!Mesh("res:terraindemo/stall/mesh.obj");
         //mesh.material = AssetManager.load!Material("res:terraindemo/stall/material.mtl");
 
@@ -58,29 +50,32 @@ protected:
         return entity;
     }
 
-    Entity createTerrain()
-    {
+    Entity createTerrain() {
         TerrainProperties properties = {
             size: vec2(256, 256),
             blendMap: AssetManager.load!Texture2d("res:terraindemo/terrain/blendmap.png"),
             textureTiling: vec2(10)
         };
-        
-        properties.textures[0] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/grass.png");
-        properties.textures[1] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/grassFlowers.png");
-        properties.textures[2] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/mud.png");
-        properties.textures[3] = AssetManager.load!Texture2d("res:terraindemo/terrain/textures/path.png");
+
+        properties.textures[0] = AssetManager.load!Texture2d(
+            "res:terraindemo/terrain/textures/grass.png");
+        properties.textures[1] = AssetManager.load!Texture2d(
+            "res:terraindemo/terrain/textures/grassFlowers.png");
+        properties.textures[2] = AssetManager.load!Texture2d(
+            "res:terraindemo/terrain/textures/mud.png");
+        properties.textures[3] = AssetManager.load!Texture2d(
+            "res:terraindemo/terrain/textures/path.png");
 
         Entity terrain = entities.create();
-        
+
         terrain.register!Transform3DComponent(vec3(0));
-        terrain.register!Render3DComponent(new Terrain(properties, AssetManager.load!Image("res:terraindemo/terrain/heightmap.png"), 32f));
+        terrain.register!Render3DComponent(new Terrain(properties, AssetManager.load!Image(
+                "res:terraindemo/terrain/heightmap.png"), 32f));
 
         return terrain;
     }
 
-    Entity createCamera(vec3 position, quat rotation)
-    {
+    Entity createCamera(vec3 position, quat rotation) {
         Entity camera = entities.create();
 
         auto nativeCamera = new PerspectiveCamera(640, 480, 90f, 0.01f, 1000f);
@@ -88,7 +83,8 @@ protected:
 
         environment.ambientColor = color(0.1, 0.1, 0.1, 1);
         environment.fogColor = color(0.3, 0.4, 0.6, 0.05);
-        environment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
+        environment.sky = new Skybox(
+            AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
 
         camera.register!CameraComponent(nativeCamera, environment, Yes.active);
         camera.register!Transform3DComponent(position, rotation);
@@ -97,8 +93,7 @@ protected:
     }
 
 public:
-    this(StateApplication application)
-    {
+    this(StateApplication application) {
         import std.random : uniform;
 
         super(application);
@@ -114,8 +109,7 @@ public:
         Image entitymap = AssetManager.load!Image("res:terraindemo/terrain/entitymap.png");
 
         for (uint y; y < entitymap.size.y; ++y)
-            for (uint x; x < entitymap.size.x; ++x)
-            {
+            for (uint x; x < entitymap.size.x; ++x) {
                 immutable color pixel = entitymap.getPixel(vec2i(x, y));
                 immutable vec2 coords = vec2(x * 2f, y * 2f);
 
@@ -130,12 +124,10 @@ public:
         systems.register(new CameraSystem(cast(Terrain) terrain));
     }
 
-    override void onAttach(bool firstTime)
-    {
+    override void onAttach(bool firstTime) {
         super.onAttach(firstTime);
 
-        if (firstTime)
-        {
+        if (firstTime) {
             mAmbienceSource = AudioSource.create(null);
             //mAmbienceSource.loop = true;
             mAmbienceSource.sound = AssetManager.load!AudioBuffer("res:terraindemo/ambience.ogg");
@@ -174,8 +166,7 @@ public:
         mAmbienceSource.play();
     }
 
-    override void onDetach()
-    {
+    override void onDetach() {
         super.onDetach();
 
         mAmbienceSource.stop();
@@ -188,10 +179,8 @@ public:
         InputManager.removeAction("pl_straferight");
     }
 
-    override void receive(in Event event)
-    {
-        if (auto actionEvent = cast(InputEventAction) event)
-        {
+    override void receive(in Event event) {
+        if (auto actionEvent = cast(InputEventAction) event) {
             if (actionEvent.isPressed && actionEvent.action == "ui_cancel")
                 application.popState();
         }

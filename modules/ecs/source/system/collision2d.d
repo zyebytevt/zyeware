@@ -9,15 +9,13 @@ import zyeware;
 import zyeware.ecs;
 
 /// Holds information about a collision that happened.
-@event struct Collision2DEvent
-{
+@event struct Collision2DEvent {
     Collision2D collision; /// The collision that occurred.
     Entity firstEntity; /// The first entity affected by the collision.
     Entity secondEntity; /// The second entity affected by the collision.
 
     pragma(inline, true)
-    bool isAffected(Entity entity) const
-    {
+    bool isAffected(Entity entity) const {
         return firstEntity == entity || secondEntity == entity;
     }
 }
@@ -25,8 +23,7 @@ import zyeware.ecs;
 /// The `Collision2DSystem` is responsible for checking all entities that carry
 /// a `Transform2DComponent` and a `Collision2DComponent` for collisions. What
 /// algorithm the system uses for the broad-phase detection is customizable.
-class Collision2DSystem : System
-{
+class Collision2DSystem : System {
 protected:
     BroadPhaseTechnique2D mTechnique;
 
@@ -34,15 +31,13 @@ public:
     /// Params:
     ///     technique = What algorithm the system uses for broad-phase detection.
     this(BroadPhaseTechnique2D technique)
-        in (technique, "Technique cannot be null.")
-    {
+    in (technique, "Technique cannot be null.") {
         super(PauseMode.stopped);
 
         mTechnique = technique;
     }
 
-    override void tick(EntityManager entities, EventManager events, in FrameTime frameTime)
-    {
+    override void tick(EntityManager entities, EventManager events, in FrameTime frameTime) {
         foreach (Entity entity; entities.entitiesWith!(Transform2DComponent, Collision2DComponent))
             mTechnique.add(entity);
 
@@ -52,14 +47,12 @@ public:
         mTechnique.clear();
     }
 
-    inout(BroadPhaseTechnique2D) technique() pure inout nothrow
-    {
+    inout(BroadPhaseTechnique2D) technique() pure inout nothrow {
         return mTechnique;
     }
 
     void technique(BroadPhaseTechnique2D value) pure nothrow
-        in (value, "Technique cannot be null.")
-    {
+    in (value, "Technique cannot be null.") {
         mTechnique = value;
     }
 }
@@ -67,8 +60,7 @@ public:
 // ===================================================================================================
 
 /// Describes an algorithm used for `Collision2DSystem`s broad-phase collision detection.
-interface BroadPhaseTechnique2D
-{
+interface BroadPhaseTechnique2D {
     /// Adds an entity to be queried for collisions.
     ///
     /// Params:
@@ -86,28 +78,23 @@ interface BroadPhaseTechnique2D
 
 /// Brute force broad-phase collision detection checks each entity with each other for
 /// collisions. Works best with small entity counts.
-class BruteForceTechnique2D : BroadPhaseTechnique2D
-{
+class BruteForceTechnique2D : BroadPhaseTechnique2D {
 protected:
     Entity[] mEntities;
 
 public:
-    void add(Entity entity)
-    {
+    void add(Entity entity) {
         mEntities ~= entity;
     }
-    
-    Collision2DEvent[] query()
-    {
+
+    Collision2DEvent[] query() {
         Collision2DEvent[] result;
 
-        for (size_t i; i < mEntities.length; ++i)
-        {
+        for (size_t i; i < mEntities.length; ++i) {
             const transform1 = mEntities[i].component!Transform2DComponent.globalMatrix;
             const collisionComp1 = mEntities[i].component!Collision2DComponent;
 
-            for (size_t j = i + 1; j < mEntities.length; ++j)
-            {
+            for (size_t j = i + 1; j < mEntities.length; ++j) {
                 const transform2 = mEntities[j].component!Transform2DComponent.globalMatrix;
                 const collisionComp2 = mEntities[j].component!Collision2DComponent;
 
@@ -124,15 +111,12 @@ public:
         return result;
     }
 
-    void clear()
-    {
+    void clear() {
         mEntities.length = 0;
     }
 }
 
-version(none)
-class SpatialGridTechnique2D : BroadPhaseTechnique2D
-{
+version (none) class SpatialGridTechnique2D : BroadPhaseTechnique2D {
 protected:
     vec2i mGridSize;
     uint mGridCellSize;
@@ -140,15 +124,13 @@ protected:
 
 public:
     this(vec2i gridSize, uint gridCellSize)
-        in (gridSize.x >= 1 && gridSize.y >= 1, "Invalid grid size.")
-    {  
+    in (gridSize.x >= 1 && gridSize.y >= 1, "Invalid grid size.") {
         mGridSize = gridSize;
         mGridCellSize = gridCellSize;
         mEntities.length = mGridSize.x * mGridSize.y;
     }
 
-    void add(Entity entity)
-    {
+    void add(Entity entity) {
         const transform = entity.component!Transform2DComponent;
         const collision = entity.component!Collision2DComponent;
 
@@ -156,15 +138,14 @@ public:
         immutable vec2 pos = transform.position;
 
         recti cellExtremes = recti(
-            cast(uint) ((pos.x + bb.min.x) / mGridCellSize),
-            cast(uint) ((pos.y + bb.min.y) / mGridCellSize),
-            cast(uint) ((pos.x + bb.max.x) / mGridCellSize),
-            cast(uint) ((pos.y + bb.max.y) / mGridCellSize)
+            cast(uint)((pos.x + bb.min.x) / mGridCellSize),
+            cast(uint)((pos.y + bb.min.y) / mGridCellSize),
+            cast(uint)((pos.x + bb.max.x) / mGridCellSize),
+            cast(uint)((pos.y + bb.max.y) / mGridCellSize)
         );
 
         for (uint x = cellExtremes.min.x; x < cellExtremes.max.x; ++x)
-            for (uint y = cellExtremes.min.y; y < cellExtremes.max.y; ++y)
-            {
+            for (uint y = cellExtremes.min.y; y < cellExtremes.max.y; ++y) {
                 immutable size_t cellIdx = x + y * mGridSize.x;
                 assert(cellIdx < mEntities.length, "Cell index outside of grid.");
 
@@ -172,25 +153,20 @@ public:
             }
     }
 
-    Collision2DEvent[] query()
-    {
-        struct IdPair
-        {
+    Collision2DEvent[] query() {
+        struct IdPair {
             Entity.Id first, second;
         }
 
         Collision2DEvent[] result;
         bool[IdPair] checked;
 
-        foreach (ref Entity[] cell; mEntities)
-        {
-            foreach (ref Entity entity1; cell)
-            {
+        foreach (ref Entity[] cell; mEntities) {
+            foreach (ref Entity entity1; cell) {
                 Shape2D shape1 = entity1.component!Collision2DComponent.shape;
                 immutable mat4 transform1 = entity1.component!Transform2DComponent.globalMatrix;
 
-                foreach (ref Entity entity2; cell)
-                {
+                foreach (ref Entity entity2; cell) {
                     if (entity1.id == entity2.id)
                         continue;
 
@@ -199,7 +175,8 @@ public:
                         continue;
 
                     Shape2D shape2 = entity2.component!Collision2DComponent.shape;
-                    immutable mat4 transform2 = entity2.component!Transform2DComponent.globalMatrix;
+                    immutable mat4 transform2 = entity2
+                        .component!Transform2DComponent.globalMatrix;
 
                     Collision2D c = shape1.checkCollision(transform1, shape2, transform2);
                     if (c.isColliding)
@@ -214,8 +191,7 @@ public:
         return result;
     }
 
-    void clear()
-    {
+    void clear() {
         foreach (ref Entity[] cell; mEntities)
             cell.length = 0;
     }

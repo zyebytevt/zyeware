@@ -5,8 +5,7 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.system;
 
-public
-{
+public {
     import zyeware.ecs.system.render2d;
     import zyeware.ecs.system.render3d;
     import zyeware.ecs.system.collision2d;

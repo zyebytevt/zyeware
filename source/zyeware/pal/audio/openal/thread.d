@@ -3,9 +3,8 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.thread; version(ZW_PAL_OPENAL):
-
-import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
+module zyeware.pal.audio.openal.thread;
+version (ZW_PAL_OPENAL)  : import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
 import zyeware;
 import zyeware.pal.audio.openal.api : audioBufferCount, audioBufferSize, updateSourceBuffers, pSources;
@@ -13,17 +12,16 @@ import zyeware.pal.audio.openal.types;
 
 package:
 
-class AudioThread : Thread
-{
+class AudioThread : Thread {
 protected:
     bool mIsRunning;
 
-    void run()
-    {
+    void run() {
         mIsRunning = true;
 
         thread_detachThis();
-        scope (exit) rt_moduleTlsDtor();
+        scope (exit)
+            rt_moduleTlsDtor();
 
         // Determine the sleep time between updating the buffers.
         // YukieVT supplied the following formula for this:
@@ -32,8 +30,7 @@ protected:
 
         immutable Duration waitTime = msecs(audioBufferSize / audioBufferCount / 44_100 / 2 * 1000);
 
-        while (mIsRunning)
-        {
+        while (mIsRunning) {
             foreach (SourceData* sourceData; pSources)
                 updateSourceBuffers(sourceData);
 
@@ -42,13 +39,11 @@ protected:
     }
 
 public:
-    this()
-    {
+    this() {
         super(&run);
     }
 
-    void stop()
-    {
+    void stop() {
         mIsRunning = false;
         join();
     }

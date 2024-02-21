@@ -13,8 +13,7 @@ import std.exception : enforce;
 import zyeware;
 import zyeware.pal.pal;
 
-struct Renderer2D
-{
+struct Renderer2D {
     @disable this();
     @disable this(this);
 
@@ -24,8 +23,7 @@ public static:
     /// Params:
     ///     clearColor = The modulate to clear the screen to.
     pragma(inline, true)
-    void clearScreen(in color clearColor) nothrow
-    {
+    void clearScreen(in color clearColor) nothrow {
         Pal.graphics.api.clearScreen(clearColor);
     }
 
@@ -34,20 +32,17 @@ public static:
     /// Params:
     ///     projectionMatrix = The projection matrix to use.
     ///     viewMatrix = The view matrix to use.
-    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix)
-    {
+    void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix) {
         Pal.graphics.renderer2d.beginScene(projectionMatrix, viewMatrix);
     }
 
     /// Ends batching render commands. Calling this results in all render commands being flushed to the GPU.
-    void endScene()
-    {
+    void endScene() {
         Pal.graphics.renderer2d.endScene();
     }
 
     /// Flushes all render commands to the GPU.
-    void flush()
-    {
+    void flush() {
         Pal.graphics.renderer2d.flush();
     }
 
@@ -56,9 +51,9 @@ public static:
     /// Params:
     ///     mesh = The mesh to draw.
     ///     position = 2D transform where to draw the mesh to.
-    void drawMesh(in Mesh2D mesh, in mat4 transform)
-    {
-        Pal.graphics.renderer2d.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh.material);
+    void drawMesh(in Mesh2D mesh, in mat4 transform) {
+        Pal.graphics.renderer2d.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh
+                .material);
     }
 
     /// Draws a rectangle.
@@ -72,11 +67,11 @@ public static:
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
-    void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, in color modulate = color("white"),
-        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
-    {
+    void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, in color modulate = color(
+            "white"),
+        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
-            * mat4.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
+                * mat4.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
     }
 
     /// Draws a rectangle.
@@ -92,10 +87,9 @@ public static:
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     pragma(inline, true)
     void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, float rotation, in color modulate = vec4(1),
-        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
-    {
+        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
         Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
-            * mat4.rotation(rotation, vec3(0, 0, 1)) * mat4.scaling(scale.x, scale.y, 1),
+                * mat4.rotation(rotation, vec3(0, 0, 1)) * mat4.scaling(scale.x, scale.y, 1),
             modulate, texture, material, region);
     }
 
@@ -109,8 +103,7 @@ public static:
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = vec4(1),
-        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
-    {
+        in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
         Pal.graphics.renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
     }
 
@@ -124,10 +117,10 @@ public static:
     ///     modulate = The modulate of the text.
     ///     alignment = The alignment of the text.
     ///     material = The material to use. If `null`, uses the default material.
-    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in color modulate = color("white"),
+    void drawString(T)(in T text, in BitmapFont font, in vec2 position, in color modulate = color(
+            "white"),
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
-        if (isSomeString!T)
-    {
+            if (isSomeString!T) {
         static if (is(T == string))
             Pal.graphics.renderer2d.drawString(text, font, position, modulate, alignment, material);
         else static if (is(T == wstring))

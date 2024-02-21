@@ -12,18 +12,15 @@ import std.string : format;
 
 import zyeware;
 
-
 alias ParticleRegistrationID = size_t;
 
-class Particles2D
-{
+class Particles2D {
 protected:
     ParticleContainer*[ParticleRegistrationID] mParticles;
     ParticleRegistrationID mNextTypeId = 1;
 
 public:
-    ParticleRegistrationID registerType(in ParticleProperties2D type, size_t maxParticles)
-    {
+    ParticleRegistrationID registerType(in ParticleProperties2D type, size_t maxParticles) {
         enforce!RenderException(type.typeOnDeath != mNextTypeId, "Cannot spawn same particle type on death.");
 
         immutable size_t nextId = mNextTypeId++;
@@ -31,36 +28,30 @@ public:
         return nextId;
     }
 
-    void unregisterType(ParticleRegistrationID id) nothrow
-    {
+    void unregisterType(ParticleRegistrationID id) nothrow {
         mParticles.remove(id);
     }
 
-    void emit(ParticleRegistrationID id, vec2 position, size_t amount)
-    {
+    void emit(ParticleRegistrationID id, vec2 position, size_t amount) {
         ParticleContainer* particles = mParticles.get(id, null);
-        enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(id));
+        enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(
+                id));
 
-        for (size_t i; i < amount; ++i)
-        {
+        for (size_t i; i < amount; ++i) {
             if (particles.activeParticlesCount >= particles.positions.length)
                 break;
-            
+
             particles.add(position);
         }
     }
 
-    void tick()
-    {
+    void tick() {
         immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
 
-        foreach (ParticleContainer* particles; mParticles.values)
-        {
-            for (size_t i; i < particles.activeParticlesCount; ++i)
-            {
+        foreach (ParticleContainer* particles; mParticles.values) {
+            for (size_t i; i < particles.activeParticlesCount; ++i) {
                 particles.lifeTimes[i] -= ZyeWare.frameTime.deltaTime;
-                if (particles.lifeTimes[i] <= Duration.zero)
-                {
+                if (particles.lifeTimes[i] <= Duration.zero) {
                     particles.remove(i);
 
                     if (particles.type.typeOnDeath > ParticleRegistrationID.init)
@@ -76,17 +67,15 @@ public:
         }
     }
 
-    void draw(in FrameTime nextFrameTime)
-    {
+    void draw(in FrameTime nextFrameTime) {
         immutable float delta = nextFrameTime.deltaTime.toFloatSeconds;
 
-        foreach (ParticleContainer* particles; mParticles.values)
-        {
+        foreach (ParticleContainer* particles; mParticles.values) {
             immutable static rect dimensions = rect(-2, -2, 2, 2);
 
-            for (size_t i; i < particles.activeParticlesCount; ++i)
-            {
-                immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(float) particles.startLifeTimes[i].total!"hnsecs");
+            for (size_t i; i < particles.activeParticlesCount; ++i) {
+                immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(
+                        float) particles.startLifeTimes[i].total!"hnsecs");
                 immutable vec2 position = particles.positions[i] + particles.velocities[i] * delta;
 
                 import std.math.traits : isNaN;
@@ -101,8 +90,7 @@ public:
         }
     }
 
-    size_t count() pure nothrow
-    {
+    size_t count() pure nothrow {
         // is "total"; redeemed by TheFrozenKnights
         size_t bigDEnergy;
 
@@ -113,8 +101,7 @@ public:
     }
 }
 
-struct ParticleProperties2D
-{
+struct ParticleProperties2D {
 public:
     Texture2d texture;
     auto size = Range!float(1, 1);
@@ -122,13 +109,12 @@ public:
     Gradient modulate;
     vec2 gravity;
     auto spriteAngle = Range!float(0, 0);
-    auto direction = Range!float(0, PI*2);
+    auto direction = Range!float(0, PI * 2);
     auto speed = Range!float(0, 1);
     ParticleRegistrationID typeOnDeath;
 }
 
-private struct ParticleContainer
-{
+private struct ParticleContainer {
     ParticleProperties2D type;
     vec2[] positions;
     float[] sizes;
@@ -139,8 +125,7 @@ private struct ParticleContainer
 
     size_t activeParticlesCount;
 
-    this(in ParticleProperties2D type, size_t count) pure nothrow
-    {
+    this(in ParticleProperties2D type, size_t count) pure nothrow {
         this.type = cast(ParticleProperties2D) type;
 
         positions = new vec2[count];
@@ -151,8 +136,7 @@ private struct ParticleContainer
         startLifeTimes = new Duration[count];
     }
 
-    ~this()
-    {
+    ~this() {
         positions.dispose();
         sizes.dispose();
         rotations.dispose();
@@ -161,26 +145,26 @@ private struct ParticleContainer
         startLifeTimes.dispose();
     }
 
-    void add(in vec2 position)
-    {
+    void add(in vec2 position) {
         assert(activeParticlesCount < positions.length, "No more free particles.");
 
         positions[activeParticlesCount] = position;
         sizes[activeParticlesCount] = ZyeWare.random.getRange(type.size.min, type.size.max);
-        rotations[activeParticlesCount] = ZyeWare.random.getRange(type.spriteAngle.min, type.spriteAngle.max);
+        rotations[activeParticlesCount] = ZyeWare.random.getRange(type.spriteAngle.min, type
+                .spriteAngle.max);
 
         immutable float speed = ZyeWare.random.getRange(type.speed.min, type.speed.max);
         immutable float direction = ZyeWare.random.getRange(type.direction.min, type.direction.max);
         velocities[activeParticlesCount] = vec2(cos(direction) * speed, sin(direction) * speed);
 
-        lifeTimes[activeParticlesCount] = hnsecs(ZyeWare.random.getRange(type.lifeTime.min.total!"hnsecs", type.lifeTime.max.total!"hnsecs"));
+        lifeTimes[activeParticlesCount] = hnsecs(ZyeWare.random.getRange(
+                type.lifeTime.min.total!"hnsecs", type.lifeTime.max.total!"hnsecs"));
         startLifeTimes[activeParticlesCount] = lifeTimes[activeParticlesCount];
 
         ++activeParticlesCount;
     }
 
-    void remove(size_t idx)
-    {
+    void remove(size_t idx) {
         assert(activeParticlesCount > 0, "No active particles to remove.");
 
         positions[idx] = positions[activeParticlesCount - 1];

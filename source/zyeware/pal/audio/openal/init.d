@@ -3,15 +3,13 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.init; version(ZW_PAL_OPENAL):
-
-import zyeware.pal.generic.drivers;
+module zyeware.pal.audio.openal.init;
+version (ZW_PAL_OPENAL)  : import zyeware.pal.generic.drivers;
 import zyeware.pal.audio.openal.api;
 
 package(zyeware.pal):
 
-void load(ref AudioDriver driver) nothrow
-{
+void load(ref AudioDriver driver) nothrow {
     driver.initialize = &initialize;
     driver.loadLibraries = &loadLibraries;
     driver.cleanup = &cleanup;

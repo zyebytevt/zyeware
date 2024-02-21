@@ -3,15 +3,13 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl.init; version(ZW_PAL_SDL):
-
-import zyeware.pal.generic.drivers;
+module zyeware.pal.display.sdl.init;
+version (ZW_PAL_SDL)  : import zyeware.pal.generic.drivers;
 import zyeware.pal.display.sdl.api;
 
 package(zyeware.pal):
 
-void load(ref DisplayDriver driver) nothrow
-{
+void load(ref DisplayDriver driver) nothrow {
     driver.createDisplay = &createDisplay;
     driver.destroyDisplay = &destroyDisplay;
     driver.update = &update;

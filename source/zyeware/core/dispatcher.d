@@ -2,8 +2,7 @@ module zyeware.core.dispatcher;
 
 import zyeware;
 
-struct EventDispatcher
-{
+struct EventDispatcher {
     @disable this(this);
 
 public static:

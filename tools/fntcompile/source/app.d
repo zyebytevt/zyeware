@@ -7,8 +7,7 @@ import fntcompile.font;
 
 bool isVerbose;
 
-int main(string[] args)
-{
+int main(string[] args) {
 	string inputName, outputName;
 
 	auto helpInformation = getopt(
@@ -18,20 +17,17 @@ int main(string[] args)
 		"v|verbose", "Print extra information.", &isVerbose,
 	);
 
-	if (helpInformation.helpWanted)
-	{
+	if (helpInformation.helpWanted) {
 		defaultGetoptPrinter("FNTCompile, Copyright 2023 ZyeByte", helpInformation.options);
 		return 0;
 	}
 
-	if (!inputName)
-	{
+	if (!inputName) {
 		stderr.writeln("Need a source font description! (Specify with -i or --input)");
 		return 1;
 	}
 
-	if (!outputName)
-	{
+	if (!outputName) {
 		stderr.writeln("Need an output name! (Specify with -o or --output)");
 		return 1;
 	}

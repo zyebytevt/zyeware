@@ -10,8 +10,7 @@ public import inmath.math : degrees, radians;
 import inmath.util : isVector;
 
 /// Represents a range of values, given a `min` and `max`.
-struct Range(T)
-{
+struct Range(T) {
     T min;
     T max;
 }
@@ -24,8 +23,7 @@ struct Range(T)
 ///     t = Factor to interpolate between a and b, must be between 0.0 and 1.0.
 /// 
 /// Returns: The interpolated value.
-T lerp(T)(T a, T b, float t) if (isNumeric!T || isVector!T)
-{
+T lerp(T)(T a, T b, float t) if (isNumeric!T || isVector!T) {
     return t * b + (1f - t) * a;
 }
 
@@ -37,8 +35,7 @@ T lerp(T)(T a, T b, float t) if (isNumeric!T || isVector!T)
 ///     v = The value to inversly interpolate between `a` and `b`.
 /// 
 /// Returns: A value between 0.0 and 1.0.
-T invLerp(T)(T a, T b, float v) if (isNumeric!T || isVector!T)
-{
+T invLerp(T)(T a, T b, float v) if (isNumeric!T || isVector!T) {
     return (v - a) / (b - a);
 }
 
@@ -52,8 +49,7 @@ T invLerp(T)(T a, T b, float v) if (isNumeric!T || isVector!T)
 import std.math : fmod;
 
 float angleBetween(T)(T a, T b) nothrow
-    if (isFloatingPoint!T)
-{
+if (isFloatingPoint!T) {
     immutable T delta = (b - a) + PI;
     return fmod(delta, PI * 2) - PI;
 }
@@ -65,14 +61,12 @@ float angleBetween(T)(T a, T b) nothrow
 /// 
 /// Returns: The seconds as float.
 pragma(inline, true)
-float toFloatSeconds(Duration dt) pure nothrow
-{
+float toFloatSeconds(Duration dt) pure nothrow {
     return dt.total!"hnsecs" * 0.0000001f;
 }
 
 @("Numeric helper functions")
-unittest
-{
+unittest {
     import std.datetime : seconds;
     import unit_threaded.assertions;
 

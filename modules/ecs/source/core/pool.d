@@ -21,8 +21,7 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.pool;
 
-template hasConst(C)
-{
+template hasConst(C) {
     import std.meta : anySatisfy;
     import std.traits : RepresentationTypeTuple;
 
@@ -30,40 +29,33 @@ template hasConst(C)
     enum bool hasConst = anySatisfy!(isConst, RepresentationTypeTuple!C);
 }
 
-class BasePool
-{
+class BasePool {
 public:
-    this(size_t elementSize, size_t chunkSize)
-    {
+    this(size_t elementSize, size_t chunkSize) {
         mElementSize = elementSize;
-        mChunkSize   = chunkSize;
+        mChunkSize = chunkSize;
     }
 
-    void accomodate(in size_t nbElements)
-    {
-        while (nbElements > mMaxElements)
-        {
+    void accomodate(in size_t nbElements) {
+        while (nbElements > mMaxElements) {
             mNbChunks++;
             mMaxElements = (mNbChunks * mChunkSize) / mElementSize;
         }
 
         if (mData.length < mNbChunks * mChunkSize)
             mData.length = mNbChunks * mChunkSize;
-        mNbElements  = nbElements;
+        mNbElements = nbElements;
     }
 
-    size_t nbElements()
-    {
+    size_t nbElements() {
         return mNbElements;
     }
 
-    size_t nbChunks()
-    {
+    size_t nbChunks() {
         return mNbChunks;
     }
 
-    void* getPtr(size_t n)
-    {
+    void* getPtr(size_t n) {
         if (n >= mNbElements)
             return null;
         size_t offset = n * mElementSize;
@@ -71,52 +63,44 @@ public:
     }
 
 private:
-    size_t  mElementSize;
-    size_t  mChunkSize;
-    size_t  mNbChunks;
-    size_t  mMaxElements;
-    size_t  mNbElements;
-    void[]  mData;
+    size_t mElementSize;
+    size_t mChunkSize;
+    size_t mNbChunks;
+    size_t mMaxElements;
+    size_t mNbElements;
+    void[] mData;
 }
 
-class Pool(T, size_t ChunkSize = 8192) : BasePool
-{
-    this(in size_t n)
-    {
+class Pool(T, size_t ChunkSize = 8192) : BasePool {
+    this(in size_t n) {
         super(T.sizeof, ChunkSize);
         accomodate(n);
     }
 
-    ref T opIndex(size_t n)
-    {
-        return *cast(T*)getPtr(n);
+    ref T opIndex(size_t n) {
+        return *cast(T*) getPtr(n);
     }
 
-    static if (!hasConst!T)
-    {
-        T opIndexAssign(T t, size_t n)
-        {
-            *cast(T*)getPtr(n) = t;
+    static if (!hasConst!T) {
+        T opIndexAssign(T t, size_t n) {
+            *cast(T*) getPtr(n) = t;
             return t;
         }
     }
 
-    void initN(size_t n)
-    {
+    void initN(size_t n) {
         import std.conv : emplace;
+
         emplace(&this[n]);
     }
 }
 
-
 //******************************************************************************
 //***** UNIT-TESTS
 //******************************************************************************
-unittest
-{
-    static struct TestComponent
-    {
-        int    i;
+unittest {
+    static struct TestComponent {
+        int i;
         string s;
     }
 
@@ -128,14 +112,15 @@ unittest
     assert(pool1.getPtr(1) !is null);
     assert(pool0.getPtr(5) is null);
 
-    pool0[0].i = 10; pool0[0].s = "hello";
+    pool0[0].i = 10;
+    pool0[0].s = "hello";
     pool0[3] = TestComponent(5, "world");
 
     assert(pool0[0].i == 10 && pool0[0].s == "hello");
-    assert(pool0[1].i == 0  && pool0[1].s is null);
-    assert(pool0[2].i == 0  && pool0[2].s is null);
-    assert(pool0[3].i == 5  && pool0[3].s == "world");
-    assert(pool0[4].i == 0  && pool0[4].s is null);
+    assert(pool0[1].i == 0 && pool0[1].s is null);
+    assert(pool0[2].i == 0 && pool0[2].s is null);
+    assert(pool0[3].i == 5 && pool0[3].s == "world");
+    assert(pool0[4].i == 0 && pool0[4].s is null);
 
     pool1[1999] = 325;
     assert(pool1[1999] == 325);

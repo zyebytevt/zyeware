@@ -12,8 +12,7 @@ import zyeware;
 alias Gradient = Interpolator!(color, color.lerp);
 
 /// 4-dimensional vector representing a color (rgba).
-struct color
-{
+struct color {
 public:
     static immutable aliceblue = color(0.94, 0.97, 1);
     static immutable antiquewhite = color(0.98, 0.92, 0.84);
@@ -165,75 +164,65 @@ public:
     vec4 vec;
     alias vec this;
 
-    this(string hexcode) pure
-    {
+    this(string hexcode) pure {
         enforce!GraphicsException(hexcode && hexcode.length > 0, "Invalid hexcode.");
 
-        if (hexcode[0] == '#')
-        {
+        if (hexcode[0] == '#') {
             hexcode = hexcode[1 .. $];
 
-            enforce!GraphicsException(hexcode.length >= 6, format!"Invalid color hexcode '%s'."(hexcode));
+            enforce!GraphicsException(hexcode.length >= 6, format!"Invalid color hexcode '%s'."(
+                    hexcode));
 
-            vec.r = hexcode[0..2].to!ubyte(16) / 255.0;
-            vec.g = hexcode[2..4].to!ubyte(16) / 255.0;
-            vec.b = hexcode[4..6].to!ubyte(16) / 255.0;
-            vec.a = hexcode.length > 6 ? hexcode[6..8].to!ubyte(16) / 255.0 : 1.0;
+            vec.r = hexcode[0 .. 2].to!ubyte(16) / 255.0;
+            vec.g = hexcode[2 .. 4].to!ubyte(16) / 255.0;
+            vec.b = hexcode[4 .. 6].to!ubyte(16) / 255.0;
+            vec.a = hexcode.length > 6 ? hexcode[6 .. 8].to!ubyte(16) / 255.0 : 1.0;
         }
     }
 
-    this(uint color) @safe pure nothrow @nogc
-    {
+    this(uint color) @safe pure nothrow @nogc {
         vec.r = ((color >> 16) & 0xFF) / 255.0;
         vec.g = ((color >> 8) & 0xFF) / 255.0;
         vec.b = (color & 0xFF) / 255.0;
         vec.a = ((color >> 24) & 0xFF) / 255.0;
     }
 
-    this(float r, float g, float b, float a = 1f) @safe pure nothrow @nogc
-    {
+    this(float r, float g, float b, float a = 1f) @safe pure nothrow @nogc {
         vec = vec4(r, g, b, a);
     }
 
-    this(vec4 values) @safe pure nothrow @nogc
-    {
+    this(vec4 values) @safe pure nothrow @nogc {
         vec = values;
     }
 
     pragma(inline, true)
-    color toRgb() const nothrow
-    {
+    color toRgb() const nothrow {
         return color(hsv2rgb(vec4(vec.x / 360.0f, vec.y, vec.z, vec.w)));
     }
 
     pragma(inline, true)
-    color toHsv() pure const nothrow
-    {
+    color toHsv() pure const nothrow {
         return color(rgb2hsv(vec));
     }
 
     pragma(inline, true)
-    color brighten(float amount) pure const nothrow @nogc
-    {
+    color brighten(float amount) pure const nothrow @nogc {
         return color(vec.r + amount, vec.g + amount, vec.b + amount, vec.a);
     }
 
     pragma(inline, true)
-    color darken(float amount) pure const nothrow @nogc
-    {
+    color darken(float amount) pure const nothrow @nogc {
         return brighten(-amount);
     }
 
-    static color lerp(color a, color b, float t) pure nothrow
-    {
+    static color lerp(color a, color b, float t) pure nothrow {
         immutable vec4 result = zyeware.core.math.numeric.lerp(a.vec, b.vec, t);
         return color(result.r, result.g, result.b, result.a);
     }
 }
 
 @("Color")
-unittest
-{
+unittest {
     import unit_threaded.assertions;
 
     // Create a color from a hex code

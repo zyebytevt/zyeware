@@ -19,11 +19,9 @@ import inmath.linalg;
 import zyeware;
 
 @asset(Yes.cache)
-class Material
-{
+class Material {
 protected:
-    union
-    {
+    union {
         Shader mShader;
         Material mParent;
     }
@@ -36,8 +34,7 @@ public:
     alias Parameter = SumType!(void[], int, float, vec2, vec3, vec4);
 
     this(Shader shader, size_t textureSlots = 1)
-        in (shader, "Shader cannot be null.")
-    {
+    in (shader, "Shader cannot be null.") {
         mShader = shader;
         mIsRoot = true;
 
@@ -45,28 +42,24 @@ public:
     }
 
     this(Material parent)
-        in (parent, "Parent material cannot be null.")
-    {
+    in (parent, "Parent material cannot be null.") {
         mParent = parent;
         mIsRoot = false;
 
         mTextureSlots.length = parent.mTextureSlots.length;
     }
 
-    void setParameter(string name, Parameter value)
-    {
+    void setParameter(string name, Parameter value) {
         mParameters[name] = value;
     }
 
     void setParameter(T)(string name, T value)
-        in (name, "Parameter name cannot be null.")
-    {
+    in (name, "Parameter name cannot be null.") {
         setParameter(Parameter(value));
     }
 
     ref inout(Parameter) getParameter(string name) inout
-        in (name, "Parameter name cannot be null.")
-    {
+    in (name, "Parameter name cannot be null.") {
         auto parameter = name in mParameters;
         if (parameter)
             return *parameter;
@@ -78,21 +71,18 @@ public:
     }
 
     bool removeParameter(string name) nothrow
-        in (name, "Parameter name cannot be null.")
-    {
+    in (name, "Parameter name cannot be null.") {
         return mParameters.remove(name);
     }
 
-    void setTexture(size_t idx, in Texture texture)
-    {
+    void setTexture(size_t idx, in Texture texture) {
         enforce!RenderException(idx < mTextureSlots.length,
             format!"Invalid texture slot '%d'. (Max %d slots)"(idx, mTextureSlots.length));
-        
+
         mTextureSlots[idx] = texture;
     }
 
-    const(Texture) getTexture(size_t idx) const
-    {
+    const(Texture) getTexture(size_t idx) const {
         enforce!RenderException(idx < mTextureSlots.length,
             format!"Invalid texture slot '%d'. (Max %d slots)"(idx, mTextureSlots.length));
 
@@ -106,22 +96,19 @@ public:
         return null;
     }
 
-    void removeTexture(size_t idx)
-    {
+    void removeTexture(size_t idx) {
         enforce!RenderException(idx < mTextureSlots.length,
             format!"Invalid texture slot '%d'. (Max %d slots)"(idx, mTextureSlots.length));
 
         mTextureSlots[idx] = null;
     }
 
-    string[] parameterList() const nothrow
-    {
+    string[] parameterList() const nothrow {
         string[] list;
 
         Material current = cast(Material) this;
 
-        while (true)
-        {
+        while (true) {
             list ~= current.mParameters.keys;
             if (current.mIsRoot)
                 break;
@@ -132,16 +119,14 @@ public:
         return list.sort.uniq.array;
     }
 
-    inout(Material) parent() inout nothrow
-    {
+    inout(Material) parent() inout nothrow {
         if (mIsRoot)
             return null;
 
         return mParent;
     }
 
-    inout(Material) root() inout nothrow
-    {
+    inout(Material) root() inout nothrow {
         Material root = cast(Material) this;
         while (!root.mIsRoot)
             root = root.mParent;
@@ -149,62 +134,58 @@ public:
         return cast(inout Material) root;
     }
 
-    inout(Shader) shader() inout nothrow
-    {
+    inout(Shader) shader() inout nothrow {
         return root.mShader;
     }
 
     static Material load(string path)
-        in (path, "Path cannot be null.")
-    {
+    in (path, "Path cannot be null.") {
         SDLNode* root = loadSdlDocument(path);
-        
+
         bool isRoot;
         string resourcePath;
         Parameter[string] parameters;
         Texture[] textures;
 
-        if (auto shaderNode = root.getChild("shader"))
-        {
+        if (auto shaderNode = root.getChild("shader")) {
             isRoot = true;
             resourcePath = shaderNode.expectValue!string();
-        }
-        else if (auto extendsNode = root.getChild("extends"))
-        {
+        } else if (auto extendsNode = root.getChild("extends")) {
             isRoot = false;
             resourcePath = extendsNode.expectValue!string();
-        }
-        else
+        } else
             throw new ResourceException("Expected either 'shader' or 'extends' instruction.");
 
-        if (auto parametersNode = root.getChild("parameters"))
-        {
-            for (size_t i; i < parametersNode.children.length; ++i)
-            {
+        if (auto parametersNode = root.getChild("parameters")) {
+            for (size_t i; i < parametersNode.children.length; ++i) {
                 SDLNode* parameterNode = &parametersNode.children[i];
 
                 immutable string type = parameterNode.expectAttributeValue!string("type");
 
-                switch (type)
-                {
+                switch (type) {
                 case "int":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!int("value"));
+                    parameters[parametersNode.name] = Parameter(
+                        parameterNode.expectAttributeValue!int("value"));
                     break;
 
                 case "float":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!float("value"));
+                    parameters[parametersNode.name] = Parameter(
+                        parameterNode.expectAttributeValue!float("value"));
                     break;
 
                 case "vec2":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!vec2("value"));
+                    parameters[parametersNode.name] = Parameter(
+                        parameterNode.expectAttributeValue!vec2("value"));
                     break;
 
                 case "vec3":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!vec3("value"));
+                    parameters[parametersNode.name] = Parameter(
+                        parameterNode.expectAttributeValue!vec3("value"));
                     break;
 
                 case "vec4":
-                    parameters[parametersNode.name] = Parameter(parameterNode.expectAttributeValue!vec4("value"));
+                    parameters[parametersNode.name] = Parameter(
+                        parameterNode.expectAttributeValue!vec4("value"));
                     break;
 
                 default:
@@ -213,24 +194,23 @@ public:
             }
         }
 
-        if (auto texturesNode = root.getChild("textures"))
-        {
-            for (size_t i; i < texturesNode.children.length; ++i)
-            {
+        if (auto texturesNode = root.getChild("textures")) {
+            for (size_t i; i < texturesNode.children.length; ++i) {
                 SDLNode* textureNode = &texturesNode.children[i];
 
                 enforce!ResourceException(textureNode.name == "texture", "Expected 'texture' node.");
 
                 immutable string type = textureNode.expectAttributeValue!string("type");
 
-                switch (type)
-                {
+                switch (type) {
                 case "two":
-                    textures ~= AssetManager.load!Texture2d(textureNode.expectAttributeValue!string("path"));
+                    textures ~= AssetManager.load!Texture2d(
+                        textureNode.expectAttributeValue!string("path"));
                     break;
 
                 case "cube":
-                    textures ~= AssetManager.load!TextureCubeMap(textureNode.expectAttributeValue!string("path"));
+                    textures ~= AssetManager.load!TextureCubeMap(
+                        textureNode.expectAttributeValue!string("path"));
                     break;
 
                 case "null":

@@ -5,15 +5,10 @@
 // Copyright 2021 ZyeByte
 module zyeware.ecs.component;
 
-public
-{
+public {
     import zyeware.ecs.component.camera;
     import zyeware.ecs.component.render;
     import zyeware.ecs.component.transform;
     import zyeware.ecs.component.collision;
     import zyeware.ecs.component.particles;
 }
-
-
-
-

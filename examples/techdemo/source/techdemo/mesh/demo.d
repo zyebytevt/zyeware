@@ -8,11 +8,7 @@ import std.algorithm : clamp;
 
 import zyeware;
 
-
-version(none):
-
-class MeshDemo : AppState
-{
+version (none)  : class MeshDemo : AppState {
 protected:
     static immutable string[] sMeshPaths = [
         "res:meshes/teapot_normal.obj"
@@ -29,25 +25,21 @@ protected:
     float mCameraPhi = PI / 2f, mCameraTheta = 0f, mCameraDistance = 5f;
     bool mShouldMoveCamera = false;
 
-    void moveCamera(float thetaDelta, float phiDelta) pure nothrow
-    {
+    void moveCamera(float thetaDelta, float phiDelta) pure nothrow {
         mCameraTheta += thetaDelta;
         mCameraPhi = clamp(mCameraPhi + phiDelta, 0.01, PI - 0.01);
     }
 
-    void zoomCamera(float delta) pure nothrow
-    {
+    void zoomCamera(float delta) pure nothrow {
         mCameraDistance = clamp(mCameraDistance + delta, 1f, 50f);
     }
 
 public:
-    this(StateApplication application)
-    {
+    this(StateApplication application) {
         super(application);
     }
 
-    override void tick(in FrameTime frameTime)
-    {
+    override void tick(in FrameTime frameTime) {
         immutable vec3 cameraPosition = vec3(mCameraDistance * sin(mCameraPhi) * cos(mCameraTheta),
             mCameraDistance * cos(mCameraPhi),
             mCameraDistance * sin(mCameraPhi) * sin(mCameraTheta));
@@ -70,19 +62,14 @@ public:
             );
         }
 
-        if (InputManager.isActionJustPressed("ui_cancel"))
-        {
+        if (InputManager.isActionJustPressed("ui_cancel")) {
             application.popState();
-        }
-        else if (InputManager.isActionJustPressed("ui_left"))
-        {
+        } else if (InputManager.isActionJustPressed("ui_left")) {
             if (--mCurrentMeshIndex == size_t.max)
                 mCurrentMeshIndex = sMeshPaths.length - 1;
 
             mCurrentMesh = AssetManager.load!Mesh(sMeshPaths[mCurrentMeshIndex]);
-        }
-        else if (InputManager.isActionJustPressed("ui_right"))
-        {
+        } else if (InputManager.isActionJustPressed("ui_right")) {
             if (++mCurrentMeshIndex == sMeshPaths.length)
                 mCurrentMeshIndex = 0;
 
@@ -90,8 +77,7 @@ public:
         }
     }
 
-    override void draw(in FrameTime nextFrameTime)
-    {
+    override void draw(in FrameTime nextFrameTime) {
         Pal.graphicsDriver.clear();
 
         Material material = mCurrentMesh.material;
@@ -110,23 +96,22 @@ public:
 
         Renderer2D.endScene();
     }
-    
-    override void onAttach(bool firstTime)
-    {
-        if (firstTime)
-        {
+
+    override void onAttach(bool firstTime) {
+        if (firstTime) {
             assert(sMeshPaths.length > 0, "No meshes defined.");
 
             mCurrentMeshIndex = 0;
             mCurrentMesh = AssetManager.load!Mesh(sMeshPaths[mCurrentMeshIndex]);
-            
+
             mWorldCamera = new PerspectiveCamera(640, 480, 60f, 0.01f, 1000f);
 
             mUICamera = new OrthographicCamera(0, 640, 480, 0);
 
             mFont = AssetManager.load!Font("core:fonts/internal.fnt");
             mEnvironment = new Environment3D();
-            mEnvironment.sky = new Skybox(AssetManager.load!TextureCubeMap("res:terraindemo/skybox/skybox.cube"));
+            mEnvironment.sky = new Skybox(AssetManager.load!TextureCubeMap(
+                    "res:terraindemo/skybox/skybox.cube"));
             mEnvironment.ambientColor = color.black;
 
             mLights ~= Renderer3D.Light(vec3(-5, 2, -5), color.white, vec3(1, 0.005, 0.001));
@@ -134,19 +119,14 @@ public:
         }
     }
 
-    override void receive(in Event ev)
-    {
-        if (auto mouseMotionEv = cast(InputEventMouseMotion) ev)
-        {
+    override void receive(in Event ev) {
+        if (auto mouseMotionEv = cast(InputEventMouseMotion) ev) {
             if (mShouldMoveCamera)
                 moveCamera(mouseMotionEv.relative.x * 0.015f, -mouseMotionEv.relative.y * 0.015f);
-        }
-        else if (auto mouseButtonEv = cast(InputEventMouseButton) ev)
-        {
+        } else if (auto mouseButtonEv = cast(InputEventMouseButton) ev) {
             if (mouseButtonEv.button == MouseCode.buttonLeft)
                 mShouldMoveCamera = mouseButtonEv.isPressed;
-        }
-        else if (auto scrollEv = cast(InputEventMouseScroll) ev)
+        } else if (auto scrollEv = cast(InputEventMouseScroll) ev)
             zoomCamera(-scrollEv.offset.y);
     }
 }

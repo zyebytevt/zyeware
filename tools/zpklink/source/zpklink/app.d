@@ -9,8 +9,7 @@ import zpklink.file;
 
 bool isVerbose;
 
-int main(string[] args)
-{
+int main(string[] args) {
 	// Get parameters
 	string inputName, outputName;
 	bool isExtract, isPack;
@@ -25,27 +24,24 @@ int main(string[] args)
 	);
 
 	// Check parameters
-	if (helpInformation.helpWanted)
-	{
+	if (helpInformation.helpWanted) {
 		defaultGetoptPrinter("ZPKLINK, Copyright 2021 ZyeByte", helpInformation.options);
 		return 0;
 	}
 
 	// Either none or both flags have been given.
-	if (isExtract == isPack)
-	{
-		stderr.writeln("Need to know if to extract or to pack! (Specify with -p/--pack or -x/--extract)");
+	if (isExtract == isPack) {
+		stderr.writeln(
+			"Need to know if to extract or to pack! (Specify with -p/--pack or -x/--extract)");
 		return 1;
 	}
 
-	if (!inputName)
-	{
+	if (!inputName) {
 		stderr.writeln("Need an input object! (Specify with -i or --input)");
 		return 1;
 	}
 
-	if (!outputName)
-	{
+	if (!outputName) {
 		stderr.writeln("Need an output object! (Specify with -o or --output)");
 		return 1;
 	}
@@ -58,22 +54,20 @@ int main(string[] args)
 		assert(false, "Neither isPack nor isExtract is true! How did we even get here?");
 }
 
-struct FileInfo
-{
+struct FileInfo {
 	uint offset;
 	uint size;
 }
 
-int pack(string sourceDirName, string targetZpkName)
-{
+int pack(string sourceDirName, string targetZpkName) {
 	// Create ZPK file
 	File zpkFile = File(targetZpkName, "wb");
 	if (isVerbose)
 		writefln("Creating ZPK file '%s'.", targetZpkName);
-	
+
 	FileInfo[string] fileInfos;
 	uint centralDirectoryOffset;
-	
+
 	// Write magic number
 	zpkFile.rawWrite("ZPK1");
 
@@ -81,33 +75,32 @@ int pack(string sourceDirName, string targetZpkName)
 	zpkFile.writePrimitive!uint(0);
 
 	// Write all files
-	foreach (string entry; dirEntries(sourceDirName, "*", SpanMode.breadth))
-	{
+	foreach (string entry; dirEntries(sourceDirName, "*", SpanMode.breadth)) {
 		if (!isFile(entry))
 			continue;
 
 		File file = File(entry, "rb");
 
-		if (file.size == 0)
-		{
+		if (file.size == 0) {
 			file.close();
 			continue;
 		}
 
 		string entryName = entry[sourceDirName.length .. $];
 		if (entryName[0] == '/')
-			entryName = entryName[1..$];
+			entryName = entryName[1 .. $];
 
 		fileInfos[entryName] = FileInfo(cast(uint) zpkFile.tell, cast(uint) file.size);
 		if (isVerbose)
-			writefln("Archiving '%s' at offset 0x%X, file size %d bytes.", entryName, zpkFile.tell, file.size);
+			writefln("Archiving '%s' at offset 0x%X, file size %d bytes.", entryName, zpkFile.tell, file
+					.size);
 
 		ubyte[] buffer = file.rawRead(new ubyte[file.size]);
 		zpkFile.rawWrite(buffer);
 
 		file.close();
 	}
-	
+
 	// Central directory
 	centralDirectoryOffset = cast(uint) zpkFile.tell;
 	zpkFile.writePrimitive!uint(cast(uint) fileInfos.length);
@@ -115,8 +108,7 @@ int pack(string sourceDirName, string targetZpkName)
 	if (isVerbose)
 		writefln("Writing central directory at offset 0x%X...", centralDirectoryOffset);
 
-	foreach (string path, ref FileInfo info; fileInfos)
-	{
+	foreach (string path, ref FileInfo info; fileInfos) {
 		zpkFile.writePString!ushort(path);
 		zpkFile.writePrimitive!uint(info.offset);
 		zpkFile.writePrimitive!uint(info.size);
@@ -126,8 +118,7 @@ int pack(string sourceDirName, string targetZpkName)
 	zpkFile.seek(4);
 	zpkFile.writePrimitive!uint(centralDirectoryOffset);
 
-	if (isVerbose)
-	{
+	if (isVerbose) {
 		writefln("ZPK size: %d bytes", zpkFile.size);
 		writefln("Central directory size: %d bytes", zpkFile.size - centralDirectoryOffset);
 		writeln("Done!");
@@ -138,8 +129,7 @@ int pack(string sourceDirName, string targetZpkName)
 	return 0;
 }
 
-int extract(string sourceZpkName, string targetDirName)
-{
+int extract(string sourceZpkName, string targetDirName) {
 	// Load ZPK file
 	File zpkFile = File(sourceZpkName, "rb");
 	if (isVerbose)
@@ -149,15 +139,14 @@ int extract(string sourceZpkName, string targetDirName)
 	char[4] magic;
 	zpkFile.rawRead(magic);
 
-	if (magic != "ZPK1")
-	{
+	if (magic != "ZPK1") {
 		stderr.writeln("Invalid ZPK file.");
 		return 1;
 	}
 
 	// Go to central directory
 	immutable uint centralDirectoryOffset = zpkFile.readPrimitive!uint();
-    zpkFile.seek(centralDirectoryOffset);
+	zpkFile.seek(centralDirectoryOffset);
 
 	FileInfo[string] fileInfos;
 
@@ -166,8 +155,7 @@ int extract(string sourceZpkName, string targetDirName)
 
 	// Read central directory
 	immutable int fileAmount = zpkFile.readPrimitive!uint();
-	for (size_t i; i < fileAmount; ++i)
-	{
+	for (size_t i; i < fileAmount; ++i) {
 		immutable string fullPath = zpkFile.readPString!ushort();
 		immutable int fileOffset = zpkFile.readPrimitive!uint();
 		immutable int fileSize = zpkFile.readPrimitive!uint();
@@ -179,16 +167,15 @@ int extract(string sourceZpkName, string targetDirName)
 		writefln("Accounted for %d embedded file(s), extracting...", fileInfos.length);
 
 	// Write out all files
-	foreach (string path, FileInfo info; fileInfos)
-	{
-		if (info.size == 0)
-		{
+	foreach (string path, FileInfo info; fileInfos) {
+		if (info.size == 0) {
 			writefln("File '%s' is zero-sized, skipping...", path);
 			continue;
 		}
 
 		if (isVerbose)
-			writefln("Extracting '%s' from offset 0x%X with size %d bytes...", path, info.offset, info.size);
+			writefln("Extracting '%s' from offset 0x%X with size %d bytes...", path, info.offset, info
+					.size);
 
 		immutable string extractPath = buildNormalizedPath(targetDirName ~ "/", path);
 
