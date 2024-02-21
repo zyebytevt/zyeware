@@ -8,9 +8,7 @@ module zyeware.audio.buffer;
 import std.conv : to;
 
 import zyeware;
-
-import zyeware.pal;
-import zyeware.pal.audio.types;
+import zyeware.pal.pal;
 
 /// Contains an encoded audio segment, plus various information like
 /// loop point etc.

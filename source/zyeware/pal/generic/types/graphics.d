@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.graphics.types;
+module zyeware.pal.generic.types.graphics;
 
 enum RenderFlag
 {

@@ -3,11 +3,13 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.types;
+module zyeware.pal.audio.openal.types; version(ZW_PAL_OPENAL):
 
 import audioformats;
 
-import zyeware.pal.audio.types;
+import zyeware.pal.generic.types.audio;
+
+package:
 
 struct BufferData
 {

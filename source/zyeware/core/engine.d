@@ -18,9 +18,9 @@ import std.algorithm : min;
 
 import zyeware;
 import zyeware.core.project;
-import zyeware.pal;
 import zyeware.core.main;
 import zyeware.core.cmdargs;
+import zyeware.pal.pal;
 
 /// How the main framebuffer should be scaled on resizing.
 enum ScaleMode
@@ -220,6 +220,8 @@ package(zyeware.core) static:
         sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
         enforce!CoreException(sApplication, "Failed to create main application.");
         
+        Pal.initialize();
+
         Pal.loadAudioDriver(parsedArgs.audioDriver);
         Pal.loadDisplayDriver(parsedArgs.displayDriver);
         Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);

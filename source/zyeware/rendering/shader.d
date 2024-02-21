@@ -14,8 +14,7 @@ import std.algorithm : countUntil;
 import inmath.linalg;
 
 import zyeware;
-
-import zyeware.pal;
+import zyeware.pal.pal;
 
 struct ShaderProperties
 {

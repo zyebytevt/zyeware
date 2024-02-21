@@ -6,9 +6,9 @@
 module zyeware.pal.pal;
 
 import zyeware;
-import zyeware.pal.graphics.driver;
-import zyeware.pal.display.driver;
-import zyeware.pal.audio.driver;
+import zyeware.pal.generic.drivers;
+
+package(zyeware):
 
 struct Pal
 {
@@ -25,44 +25,41 @@ private static:
     AudioDriverLoader[string] sAudioLoaders;
 
 package(zyeware.pal) static:
-    alias GraphicsDriverLoader = GraphicsDriver function() nothrow;
-    alias DisplayDriverLoader = DisplayDriver function() nothrow;
-    alias AudioDriverLoader = AudioDriver function() nothrow;
-
-    void registerGraphicsDriver(string name, GraphicsDriverLoader callbacksGenerator) nothrow
-    {
-        sGraphicsLoaders[name] = callbacksGenerator;
-    }
-
-    void registerDisplayDriver(string name, DisplayDriverLoader callbacksGenerator) nothrow
-    {
-        sDisplayLoaders[name] = callbacksGenerator;
-    }
-
-    void registerAudioDriver(string name, AudioDriverLoader callbacksGenerator) nothrow
-    {
-        sAudioLoaders[name] = callbacksGenerator;
-    }
+    alias GraphicsDriverLoader = void function(ref GraphicsDriver) nothrow;
+    alias DisplayDriverLoader = void function(ref DisplayDriver) nothrow;
+    alias AudioDriverLoader = void function(ref AudioDriver) nothrow;
 
 package(zyeware) static:
+    void initialize() nothrow
+    {
+        version(ZW_PAL_OPENGL)
+            sGraphicsLoaders["opengl"] = &imported!"zyeware.pal.graphics.opengl.init".load;
+
+        version(ZW_PAL_OPENAL)
+            sAudioLoaders["openal"] = &imported!"zyeware.pal.audio.openal.init".load;
+
+        version(ZW_PAL_SDL)
+            sDisplayLoaders["sdl"] = &imported!"zyeware.pal.display.sdl.init".load;
+    }
+
     void loadGraphicsDriver(string name) nothrow
         in (name in sGraphicsLoaders, "GraphicsDriver " ~ name ~ " not registered")
     {
-        sGraphics = sGraphicsLoaders[name]();
+        sGraphicsLoaders[name](sGraphics);
         Logger.core.info("Set graphics driver '%s' active.", name);
     }
 
     void loadDisplayDriver(string name) nothrow
         in (name in sDisplayLoaders, "DisplayDriver " ~ name ~ " not registered")
     {
-        sDisplay = sDisplayLoaders[name]();
+        sDisplayLoaders[name](sDisplay);
         Logger.core.info("Set display driver '%s' active.", name);
     }
 
     void loadAudioDriver(string name) nothrow
         in (name in sAudioLoaders, "AudioDriver " ~ name ~ " not registered")
     {
-        sAudio = sAudioLoaders[name]();
+        sAudioLoaders[name](sAudio);
         Logger.core.info("Set audio driver '%s' active.", name);
     }
 
@@ -81,7 +78,6 @@ package(zyeware) static:
         return sAudioLoaders.keys;
     }
 
-public static:
     pragma(inline, true)
     ref const(GraphicsDriver) graphics() nothrow
     {

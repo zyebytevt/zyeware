@@ -6,7 +6,7 @@ import zyeware;
 import zyeware.core.appstate;
 import zyeware.ecs;
 
-import zyeware.pal;
+
 
 import techdemo.menu.menu;
 

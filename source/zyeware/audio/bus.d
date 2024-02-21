@@ -8,7 +8,7 @@ module zyeware.audio.bus;
 import std.algorithm : clamp;
 
 import zyeware;
-import zyeware.pal;
+import zyeware.pal.pal;
 
 /// Controls the mixing of various sounds which are assigned to this audio bus, 
 class AudioBus : NativeObject

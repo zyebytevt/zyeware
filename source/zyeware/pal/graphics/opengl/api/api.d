@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.graphics.opengl.api.api;
+module zyeware.pal.graphics.opengl.api.api; version(ZW_PAL_OPENGL):
 
 import std.typecons : Tuple;
 import std.exception : assumeWontThrow;
@@ -14,9 +14,7 @@ import bindbc.opengl;
 
 import zyeware;
 
-import zyeware.pal;
-
-import zyeware.pal.graphics.types;
+import zyeware.pal.generic.types.graphics;
 import zyeware.pal.graphics.opengl.api.types;
 import zyeware.pal.graphics.opengl.api.utils;
 

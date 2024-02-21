@@ -6,9 +6,7 @@
 module zyeware.audio.source;
 
 import zyeware;
-
-import zyeware.pal;
-import zyeware.pal.audio.types;
+import zyeware.pal.pal;
 
 /// Represents an individual source that can play sounds. Only one sound
 /// can play at a time.

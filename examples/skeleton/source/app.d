@@ -6,7 +6,7 @@ import zyeware;
 
 import zyeware.core.application;
 import zyeware.core.main;
-import zyeware.pal;
+
 
 extern(C) ProjectProperties getProjectProperties()
 {
@@ -29,7 +29,7 @@ class SkeletonApplication : Application
 {
 protected:
 	Texture2d mSprite;
-	Material mWaveyMaterial;
+	//Material mWaveyMaterial;
 	BitmapFont mFont;
 	OrthographicProjection mCamera;
 
@@ -38,11 +38,9 @@ public:
 	{
 		ZyeWare.scaleMode = ScaleMode.keepAspect;
 
-		Files.addPackage("skeleton.zpk");
-
 		mSprite = AssetManager.load!Texture2d("core:textures/missing.png");
 		mCamera = new OrthographicProjection(0, 800, 600, 0);
-		mWaveyMaterial = AssetManager.load!Material("res:waveyChild.mtl");
+		//mWaveyMaterial = AssetManager.load!Material("res:waveyChild.mtl");
 		mFont = AssetManager.load!BitmapFont("core:fonts/internal.zfnt");
 	}
 

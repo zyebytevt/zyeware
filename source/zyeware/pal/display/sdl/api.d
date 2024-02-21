@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl.api;
+module zyeware.pal.display.sdl.api; version(ZW_PAL_SDL):
 
 import core.stdc.string : memcpy;
 
@@ -20,11 +20,10 @@ import bindbc.opengl;
 
 import zyeware;
 
-import zyeware.pal;
 import zyeware.pal.display.sdl.types;
 import zyeware.pal.display.sdl.utils;
 
-package(zyeware.pal.display.sdl):
+package:
 
 size_t pWindowCount = 0;
 

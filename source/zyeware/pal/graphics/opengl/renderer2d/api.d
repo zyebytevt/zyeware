@@ -1,4 +1,4 @@
-module zyeware.pal.graphics.opengl.renderer2d.api;
+module zyeware.pal.graphics.opengl.renderer2d.api; version(ZW_PAL_OPENGL):
 
 import std.traits : isSomeString;
 import std.string : lineSplitter;
@@ -8,7 +8,7 @@ import bindbc.opengl;
 
 import zyeware;
 
-import zyeware.pal.graphics.types;
+import zyeware.pal.generic.types.graphics;
 
 import zyeware.pal.graphics.opengl.api.api;
 import zyeware.pal.graphics.opengl.renderer2d.types;

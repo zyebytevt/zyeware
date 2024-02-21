@@ -6,8 +6,7 @@
 module zyeware.rendering.display;
 
 import zyeware;
-
-import zyeware.pal;
+import zyeware.pal.pal;
 
 struct DisplayProperties
 {

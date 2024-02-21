@@ -1,4 +1,4 @@
-module zyeware.pal.graphics.opengl.api.utils;
+module zyeware.pal.graphics.opengl.api.utils; version(ZW_PAL_OPENGL):
 
 import zyeware;
 

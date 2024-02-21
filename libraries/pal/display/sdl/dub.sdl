@@ -1,8 +1,0 @@
-name "pal-display-sdl"
-description "SDL Display Pal implementation."
-authors "ZyeByte"
-copyright "Copyright © 2023, ZyeByte"
-license "LGPL-3.0"
-targetType "sourceLibrary"
-
-dependency "bindbc-sdl" version="~>1.4.3"

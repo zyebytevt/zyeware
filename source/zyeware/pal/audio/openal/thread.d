@@ -3,13 +3,15 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.thread;
+module zyeware.pal.audio.openal.thread; version(ZW_PAL_OPENAL):
 
 import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
 
 import zyeware;
 import zyeware.pal.audio.openal.api : audioBufferCount, audioBufferSize, updateSourceBuffers, pSources;
 import zyeware.pal.audio.openal.types;
+
+package:
 
 class AudioThread : Thread
 {

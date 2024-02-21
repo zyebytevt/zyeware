@@ -3,12 +3,13 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.display.sdl.utils;
+module zyeware.pal.display.sdl.utils; version(ZW_PAL_SDL):
 
 import bindbc.sdl;
 
 import zyeware;
 
+package:
 
 SDL_Surface* createSurfaceFromImage(in Image image) nothrow
 {

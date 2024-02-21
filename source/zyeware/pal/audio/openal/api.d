@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.openal.api;
+module zyeware.pal.audio.openal.api; version(ZW_PAL_OPENAL):
 
 import std.sumtype : match;
 import std.exception : enforce;
@@ -14,11 +14,11 @@ import bindbc.openal;
 import audioformats;
 
 import zyeware;
-import zyeware.pal;
+
 import zyeware.pal.audio.openal.types;
 import zyeware.pal.audio.openal.thread;
 
-package(zyeware.pal.audio.openal):
+package:
 
 enum audioBufferSize = 4096 * 4;
 enum audioBufferCount = 4;
@@ -374,7 +374,7 @@ float getSourcePitch(in NativeHandle handle) nothrow
     return source.pitch;
 }
 
-bool getSourceLooping(in NativeHandle handle) nothrow
+bool isSourceLooping(in NativeHandle handle) nothrow
 {
     auto source = cast(SourceData*) handle;
 

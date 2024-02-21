@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.pal.audio.types;
+module zyeware.pal.generic.types.audio;
 
 import std.sumtype : SumType;
 

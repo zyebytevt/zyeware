@@ -5,7 +5,7 @@ import std.string : format;
 
 import zyeware;
 
-import zyeware.pal;
+
 
 import techdemo.menu.menu;
 

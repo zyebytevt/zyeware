@@ -9,8 +9,7 @@ import std.typecons : Rebindable;
 import std.exception : enforce;
 
 import zyeware;
-
-import zyeware.pal;
+import zyeware.pal.pal;
 
 struct Renderer3D
 {

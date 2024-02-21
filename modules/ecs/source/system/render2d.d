@@ -10,7 +10,7 @@ import std.datetime : Duration;
 import zyeware;
 import zyeware.ecs;
 
-import zyeware.pal;
+
 
 /// This system is responsible for rendering all entities with `SpriteComponent`s to
 /// the screen. It also updates these components if they are set to animate.

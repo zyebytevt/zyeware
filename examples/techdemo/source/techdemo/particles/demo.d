@@ -7,7 +7,7 @@ import std.string : format;
 import zyeware;
 
 import zyeware.core.debugging.profiler;
-import zyeware.pal;
+
 
 class ParticlesDemo : AppState
 {

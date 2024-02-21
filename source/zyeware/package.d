@@ -38,8 +38,8 @@ public
     import zyeware.core.math.rect;
     import zyeware.core.math.vector;
 
-    import zyeware.pal.graphics.types;
-    import zyeware.pal.audio.types;
+    import zyeware.pal.generic.types.graphics;
+    import zyeware.pal.generic.types.audio;
 
     import zyeware.physics.shapes.circle2d;
     import zyeware.physics.shapes.polygon2d;

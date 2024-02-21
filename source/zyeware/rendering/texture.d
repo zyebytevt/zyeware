@@ -10,8 +10,7 @@ import std.string : format;
 import std.algorithm : countUntil;
 
 import zyeware;
-
-import zyeware.pal;
+import zyeware.pal.pal;
 
 struct TextureProperties
 {

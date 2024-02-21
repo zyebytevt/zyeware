@@ -21,20 +21,18 @@ subPackage "tools/zpklink"
 
 subPackage "libraries/zyfont"
 subPackage "libraries/crashhandler"
-subPackage "libraries/pal/audio/openal"
-subPackage "libraries/pal/graphics/opengl"
-subPackage "libraries/pal/display/sdl"
 
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
 
 	targetType "staticLibrary"
 
-	dependency "zyeware:pal-audio-openal" version="*"
-	dependency "zyeware:pal-graphics-opengl" version="*"
-	dependency "zyeware:pal-display-sdl" version="*"
+	dependency "bindbc-sdl" version="~>1.4.3"
+	dependency "bindbc-opengl" version="~>1.1.0"
+	dependency "audio-formats" version="~>3.0.1"
+	dependency "bindbc-openal" version="~>1.1.0"
 
-	versions "GL_43" "SDL_205"
+	versions "GL_43" "SDL_205" "ZW_PAL_SDL" "ZW_PAL_OPENGL" "ZW_PAL_OPENAL"
 }
 
 configuration "unittest" {
