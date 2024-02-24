@@ -3,15 +3,15 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.material;
+module zyeware.graphics.material;
 
-import std.sumtype : SumType, match;
-import std.string : format, startsWith;
+import std.sumtype : SumType;
+import std.string : format;
 import std.exception : enforce;
 import std.typecons : Rebindable;
 import std.conv : to;
-import std.string : split, format;
-import std.algorithm : map, filter, sort, uniq;
+import std.string : format;
+import std.algorithm : sort, uniq;
 import std.array : array;
 
 import inmath.linalg;

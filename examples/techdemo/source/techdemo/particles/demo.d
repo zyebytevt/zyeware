@@ -12,8 +12,8 @@ class ParticlesDemo : AppState {
 protected:
     OrthographicCamera mUICamera;
     BitmapFont mFont;
-    Particles2D mParticles;
-    ParticleRegistrationID mStarParticlesId;
+    Particles2d mParticles;
+    ParticleRegistrationId mStarParticlesId;
 
 public:
     this(StateApplication application) {
@@ -49,14 +49,14 @@ public:
         if (firstTime) {
             mUICamera = new OrthographicCamera(0, 640, 480, 0);
             mFont = AssetManager.load!Font("core:fonts/internal.fnt");
-            mParticles = new Particles2D();
+            mParticles = new Particles2d();
 
             Gradient gradient;
             gradient.addPoint(0, color.red);
             gradient.addPoint(0.5, color.blue);
             gradient.addPoint(1, color.yellow);
 
-            ParticleProperties2D starType = {
+            ParticleProperties2d starType = {
                 texture: AssetManager.load!Texture2d("res:menu/menuStar.png"),
                 gravity: vec2(0, 15),
                 speed: {min: 30f,

@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.display;
+module zyeware.graphics.display;
 
 import zyeware;
 import zyeware.pal.pal;

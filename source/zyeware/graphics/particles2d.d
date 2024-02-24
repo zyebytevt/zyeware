@@ -1,4 +1,9 @@
-module zyeware.rendering.particles2d;
+// This file is part of the ZyeWare Game Engine, and subject to the terms
+// and conditions defined in the file 'LICENSE.txt', which is part
+// of this source code package.
+//
+// Copyright 2021 ZyeByte
+module zyeware.graphics.particles2d;
 
 import std.container.slist;
 import std.container.dlist;
@@ -12,15 +17,15 @@ import std.string : format;
 
 import zyeware;
 
-alias ParticleRegistrationID = size_t;
+alias ParticleRegistrationId = size_t;
 
-class Particles2D {
+class Particles2d {
 protected:
-    ParticleContainer*[ParticleRegistrationID] mParticles;
-    ParticleRegistrationID mNextTypeId = 1;
+    ParticleContainer*[ParticleRegistrationId] mParticles;
+    ParticleRegistrationId mNextTypeId = 1;
 
 public:
-    ParticleRegistrationID registerType(in ParticleProperties2D type, size_t maxParticles) {
+    ParticleRegistrationId registerType(in ParticleProperties2d type, size_t maxParticles) {
         enforce!RenderException(type.typeOnDeath != mNextTypeId, "Cannot spawn same particle type on death.");
 
         immutable size_t nextId = mNextTypeId++;
@@ -28,11 +33,11 @@ public:
         return nextId;
     }
 
-    void unregisterType(ParticleRegistrationID id) nothrow {
+    void unregisterType(ParticleRegistrationId id) nothrow {
         mParticles.remove(id);
     }
 
-    void emit(ParticleRegistrationID id, vec2 position, size_t amount) {
+    void emit(ParticleRegistrationId id, vec2 position, size_t amount) {
         ParticleContainer* particles = mParticles.get(id, null);
         enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(
                 id));
@@ -54,7 +59,7 @@ public:
                 if (particles.lifeTimes[i] <= Duration.zero) {
                     particles.remove(i);
 
-                    if (particles.type.typeOnDeath > ParticleRegistrationID.init)
+                    if (particles.type.typeOnDeath > ParticleRegistrationId.init)
                         emit(particles.type.typeOnDeath, particles.positions[i], 1);
 
                     --i;
@@ -84,7 +89,7 @@ public:
                 if (isNaN(modulate.r) || isNaN(modulate.g) || isNaN(modulate.b) || isNaN(modulate.a))
                     modulate = color("white");
 
-                Renderer2d.drawRectangle(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
+                Renderer.drawRect2d(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
                     modulate, particles.type.texture);
             }
         }
@@ -101,7 +106,7 @@ public:
     }
 }
 
-struct ParticleProperties2D {
+struct ParticleProperties2d {
 public:
     Texture2d texture;
     auto size = Range!float(1, 1);
@@ -111,11 +116,11 @@ public:
     auto spriteAngle = Range!float(0, 0);
     auto direction = Range!float(0, PI * 2);
     auto speed = Range!float(0, 1);
-    ParticleRegistrationID typeOnDeath;
+    ParticleRegistrationId typeOnDeath;
 }
 
 private struct ParticleContainer {
-    ParticleProperties2D type;
+    ParticleProperties2d type;
     vec2[] positions;
     float[] sizes;
     float[] rotations;
@@ -125,8 +130,8 @@ private struct ParticleContainer {
 
     size_t activeParticlesCount;
 
-    this(in ParticleProperties2D type, size_t count) pure nothrow {
-        this.type = cast(ParticleProperties2D) type;
+    this(in ParticleProperties2d type, size_t count) pure nothrow {
+        this.type = cast(ParticleProperties2d) type;
 
         positions = new vec2[count];
         sizes = new float[count];

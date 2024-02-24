@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.camera;
+module zyeware.graphics.camera;
 
 import zyeware;
 

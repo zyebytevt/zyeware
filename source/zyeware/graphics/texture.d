@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.texture;
+module zyeware.graphics.texture;
 
 import std.conv : to;
 import std.string : format;
@@ -117,8 +117,8 @@ public:
         SDLNode* root = loadSdlDocument(path);
 
         static foreach (size_t i, string side; [
-                "right", "left", "top", "bottom", "front", "back"
-            ])
+            "right", "left", "top", "bottom", "front", "back"
+        ])
             images[i] = AssetManager.load!Image(root.expectChildValue!string(side));
 
         if (Files.hasFile(path ~ ".props")) // Properties file exists

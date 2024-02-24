@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.Mesh3d;
+module zyeware.graphics.mesh;
 
 import std.string : format;
 import std.path : extension;
@@ -15,11 +15,43 @@ import inmath.linalg;
 import zyeware;
 import zyeware.pal.pal;
 
-interface Mesh {
+@asset(Yes.cache)
+class Mesh2d {
+protected:
+    const(Vertex2d[]) mVertices;
+    const(uint[]) mIndices;
+    const(Material) mMaterial;
+    const(Texture2d) mTexture;
+
+public:
+    this(in Vertex2d[] vertices, in uint[] indices, in Material material, in Texture2d texture) {
+        mVertices = vertices;
+        mIndices = indices;
+        mMaterial = material;
+        mTexture = texture;
+    }
+
+    const(Vertex2d[]) vertices() pure const nothrow {
+        return mVertices;
+    }
+
+    const(uint[]) indices() pure const nothrow {
+        return mIndices;
+    }
+
+    const(Material) material() pure const nothrow {
+        return mMaterial;
+    }
+
+    const(Texture2d) texture() pure const nothrow {
+        return mTexture;
+    }
 }
 
+// =================================================================================================
+
 @asset(Yes.cache)
-class Mesh3d : Mesh, NativeObject {
+class Mesh3d : NativeObject {
 protected:
     NativeHandle mNativeHandle;
 

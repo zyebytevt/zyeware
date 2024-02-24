@@ -228,7 +228,7 @@ package(zyeware.core) static:
         sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
         enforce!CoreException(sApplication, "Failed to create main application.");
 
-        Pal.initialize();
+        Pal.registerDrivers();
 
         Pal.loadAudioDriver(parsedArgs.audioDriver);
         Pal.loadDisplayDriver(parsedArgs.displayDriver);
@@ -242,9 +242,7 @@ package(zyeware.core) static:
 
         enforce!CoreException(sMainDisplay, "Main display creation failed.");
 
-        Pal.graphics.api.initialize();
-        Pal.graphics.Renderer2d.initialize();
-        Pal.audio.initialize();
+        Pal.initializeDrivers();
 
         AudioBus.create("master");
 
@@ -257,9 +255,7 @@ package(zyeware.core) static:
         sMainFramebuffer.destroy();
         sApplication.cleanup();
 
-        Pal.graphics.Renderer2d.cleanup();
-        Pal.graphics.api.cleanup();
-        Pal.audio.cleanup();
+        Pal.cleanupDrivers();
 
         InputMap.cleanup();
         Files.cleanup();

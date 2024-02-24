@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.environment;
+module zyeware.graphics.environment;
 
 import zyeware;
 

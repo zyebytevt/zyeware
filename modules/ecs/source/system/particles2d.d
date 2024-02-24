@@ -7,7 +7,7 @@ import zyeware.ecs;
 
 version (none)  : class Particles2DSystem : System {
 protected:
-    Particles2D mParticles;
+    Particles2d mParticles;
 
     override void tick(EntityManager entities, EventManager events, in FrameTime frameTime) {
         foreach (Entity entity, Transform2DComponent* transform, ParticleEmitter2DComponent* emitter;
@@ -28,6 +28,6 @@ protected:
 
 public:
     this() {
-        mParticles = new Particles2D();
+        mParticles = new Particles2d();
     }
 }

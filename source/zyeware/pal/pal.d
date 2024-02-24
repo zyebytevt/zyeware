@@ -29,7 +29,7 @@ package(zyeware.pal) static:
     alias AudioDriverLoader = void function(ref AudioDriver) nothrow;
 
 package(zyeware) static:
-    void initialize() nothrow {
+    void registerDrivers() nothrow {
         version (ZW_PAL_OPENGL)
             sGraphicsLoaders["opengl"] = &imported!"zyeware.pal.graphics.opengl.init".load;
 
@@ -38,6 +38,18 @@ package(zyeware) static:
 
         version (ZW_PAL_SDL)
             sDisplayLoaders["sdl"] = &imported!"zyeware.pal.display.sdl.init".load;
+    }
+
+    void initializeDrivers() {
+        sGraphics.api.initialize();
+        sGraphics.r2d.initialize();
+        sAudio.initialize();
+    }
+
+    void cleanupDrivers() {
+        sGraphics.api.cleanup();
+        sGraphics.r2d.cleanup();
+        sAudio.cleanup();
     }
 
     void loadGraphicsDriver(string name) nothrow

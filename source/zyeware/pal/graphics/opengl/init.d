@@ -34,14 +34,13 @@ void load(ref GraphicsDriver driver) nothrow {
     driver.api.presentToScreen = &api.presentToScreen;
     driver.api.getTextureFromFramebuffer = &api.getTextureFromFramebuffer;
 
-    driver.renderer2d.initialize = &r2d.initialize;
-    driver.renderer2d.cleanup = &r2d.cleanup;
-    driver.renderer2d.beginScene = &r2d.beginScene;
-    driver.renderer2d.endScene = &r2d.endScene;
-    driver.renderer2d.flush = &r2d.flush;
-    driver.renderer2d.drawVertices = &r2d.drawVertices;
-    driver.renderer2d.drawRectangle = &r2d.drawRectangle;
-    driver.renderer2d.drawString = &r2d.drawString;
-    driver.renderer2d.drawWString = &r2d.drawWString;
-    driver.renderer2d.drawDString = &r2d.drawDString;
+    driver.r2d.initialize = &r2d.initialize;
+    driver.r2d.cleanup = &r2d.cleanup;
+    driver.r2d.begin = &r2d.begin;
+    driver.r2d.end = &r2d.end;
+    driver.r2d.drawVertices = &r2d.drawVertices;
+    driver.r2d.drawRectangle = &r2d.drawRectangle;
+    driver.r2d.drawString = &r2d.drawString;
+    driver.r2d.drawWString = &r2d.drawWString;
+    driver.r2d.drawDString = &r2d.drawDString;
 }

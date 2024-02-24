@@ -3,7 +3,7 @@ version (ZW_PAL_OPENGL)  : import zyeware;
 
 package(zyeware.pal.graphics.opengl):
 
-struct BatchVertex2D {
+struct BatchVertex2d {
     vec4 position;
     vec2 uv;
     color modulate;

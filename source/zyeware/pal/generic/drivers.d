@@ -7,8 +7,10 @@ module zyeware.pal.generic.drivers;
 
 import zyeware;
 
+package(zyeware):
+
 struct AudioDriver {
-public:
+package(zyeware):
     void function() initialize;
     void function() loadLibraries;
     void function() cleanup;
@@ -45,7 +47,7 @@ public:
 }
 
 struct DisplayDriver {
-public:
+package(zyeware):
     NativeHandle function(in DisplayProperties properties, in Display container) createDisplay;
     void function(NativeHandle handle) destroyDisplay;
 
@@ -108,7 +110,7 @@ public:
 }
 
 struct GraphicsDriver {
-public:
+package(zyeware):
     struct Api {
         void function() initialize;
         void function() cleanup;
@@ -146,9 +148,8 @@ public:
     struct Renderer2d {
         void function() initialize;
         void function() cleanup;
-        void function(in mat4 projectionMatrix, in mat4 viewMatrix) beginScene;
-        void function() endScene;
-        void function() flush;
+        void function(in mat4 projectionMatrix, in mat4 viewMatrix) begin;
+        void function() end;
         void function(in Vertex2d[] vertices, in uint[] indices, in mat4 transform, in Texture2d texture, in Material material) drawVertices;
         void function(in rect dimensions, in mat4 transform, in color modulate, in Texture2d texture, in Material material, in rect region) drawRectangle;
         void function(in string text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawString;
@@ -156,13 +157,6 @@ public:
         void function(in dstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawDString;
     }
 
-    struct Renderer3d {
-        void function(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment) beginScene;
-        void function() end;
-        void function(in mat4 transform) submit;
-    }
-
     Api api;
-    Renderer2d renderer2d;
-    Renderer3d renderer3d;
+    Renderer2d r2d;
 }

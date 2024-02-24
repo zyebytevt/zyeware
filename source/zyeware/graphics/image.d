@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.image;
+module zyeware.graphics.image;
 
 import std.string : format;
 import std.exception : enforce;

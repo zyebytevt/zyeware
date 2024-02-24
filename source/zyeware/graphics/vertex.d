@@ -1,4 +1,4 @@
-module zyeware.rendering.vertex;
+module zyeware.graphics.vertex;
 
 import zyeware;
 

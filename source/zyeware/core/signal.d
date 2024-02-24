@@ -31,13 +31,8 @@ private:
         for (size_t i; i < mSlots.length; ++i) {
             auto c = &mSlots[i];
 
-            immutable ptrdiff_t result = c.callback.match!(
-                (T cb) => cb is callback ? i : -1,
-                _ => -1
-            );
-
-            if (result != -1)
-                return result;
+            if (c.callback == SumType!callbacks_t(callback))
+                return i;
         }
 
         return -1;
@@ -69,10 +64,8 @@ public:
             auto c = &mSlots[i];
 
             c.callback.match!(
-                (delegate_nothrow_t dg) => dg(args),
-                (delegate_t dg) => dg(args),
-                (function_nothrow_t fn) => fn(args),
                 (function_t fn) => fn(args),
+                (delegate_t dg) => dg(args),
             );
 
             if (c.isOneShot)

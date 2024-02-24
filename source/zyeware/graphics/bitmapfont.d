@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.bitmapfont;
+module zyeware.graphics.bitmapfont;
 
 import std.traits : isSomeString;
 import std.array : array;

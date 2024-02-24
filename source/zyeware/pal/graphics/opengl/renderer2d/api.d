@@ -22,7 +22,7 @@ enum maxIndicesPerBatch = 30000;
 struct Batch {
     Rebindable!(const Material) material;
 
-    BatchVertex2D[] vertices;
+    BatchVertex2d[] vertices;
     uint[] indices;
     Rebindable!(const Texture2d)[] textures;
 
@@ -46,7 +46,7 @@ struct Batch {
         glBindVertexArray(buffer.vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, currentVertexCount * BatchVertex2D.sizeof, cast(void*) vertices
+        glBufferSubData(GL_ARRAY_BUFFER, 0, currentVertexCount * BatchVertex2d.sizeof, cast(void*) vertices
                 .ptr);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
@@ -125,19 +125,19 @@ void createBuffer(ref GlBuffer buffer) {
 
     glGenBuffers(1, &buffer.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-    glBufferData(GL_ARRAY_BUFFER, maxVerticesPerBatch * BatchVertex2D.sizeof, null, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maxVerticesPerBatch * BatchVertex2d.sizeof, null, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*) BatchVertex2D
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
             .position.offsetof);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*) BatchVertex2D
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
             .uv.offsetof);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*) BatchVertex2D
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
             .modulate.offsetof);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2D.sizeof, cast(void*) BatchVertex2D
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
             .textureIndex.offsetof);
 
     glGenBuffers(1, &buffer.ibo);
@@ -192,7 +192,7 @@ void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color
 }
 
 void initializeBatch(ref Batch batch) {
-    batch.vertices = new BatchVertex2D[maxVerticesPerBatch + 2000];
+    batch.vertices = new BatchVertex2d[maxVerticesPerBatch + 2000];
     batch.indices = new uint[maxIndicesPerBatch + 3000];
     batch.textures = new Rebindable!(const Texture2d)[maxTexturesPerBatch];
 
@@ -234,13 +234,13 @@ void cleanup() {
     }
 }
 
-void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix) {
+void begin(in mat4 projectionMatrix, in mat4 viewMatrix) {
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
     setRenderFlag(RenderFlag.culling, false);
 }
 
-void endScene() {
+void end() {
     flush();
 }
 
@@ -297,7 +297,7 @@ void drawVertices(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
     }
 
     foreach (size_t i, const Vertex2d vertex; vertices)
-        batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(
+        batch.vertices[batch.currentVertexCount + i] = BatchVertex2d(
             transform * vec4(vertex.position, 0, 1), vertex.uv, vertex.modulate, texIdx);
 
     foreach (size_t i, uint index; indices)

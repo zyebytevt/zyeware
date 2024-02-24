@@ -1,4 +1,4 @@
-module zyeware.rendering.cursor;
+module zyeware.graphics.cursor;
 
 import std.conv : to;
 

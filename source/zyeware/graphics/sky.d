@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.sky;
+module zyeware.graphics.sky;
 
 import zyeware;
 

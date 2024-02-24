@@ -1,4 +1,4 @@
-module zyeware.rendering.color;
+module zyeware.graphics.color;
 
 import std.conv : to;
 import std.exception : enforce;
