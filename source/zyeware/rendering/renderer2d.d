@@ -3,17 +3,14 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.renderer2d;
+module zyeware.rendering.Renderer2d;
 
 import std.traits : isSomeString;
-import std.string : lineSplitter;
-import std.typecons : Rebindable;
-import std.exception : enforce;
 
 import zyeware;
 import zyeware.pal.pal;
 
-struct Renderer2D {
+struct Renderer2d {
     @disable this();
     @disable this(this);
 
@@ -35,17 +32,17 @@ public static:
         immutable mat4 projectionMatrix = camera ? camera.getProjectionMatrix() : mat4.orthographic(0, 1, 1, 0, -1, 1);
         immutable mat4 viewMatrix = camera ? camera.getViewMatrix() : mat4.identity;
 
-        Pal.graphics.renderer2d.beginScene(projectionMatrix, viewMatrix);
+        Pal.graphics.Renderer2d.beginScene(projectionMatrix, viewMatrix);
     }
 
     /// Ends batching render commands. Calling this results in all render commands being flushed to the GPU.
     void endScene() {
-        Pal.graphics.renderer2d.endScene();
+        Pal.graphics.Renderer2d.endScene();
     }
 
     /// Flushes all render commands to the GPU.
     void flush() {
-        Pal.graphics.renderer2d.flush();
+        Pal.graphics.Renderer2d.flush();
     }
 
     /// Draws a mesh.
@@ -53,8 +50,8 @@ public static:
     /// Params:
     ///     mesh = The mesh to draw.
     ///     position = 2D transform where to draw the mesh to.
-    void drawMesh(in Mesh2D mesh, in mat4 transform) {
-        Pal.graphics.renderer2d.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh
+    void drawMesh(in Mesh2d mesh, in mat4 transform) {
+        Pal.graphics.Renderer2d.drawVertices(mesh.vertices, mesh.indices, transform, mesh.texture, mesh
                 .material);
     }
 
@@ -72,7 +69,7 @@ public static:
     void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, in color modulate = color(
             "white"),
         in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
-        Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
+        Pal.graphics.Renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
                 * mat4.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
     }
 
@@ -90,7 +87,7 @@ public static:
     pragma(inline, true)
     void drawRectangle(in rect dimensions, in vec2 position, in vec2 scale, float rotation, in color modulate = vec4(1),
         in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
-        Pal.graphics.renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
+        Pal.graphics.Renderer2d.drawRectangle(dimensions, mat4.translation(vec3(position, 0))
                 * mat4.rotation(rotation, vec3(0, 0, 1)) * mat4.scaling(scale.x, scale.y, 1),
             modulate, texture, material, region);
     }
@@ -106,7 +103,7 @@ public static:
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
     void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = vec4(1),
         in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
-        Pal.graphics.renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
+        Pal.graphics.Renderer2d.drawRectangle(dimensions, transform, modulate, texture, material, region);
     }
 
     /// Draws text to the screen.
@@ -124,11 +121,11 @@ public static:
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null)
             if (isSomeString!T) {
         static if (is(T == string))
-            Pal.graphics.renderer2d.drawString(text, font, position, modulate, alignment, material);
+            Pal.graphics.Renderer2d.drawString(text, font, position, modulate, alignment, material);
         else static if (is(T == wstring))
-            Pal.graphics.renderer2d.drawWString(text, font, position, modulate, alignment, material);
+            Pal.graphics.Renderer2d.drawWString(text, font, position, modulate, alignment, material);
         else static if (is(T == dstring))
-            Pal.graphics.renderer2d.drawDString(text, font, position, modulate, alignment, material);
+            Pal.graphics.Renderer2d.drawDString(text, font, position, modulate, alignment, material);
         else
             static assert(false, "Unsupported string type for rendering");
     }

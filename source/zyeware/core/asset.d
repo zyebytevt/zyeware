@@ -37,7 +37,7 @@ struct AssetManager {
 
 private static:
     struct AssetUID {
-        string typeFQN;
+        string typeFqn;
         string path;
     }
 
@@ -48,22 +48,21 @@ private static:
     WeakReference!Object[AssetUID] sCache;
 
     Object load(in AssetUID uid) {
-        LoadFunction* loader = uid.typeFQN in sLoaders;
-        enforce!CoreException(loader, format!"'%s' was not registered as an asset."(uid.typeFQN));
+        LoadFunction* loader = uid.typeFqn in sLoaders;
+        enforce!CoreException(loader, format!"'%s' was not registered as an asset."(uid.typeFqn));
 
-        // Check if we have it cached, and if so, if it's still alive
-        auto weakref = sCache.get(uid, null).assumeWontThrow;
-        if (weakref && weakref.alive)
-            return weakref.target;
+        if (loader.cache) {
+            // Check if we have it cached, and if so, if it's still alive
+            auto weakref = sCache.get(uid, null).assumeWontThrow;
+            if (weakref && weakref.alive)
+                return weakref.target;
+        }
 
         // Otherwise, load asset
-        if (weakref)
-            Logger.core.debug_("Asset '%s' (%s) got collected, reloading...", uid.path, uid.typeFQN);
-        else
-            Logger.core.debug_("Loading asset '%s' (%s)...", uid.path, uid.typeFQN);
+        Logger.core.debug_("Loading asset '%s' (%s)...", uid.path, uid.typeFqn);
 
         Object asset = loader.callback(uid.path);
-        assert(asset, format!"Loader for '%s' returned null!"(uid.typeFQN));
+        assert(asset, format!"Loader for '%s' returned null!"(uid.typeFqn));
 
         if (loader.cache)
             sCache[uid] = weakReference(asset);
@@ -86,16 +85,6 @@ private static:
 
 package(zyeware.core) static:
     void initialize() {
-        import zyeware.rendering.shader : Shader;
-        import zyeware.rendering.texture : Texture2d, TextureCubeMap;
-        import zyeware.rendering.mesh3d : Mesh3d;
-        import zyeware.rendering.bitmapfont : BitmapFont;
-        import zyeware.rendering.material : Material;
-        import zyeware.rendering.frameanim : FrameAnimations;
-        import zyeware.rendering.cursor : Cursor;
-        import zyeware.core.locale : Locale;
-        import zyeware.audio.buffer : AudioBuffer;
-
         register!Shader((path) => cast(Object) Shader.load(path));
         register!Texture2d((path) => cast(Object) Texture2d.load(path));
         register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
@@ -139,9 +128,7 @@ public static:
     void register(T)(LoadCallback callback) if (isAsset!T) {
         import std.traits : getUDAs;
 
-        auto data = getUDAs!(T, asset)[0];
-
-        register(fullyQualifiedName!T, callback, data.cache);
+        register(fullyQualifiedName!T, callback, getUDAs!(T, asset)[0].cache);
     }
 
     /// Unregisters an asset.
@@ -169,7 +156,7 @@ public static:
     void freeAll() {
         foreach (weakref; sCache.values)
             if (weakref.alive)
-                weakref.target.dispose();
+                weakref.target.destroy();
 
         Logger.core.info("Freed all assets.");
     }
@@ -181,7 +168,7 @@ public static:
         foreach (AssetUID key; sCache.keys) {
             if (!sCache[key].alive) {
                 sCache.remove(key).assumeWontThrow;
-                Logger.core.verbose("Uncaching '%s' (%s)...", key.path, key.typeFQN);
+                Logger.core.verbose("Uncaching '%s' (%s)...", key.path, key.typeFqn);
                 ++cleaned;
             }
         }

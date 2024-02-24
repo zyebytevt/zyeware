@@ -36,16 +36,16 @@ public:
     override void draw(in FrameTime nextFrameTime) {
         immutable float seconds = ZyeWare.upTime.toFloatSeconds;
 
-        Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
+        Renderer2d.beginScene(mCamera.projectionMatrix, mat4.identity);
 
-        Renderer2D.drawRectangle(rect(0, 0, 480, 720), vec2(0), vec2(1), color(
+        Renderer2d.drawRectangle(rect(0, 0, 480, 720), vec2(0), vec2(1), color(
                 0.3 + 0.1 * sin(seconds * 2f), 0.38, 0.4));
-        Renderer2D.drawRectangle(rect(0, 0, 480, 149), vec2(0, 250 + sin(seconds) * 30f), vec2(1), color.white, mTitleTexture);
+        Renderer2d.drawRectangle(rect(0, 0, 480, 149), vec2(0, 250 + sin(seconds) * 30f), vec2(1), color.white, mTitleTexture);
 
-        Renderer2D.drawString(tr("Press 'accept' to begin!\nPress 'cancel' to slither back to the main menu.\nArrow keys or controller to move."),
+        Renderer2d.drawString(tr("Press 'accept' to begin!\nPress 'cancel' to slither back to the main menu.\nArrow keys or controller to move."),
             mFont, vec2(240, 600), color.white, Font.Alignment.center);
 
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 
     override void onAttach(bool firstTime) {

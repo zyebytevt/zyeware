@@ -29,11 +29,11 @@ public:
     override void draw(in FrameTime nextFrameTime) {
         Pal.graphicsDriver.clear();
 
-        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
+        Renderer2d.beginScene(mUICamera.projectionMatrix, mat4.identity);
 
         mRoot.draw(nextFrameTime);
 
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 
     override void receive(in Event event) {

@@ -1,24 +1,24 @@
-module zyeware.rendering.mesh2d;
+module zyeware.rendering.Mesh2d;
 
 import zyeware;
 
 @asset(Yes.cache)
-class Mesh2D : Mesh {
+class Mesh2d : Mesh {
 protected:
-    const(Vertex2D[]) mVertices;
+    const(Vertex2d[]) mVertices;
     const(uint[]) mIndices;
     const(Material) mMaterial;
     const(Texture2d) mTexture;
 
 public:
-    this(in Vertex2D[] vertices, in uint[] indices, in Material material, in Texture2d texture) {
+    this(in Vertex2d[] vertices, in uint[] indices, in Material material, in Texture2d texture) {
         mVertices = vertices;
         mIndices = indices;
         mMaterial = material;
         mTexture = texture;
     }
 
-    const(Vertex2D[]) vertices() pure const nothrow {
+    const(Vertex2d[]) vertices() pure const nothrow {
         return mVertices;
     }
 

@@ -38,23 +38,23 @@ public:
 		//mWaveyMaterial = AssetManager.load!Material("res:waveyChild.mtl");
 		mFont = AssetManager.load!BitmapFont("core:fonts/internal.zfnt");
 
-		EventDispatcher.quitRequested += () { ZyeWare.quit(); };
+		ZyeWare.events.quitRequested += () { ZyeWare.quit(); };
 	}
 
 	override void tick() {
 	}
 
 	override void draw() {
-		Renderer2D.clearScreen(color.lime);
+		Renderer2d.clearScreen(color.lime);
 
-		Renderer2D.beginScene(mCamera);
-		//Renderer2D.drawRectangle(rect(60, 60, 100, 100), mat4.identity, color.white, mSprite);
-		//Renderer2D.drawRectangle(rect(120, 60, 200, 200), mat4.identity.rotateX(30), color.white, mSprite);
-		//Renderer2D.drawRectangle(rect(30, 340, 70, 70), mat4.identity, color.white, mSprite);
-		//Renderer2D.drawRectangle(rect(300, 520, 30, 40), mat4.identity, color.white, mSprite);
-		//Renderer2D.drawRectangle(rect(0, 0, 70, 50), mat4.identity, color.white, mSprite, mWaveyMaterial);
+		Renderer2d.beginScene(mCamera);
+		//Renderer2d.drawRectangle(rect(60, 60, 100, 100), mat4.identity, color.white, mSprite);
+		//Renderer2d.drawRectangle(rect(120, 60, 200, 200), mat4.identity.rotateX(30), color.white, mSprite);
+		//Renderer2d.drawRectangle(rect(30, 340, 70, 70), mat4.identity, color.white, mSprite);
+		//Renderer2d.drawRectangle(rect(300, 520, 30, 40), mat4.identity, color.white, mSprite);
+		//Renderer2d.drawRectangle(rect(0, 0, 70, 50), mat4.identity, color.white, mSprite, mWaveyMaterial);
 
-		Renderer2D.drawString("Hello world!", mFont, vec2(0, 0), color.white);
-		Renderer2D.endScene();
+		Renderer2d.drawString("Hello world!", mFont, vec2(0, 0), color.white);
+		Renderer2d.endScene();
 	}
 }

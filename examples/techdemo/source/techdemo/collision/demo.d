@@ -59,20 +59,20 @@ public:
     }
 
     override void draw(in FrameTime nextFrameTime) {
-        Renderer2D.clearScreen(color.black);
+        Renderer2d.clearScreen(color.black);
 
         auto r = rect(-50, -50, 100, 100);
         Collision2D collision = mFirstShape.checkCollision(mFirstTransform.globalMatrix, mSecondShape, mSecondTransform
                 .globalMatrix);
         color c = collision.isColliding ? color(0, 1, 0, 1) : color(1, 0, 0, 1);
 
-        Renderer2D.beginScene(mCamera.projectionMatrix, mat4.identity);
+        Renderer2d.beginScene(mCamera.projectionMatrix, mat4.identity);
 
         DemoMenu.background.draw();
 
-        Renderer2D.drawRectangle(r, mFirstTransform.globalMatrix, c, mCircleTexture);
-        Renderer2D.drawRectangle(r, mSecondTransform.globalMatrix, c);
+        Renderer2d.drawRectangle(r, mFirstTransform.globalMatrix, c, mCircleTexture);
+        Renderer2d.drawRectangle(r, mSecondTransform.globalMatrix, c);
 
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 }

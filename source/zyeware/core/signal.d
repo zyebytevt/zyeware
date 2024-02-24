@@ -109,10 +109,10 @@ unittest {
 
     void function(int x) nothrow function1 = (x) {};
 
-    signal.connect(delegate1);
+    signal += delegate1;
     signal.mSlots.length.should == 1;
 
-    signal.connect(function1);
+    signal += function1;
     signal.mSlots.length.should == 2;
 
     // Emit the signal
@@ -120,25 +120,25 @@ unittest {
     result.should == 20;
 
     // Disconnect the delegate
-    signal.disconnect(delegate1);
+    signal -= delegate1;
     signal.mSlots.length.should == 1;
 
     // Disconnect the function
-    signal.disconnect(function1);
+    signal -= function1;
     signal.mSlots.length.should == 0;
 
     // Connect the delegate and function again
-    signal.connect(delegate1);
-    signal.connect(function1);
+    signal += delegate1;
+    signal += function1;
     signal.mSlots.length.should == 2;
 
     // Reconnecting same delegate and function should throw
-    signal.connect(delegate1).shouldThrow;
-    signal.connect(function1).shouldThrow;
+    signal += delegate1.shouldThrow;
+    signal += function1.shouldThrow;
 
     // Connecting null should throw
-    signal.connect(cast(signal.delegate_t) null).shouldThrow;
-    signal.connect(cast(signal.function_t) null).shouldThrow;
+    signal += cast(signal.delegate_t) null.shouldThrow;
+    signal += cast(signal.function_t) null.shouldThrow;
 
     // Disconnect all
     signal.disconnectAll();

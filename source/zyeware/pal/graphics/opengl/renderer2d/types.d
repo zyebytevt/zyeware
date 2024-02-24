@@ -1,4 +1,4 @@
-module zyeware.pal.graphics.opengl.renderer2d.types;
+module zyeware.pal.graphics.opengl.Renderer2d.types;
 version (ZW_PAL_OPENGL)  : import zyeware;
 
 package(zyeware.pal.graphics.opengl):

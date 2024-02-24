@@ -34,15 +34,15 @@ public:
     }
 
     override void draw(in FrameTime nextFrameTime) {
-        Renderer2D.clearScreen(color.black);
+        Renderer2d.clearScreen(color.black);
 
-        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
-        Renderer2D.drawString(format!"Active particles: %d"(mParticles.count), mFont, vec2(4), color
+        Renderer2d.beginScene(mUICamera.projectionMatrix, mat4.identity);
+        Renderer2d.drawString(format!"Active particles: %d"(mParticles.count), mFont, vec2(4), color
                 .white);
-        Renderer2D.drawString(format!"Draw calls: %d"(Profiler.currentReadData.renderData.drawCalls), mFont, vec2(4, 20), color
+        Renderer2d.drawString(format!"Draw calls: %d"(Profiler.currentReadData.renderData.drawCalls), mFont, vec2(4, 20), color
                 .white);
         mParticles.draw(nextFrameTime);
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 
     override void onAttach(bool firstTime) {

@@ -2,7 +2,7 @@ module zyeware.pal.graphics.opengl.init;
 version (ZW_PAL_OPENGL)  : import zyeware.pal.generic.drivers;
 
 import api = zyeware.pal.graphics.opengl.api.api;
-import r2d = zyeware.pal.graphics.opengl.renderer2d.api;
+import r2d = zyeware.pal.graphics.opengl.Renderer2d.api;
 
 package(zyeware.pal):
 

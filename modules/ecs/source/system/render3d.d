@@ -8,7 +8,7 @@ module zyeware.ecs.system.render3d;
 import zyeware;
 import zyeware.ecs;
 
-version (none)  : /// This system is responsible for rendering all entities with `RenderComponent`s
+version (none)  :  /// This system is responsible for rendering all entities with `RenderComponent`s
 /// to the screen.
 ///
 /// See_Also: RenderComponent
@@ -24,10 +24,10 @@ package:
             texture = AssetManager.load!Texture2d("core:textures/no-camera.png");
         }
 
-        Renderer2D.beginScene(camera.projectionMatrix, mat4.identity);
+        Renderer2d.beginScene(camera.projectionMatrix, mat4.identity);
         if ((ZyeWare.upTime.total!"hnsecs" / 5_000_000) % 2 == 0)
-            Renderer2D.drawRectangle(rect(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), color.white, texture);
-        Renderer2D.endScene();
+            Renderer2d.drawRectangle(rect(-0.5f, -0.5f, 0.5f, 0.5f), vec2(0), vec2(1), color.white, texture);
+        Renderer2d.endScene();
     }
 
 public:
@@ -57,27 +57,27 @@ public:
             return;
         }
 
-        static Renderer3D.Light[Renderer3D.maxLights] lights;
+        static Renderer3d.Light[Renderer3d.maxLights] lights;
         size_t lightPointer = 0;
 
         foreach (Entity entity, Transform3DComponent* transform, LightComponent* light;
             entities.entitiesWith!(Transform3DComponent, LightComponent)) {
-            lights[lightPointer++] = Renderer3D.Light(transform.globalPosition, light.modulate, light
+            lights[lightPointer++] = Renderer3d.Light(transform.globalPosition, light.modulate, light
                     .attenuation);
 
             if (lightPointer == lights.length)
                 break;
         }
 
-        Renderer3D.uploadLights(lights[0 .. lightPointer]);
+        Renderer3d.uploadLights(lights[0 .. lightPointer]);
 
-        Renderer3D.begin(projectionMatrix, cameraTransform.globalMatrix.inverse, environment);
+        Renderer3d.begin(projectionMatrix, cameraTransform.globalMatrix.inverse, environment);
 
         foreach (Entity entity, Transform3DComponent* transform, Render3DComponent* renderable;
             entities.entitiesWith!(Transform3DComponent, Render3DComponent)) {
-            Renderer3D.submit(renderable.renderable, transform.globalMatrix);
+            Renderer3d.submit(renderable.renderable, transform.globalMatrix);
         }
 
-        Renderer3D.end();
+        Renderer3d.end();
     }
 }

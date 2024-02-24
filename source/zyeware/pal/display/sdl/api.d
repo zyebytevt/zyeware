@@ -76,7 +76,7 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow {
             Logger.core.debug_("Added controller '%s' as gamepad #%d.",
                 name ? name.fromStringz : "<No name>", gamepadIndex);
 
-            EventDispatcher.gamepadConnected(gamepadIndex).collectException;
+            ZyeWare.events.gamepadConnected(gamepadIndex).collectException;
         }
     } else
         Logger.core.warning("Failed to add controller: %s.", SDL_GetError().fromStringz);
@@ -102,7 +102,7 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow {
             : "<No name>",
         gamepadIndex);
 
-    EventDispatcher.gamepadDisconnected(gamepadIndex).collectException;
+    ZyeWare.events.gamepadDisconnected(gamepadIndex).collectException;
 }
 
 ptrdiff_t getGamepadIndex(in WindowData* windowData, SDL_GameController* pad) nothrow {
@@ -223,12 +223,12 @@ void update(NativeHandle handle) {
             switch (ev.window.event) {
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 data.size = vec2i(ev.window.data1, ev.window.data2);
-                EventDispatcher.displayResized(data.container, data.size);
+                ZyeWare.events.displayResized(data.container, data.size);
                 break;
 
             case SDL_WINDOWEVENT_MOVED:
                 data.position = vec2i(ev.window.data1, ev.window.data2);
-                EventDispatcher.displayMoved(data.container, data.position);
+                ZyeWare.events.displayMoved(data.container, data.position);
                 break;
 
             default:
@@ -236,16 +236,16 @@ void update(NativeHandle handle) {
             break;
 
         case SDL_QUIT:
-            EventDispatcher.quitRequested();
+            ZyeWare.events.quitRequested();
             break;
 
         case SDL_KEYUP:
-            EventDispatcher.keyboardKeyReleased(cast(KeyCode) ev.key.keysym.scancode);
+            ZyeWare.events.keyboardKeyReleased(cast(KeyCode) ev.key.keysym.scancode);
             break;
 
         case SDL_KEYDOWN:
             if (!ev.key.repeat)
-                EventDispatcher.keyboardKeyPressed(cast(KeyCode) ev.key.keysym.scancode);
+                ZyeWare.events.keyboardKeyPressed(cast(KeyCode) ev.key.keysym.scancode);
             break;
 
         case SDL_TEXTINPUT:
@@ -255,11 +255,11 @@ void update(NativeHandle handle) {
             break;
 
         case SDL_MOUSEBUTTONUP:
-            EventDispatcher.mouseButtonReleased(cast(MouseCode) ev.button.button);
+            ZyeWare.events.mouseButtonReleased(cast(MouseCode) ev.button.button);
             break;
 
         case SDL_MOUSEBUTTONDOWN:
-            EventDispatcher.mouseButtonPressed(cast(MouseCode) ev.button.button, cast(size_t) ev
+            ZyeWare.events.mouseButtonPressed(cast(MouseCode) ev.button.button, cast(size_t) ev
                     .button.clicks);
             break;
 
@@ -268,11 +268,11 @@ void update(NativeHandle handle) {
             if (ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                 amount *= -1;
 
-            EventDispatcher.mouseWheelScrolled(amount);
+            ZyeWare.events.mouseWheelScrolled(amount);
             break;
 
         case SDL_MOUSEMOTION:
-            EventDispatcher.mouseMoved(vec2(ev.motion.x, ev.motion.y),
+            ZyeWare.events.mouseMoved(vec2(ev.motion.x, ev.motion.y),
                 vec2(ev.motion.xrel, ev.motion.yrel));
             break;
 
@@ -331,9 +331,9 @@ void update(NativeHandle handle) {
             }
 
             if (ev.cbutton.state == SDL_PRESSED)
-                EventDispatcher.gamepadButtonPressed(getGamepadIndex(data, ev.cbutton.which), button);
+                ZyeWare.events.gamepadButtonPressed(getGamepadIndex(data, ev.cbutton.which), button);
             else
-                EventDispatcher.gamepadButtonReleased(getGamepadIndex(data, ev.cbutton.which), button);
+                ZyeWare.events.gamepadButtonReleased(getGamepadIndex(data, ev.cbutton.which), button);
             break;
 
         case SDL_CONTROLLERAXISMOTION:
@@ -362,7 +362,7 @@ void update(NativeHandle handle) {
                 break typeSwitch;
             }
 
-            EventDispatcher.gamepadAxisMoved(getGamepadIndex(data, ev.caxis.which), axis,
+            ZyeWare.events.gamepadAxisMoved(getGamepadIndex(data, ev.caxis.which), axis,
                 ev.caxis.value / 32_768f);
             break;
 

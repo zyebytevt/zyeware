@@ -35,25 +35,25 @@ public:
     }
 
     override void draw(in FrameTime nextFrameTime) {
-        Renderer2D.clearScreen(color.black);
+        Renderer2d.clearScreen(color.black);
 
-        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
+        Renderer2d.beginScene(mUICamera.projectionMatrix, mat4.identity);
 
         DemoMenu.background.draw();
 
-        Renderer2D.drawString(tr("GAMEPAD DEMO\nWhile holding 'accept':\n    Press 'cancel' to return to menu.\n"
+        Renderer2d.drawString(tr("GAMEPAD DEMO\nWhile holding 'accept':\n    Press 'cancel' to return to menu.\n"
                 ~ "    Press 'left' or 'right' to change current gamepad index.\n\nCurrent gamepad index: %1$d")
                 .format(mCurrentGamepadIndex), mFont, vec2(4));
 
         for (GamepadButton b = GamepadButton.min; b <= GamepadButton.max; ++b)
-            Renderer2D.drawString(format!"%s: %s"(b, ZyeWare.mainDisplay.isGamepadButtonPressed(mCurrentGamepadIndex, b)),
+            Renderer2d.drawString(format!"%s: %s"(b, ZyeWare.mainDisplay.isGamepadButtonPressed(mCurrentGamepadIndex, b)),
                 mFont, vec2(40, 140 + b * 16));
 
         for (GamepadAxis a = GamepadAxis.min; a <= GamepadAxis.max; ++a)
-            Renderer2D.drawString(format!"%s: %.3f"(a, ZyeWare.mainDisplay.getGamepadAxisValue(mCurrentGamepadIndex, a)),
+            Renderer2d.drawString(format!"%s: %.3f"(a, ZyeWare.mainDisplay.getGamepadAxisValue(mCurrentGamepadIndex, a)),
                 mFont, vec2(300, 140 + a * 16));
 
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 
     override void onAttach(bool firstTime) {

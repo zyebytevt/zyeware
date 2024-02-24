@@ -60,14 +60,14 @@ public:
             }
         }
 
-        Renderer2D.clearScreen(color.black);
+        Renderer2d.clearScreen(color.black);
 
         if (!foundCamera) {
             //Render3DSystem.drawNoCameraSprite();
             return;
         }
 
-        Renderer2D.beginScene(projectionMatrix, cameraTransform.globalMatrix.inverse);
+        Renderer2d.beginScene(projectionMatrix, cameraTransform.globalMatrix.inverse);
 
         foreach (Entity entity, Transform2DComponent* transform, SpriteComponent* sprite;
             entities.entitiesWith!(Transform2DComponent, SpriteComponent)) {
@@ -86,10 +86,10 @@ public:
                 y2 *= -1;
             }
 
-            Renderer2D.drawRectangle(rect(x1, y1, x2, y2), transform.globalMatrix,
+            Renderer2d.drawRectangle(rect(x1, y1, x2, y2), transform.globalMatrix,
                 sprite.modulate, sprite.atlas.texture, sprite.material, sprite.atlas.region);
         }
 
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 }

@@ -110,11 +110,11 @@ unittest {
 
     // Create an Image
     immutable ubyte[] pixels = [0, 0, 0, 255, 255, 255, 255, 255];
-    ubyte channels = 4;
-    ubyte bitsPerChannel = 8;
+    immutable ubyte channels = 4;
+    immutable ubyte bitsPerChannel = 8;
     vec2i size = vec2i(2, 1);
 
-    Image image = new Image(pixels, channels, bitsPerChannel, size);
+    auto image = new Image(pixels, channels, bitsPerChannel, size);
     image.pixels.length.should == 8;
     image.channels.should == 4;
     image.bitsPerChannel.should == 8;

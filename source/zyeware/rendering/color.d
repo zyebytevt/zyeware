@@ -161,8 +161,8 @@ public:
     static immutable yellow = color(1, 1, 0);
     static immutable yellowgreen = color(0.6, 0.8, 0.2);
 
-    vec4 vec;
-    alias vec this;
+    vec4 values;
+    alias values this;
 
     this(string hexcode) pure {
         enforce!GraphicsException(hexcode && hexcode.length > 0, "Invalid hexcode.");
@@ -173,41 +173,41 @@ public:
             enforce!GraphicsException(hexcode.length >= 6, format!"Invalid color hexcode '%s'."(
                     hexcode));
 
-            vec.r = hexcode[0 .. 2].to!ubyte(16) / 255.0;
-            vec.g = hexcode[2 .. 4].to!ubyte(16) / 255.0;
-            vec.b = hexcode[4 .. 6].to!ubyte(16) / 255.0;
-            vec.a = hexcode.length > 6 ? hexcode[6 .. 8].to!ubyte(16) / 255.0 : 1.0;
+            values.r = hexcode[0 .. 2].to!ubyte(16) / 255.0;
+            values.g = hexcode[2 .. 4].to!ubyte(16) / 255.0;
+            values.b = hexcode[4 .. 6].to!ubyte(16) / 255.0;
+            values.a = hexcode.length > 6 ? hexcode[6 .. 8].to!ubyte(16) / 255.0 : 1.0;
         }
     }
 
     this(uint color) @safe pure nothrow @nogc {
-        vec.r = ((color >> 16) & 0xFF) / 255.0;
-        vec.g = ((color >> 8) & 0xFF) / 255.0;
-        vec.b = (color & 0xFF) / 255.0;
-        vec.a = ((color >> 24) & 0xFF) / 255.0;
+        values.r = ((color >> 16) & 0xFF) / 255.0;
+        values.g = ((color >> 8) & 0xFF) / 255.0;
+        values.b = (color & 0xFF) / 255.0;
+        values.a = ((color >> 24) & 0xFF) / 255.0;
     }
 
     this(float r, float g, float b, float a = 1f) @safe pure nothrow @nogc {
-        vec = vec4(r, g, b, a);
+        values = vec4(r, g, b, a);
     }
 
     this(vec4 values) @safe pure nothrow @nogc {
-        vec = values;
+        values = values;
     }
 
     pragma(inline, true)
     color toRgb() const nothrow {
-        return color(hsv2rgb(vec4(vec.x / 360.0f, vec.y, vec.z, vec.w)));
+        return color(hsv2rgb(vec4(values.x / 360.0f, values.y, values.z, values.w)));
     }
 
     pragma(inline, true)
     color toHsv() pure const nothrow {
-        return color(rgb2hsv(vec));
+        return color(rgb2hsv(values));
     }
 
     pragma(inline, true)
     color brighten(float amount) pure const nothrow @nogc {
-        return color(vec.r + amount, vec.g + amount, vec.b + amount, vec.a);
+        return color(values.r + amount, values.g + amount, values.b + amount, values.a);
     }
 
     pragma(inline, true)
@@ -216,7 +216,7 @@ public:
     }
 
     static color lerp(color a, color b, float t) pure nothrow {
-        immutable vec4 result = zyeware.core.math.numeric.lerp(a.vec, b.vec, t);
+        immutable vec4 result = zyeware.core.math.numeric.lerp(a.values, b.values, t);
         return color(result.r, result.g, result.b, result.a);
     }
 }

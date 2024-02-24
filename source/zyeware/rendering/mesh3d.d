@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.mesh3d;
+module zyeware.rendering.Mesh3d;
 
 import std.string : format;
 import std.path : extension;
@@ -33,12 +33,12 @@ protected:
         return u.cross(v);
     }
 
-    static void calculateNormals(ref Vertex3D[] vertices, in uint[] indices) nothrow pure
+    static void calculateNormals(ref Vertex3d[] vertices, in uint[] indices) nothrow pure
     in (vertices, "Vertices cannot be null.")
     in (indices, "Indices cannot be null.") {
         // First, calculate all missing vertex normals
         for (size_t i; i < indices.length; i += 3) {
-            Vertex3D* v1 = &vertices[indices[i]], v2 = &vertices[indices[i + 1]], v3 = &vertices[indices[i + 2]];
+            Vertex3d* v1 = &vertices[indices[i]], v2 = &vertices[indices[i + 1]], v3 = &vertices[indices[i + 2]];
 
             // If one of the vertices already has a normal, continue on
             if (v1.normal != vec3(0) || v2.normal != vec3(0) || v3.normal != vec3(0))
@@ -52,12 +52,12 @@ protected:
         }
 
         // Secondly, normalize all normals
-        foreach (ref Vertex3D v; vertices)
+        foreach (ref Vertex3d v; vertices)
             v.normal = v.normal.normalized;
     }
 
 public:
-    this(in Vertex3D[] vertices, in uint[] indices, in Material material)
+    this(in Vertex3d[] vertices, in uint[] indices, in Material material)
     in (vertices, "Vertices cannot be null.")
     in (indices, "Indices cannot be null.") {
         mNativeHandle = Pal.graphics.api.createMesh(vertices, indices);
@@ -117,7 +117,7 @@ in (path, "Path cannot be null.") {
     vec2[] uvs;
     vec3[] normals;
 
-    Vertex3D[] vertices;
+    Vertex3d[] vertices;
     uint[] indices;
 
     size_t[size_t] positionToVertexIndex;
@@ -221,7 +221,7 @@ in (path, "Path cannot be null.") {
                 if (vertexIdx)
                     indices ~= cast(uint)*vertexIdx;
                 else {
-                    Vertex3D v;
+                    Vertex3d v;
 
                     v.position = positions[posIdx].xyz;
 

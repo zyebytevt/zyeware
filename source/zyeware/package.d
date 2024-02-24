@@ -19,7 +19,6 @@ public {
 
     import zyeware.core.application;
     import zyeware.core.asset;
-    import zyeware.core.dispatcher;
     import zyeware.core.engine;
     import zyeware.core.exception;
     import zyeware.core.inputmap;
@@ -54,11 +53,11 @@ public {
     import zyeware.rendering.framebuffer;
     import zyeware.rendering.image;
     import zyeware.rendering.material;
-    import zyeware.rendering.mesh2d;
-    import zyeware.rendering.mesh3d;
+    import zyeware.rendering.Mesh2d;
+    import zyeware.rendering.Mesh3d;
     import zyeware.rendering.particles2d;
-    import zyeware.rendering.renderer2d;
-    import zyeware.rendering.renderer3d;
+    import zyeware.rendering.Renderer2d;
+    import zyeware.rendering.Renderer3d;
     import zyeware.rendering.shader;
     import zyeware.rendering.texatlas;
     import zyeware.rendering.texture;

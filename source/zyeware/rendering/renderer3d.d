@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.rendering.renderer3d;
+module zyeware.rendering.Renderer3d;
 
 import std.typecons : Rebindable;
 import std.exception : enforce;
@@ -11,7 +11,7 @@ import std.exception : enforce;
 import zyeware;
 import zyeware.pal.pal;
 
-struct Renderer3D {
+struct Renderer3d {
     @disable this();
     @disable this(this);
 
@@ -26,14 +26,14 @@ public static:
     }
 
     void beginScene(in mat4 projectionMatrix, in mat4 viewMatrix, Environment3D environment) {
-        Pal.graphics.renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
+        Pal.graphics.Renderer3d.beginScene(projectionMatrix, viewMatrix, environment);
     }
 
     void end() {
-        Pal.graphics.renderer3d.end();
+        Pal.graphics.Renderer3d.end();
     }
 
     void submit(in mat4 transform) {
-        Pal.graphics.renderer3d.submit(transform);
+        Pal.graphics.Renderer3d.submit(transform);
     }
 }

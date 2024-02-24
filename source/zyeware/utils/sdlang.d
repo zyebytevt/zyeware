@@ -127,8 +127,8 @@ SDLValue marshal(T)(in T value) {
 }
 
 T unmarshal(T)(in SDLValue value) {
-    static if (isSomeString!T || isNumeric!T || isBoolean!T || is(T == SysTime) || is(T == Date) || is(
-            T == Duration))
+    static if (isSomeString!T || isNumeric!T || isBoolean!T || is(T == SysTime) || is(T == Date)
+        || is(T == Duration))
         return cast(T) value;
     else static if (is(T == color)) {
         if (value.isText)

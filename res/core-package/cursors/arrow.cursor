@@ -1,2 +1,2 @@
 image "core:textures/default-cursor/arrow.png"
-hotspot x=5 y=5
+hotspot (5, 5)

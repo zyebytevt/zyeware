@@ -171,7 +171,7 @@ void initialize() {
 void cleanup() {
 }
 
-NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices) {
+NativeHandle createMesh(in Vertex3d[] vertices, in uint[] indices) {
     auto data = new MeshData;
 
     glGenVertexArrays(1, &data.vao);
@@ -181,7 +181,7 @@ NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices) {
     glBindVertexArray(data.vao);
     glBindBuffer(GL_ARRAY_BUFFER, data.vbo);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.length * Vertex3D.sizeof, &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.length * Vertex3d.sizeof, &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.length * uint.sizeof,
@@ -189,19 +189,19 @@ NativeHandle createMesh(in Vertex3D[] vertices, in uint[] indices) {
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
             .position.offsetof);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
             .normal.offsetof);
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
             .uv.offsetof);
     // vertex modulate
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3D.sizeof, cast(void*) Vertex3D
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
             .modulate.offsetof);
 
     glBindVertexArray(0);

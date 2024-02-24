@@ -135,9 +135,6 @@ public:
 
     static BitmapFont load(string path)
     in (path, "Path cannot be null.") {
-        import std.zlib : uncompress;
-        import std.bitmanip : read;
-
         File sourceFile = Files.open(path);
         scope (exit)
             sourceFile.close();

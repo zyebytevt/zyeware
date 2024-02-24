@@ -1,4 +1,4 @@
-module zyeware.pal.graphics.opengl.renderer2d.api;
+module zyeware.pal.graphics.opengl.Renderer2d.api;
 version (ZW_PAL_OPENGL)  : import std.traits : isSomeString;
 import std.string : lineSplitter;
 import std.typecons : Rebindable;
@@ -10,7 +10,7 @@ import zyeware;
 import zyeware.pal.generic.types.graphics;
 
 import zyeware.pal.graphics.opengl.api.api;
-import zyeware.pal.graphics.opengl.renderer2d.types;
+import zyeware.pal.graphics.opengl.Renderer2d.types;
 
 package(zyeware.pal.graphics.opengl):
 
@@ -205,7 +205,7 @@ void initialize() {
         createBuffer(pRenderBuffers[i]);
 
     // To circumvent a bug in MacOS builds that require a VAO to be bound before validating a
-    // shader program in OpenGL. Due to Renderer2D being initialized early during the
+    // shader program in OpenGL. Due to Renderer2d being initialized early during the
     // engines lifetime, this should fix all further shader loadings.
     glBindVertexArray(pRenderBuffers[0].vao);
 
@@ -260,7 +260,7 @@ void flush() {
     currentMaterialCount = 0;
 }
 
-void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
+void drawVertices(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
     in Texture2d texture = null, in Material material = null) {
     const(Material) mat = material ? material : pDefaultMaterial;
 
@@ -296,7 +296,7 @@ void drawVertices(in Vertex2D[] vertices, in uint[] indices, in mat4 transform,
         texIdx = cast(float) idx;
     }
 
-    foreach (size_t i, const Vertex2D vertex; vertices)
+    foreach (size_t i, const Vertex2d vertex; vertices)
         batch.vertices[batch.currentVertexCount + i] = BatchVertex2D(
             transform * vec4(vertex.position, 0, 1), vertex.uv, vertex.modulate, texIdx);
 
@@ -321,11 +321,11 @@ void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = ve
     quadUVs[2] = vec2(region.x + region.width, region.y + region.height);
     quadUVs[3] = vec2(region.x, region.y + region.height);
 
-    static Vertex2D[4] vertices;
+    static Vertex2d[4] vertices;
     static uint[6] indices;
 
     for (size_t i; i < 4; ++i)
-        vertices[i] = Vertex2D(quadPositions[i], quadUVs[i], modulate);
+        vertices[i] = Vertex2d(quadPositions[i], quadUVs[i], modulate);
 
     indices[0] = 2;
     indices[1] = 1;

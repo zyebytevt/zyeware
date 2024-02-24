@@ -86,7 +86,7 @@ public:
             else
                 modulate = mCursor == i ? color.yellow : color.white;
 
-            Renderer2D.drawString(mEntries[i].text, mFont, topCenterPos + vec2(0, i * mFont.bmFont.common.lineHeight + 4), modulate, Font
+            Renderer2d.drawString(mEntries[i].text, mFont, topCenterPos + vec2(0, i * mFont.bmFont.common.lineHeight + 4), modulate, Font
                     .Alignment.center);
         }
     }

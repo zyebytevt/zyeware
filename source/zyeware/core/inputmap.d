@@ -168,23 +168,23 @@ private static:
 
 package(zyeware.core) static:
     void initialize() @safe {
-        EventDispatcher.keyboardKeyPressed.connect(&onKeyboardKeyPressed);
-        EventDispatcher.keyboardKeyReleased.connect(&onKeyboardKeyReleased);
-        EventDispatcher.mouseButtonPressed.connect(&onMouseButtonPressed);
-        EventDispatcher.mouseButtonReleased.connect(&onMouseButtonReleased);
-        EventDispatcher.gamepadButtonPressed.connect(&onGamepadButtonPressed);
-        EventDispatcher.gamepadButtonReleased.connect(&onGamepadButtonReleased);
-        EventDispatcher.gamepadAxisMoved.connect(&onGamepadAxisMoved);
+        ZyeWare.events.keyboardKeyPressed += &onKeyboardKeyPressed;
+        ZyeWare.events.keyboardKeyReleased += &onKeyboardKeyReleased;
+        ZyeWare.events.mouseButtonPressed += &onMouseButtonPressed;
+        ZyeWare.events.mouseButtonReleased += &onMouseButtonReleased;
+        ZyeWare.events.gamepadButtonPressed += &onGamepadButtonPressed;
+        ZyeWare.events.gamepadButtonReleased += &onGamepadButtonReleased;
+        ZyeWare.events.gamepadAxisMoved += &onGamepadAxisMoved;
     }
 
     void cleanup() @safe nothrow {
-        EventDispatcher.keyboardKeyPressed.disconnect(&onKeyboardKeyPressed);
-        EventDispatcher.keyboardKeyReleased.disconnect(&onKeyboardKeyReleased);
-        EventDispatcher.mouseButtonPressed.disconnect(&onMouseButtonPressed);
-        EventDispatcher.mouseButtonReleased.disconnect(&onMouseButtonReleased);
-        EventDispatcher.gamepadButtonPressed.disconnect(&onGamepadButtonPressed);
-        EventDispatcher.gamepadButtonReleased.disconnect(&onGamepadButtonReleased);
-        EventDispatcher.gamepadAxisMoved.disconnect(&onGamepadAxisMoved);
+        ZyeWare.events.keyboardKeyPressed -= &onKeyboardKeyPressed;
+        ZyeWare.events.keyboardKeyReleased -= &onKeyboardKeyReleased;
+        ZyeWare.events.mouseButtonPressed -= &onMouseButtonPressed;
+        ZyeWare.events.mouseButtonReleased -= &onMouseButtonReleased;
+        ZyeWare.events.gamepadButtonPressed -= &onGamepadButtonPressed;
+        ZyeWare.events.gamepadButtonReleased -= &onGamepadButtonReleased;
+        ZyeWare.events.gamepadAxisMoved -= &onGamepadAxisMoved;
     }
 
 public static:

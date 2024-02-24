@@ -21,7 +21,7 @@ protected:
     Mesh mCurrentMesh;
     size_t mCurrentMeshIndex;
     mat4 mViewMatrix;
-    Renderer3D.Light[] mLights;
+    Renderer3d.Light[] mLights;
     float mCameraPhi = PI / 2f, mCameraTheta = 0f, mCameraDistance = 5f;
     bool mShouldMoveCamera = false;
 
@@ -84,17 +84,17 @@ public:
         if (!material)
             material = AssetManager.load!Material("core:materials/default.mtl");
 
-        Renderer3D.uploadLights(mLights);
-        Renderer3D.begin(mWorldCamera.projectionMatrix, mViewMatrix, mEnvironment);
+        Renderer3d.uploadLights(mLights);
+        Renderer3d.begin(mWorldCamera.projectionMatrix, mViewMatrix, mEnvironment);
 
-        Renderer3D.submit(mCurrentMesh.bufferGroup, material, mat4.identity);
-        Renderer3D.end();
+        Renderer3d.submit(mCurrentMesh.bufferGroup, material, mat4.identity);
+        Renderer3d.end();
 
-        Renderer2D.beginScene(mUICamera.projectionMatrix, mat4.identity);
-        Renderer2D.drawString(tr("MESH VIEW DEMO\nPress 'left' and 'right' to change mesh.\nClick and drag or use left analog stick to move camera.\nScroll or use right analog stick to zoom in or out."),
+        Renderer2d.beginScene(mUICamera.projectionMatrix, mat4.identity);
+        Renderer2d.drawString(tr("MESH VIEW DEMO\nPress 'left' and 'right' to change mesh.\nClick and drag or use left analog stick to move camera.\nScroll or use right analog stick to zoom in or out."),
             mFont, vec2(4));
 
-        Renderer2D.endScene();
+        Renderer2d.endScene();
     }
 
     override void onAttach(bool firstTime) {
@@ -114,8 +114,8 @@ public:
                     "res:terraindemo/skybox/skybox.cube"));
             mEnvironment.ambientColor = color.black;
 
-            mLights ~= Renderer3D.Light(vec3(-5, 2, -5), color.white, vec3(1, 0.005, 0.001));
-            mLights ~= Renderer3D.Light(vec3(5, -1, 5), color.gray, vec3(1, 0.01, 0.002));
+            mLights ~= Renderer3d.Light(vec3(-5, 2, -5), color.white, vec3(1, 0.005, 0.001));
+            mLights ~= Renderer3d.Light(vec3(5, -1, 5), color.gray, vec3(1, 0.01, 0.002));
         }
     }
 

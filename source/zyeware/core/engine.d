@@ -48,6 +48,26 @@ struct Version {
     }
 }
 
+struct Events {
+    @disable this(this);
+
+public:
+    Signal!() quitRequested;
+    Signal!(const Display, vec2i) displayResized;
+    Signal!(const Display, vec2i) displayMoved;
+    Signal!(KeyCode) keyboardKeyPressed;
+    Signal!(KeyCode) keyboardKeyReleased;
+    Signal!(MouseCode, size_t) mouseButtonPressed;
+    Signal!(MouseCode) mouseButtonReleased;
+    Signal!(vec2) mouseWheelScrolled;
+    Signal!(vec2, vec2) mouseMoved;
+    Signal!(GamepadIndex) gamepadConnected;
+    Signal!(GamepadIndex) gamepadDisconnected;
+    Signal!(GamepadIndex, GamepadButton) gamepadButtonPressed;
+    Signal!(GamepadIndex, GamepadButton) gamepadButtonReleased;
+    Signal!(GamepadIndex, GamepadAxis, float) gamepadAxisMoved;
+}
+
 alias stringz = const(char)*;
 
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
@@ -102,11 +122,9 @@ private static:
 
             // Call all registered deferred functions at the end of the frame.
             {
-                debug {
-                    sIsProcessingDeferred = true;
-                    scope (exit)
-                        sIsProcessingDeferred = false;
-                }
+                sIsProcessingDeferred = true;
+                scope (exit)
+                    sIsProcessingDeferred = false;
 
                 for (size_t i; i < sDeferredFunctions.length; ++i) {
                     // After invoking set to null so that no references keep lingering.
@@ -225,7 +243,7 @@ package(zyeware.core) static:
         enforce!CoreException(sMainDisplay, "Main display creation failed.");
 
         Pal.graphics.api.initialize();
-        Pal.graphics.renderer2d.initialize();
+        Pal.graphics.Renderer2d.initialize();
         Pal.audio.initialize();
 
         AudioBus.create("master");
@@ -239,7 +257,7 @@ package(zyeware.core) static:
         sMainFramebuffer.destroy();
         sApplication.cleanup();
 
-        Pal.graphics.renderer2d.cleanup();
+        Pal.graphics.Renderer2d.cleanup();
         Pal.graphics.api.cleanup();
         Pal.audio.cleanup();
 
@@ -260,6 +278,8 @@ package(zyeware.core) static:
 public static:
     /// The current version of the engine.
     immutable Version engineVersion = Version(0, 6, 0, "alpha");
+
+    Events events;
 
     /// Stops the main loop and quits the engine.
     void quit() nothrow {

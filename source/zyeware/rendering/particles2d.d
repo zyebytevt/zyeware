@@ -84,7 +84,7 @@ public:
                 if (isNaN(modulate.r) || isNaN(modulate.g) || isNaN(modulate.b) || isNaN(modulate.a))
                     modulate = color("white");
 
-                Renderer2D.drawRectangle(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
+                Renderer2d.drawRectangle(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
                     modulate, particles.type.texture);
             }
         }
