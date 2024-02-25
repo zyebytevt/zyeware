@@ -13,6 +13,10 @@ private:
     size_t mHFrames, mVFrames;
 
 public:
+    this(string path, size_t hFrames, size_t vFrames) {
+        this(AssetManager.load!Texture2d(path), hFrames, vFrames);
+    }
+
     this(Texture2d texture, size_t hFrames, size_t vFrames) pure nothrow {
         mTexture = texture;
         mHFrames = hFrames;

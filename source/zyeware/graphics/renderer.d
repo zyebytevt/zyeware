@@ -6,11 +6,15 @@
 module zyeware.graphics.renderer;
 
 import std.traits : isSomeString;
+import std.typecons : Rebindable;
 
 import zyeware;
 import zyeware.pal.pal;
 
 struct Renderer {
+private static:
+    Rebindable!(const Camera) mActiveCamera;
+
 public static:
     /// Clears the screen.
     ///
@@ -25,11 +29,12 @@ public static:
     ///
     /// Params:
     ///     camera = The camera to use. If `null`, uses a default projection.
-    pragma(inline, true)
-    void begin2d(in Camera camera) {
+    void begin2d(in Camera camera)
+    in (!mActiveCamera, "A 2D render batch is already active. Call `end2d` before starting a new batch.") {
         immutable mat4 projectionMatrix = camera ? camera.getProjectionMatrix() : mat4.orthographic(0, 1, 1, 0, -1, 1);
         immutable mat4 viewMatrix = camera ? camera.getViewMatrix() : mat4.identity;
 
+        mActiveCamera = camera;
         Pal.graphics.r2d.begin(projectionMatrix, viewMatrix);
     }
 
@@ -37,6 +42,7 @@ public static:
     pragma(inline, true)
     void end2d() {
         Pal.graphics.r2d.end();
+        mActiveCamera = null;
     }
 
     /// Draws a mesh.
@@ -128,4 +134,6 @@ public static:
         else
             static assert(false, "Unsupported string type for rendering");
     }
+
+    static const(Camera) activeCamera() nothrow @nogc => mActiveCamera;
 }
