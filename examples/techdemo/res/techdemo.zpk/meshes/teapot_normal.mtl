@@ -1,5 +1,0 @@
-extends "core:materials/default.mtl"
-
-parameters {
-    reflectivity 1.0
-}

@@ -1,4 +1,0 @@
-opengl {
-    vertex "res:shaders/glsl/teapot.vert.glsl"
-    fragment "res:shaders/glsl/teapot.frag.glsl"
-}
