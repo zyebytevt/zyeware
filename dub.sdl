@@ -16,8 +16,6 @@ targetPath "out"
 workingDirectory "out"
 
 subPackage "modules/ecs"
-subPackage "examples/techdemo"
-subPackage "tools/zpklink"
 
 subPackage "libraries/zyfont"
 subPackage "libraries/crashhandler"
