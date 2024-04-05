@@ -1,0 +1,6 @@
+name "thinker"
+description "Thinker module for ZyeWare"
+authors "ZyeByte"
+copyright "Copyright © 2024, ZyeByte"
+license "LGPL-3.0"
+targetType "sourceLibrary"
