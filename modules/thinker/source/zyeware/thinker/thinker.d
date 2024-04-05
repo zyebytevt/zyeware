@@ -18,7 +18,7 @@ private:
 public:
     abstract void tick();
 
-    void free() {
+    void free() @safe pure nothrow {
         mIsFreeQueued = true;
     }
 

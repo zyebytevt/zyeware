@@ -16,6 +16,7 @@ targetPath "out"
 workingDirectory "out"
 
 subPackage "modules/ecs"
+subPackage "modules/thinker"
 
 subPackage "libraries/zyfont"
 subPackage "libraries/crashhandler"

@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.ecs.appstate;
+module zyeware.ecs.gamestate;
 
 import zyeware;
 import zyeware.ecs;
