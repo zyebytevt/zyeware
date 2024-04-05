@@ -30,7 +30,7 @@ __gshared SourceData*[] pSources;
 
 // This function is essentially noGC, but it's not marked as such because the array
 // is initialized the first time the function is called.
-size_t readShortsFromDecoder(ref AudioStream decoder, ref short[] buffer)
+size_t readShortsFromDecoder(ref AudioStream decoder, ref short[] buffer) nothrow
 in (decoder.isOpenForReading(), "Tried to decode while decoder is not open for reading.") {
     static float[] readBuffer;
     if (!readBuffer)
@@ -101,7 +101,6 @@ void loadLibraries() {
 
 void cleanup() {
     pAudioThread.stop();
-    pAudioThread.join();
 
     alcCloseDevice(pDevice);
 
@@ -165,7 +164,7 @@ void freeBus(NativeHandle handle) {
     destroy(bus);
 }
 
-void setBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint) {
+void setBufferLoopPoint(NativeHandle handle, in LoopPoint loopPoint) nothrow {
     auto buffer = cast(BufferData*) handle;
 
     buffer.loopPoint = loopPoint;
@@ -186,18 +185,17 @@ void setSourceBuffer(NativeHandle sourceHandle, in NativeHandle bufferHandle) {
     source.bufferData = cast(BufferData*) bufferHandle;
 
     source.decoder.openFromMemory(source.bufferData.encodedMemory);
-    if (source.decoder.isError)
-        throw new AudioException(source.decoder.errorMessage);
+    enforce!AudioException(source.decoder.isError, source.decoder.errorMessage);
 }
 
-void setSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle) {
+void setSourceBus(NativeHandle sourceHandle, in NativeHandle busHandle) nothrow {
     auto source = cast(SourceData*) sourceHandle;
     auto bus = cast(const(BusData*)) busHandle;
 
     source.bus = bus;
 }
 
-void playSource(NativeHandle handle) {
+void playSource(NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     if (source.state == SourceState.playing)
@@ -221,7 +219,7 @@ void playSource(NativeHandle handle) {
     alSourcePlay(source.id);
 }
 
-void pauseSource(NativeHandle handle) {
+void pauseSource(NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     if (source.state != SourceState.playing)
@@ -231,7 +229,7 @@ void pauseSource(NativeHandle handle) {
     alSourcePause(source.id);
 }
 
-void stopSource(NativeHandle handle) {
+void stopSource(NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     if (source.state == SourceState.stopped)
@@ -252,7 +250,7 @@ void stopSource(NativeHandle handle) {
     }
 }
 
-void updateSourceBuffers(NativeHandle handle) {
+void updateSourceBuffers(NativeHandle handle) nothrow {
     auto source = cast(SourceData*) handle;
 
     if (source.state != SourceState.playing)

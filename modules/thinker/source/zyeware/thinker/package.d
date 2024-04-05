@@ -2,11 +2,12 @@
 // and conditions defined in the file 'LICENSE.txt', which is part
 // of this source code package.
 //
-// Copyright 2021 ZyeByte
+// Copyright 2024 ZyeByte
 module zyeware.thinker;
 
 public {
-    import zyeware.thinker.interfaces;
     import zyeware.thinker.manager;
     import zyeware.thinker.thinker;
+    import zyeware.thinker.fiber;
+    import zyeware.thinker.fsm;
 }

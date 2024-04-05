@@ -14,7 +14,7 @@ import std.exception : enforce, assumeWontThrow, collectException;
 import std.string : format, fromStringz, toStringz;
 import std.typecons : scoped, Rebindable;
 import std.datetime : Duration, dur;
-import std.algorithm : min;
+import std.algorithm : min, remove;
 
 import zyeware;
 import zyeware.core.project;
@@ -76,7 +76,12 @@ struct ZyeWare {
     @disable this(this);
 
 private static:
-    alias DeferCallable = void delegate();
+    struct TimeoutEntry {
+        Duration duration;
+        Duration expiresAt;
+        void delegate() callback;
+        bool repeating;
+    }
 
     Display sMainDisplay;
     Application sApplication;
@@ -93,11 +98,10 @@ private static:
 
     Rebindable!(const ProjectProperties) sProjectProperties;
 
-    DeferCallable[] sDeferredFunctions;
+    TimeoutEntry[32] sTimeouts;
 
     bool sRunning;
     float sTimeScale = 1f;
-    bool sIsProcessingDeferred;
 
     void runMainLoop() {
         MonoTime previous = MonoTime.currTime;
@@ -120,18 +124,19 @@ private static:
 
             drawFramebuffer();
 
-            // Call all registered deferred functions at the end of the frame.
-            {
-                sIsProcessingDeferred = true;
-                scope (exit)
-                    sIsProcessingDeferred = false;
+            // Check timeouts.
+            for (size_t i; i < sTimeouts.length; ++i) {
+                auto entry = &sTimeouts[i];
 
-                for (size_t i; i < sDeferredFunctions.length; ++i) {
-                    // After invoking set to null so that no references keep lingering.
-                    sDeferredFunctions[i]();
-                    sDeferredFunctions[i] = null;
+                if (entry.callback && entry.expiresAt <= upTime) {
+                    entry.callback();
+
+                    if (entry.repeating) {
+                        entry.expiresAt = upTime + entry.duration;
+                    } else {
+                        entry.callback = null;
+                    }
                 }
-                sDeferredFunctions.length = 0;
             }
 
             // Wait until the target frame rate is reached.
@@ -221,8 +226,9 @@ package(zyeware.core) static:
         InputMap.initialize();
 
         Files.addPackage("main.zpk");
-        foreach (string pckPath; parsedArgs.packages)
+        foreach (string pckPath; parsedArgs.packages) {
             Files.addPackage(pckPath);
+        }
 
         sProjectProperties = projectProperties;
         sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
@@ -247,6 +253,11 @@ package(zyeware.core) static:
         AudioBus.create("master");
 
         createFramebuffer();
+
+        events.displayResized += (const Display display, vec2i size) {
+            sMustUpdateFramebufferDimensions = true;
+        };
+
         sApplication.initialize();
     }
 
@@ -306,14 +317,26 @@ public static:
         framebufferSize = vec2i(size);
     }
 
-    /// Registers a callback to be called at the very end of a frame.
-    ///
-    /// Params:
-    ///     func = The deferred callback.
-    void callDeferred(DeferCallable func) {
-        enforce!CoreException(!sIsProcessingDeferred, "Cannot defer calls while processing deferred calls!");
+    void setTimeout(Duration duration, void delegate() callback,
+        Flag!"repeating" repeating = No.repeating)
+    in (callback, "Callback cannot be null.") {
+        for (size_t i; i < sTimeouts.length; ++i) {
+            if (!sTimeouts[i].callback) {
+                sTimeouts[i] = TimeoutEntry(duration, upTime + duration, callback, repeating);
+                return;
+            }
+        }
 
-        sDeferredFunctions ~= func;
+        throw new CoreException("Cannot set more than " ~ sTimeouts.length ~ " timeouts at once.");
+    }
+
+    void clearTimeout(void delegate() callback) {
+        for (size_t i; i < sTimeouts.length; ++i) {
+            if (sTimeouts[i].callback is callback) {
+                sTimeouts[i].callback = null;
+                return;
+            }
+        }
     }
 
     /// The current application.
@@ -321,7 +344,7 @@ public static:
 
     /// Sets the current application. It will only be set active after the current frame.
     void application(Application value) {
-        callDeferred(() {
+        setTimeout(Duration.zero, {
             if (sApplication)
                 sApplication.cleanup();
 
@@ -414,13 +437,5 @@ public static:
     /// See_Also: ProjectProperties
     const(ProjectProperties) projectProperties() nothrow @nogc {
         return sProjectProperties;
-    }
-
-    debug {
-        /// If the engine is currently processing deferred calls.
-        /// **This method is only available in debug builds!**
-        bool isProcessingDeferred() nothrow {
-            return sIsProcessingDeferred;
-        }
     }
 }

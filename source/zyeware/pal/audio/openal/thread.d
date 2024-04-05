@@ -4,7 +4,9 @@
 //
 // Copyright 2021 ZyeByte
 module zyeware.pal.audio.openal.thread;
-version (ZW_PAL_OPENAL)  : import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
+version (ZW_PAL_OPENAL)  :  //import core.thread : Thread, Duration, msecs, thread_detachThis, rt_moduleTlsDtor;
+
+import core.thread;
 
 import zyeware;
 import zyeware.pal.audio.openal.api : audioBufferCount, audioBufferSize, updateSourceBuffers, pSources;
@@ -12,17 +14,12 @@ import zyeware.pal.audio.openal.types;
 
 package:
 
-class AudioThread : Thread {
+class AudioThread {
 protected:
+    ThreadID mThreadID;
     bool mIsRunning;
 
-    void run() {
-        mIsRunning = true;
-
-        thread_detachThis();
-        scope (exit)
-            rt_moduleTlsDtor();
-
+    void run() nothrow {
         // Determine the sleep time between updating the buffers.
         // YukieVT supplied the following formula for this:
         //     (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
@@ -31,20 +28,23 @@ protected:
         immutable Duration waitTime = msecs(audioBufferSize / audioBufferCount / 44_100 / 2 * 1000);
 
         while (mIsRunning) {
-            foreach (SourceData* sourceData; pSources)
+            foreach (SourceData* sourceData; pSources) {
                 updateSourceBuffers(sourceData);
+            }
 
             Thread.sleep(waitTime);
         }
     }
 
 public:
-    this() {
-        super(&run);
+    void start() {
+        mIsRunning = true;
+        mThreadID = createLowLevelThread(&run);
+        enforce!AudioException(mThreadID != ThreadID.init, "Failed to create audio thread.");
     }
 
     void stop() {
         mIsRunning = false;
-        join();
+        joinLowLevelThread(mThreadID);
     }
 }

@@ -3,6 +3,7 @@ module zyeware.graphics.frameanim;
 import std.datetime : dur, Duration;
 import std.conv : to;
 import std.exception : enforce;
+import std.algorithm : reduce;
 
 import zyeware;
 
@@ -15,6 +16,8 @@ public:
     struct Frame {
         size_t index;
         Duration duration;
+        bool hFlip; /// If the frame is horizontally flipped.
+        bool vFlip; /// If the frame is vertically flipped.
     }
 
     /// Represents a single animation.
@@ -22,15 +25,9 @@ public:
         string name;
         Frame[] frames;
         bool isLooping; /// If the animation should loop after the last frame.
-        bool hFlip; /// If the animation is horizontally flipped.
-        bool vFlip; /// If the animation is vertically flipped.
 
-        Duration duration() pure const nothrow {
-            auto totalDuration = Duration.zero;
-            foreach (ref frame; frames)
-                totalDuration += frame.duration;
-            return totalDuration;
-        }
+        Duration duration() @safe pure const nothrow => reduce!((Duration acc, Frame frame) => acc + frame
+                .duration)(Duration.zero, frames);
     }
 
     /// Adds an animation.
@@ -38,7 +35,7 @@ public:
     /// Params:
     ///     name = The name of the animation to add.
     ///     animation = The animation to add.
-    void addAnimation(string name, Animation animation) pure nothrow
+    void addAnimation(string name, Animation animation) @safe pure nothrow
     in (name, "Name cannot be null.") {
         mAnimations[name] = animation;
         mAnimations[name].name = name;
@@ -48,7 +45,7 @@ public:
     ///
     /// Params:
     ///     name = The name of the animation to remove.
-    void removeAnimation(string name) pure nothrow
+    void removeAnimation(string name) @safe pure nothrow
     in (name, "Name cannot be null.") {
         mAnimations.remove(name);
     }
@@ -58,7 +55,7 @@ public:
     /// Params:
     ///     name = The name of the animation to return.
     /// Returns: Pointer to the animation if found, `null` otherwise.
-    Animation* getAnimation(string name) pure
+    Animation* getAnimation(string name) @safe pure nothrow
     in (name, "Name cannot be null.") {
         return name in mAnimations;
     }
@@ -77,13 +74,11 @@ public:
             immutable string animationName = node.name;
 
             animation.isLooping = node.getAttributeValue!bool("loop", false);
-            animation.hFlip = node.getAttributeValue!bool("hflip", false);
-            animation.vFlip = node.getAttributeValue!bool("vflip", false);
 
             for (size_t j; j < node.children.length; ++j) {
                 SDLNode* frameNode = &node.children[j];
 
-                size_t startFrame, endFrame, durationMsecs;
+                size_t startFrame, endFrame;
 
                 if (frameNode.name == "frame") {
                     startFrame = cast(size_t) frameNode.getValue!int();
@@ -94,14 +89,16 @@ public:
                 } else
                     throw new Exception("Invalid frame node name: " ~ frameNode.name);
 
-                durationMsecs = frameNode.expectAttributeValue!size_t("msecs");
+                immutable durationMsecs = frameNode.expectAttributeValue!size_t("msecs");
+                immutable hFlip = frameNode.getAttributeValue!bool("hflip", false);
+                immutable vFlip = frameNode.getAttributeValue!bool("vflip", false);
 
                 if (endFrame >= startFrame) {
                     for (size_t k = startFrame; k <= endFrame; k++)
-                        animation.frames ~= Frame(k, dur!"msecs"(durationMsecs));
+                        animation.frames ~= Frame(k, dur!"msecs"(durationMsecs), hFlip, vFlip);
                 } else {
                     for (size_t k = startFrame; k >= endFrame; k--)
-                        animation.frames ~= Frame(k, dur!"msecs"(durationMsecs));
+                        animation.frames ~= Frame(k, dur!"msecs"(durationMsecs), hFlip, vFlip);
                 }
             }
 

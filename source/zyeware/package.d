@@ -28,6 +28,7 @@ public {
     import zyeware.core.random;
     import zyeware.core.signal;
     import zyeware.core.project;
+    import zyeware.core.fsm;
 
     import zyeware.core.logger;
 
@@ -60,6 +61,7 @@ public {
     import zyeware.graphics.texture;
     import zyeware.graphics.vertex;
     import zyeware.graphics.renderer;
+    import zyeware.graphics.sprite;
 
     import zyeware.utils.codes;
     import zyeware.utils.collection;

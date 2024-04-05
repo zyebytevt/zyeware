@@ -62,15 +62,15 @@ public:
         Pal.graphics.api.freeTexture2D(mNativeHandle);
     }
 
-    const(TextureProperties) properties() pure const nothrow {
+    const(TextureProperties) properties() @safe pure const nothrow {
         return mProperties;
     }
 
-    const(NativeHandle) handle() pure const nothrow {
+    const(NativeHandle) handle() @safe pure const nothrow {
         return mNativeHandle;
     }
 
-    const(vec2i) size() pure const nothrow {
+    const(vec2i) size() @safe pure const nothrow {
         return mSize;
     }
 

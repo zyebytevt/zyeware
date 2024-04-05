@@ -17,13 +17,13 @@ public:
         this(AssetManager.load!Texture2d(path), hFrames, vFrames);
     }
 
-    this(Texture2d texture, size_t hFrames, size_t vFrames) pure nothrow {
+    this(Texture2d texture, size_t hFrames, size_t vFrames) @safe pure nothrow {
         mTexture = texture;
         mHFrames = hFrames;
         mVFrames = vFrames;
     }
 
-    rect getRegionForFrame(size_t frame) pure const nothrow {
+    rect getRegionForFrame(size_t frame) @safe pure const nothrow {
         immutable float x1 = cast(float)(frame % mHFrames) / mHFrames;
         immutable float y1 = cast(float)(frame / mHFrames) / mVFrames;
 
@@ -35,14 +35,14 @@ public:
         );
     }
 
-    vec2 spriteSize() pure const nothrow {
+    vec2 spriteSize() @safe pure const nothrow {
         return vec2(
             mTexture.size.x / mHFrames,
             mTexture.size.y / mVFrames
         );
     }
 
-    inout(Texture2d) texture() pure inout nothrow {
+    inout(Texture2d) texture() @safe pure inout nothrow {
         return mTexture;
     }
 }

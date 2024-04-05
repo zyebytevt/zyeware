@@ -2,7 +2,7 @@
 // and conditions defined in the file 'LICENSE.txt', which is part
 // of this source code package.
 //
-// Copyright 2021 ZyeByte
+// Copyright 2024 ZyeByte
 module zyeware.thinker.manager;
 
 import std.algorithm : remove;
@@ -11,17 +11,17 @@ import zyeware.thinker;
 
 struct ThinkerManager {
 private:
-    Thinkable[] mThinkers;
+    Thinker[] mThinkers;
 
     size_t[] mQueuedRemovals;
-    Thinkable[] mQueuedAdditions;
+    Thinker[] mQueuedAdditions;
 
 public:
-    void add(Thinkable thinker) nothrow {
+    void add(Thinker thinker) nothrow {
         mQueuedAdditions ~= thinker;
     }
 
-    void remove(Thinkable thinker) nothrow {
+    void remove(Thinker thinker) nothrow {
         for (size_t i; i < mThinkers.length; ++i) {
             if (mThinkers[i] is thinker) {
                 mQueuedRemovals ~= i;
@@ -32,11 +32,11 @@ public:
 
     void tick() {
         for (size_t i; i < mThinkers.length; ++i) {
-            Thinkable thinker = mThinkers[i];
+            Thinker thinker = mThinkers[i];
 
             thinker.tick();
 
-            if (thinker.isFreeQueued) {
+            if (thinker.mIsFreeQueued) {
                 mQueuedRemovals ~= i;
             }
         }
@@ -49,7 +49,7 @@ public:
         }
 
         if (mQueuedAdditions.length > 0) {
-            foreach (Thinkable thinker; mQueuedAdditions) {
+            foreach (Thinker thinker; mQueuedAdditions) {
                 mThinkers ~= thinker;
             }
             mQueuedAdditions.length = 0;
@@ -58,13 +58,13 @@ public:
 
     void draw() const {
         for (size_t i; i < mThinkers.length; i++) {
-            if (auto thinker = cast(Drawable) mThinkers[i]) {
+            if (auto thinker = cast(Drawer) mThinkers[i]) {
                 thinker.draw();
             }
         }
     }
 
-    const(Thinkable[]) thinkers() const pure nothrow {
+    const(Thinker[]) thinkers() const pure nothrow {
         return mThinkers;
     }
 }
