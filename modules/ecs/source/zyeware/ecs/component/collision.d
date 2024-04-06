@@ -13,15 +13,17 @@ import zyeware.ecs;
 /// The `Collision2DComponent`, when attached, will cause this entity
 /// to be checked for collisions with other entities that hold this
 /// component.
-@component
-struct Collision2DComponent {
+@component struct Collision2DComponent
+{
 	Shape2D shape; /// The collision shape used to check for collision.
 	ulong layer; /// Mask on which layer this collider exists.
 	ulong mask; /// Mask on which layers to check against collisions.
 
-	pragma(inline, true) {
+	pragma(inline, true)
+	{
 		void setLayerBit(size_t bit, bool value) pure nothrow
-		in (bit < layer.sizeof * 8, "Invalid bit.") {
+		in (bit < layer.sizeof * 8, "Invalid bit.")
+		{
 			if (value)
 				layer |= (1UL << bit);
 			else
@@ -29,12 +31,14 @@ struct Collision2DComponent {
 		}
 
 		bool getLayerBit(size_t bit) pure const nothrow
-		in (bit < layer.sizeof * 8, "Invalid bit.") {
+		in (bit < layer.sizeof * 8, "Invalid bit.")
+		{
 			return (layer >> bit) & 1;
 		}
 
 		void setMaskBit(size_t bit, bool value) pure nothrow
-		in (bit < mask.sizeof * 8, "Invalid bit.") {
+		in (bit < mask.sizeof * 8, "Invalid bit.")
+		{
 			if (value)
 				mask |= (1UL << bit);
 			else
@@ -42,13 +46,15 @@ struct Collision2DComponent {
 		}
 
 		bool getMaskBit(size_t bit) pure const nothrow
-		in (bit < mask.sizeof * 8, "Invalid bit.") {
+		in (bit < mask.sizeof * 8, "Invalid bit.")
+		{
 			return (mask >> bit) & 1;
 		}
 	}
 }
 
-unittest {
+unittest
+{
 	Collision2DComponent c;
 
 	c.layer = 0b011;

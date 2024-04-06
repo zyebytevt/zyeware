@@ -15,11 +15,13 @@ import zyeware;
 
 /// Represents a virtual file in the Files. Where this file is
 /// physically located depends on the implementation.
-abstract class File {
+abstract class File
+{
 protected:
     string mPath;
 
-    this(string path) pure nothrow {
+    this(string path) pure nothrow
+    {
         mPath = path;
     }
 
@@ -27,14 +29,16 @@ public:
     alias FileSize = long;
 
     /// How the file position with a `seek` is set.
-    enum Seek {
+    enum Seek
+    {
         current, /// Relative to the current position.
         end, /// Relative to the end of the file.
         set /// Absolute position.
     }
 
     /// Describes the access modes for opening a file.
-    enum Mode {
+    enum Mode
+    {
         read, /// Opens for reading. File must exist.
         write, /// Opens for writing, creates empty file if it doesn't exist, or clears out content of already existing file.
         readWrite, /// Opens for reading and writing. File must exist.
@@ -87,7 +91,8 @@ public:
     /// 
     /// Params:
     ///     T = The type to return.
-    T readAll(T)() nothrow {
+    T readAll(T)() nothrow
+    {
         import std.range : ElementEncodingType;
 
         alias Element = ElementEncodingType!T;
@@ -102,7 +107,8 @@ public:
     /// Params:
     ///     buffer = The array to read data into.
     final size_t read(void[] buffer) nothrow
-    in (buffer) {
+    in (buffer)
+    {
         return read(buffer.ptr, 1, buffer.length);
     }
 
@@ -111,12 +117,14 @@ public:
     /// Params:
     ///     T = The type of number to read. All numeric types are valid.
     ///     endianness = The endianness of the number to read.
-    T readNumber(T)(Endian endianness = Endian.littleEndian) nothrow
-    if (isNumeric!T) {
+    T readNumber(T)(Endian endianness = Endian.littleEndian) nothrow 
+            if (isNumeric!T)
+    {
         ubyte[T.sizeof] buffer;
         read(buffer.ptr, T.sizeof, 1);
 
-        final switch (endianness) {
+        final switch (endianness)
+        {
         case Endian.littleEndian:
             return littleEndianToNative!T(buffer);
 
@@ -131,8 +139,9 @@ public:
     ///     S = The type of string to read. All string types are valid.
     ///     LengthType = The type of the length indicator. All unsigned number types are valid.
     ///     endianness = The endianness of the length indicator.
-    S readPascalString(S = string, LengthType = ushort)(Endian endianness = Endian
-            .littleEndian) nothrow if (isSomeString!S && isUnsigned!LengthType) {
+    S readPascalString(S = string, LengthType = ushort)(Endian endianness = Endian.littleEndian) nothrow
+            if (isSomeString!S && isUnsigned!LengthType)
+    {
         alias Char = ElementEncodingType!S;
 
         LengthType length = readNumber!LengthType(endianness);
@@ -147,7 +156,8 @@ public:
     /// Params:
     ///     buffer = The array of elements to be written.
     final size_t write(in void[] buffer) nothrow
-    in (buffer) {
+    in (buffer)
+    {
         return write(buffer.ptr, 1, buffer.length);
     }
 
@@ -157,10 +167,12 @@ public:
     ///     number = The number to write.
     ///     endianness = The endianness of the number to read.
     void writeNumber(T)(T number, Endian endianness = Endian.littleEndian) nothrow
-            if (isNumeric!T) {
+            if (isNumeric!T)
+    {
         ubyte[T.sizeof] buffer;
 
-        final switch (endianness) {
+        final switch (endianness)
+        {
         case Endian.littleEndian:
             buffer = nativeToLittleEndian(number);
             break;
@@ -180,15 +192,17 @@ public:
     ///     text = The text to write.
     ///     endianness = The endianness of the length indicator.
     void writePascalString(S = string, LengthType = ushort)(in S text,
-        Endian endianness = Endian.littleEndian) nothrow
-    if (isSomeString!S && isUnsigned!LengthType) {
+        Endian endianness = Endian.littleEndian) nothrow 
+            if (isSomeString!S && isUnsigned!LengthType)
+    {
         alias Char = ElementEncodingType!S;
 
         writeNumber(cast(LengthType) text.length, endianness);
         write(text.ptr, Char.sizeof, text.length);
     }
 
-    string path() pure const nothrow {
+    string path() pure const nothrow
+    {
         return mPath;
     }
 }

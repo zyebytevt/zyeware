@@ -26,12 +26,14 @@ package:
 
 size_t pWindowCount = 0;
 
-extern (C)
-static void logFunctionCallback(void* userdata, int category, SDL_LogPriority priority, stringz message) nothrow {
+extern (C) static void logFunctionCallback(void* userdata, int category,
+    SDL_LogPriority priority, stringz message) nothrow
+{
     LogLevel logLevel;
     immutable string msg = message.fromStringz.idup;
 
-    switch (priority) {
+    switch (priority)
+    {
     case SDL_LOG_PRIORITY_VERBOSE:
         logLevel = LogLevel.verbose;
         break;
@@ -56,14 +58,17 @@ static void logFunctionCallback(void* userdata, int category, SDL_LogPriority pr
     Logger.core.log(logLevel, msg);
 }
 
-void addGamepad(WindowData* windowData, size_t joyIdx) nothrow {
+void addGamepad(WindowData* windowData, size_t joyIdx) nothrow
+{
     SDL_GameController* pad = SDL_GameControllerOpen(cast(int) joyIdx);
-    if (SDL_GameControllerGetAttached(pad) == 1) {
+    if (SDL_GameControllerGetAttached(pad) == 1)
+    {
         stringz name = SDL_GameControllerName(pad);
 
         size_t gamepadIndex;
         for (; gamepadIndex < windowData.gamepads.length; ++gamepadIndex)
-            if (!windowData.gamepads[gamepadIndex]) {
+            if (!windowData.gamepads[gamepadIndex])
+            {
                 windowData.gamepads[gamepadIndex] = pad;
                 break;
             }
@@ -72,17 +77,21 @@ void addGamepad(WindowData* windowData, size_t joyIdx) nothrow {
         {
             SDL_GameControllerClose(pad);
             Logger.core.warning("Failed to add controller: Too many controllers attached.");
-        } else {
-            Logger.core.debug_("Added controller '%s' as gamepad #%d.",
-                name ? name.fromStringz : "<No name>", gamepadIndex);
+        }
+        else
+        {
+            Logger.core.debug_("Added controller '%s' as gamepad #%d.", name
+                    ? name.fromStringz : "<No name>", gamepadIndex);
 
             ZyeWare.events.gamepadConnected(gamepadIndex).collectException;
         }
-    } else
+    }
+    else
         Logger.core.warning("Failed to add controller: %s.", SDL_GetError().fromStringz);
 }
 
-void removeGamepad(WindowData* windowData, size_t instanceId) nothrow {
+void removeGamepad(WindowData* windowData, size_t instanceId) nothrow
+{
     SDL_GameController* pad = SDL_GameControllerFromInstanceID(cast(int) instanceId);
     if (!pad)
         return;
@@ -93,19 +102,20 @@ void removeGamepad(WindowData* windowData, size_t instanceId) nothrow {
 
     size_t gamepadIndex;
     for (; gamepadIndex < windowData.gamepads.length; ++gamepadIndex)
-        if (windowData.gamepads[gamepadIndex] == pad) {
+        if (windowData.gamepads[gamepadIndex] == pad)
+        {
             windowData.gamepads[gamepadIndex] = null;
             break;
         }
 
-    Logger.core.debug_("Removed controller '%s' (was #%d).", name ? name.fromStringz
-            : "<No name>",
-        gamepadIndex);
+    Logger.core.debug_("Removed controller '%s' (was #%d).", name
+            ? name.fromStringz : "<No name>", gamepadIndex);
 
     ZyeWare.events.gamepadDisconnected(gamepadIndex).collectException;
 }
 
-ptrdiff_t getGamepadIndex(in WindowData* windowData, SDL_GameController* pad) nothrow {
+ptrdiff_t getGamepadIndex(in WindowData* windowData, SDL_GameController* pad) nothrow
+{
     for (size_t i; i < windowData.gamepads.length; ++i)
         if (windowData.gamepads[i] == pad)
             return i;
@@ -113,16 +123,19 @@ ptrdiff_t getGamepadIndex(in WindowData* windowData, SDL_GameController* pad) no
     return -1;
 }
 
-ptrdiff_t getGamepadIndex(in WindowData* windowData, int instanceId) nothrow {
+ptrdiff_t getGamepadIndex(in WindowData* windowData, int instanceId) nothrow
+{
     return getGamepadIndex(windowData, SDL_GameControllerFromInstanceID(instanceId));
 }
 
 // TODO: This is still very much dependent on OpenGL, look for a way to make it more generic
-NativeHandle createDisplay(in DisplayProperties properties, in Display container) {
-    Logger.core.info("Creating SDL window '%s', requested size %s...", properties.title, properties
-            .size);
+NativeHandle createDisplay(in DisplayProperties properties, in Display container)
+{
+    Logger.core.info("Creating SDL window '%s', requested size %s...",
+        properties.title, properties.size);
 
-    if (pWindowCount == 0) {
+    if (pWindowCount == 0)
+    {
         loadLibraries();
         enforce!GraphicsException(SDL_Init(SDL_INIT_EVERYTHING) == 0,
             format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
@@ -144,17 +157,18 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     if (properties.resizable)
         windowFlags |= SDL_WINDOW_RESIZABLE;
 
-    data.handle = SDL_CreateWindow(properties.title.toStringz, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        cast(int) properties.size.x, cast(int) properties.size.y, windowFlags);
-    enforce!GraphicsException(data.handle, format!"Failed to create SDL Window: %s!"(
-            SDL_GetError().fromStringz));
+    data.handle = SDL_CreateWindow(properties.title.toStringz, SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED, cast(int) properties.size.x,
+        cast(int) properties.size.y, windowFlags);
+    enforce!GraphicsException(data.handle,
+        format!"Failed to create SDL Window: %s!"(SDL_GetError().fromStringz));
 
     if (properties.icon)
         setIcon(data, properties.icon);
 
     data.glContext = SDL_GL_CreateContext(data.handle);
-    enforce!GraphicsException(data.glContext, format!"Failed to create GL context: %s!"(
-            SDL_GetError().fromStringz));
+    enforce!GraphicsException(data.glContext,
+        format!"Failed to create GL context: %s!"(SDL_GetError().fromStringz));
 
     Logger.core.debug_("OpenGL context created.");
 
@@ -178,7 +192,8 @@ NativeHandle createDisplay(in DisplayProperties properties, in Display container
     return data;
 }
 
-void loadLibraries() {
+void loadLibraries()
+{
     import loader = bindbc.loader.sharedlib;
     import std.string : fromStringz;
 
@@ -186,7 +201,8 @@ void loadLibraries() {
         return;
 
     immutable sdlResult = loadSDL();
-    if (sdlResult != sdlSupport) {
+    if (sdlResult != sdlSupport)
+    {
         foreach (info; loader.errors)
             Logger.core.warning("SDL loader: %s", info.message.fromStringz);
 
@@ -199,7 +215,8 @@ void loadLibraries() {
     }
 }
 
-void destroyDisplay(NativeHandle handle) {
+void destroyDisplay(NativeHandle handle)
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_DestroyWindow(data.handle);
@@ -212,15 +229,19 @@ void destroyDisplay(NativeHandle handle) {
         SDL_Quit();
 }
 
-void update(NativeHandle handle) {
+void update(NativeHandle handle)
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_Event ev;
-    while (SDL_PollEvent(&ev)) {
+    while (SDL_PollEvent(&ev))
+    {
     typeSwitch:
-        switch (ev.type) {
+        switch (ev.type)
+        {
         case SDL_WINDOWEVENT:
-            switch (ev.window.event) {
+            switch (ev.window.event)
+            {
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 data.size = vec2i(ev.window.data1, ev.window.data2);
                 ZyeWare.events.displayResized(data.container, data.size);
@@ -259,8 +280,8 @@ void update(NativeHandle handle) {
             break;
 
         case SDL_MOUSEBUTTONDOWN:
-            ZyeWare.events.mouseButtonPressed(cast(MouseCode) ev.button.button, cast(size_t) ev
-                    .button.clicks);
+            ZyeWare.events.mouseButtonPressed(cast(MouseCode) ev.button.button,
+                cast(size_t) ev.button.clicks);
             break;
 
         case SDL_MOUSEWHEEL:
@@ -280,7 +301,8 @@ void update(NativeHandle handle) {
         case SDL_CONTROLLERBUTTONDOWN:
             GamepadButton button;
 
-            switch (ev.cbutton.button) {
+            switch (ev.cbutton.button)
+            {
             case SDL_CONTROLLER_BUTTON_A:
                 button = GamepadButton.a;
                 break;
@@ -331,15 +353,18 @@ void update(NativeHandle handle) {
             }
 
             if (ev.cbutton.state == SDL_PRESSED)
-                ZyeWare.events.gamepadButtonPressed(getGamepadIndex(data, ev.cbutton.which), button);
+                ZyeWare.events.gamepadButtonPressed(getGamepadIndex(data,
+                        ev.cbutton.which), button);
             else
-                ZyeWare.events.gamepadButtonReleased(getGamepadIndex(data, ev.cbutton.which), button);
+                ZyeWare.events.gamepadButtonReleased(getGamepadIndex(data,
+                        ev.cbutton.which), button);
             break;
 
         case SDL_CONTROLLERAXISMOTION:
             GamepadAxis axis;
 
-            switch (ev.caxis.axis) {
+            switch (ev.caxis.axis)
+            {
             case SDL_CONTROLLER_AXIS_LEFTX:
                 axis = GamepadAxis.leftX;
                 break;
@@ -362,8 +387,8 @@ void update(NativeHandle handle) {
                 break typeSwitch;
             }
 
-            ZyeWare.events.gamepadAxisMoved(getGamepadIndex(data, ev.caxis.which), axis,
-                ev.caxis.value / 32_768f);
+            ZyeWare.events.gamepadAxisMoved(getGamepadIndex(data,
+                    ev.caxis.which), axis, ev.caxis.value / 32_768f);
             break;
 
         case SDL_CONTROLLERDEVICEADDED:
@@ -379,13 +404,15 @@ void update(NativeHandle handle) {
     }
 }
 
-void swapBuffers(NativeHandle handle) {
+void swapBuffers(NativeHandle handle)
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_GL_SwapWindow(data.handle);
 }
 
-bool isKeyPressed(in NativeHandle handle, KeyCode code) nothrow {
+bool isKeyPressed(in NativeHandle handle, KeyCode code) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     if (code >= data.keyboardState.length)
@@ -394,7 +421,8 @@ bool isKeyPressed(in NativeHandle handle, KeyCode code) nothrow {
     return data.keyboardState[code] == 1;
 }
 
-bool isMouseButtonPressed(in NativeHandle handle, MouseCode code) nothrow {
+bool isMouseButtonPressed(in NativeHandle handle, MouseCode code) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     int dummy;
@@ -402,7 +430,8 @@ bool isMouseButtonPressed(in NativeHandle handle, MouseCode code) nothrow {
     return (SDL_GetMouseState(&dummy, &dummy) & code) != 0;
 }
 
-bool isGamepadButtonPressed(in NativeHandle handle, size_t gamepadIdx, GamepadButton button) nothrow {
+bool isGamepadButtonPressed(in NativeHandle handle, size_t gamepadIdx, GamepadButton button) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_GameController* pad = data.gamepads[gamepadIdx];
@@ -410,7 +439,8 @@ bool isGamepadButtonPressed(in NativeHandle handle, size_t gamepadIdx, GamepadBu
         return false;
 
     SDL_GameControllerButton sdlButton;
-    final switch (button) with (GamepadButton) {
+    final switch (button) with (GamepadButton)
+    {
     case a:
         sdlButton = SDL_CONTROLLER_BUTTON_A;
         break;
@@ -461,7 +491,8 @@ bool isGamepadButtonPressed(in NativeHandle handle, size_t gamepadIdx, GamepadBu
     return SDL_GameControllerGetButton(pad, sdlButton) == 1;
 }
 
-float getGamepadAxisValue(in NativeHandle handle, size_t gamepadIdx, GamepadAxis axis) nothrow {
+float getGamepadAxisValue(in NativeHandle handle, size_t gamepadIdx, GamepadAxis axis) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_GameController* pad = data.gamepads[gamepadIdx];
@@ -469,7 +500,8 @@ float getGamepadAxisValue(in NativeHandle handle, size_t gamepadIdx, GamepadAxis
         return 0f;
 
     SDL_GameControllerAxis sdlAxis;
-    final switch (axis) with (GamepadAxis) {
+    final switch (axis) with (GamepadAxis)
+    {
     case leftX:
         sdlAxis = SDL_CONTROLLER_AXIS_LEFTX;
         break;
@@ -493,24 +525,31 @@ float getGamepadAxisValue(in NativeHandle handle, size_t gamepadIdx, GamepadAxis
     return SDL_GameControllerGetAxis(pad, sdlAxis) / 32_768f;
 }
 
-vec2i getCursorPosition(in NativeHandle handle) nothrow {
+vec2i getCursorPosition(in NativeHandle handle) nothrow
+{
     int x, y;
     SDL_GetMouseState(&x, &y);
     return vec2i(x, y);
 }
 
-void setVSyncEnabled(NativeHandle handle, bool value) nothrow {
+void setVSyncEnabled(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
-    if (value) {
-        if (SDL_GL_SetSwapInterval(-1) == -1 && SDL_GL_SetSwapInterval(1) == -1) {
+    if (value)
+    {
+        if (SDL_GL_SetSwapInterval(-1) == -1 && SDL_GL_SetSwapInterval(1) == -1)
+        {
             Logger.core.warning("Failed to enable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
 
         data.isVSyncEnabled = true;
-    } else {
-        if (SDL_GL_SetSwapInterval(0) == -1) {
+    }
+    else
+    {
+        if (SDL_GL_SetSwapInterval(0) == -1)
+        {
             Logger.core.warning("Failed to disable VSync: %s.", SDL_GetError().fromStringz);
             return;
         }
@@ -519,88 +558,102 @@ void setVSyncEnabled(NativeHandle handle, bool value) nothrow {
     }
 }
 
-bool isVSyncEnabled(in NativeHandle handle) nothrow {
+bool isVSyncEnabled(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.isVSyncEnabled;
 }
 
-vec2i getPosition(in NativeHandle handle) nothrow {
+vec2i getPosition(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.position;
 }
 
-void setPosition(NativeHandle handle, vec2i value) nothrow {
+void setPosition(NativeHandle handle, vec2i value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetWindowPosition(data.handle, value.x, value.y);
 }
 
-vec2i getSize(in NativeHandle handle) nothrow {
+vec2i getSize(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.size;
 }
 
 void setSize(NativeHandle handle, vec2i value) nothrow
-in (value.x > 0 && value.y > 0, "Window size cannot be negative.") {
+in (value.x > 0 && value.y > 0, "Window size cannot be negative.")
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetWindowSize(data.handle, value.x, value.y);
 }
 
-void setFullscreen(NativeHandle handle, bool value) nothrow {
+void setFullscreen(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetWindowFullscreen(data.handle, value ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
     data.isFullscreen = value;
 }
 
-bool isFullscreen(in NativeHandle handle) nothrow {
+bool isFullscreen(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.isFullscreen;
 }
 
-void setResizable(NativeHandle handle, bool value) nothrow {
+void setResizable(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetWindowResizable(data.handle, value ? SDL_TRUE : SDL_FALSE);
 }
 
-bool isResizable(in NativeHandle handle) nothrow {
+bool isResizable(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_RESIZABLE) != 0;
 }
 
-void setDecorated(NativeHandle handle, bool value) nothrow {
+void setDecorated(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetWindowBordered(data.handle, value ? SDL_TRUE : SDL_FALSE);
 }
 
-bool isDecorated(in NativeHandle handle) nothrow {
+bool isDecorated(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_BORDERLESS) == 0;
 }
 
-void setFocused(NativeHandle handle, bool value) nothrow {
+void setFocused(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     if (value)
         SDL_RaiseWindow(data.handle);
 }
 
-bool isFocused(in NativeHandle handle) nothrow {
+bool isFocused(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_INPUT_FOCUS) != 0;
 }
 
-void setVisible(NativeHandle handle, bool value) nothrow {
+void setVisible(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     if (value)
@@ -609,13 +662,15 @@ void setVisible(NativeHandle handle, bool value) nothrow {
         SDL_HideWindow(data.handle);
 }
 
-bool isVisible(in NativeHandle handle) nothrow {
+bool isVisible(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_SHOWN) != 0;
 }
 
-void setMinimized(NativeHandle handle, bool value) nothrow {
+void setMinimized(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     if (value)
@@ -624,13 +679,15 @@ void setMinimized(NativeHandle handle, bool value) nothrow {
         SDL_RestoreWindow(data.handle);
 }
 
-bool isMinimized(in NativeHandle handle) nothrow {
+bool isMinimized(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_MINIMIZED) != 0;
 }
 
-void setMaximized(NativeHandle handle, bool value) nothrow {
+void setMaximized(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     if (value)
@@ -639,13 +696,15 @@ void setMaximized(NativeHandle handle, bool value) nothrow {
         SDL_RestoreWindow(data.handle);
 }
 
-bool isMaximized(in NativeHandle handle) nothrow {
+bool isMaximized(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return (SDL_GetWindowFlags(data.handle) & SDL_WINDOW_MAXIMIZED) != 0;
 }
 
-void setIcon(NativeHandle handle, in Image image) {
+void setIcon(NativeHandle handle, in Image image)
+{
     WindowData* data = cast(WindowData*) handle;
 
     data.icon = image;
@@ -655,17 +714,20 @@ void setIcon(NativeHandle handle, in Image image) {
     SDL_FreeSurface(iconSurface);
 }
 
-const(Image) getIcon(in NativeHandle handle) nothrow {
+const(Image) getIcon(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.icon;
 }
 
-void setCursor(NativeHandle handle, in Cursor cursor) {
+void setCursor(NativeHandle handle, in Cursor cursor)
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_Cursor** sdlCursor = cursor in data.sdlCursors;
-    if (!sdlCursor) {
+    if (!sdlCursor)
+    {
         SDL_Surface* surface = createSurfaceFromImage(cursor.image);
         scope (exit)
             SDL_FreeSurface(surface);
@@ -678,55 +740,67 @@ void setCursor(NativeHandle handle, in Cursor cursor) {
     SDL_SetCursor(*sdlCursor);
 }
 
-const(Cursor) getCursor(in NativeHandle handle) nothrow {
+const(Cursor) getCursor(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.cursor;
 }
 
-void setTitle(NativeHandle handle, in string value) {
+void setTitle(NativeHandle handle, in string value)
+{
     WindowData* data = cast(WindowData*) handle;
 
     data.title = value;
     SDL_SetWindowTitle(data.handle, value.toStringz);
 }
 
-string getTitle(in NativeHandle handle) nothrow {
+string getTitle(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.title;
 }
 
-void setMouseCursorVisible(NativeHandle handle, bool value) nothrow {
+void setMouseCursorVisible(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_ShowCursor(value ? SDL_ENABLE : SDL_DISABLE);
 }
 
-bool isMouseCursorVisible(in NativeHandle handle) nothrow {
+bool isMouseCursorVisible(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return SDL_ShowCursor(SDL_QUERY) == SDL_ENABLE;
 }
 
-bool isMouseCursorCaptured(in NativeHandle handle) nothrow {
+bool isMouseCursorCaptured(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return data.isCursorCaptured;
 }
 
-void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow {
+void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
-    if (value) {
-        if (SDL_SetRelativeMouseMode(SDL_TRUE) == 0) {
+    if (value)
+    {
+        if (SDL_SetRelativeMouseMode(SDL_TRUE) == 0)
+        {
             data.isCursorCaptured = true;
             return;
         }
 
         Logger.core.warning("Failed to capture mouse: %s.", SDL_GetError().fromStringz);
-    } else {
-        if (SDL_SetRelativeMouseMode(SDL_FALSE) == 0) {
+    }
+    else
+    {
+        if (SDL_SetRelativeMouseMode(SDL_FALSE) == 0)
+        {
             data.isCursorCaptured = false;
             return;
         }
@@ -735,13 +809,15 @@ void setMouseCursorCaptured(NativeHandle handle, bool value) nothrow {
     }
 }
 
-void setClipboardString(NativeHandle handle, in string value) nothrow {
+void setClipboardString(NativeHandle handle, in string value) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     SDL_SetClipboardText(value.toStringz);
 }
 
-string getClipboardString(in NativeHandle handle) nothrow {
+string getClipboardString(in NativeHandle handle) nothrow
+{
     WindowData* data = cast(WindowData*) handle;
 
     return SDL_GetClipboardText().fromStringz.idup;

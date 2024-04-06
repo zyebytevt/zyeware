@@ -39,23 +39,29 @@ public import zyeware.ecs.core.component : component;
  *
  * This is the combination of two 32-bits id: a unique-id and a version-id.
  */
-struct Entity {
+struct Entity
+{
 public:
-    static struct Id {
+    static struct Id
+    {
     public:
-        this(uint uId, uint vId) {
+        this(uint uId, uint vId)
+        {
             mId = cast(ulong) uId | cast(ulong) vId << 32;
         }
 
-        ulong id() const {
+        ulong id() const
+        {
             return mId;
         }
 
-        uint uniqueId() {
+        uint uniqueId()
+        {
             return mId & 0xffffffffUL;
         }
 
-        uint versionId() {
+        uint versionId()
+        {
             return mId >> 32;
         }
 
@@ -64,7 +70,8 @@ public:
             return id == lId.id;
         }*/
 
-        string toString() {
+        string toString()
+        {
             return format("#%d:%d", uniqueId, versionId);
         }
 
@@ -74,7 +81,8 @@ public:
 
     enum Id invalid = Id(0, 0);
 
-    this(EntityManager manager, Id id) {
+    this(EntityManager manager, Id id)
+    {
         mManager = manager;
         mId = id;
     }
@@ -84,7 +92,8 @@ public:
      *
      * Throws: EntityException if the entity is invalid.
      */
-    void destroy() {
+    void destroy()
+    {
         enforce!EntityException(valid);
         mManager.destroy(mId);
         invalidate();
@@ -95,14 +104,16 @@ public:
      *
      * Returns: true if the entity is valid, false otherwise.
      */
-    bool valid() {
+    bool valid()
+    {
         return mManager !is null && mManager.valid(mId);
     }
 
     /**
      * Invalidate the entity instance (but does not destroy it).
      */
-    void invalidate() {
+    void invalidate()
+    {
         mId = invalid;
         mManager = null;
     }
@@ -110,7 +121,8 @@ public:
     /**
      * Returns the id of the entity.
      */
-    Id id() const {
+    Id id() const
+    {
         return mId;
     }
 
@@ -128,7 +140,8 @@ public:
      *         $(D ComponentException) if there is no room for that component or
      *                                 if the component is already registered.
      */
-    C* register(C, Args...)(Args args) if (isComponent!C) {
+    C* register(C, Args...)(Args args) if (isComponent!C)
+    {
         enforce!EntityException(valid);
         auto component = mManager.register!C(mId);
         static if (Args.length != 0)
@@ -146,7 +159,8 @@ public:
      * Throws: $(D EntityException) if the entity is invalid.
      *         $(D ComponentException) if the component is not registered.
      */
-    void unregister(C)() if (isComponent!C) {
+    void unregister(C)() if (isComponent!C)
+    {
         enforce!EntityException(valid);
         mManager.unregister!C(mId);
     }
@@ -162,7 +176,8 @@ public:
      * Throws: $(D EntityException) if the entity is invalid.
      *         $(D ComponentException) if the component is not registered.
      */
-    C* component(C)() if (isComponent!C) {
+    C* component(C)() if (isComponent!C)
+    {
         enforce!EntityException(valid);
         return mManager.getComponent!(C)(mId);
     }
@@ -176,7 +191,8 @@ public:
      * Throws: $(D EntityException) if the entity is invalid.
      *         $(D ComponentException) if the component is not registered.
      */
-    void component(C)(auto ref C c) if (isComponent!C) {
+    void component(C)(auto ref C c) if (isComponent!C)
+    {
         enforce!EntityException(valid);
         *mManager.getComponent!(C)(mId) = c;
     }
@@ -192,7 +208,8 @@ public:
      *
      * Throws: EntityException if the entity is invalid.
      */
-    bool isRegistered(C)() if (isComponent!C) {
+    bool isRegistered(C)() if (isComponent!C)
+    {
         enforce!EntityException(valid);
         return mManager.isRegistered!C(mId);
     }
@@ -203,7 +220,8 @@ public:
      *
      * Throws: $(D EntityException) if the entity is invalid.
      */
-    void iterate() {
+    void iterate()
+    {
         enforce!EntityException(valid);
         mManager.iterate(this);
     }
@@ -211,7 +229,8 @@ public:
     /**
      * Compare two entities and tells whether they are the same (same id).
      */
-    bool opEquals()(auto const ref Entity e) const {
+    bool opEquals()(auto const ref Entity e) const
+    {
         return id == e.id;
     }
 
@@ -221,7 +240,8 @@ public:
      * It has the form: #uid:vid where uid is the unique-id and
      * vid is the version-id
      */
-    string toString() {
+    string toString()
+    {
         return mId.toString();
     }
 
@@ -231,8 +251,10 @@ private:
 }
 
 ///
-unittest {
-    @component struct Position {
+unittest
+{
+    @component struct Position
+    {
         float x, y;
     }
 
@@ -245,27 +267,32 @@ unittest {
     assert(entity.component!Position.y == 3.0);
 }
 
-@event struct EntityCreatedEvent {
+@event struct EntityCreatedEvent
+{
     Entity entity;
 }
 
-@event struct EntityDestroyedEvent {
+@event struct EntityDestroyedEvent
+{
     Entity entity;
 }
 
-@event struct ComponentAddedEvent(C) {
+@event struct ComponentAddedEvent(C)
+{
     Entity entity;
     C* component;
 }
 
-@event struct ComponentRemovedEvent(C) {
+@event struct ComponentRemovedEvent(C)
+{
     Entity entity;
 }
 
 /**
  * Manages entities creation and component memory management.
  */
-class EntityManager {
+class EntityManager
+{
 public:
     /**
      * Constructor of the entity-manager.
@@ -276,9 +303,8 @@ public:
      *                  manager.
      *   poolSize     = Chunk size in bytes for each components.
      */
-    this(EventManager eventManager,
-        size_t maxComponent = 64,
-        size_t poolSize = 8192) {
+    this(EventManager eventManager, size_t maxComponent = 64, size_t poolSize = 8192)
+    {
         mEventManager = eventManager;
         mMaxComponent = maxComponent;
         mPoolSize = poolSize;
@@ -287,24 +313,26 @@ public:
     /**
      * Current number of managed entities.
      */
-    size_t size() {
+    size_t size()
+    {
         return mEntityComponentMask.length - mNbFreeIds;
     }
 
     /**
      * Current capacity entity.
      */
-    size_t capacity() {
+    size_t capacity()
+    {
         return mEntityComponentMask.length;
     }
 
     /**
      * Return true if the given entity ID is still valid.
      */
-    bool valid(Entity.Id id) {
-        return id != Entity.invalid &&
-            id.uniqueId - 1 < mEntityVersions.length &&
-            mEntityVersions[id.uniqueId - 1] == id.versionId;
+    bool valid(Entity.Id id)
+    {
+        return id != Entity.invalid && id.uniqueId - 1 < mEntityVersions.length
+            && mEntityVersions[id.uniqueId - 1] == id.versionId;
     }
 
     /**
@@ -312,15 +340,19 @@ public:
      *
      * Returns: a new valid entity.
      */
-    Entity create() {
+    Entity create()
+    {
         uint uniqueId, versionId;
 
-        if (mFreeIds.empty) {
+        if (mFreeIds.empty)
+        {
             mIndexCounter++;
             uniqueId = mIndexCounter;
             accomodateEntity();
             versionId = mEntityVersions[uniqueId - 1];
-        } else {
+        }
+        else
+        {
             uniqueId = mFreeIds.front;
             mFreeIds.removeFront();
             mNbFreeIds--;
@@ -340,7 +372,8 @@ public:
      *
      * Throws: EntityException if the id is invalid.
      */
-    Entity getEntity(Entity.Id id) {
+    Entity getEntity(Entity.Id id)
+    {
         enforce!EntityException(valid(id));
         return Entity(this, id);
     }
@@ -357,7 +390,8 @@ public:
      * { ... }
      * --------------------
      */
-    int opApply(int delegate(Entity entity) dg) {
+    int opApply(int delegate(Entity entity) dg)
+    {
         int result = 0;
 
         // copy version-ids
@@ -366,11 +400,11 @@ public:
         foreach (freeId; mFreeIds)
             versionIds[freeId - 1] = uint.max;
 
-        foreach (uniqueId, versionId; versionIds) {
+        foreach (uniqueId, versionId; versionIds)
+        {
             if (versionId == uint.max)
                 continue;
-            result = dg(Entity(this,
-                    Entity.Id(cast(uint) uniqueId + 1, versionId)));
+            result = dg(Entity(this, Entity.Id(cast(uint) uniqueId + 1, versionId)));
             if (result)
                 break;
         }
@@ -381,7 +415,8 @@ public:
     /**
      * Return a range of all the valid instances of a component.
      */
-    auto components(C)() if (isComponent!C) {
+    auto components(C)() if (isComponent!C)
+    {
         import std.range : iota;
         import std.algorithm : map, filter;
 
@@ -391,8 +426,7 @@ public:
         auto pool = cast(Pool!C) mComponentPools[compId];
         assert(pool !is null, "A component pool should never be null");
 
-        return iota(0, pool.nbElements)
-            .filter!(i => mEntityComponentMask[i][compId])
+        return iota(0, pool.nbElements).filter!(i => mEntityComponentMask[i][compId])
             .map!(i => &pool[i]);
     }
 
@@ -406,25 +440,31 @@ public:
      * { ... }
      * --------------------
      */
-    auto entitiesWith(CList...)() if (areComponents!CList) {
-        struct EntitiesWithView(CList...) if (areComponents!CList) {
-            this(EntityManager em) {
+    auto entitiesWith(CList...)() if (areComponents!CList)
+    {
+        struct EntitiesWithView(CList...) if (areComponents!CList)
+        {
+            this(EntityManager em)
+            {
                 entityManager = em;
             }
 
-            int opApply(int delegate(Entity entity) dg) {
+            int opApply(int delegate(Entity entity) dg)
+            {
                 int result = 0;
 
-                entityLoop: foreach (i, ref componentMask; entityManager.mEntityComponentMask) {
-                    foreach (C; CList) {
+            entityLoop:
+                foreach (i, ref componentMask; entityManager.mEntityComponentMask)
+                {
+                    foreach (C; CList)
+                    {
                         auto compId = entityManager.componentId!C();
                         if (!componentMask[compId])
                             continue entityLoop;
                     }
 
                     auto versionId = entityManager.mEntityVersions[i];
-                    result = dg(Entity(entityManager,
-                            Entity.Id(cast(uint) i + 1, versionId)));
+                    result = dg(Entity(entityManager, Entity.Id(cast(uint) i + 1, versionId)));
                     if (result)
                         break;
                 }
@@ -432,9 +472,12 @@ public:
                 return result;
             }
 
-            int opApply(int delegate(Entity entity, Pointers!CList components) dg) {
-                auto withComponents(Entity ent) {
-                    auto get(T)() {
+            int opApply(int delegate(Entity entity, Pointers!CList components) dg)
+            {
+                auto withComponents(Entity ent)
+                {
+                    auto get(T)()
+                    {
                         return ent.component!T;
                     }
 
@@ -462,10 +505,12 @@ public:
      *   dg = Delegate that will be called when using $(D Entity.iterate).
      *        Use $(D null) to clear the accessor.
      */
-    void accessor(C)(void delegate(Entity e, C* pc) dg) {
+    void accessor(C)(void delegate(Entity e, C* pc) dg)
+    {
         immutable compId = ComponentCounter!(C).getId();
         // Make sure the delegate array is large enough
-        if (mComponentAccessors.length <= compId) {
+        if (mComponentAccessors.length <= compId)
+        {
             if (dg is null)
                 return;
             else
@@ -484,7 +529,8 @@ public:
      *   The accessor delegate; null if it has never been set, if it was cleared
      *   or if the component is missing.
      */
-    void delegate(Entity e, C* pc) accessor(C)() {
+    void delegate(Entity e, C* pc) accessor(C)()
+    {
         immutable compId = ComponentCounter!(C).getId();
         if (mComponentAccessors.length <= compId)
             return null;
@@ -492,7 +538,8 @@ public:
     }
 
 private:
-    void destroy(Entity.Id id) {
+    void destroy(Entity.Id id)
+    {
         uint uniqueId = id.uniqueId;
 
         // reset all components for that entity
@@ -506,7 +553,8 @@ private:
         mEventManager.emit!EntityDestroyedEvent(Entity(this, id));
     }
 
-    C* register(C)(Entity.Id id) if (isComponent!C) {
+    C* register(C)(Entity.Id id) if (isComponent!C)
+    {
         const auto compId = componentId!(C)();
         enforce!ComponentException(compId < mMaxComponent);
         const auto uniqueId = id.uniqueId;
@@ -526,7 +574,8 @@ private:
         return &pool[uniqueId - 1];
     }
 
-    void unregister(C)(Entity.Id id) if (isComponent!C) {
+    void unregister(C)(Entity.Id id) if (isComponent!C)
+    {
         const auto compId = componentId!(C)();
         enforce!ComponentException(compId < mMaxComponent);
         const auto uniqueId = id.uniqueId;
@@ -538,7 +587,8 @@ private:
         mEventManager.emit!(ComponentRemovedEvent!C)(Entity(this, id));
     }
 
-    bool isRegistered(C)(Entity.Id id) if (isComponent!C) {
+    bool isRegistered(C)(Entity.Id id) if (isComponent!C)
+    {
         const auto compId = componentId!(C)();
         const auto uniqueId = id.uniqueId;
 
@@ -548,7 +598,8 @@ private:
         return mEntityComponentMask[uniqueId - 1][compId];
     }
 
-    C* getComponent(C)(Entity.Id id) if (isComponent!C) {
+    C* getComponent(C)(Entity.Id id) if (isComponent!C)
+    {
         const auto compId = componentId!(C)();
         enforce!ComponentException(compId < mMaxComponent);
         const auto uniqueId = id.uniqueId;
@@ -559,11 +610,13 @@ private:
         return &pool[uniqueId - 1];
     }
 
-    size_t componentId(C)() {
+    size_t componentId(C)()
+    {
         immutable compId = ComponentCounter!(C).getId();
 
         // ensure we have a pool to hold components of this type
-        if (compId !in mComponentPools) {
+        if (compId !in mComponentPools)
+        {
             //mComponentPools.length = compId + 1;
             mComponentPools[compId] = new Pool!C(mIndexCounter);
         }
@@ -571,8 +624,10 @@ private:
         return compId;
     }
 
-    void accomodateEntity() {
-        if (mEntityComponentMask.length < mIndexCounter) {
+    void accomodateEntity()
+    {
+        if (mEntityComponentMask.length < mIndexCounter)
+        {
             mEntityComponentMask.length = mIndexCounter;
             foreach (ref mask; mEntityComponentMask)
                 mask.length = mMaxComponent;
@@ -582,14 +637,17 @@ private:
         }
     }
 
-    void iterate(Entity entity) {
+    void iterate(Entity entity)
+    {
         const auto uniqueId = entity.id.uniqueId;
 
         // Iterate over all components registered to that entity
-        foreach (compId; 0 .. mComponentAccessors.length) {
+        foreach (compId; 0 .. mComponentAccessors.length)
+        {
             // If the component is registered and has a delegate
             if (mEntityComponentMask[uniqueId - 1][compId])
-                if (mComponentAccessors[compId]!is null) {
+                if (mComponentAccessors[compId]!is null)
+                {
                     auto compPtr = mComponentPools[compId].getPtr(uniqueId - 1);
                     mComponentAccessors[compId](entity, compPtr);
                 }
@@ -617,7 +675,8 @@ private:
 }
 
 // Translate a list of types to a list of pointers to those types.
-private template Pointers(T...) {
+private template Pointers(T...)
+{
     import std.meta : staticMap;
 
     private alias PtrTo(U) = U*;
@@ -630,7 +689,8 @@ private template Pointers(T...) {
 
 import std.stdio;
 
-unittest {
+unittest
+{
     auto em = new EntityManager(new EventManager());
 
     auto ent0 = em.create();
@@ -659,11 +719,13 @@ unittest {
     assert(ent2.id.uniqueId == 3);
     assert(ent2.id.versionId == 0);
 
-    @component struct NameComponent {
+    @component struct NameComponent
+    {
         string name;
     }
 
-    @component struct PosComponent {
+    @component struct PosComponent
+    {
         int x, y;
     }
 
@@ -691,24 +753,28 @@ unittest {
     //ent1.destroy();
 
     // List all current valid entities
-    foreach (ent; em) {
+    foreach (ent; em)
+    {
         assert(ent.valid);
         //writeln(ent.component!NameComponent.name);
     }
 
     // List all name components
-    foreach (comp; em.components!NameComponent) {
+    foreach (comp; em.components!NameComponent)
+    {
         //writeln(comp.name);
     }
 
     // List all name components
-    foreach (ent; em.entitiesWith!(NameComponent, PosComponent)) {
+    foreach (ent; em.entitiesWith!(NameComponent, PosComponent))
+    {
         assert(ent.valid);
         //writeln(ent.component!NameComponent.name);
     }
 
     // Check const fields are properly handled
-    @component struct ConstComp {
+    @component struct ConstComp
+    {
         int a, b;
         const float cFloat = 5.0;
         immutable int iInt = 5;
@@ -718,7 +784,8 @@ unittest {
     assert(ent0.component!ConstComp.cFloat == 5.0);
 
     // Check immutable fields are not accepted
-    @component struct ImmutableComp {
+    @component struct ImmutableComp
+    {
         int a, b;
         shared float sFloat = 5.0;
         __gshared float gsFloat = 5.0;
@@ -728,12 +795,15 @@ unittest {
     assert(!__traits(compiles, ent0.register!ImmutableComp()));
 }
 
-unittest {
-    @component struct Velocity {
+unittest
+{
+    @component struct Velocity
+    {
         int x, y;
     }
 
-    @component struct Position {
+    @component struct Position
+    {
         int x, y;
     }
 
@@ -749,7 +819,8 @@ unittest {
     ent1.register!Velocity(3, 4);
 
     // test getting components from the opApply loop
-    foreach (ent, pos, vel; em.entitiesWith!(Position, Velocity)) {
+    foreach (ent, pos, vel; em.entitiesWith!(Position, Velocity))
+    {
         pos.x += vel.x;
         pos.y += vel.y;
     }
@@ -759,8 +830,10 @@ unittest {
 }
 
 // Ensure that em.components!T does not throw if no `T` has ever been registered
-unittest {
-    @component struct Dummy {
+unittest
+{
+    @component struct Dummy
+    {
     }
 
     auto em = new EntityManager(new EventManager());
@@ -774,11 +847,14 @@ unittest {
 // potentially creating null pools in the middle of the collection.
 // register was only checking the collection length, but did not ensure that the
 // pool it retrieved to store the component was non-null.
-unittest {
-    @component struct Dummy1 {
+unittest
+{
+    @component struct Dummy1
+    {
     }
 
-    @component struct Dummy2 {
+    @component struct Dummy2
+    {
     }
 
     auto em = new EntityManager(new EventManager());
@@ -791,12 +867,15 @@ unittest {
 }
 
 // Test range interface for components!T
-unittest {
-    @component struct A {
+unittest
+{
+    @component struct A
+    {
         int a;
     }
 
-    @component struct B {
+    @component struct B
+    {
         string b;
     }
 
@@ -822,16 +901,19 @@ unittest {
 }
 
 // Test component accessors
-unittest {
+unittest
+{
     import std.conv;
 
     string output;
 
-    @component struct A {
+    @component struct A
+    {
         int i;
     }
 
-    @component struct B {
+    @component struct B
+    {
         string str;
     }
 
@@ -846,7 +928,8 @@ unittest {
     e3.register!A(3);
     e3.register!B("world");
 
-    void accessorForA(Entity e, A* a) {
+    void accessorForA(Entity e, A* a)
+    {
         assert(e == e1 || e == e3);
         output ~= a.i.to!string;
     }

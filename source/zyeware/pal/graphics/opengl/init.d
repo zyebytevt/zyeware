@@ -6,7 +6,8 @@ import r2d = zyeware.pal.graphics.opengl.Renderer2d.api;
 
 package(zyeware.pal):
 
-void load(ref GraphicsDriver driver) nothrow {
+void load(ref GraphicsDriver driver) nothrow
+{
     driver.api.initialize = &api.initialize;
     driver.api.cleanup = &api.cleanup;
     driver.api.createMesh = &api.createMesh;

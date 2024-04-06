@@ -16,7 +16,8 @@ import inmath.util : isVector;
 
 import zyeware;
 
-SDLNode* loadSdlDocument(string path) {
+SDLNode* loadSdlDocument(string path)
+{
     File file = Files.open(path);
     scope (exit)
         file.close();
@@ -28,8 +29,10 @@ SDLNode* loadSdlDocument(string path) {
     return root;
 }
 
-SDLNode* getChild(SDLNode* parent, string qualifiedName) nothrow {
-    foreach (ref SDLNode child; parent.children) {
+SDLNode* getChild(SDLNode* parent, string qualifiedName) nothrow
+{
+    foreach (ref SDLNode child; parent.children)
+    {
         if (child.qualifiedName == qualifiedName)
             return &child;
     }
@@ -37,27 +40,31 @@ SDLNode* getChild(SDLNode* parent, string qualifiedName) nothrow {
     return null;
 }
 
-SDLNode* expectChild(SDLNode* parent, string qualifiedName) {
+SDLNode* expectChild(SDLNode* parent, string qualifiedName)
+{
     auto child = getChild(parent, qualifiedName);
-    enforce!ResourceException(child, format!"Could not find child '%s' in '%s'."(
-            qualifiedName, parent.qualifiedName));
+    enforce!ResourceException(child,
+        format!"Could not find child '%s' in '%s'."(qualifiedName, parent.qualifiedName));
     return child;
 }
 
-T getValue(T)(in SDLNode* parent, T default_ = T.init) {
+T getValue(T)(in SDLNode* parent, T default_ = T.init)
+{
     if (!parent.values || parent.values.length == 0)
         return default_;
 
     return unmarshal!T(parent.values[0]);
 }
 
-T expectValue(T)(in SDLNode* node) {
-    enforce!ResourceException(node.values.length > 0, format!"Expected value in '%s'."(
-            node.qualifiedName));
+T expectValue(T)(in SDLNode* node)
+{
+    enforce!ResourceException(node.values.length > 0,
+        format!"Expected value in '%s'."(node.qualifiedName));
     return unmarshal!T(node.values[0]);
 }
 
-T getChildValue(T)(SDLNode* node, string childName, T default_ = T.init) {
+T getChildValue(T)(SDLNode* node, string childName, T default_ = T.init)
+{
     auto child = getChild(node, childName);
     if (!child)
         return default_;
@@ -65,29 +72,34 @@ T getChildValue(T)(SDLNode* node, string childName, T default_ = T.init) {
     return getValue!T(child, default_);
 }
 
-T expectChildValue(T)(SDLNode* parent, string childName) {
+T expectChildValue(T)(SDLNode* parent, string childName)
+{
     return expectValue!T(expectChild(parent, childName));
 }
 
-T getAttributeValue(T)(in SDLNode* node, string attributeName, T default_ = T.init) {
+T getAttributeValue(T)(in SDLNode* node, string attributeName, T default_ = T.init)
+{
     if (auto attribute = findAttribute(node, attributeName))
         return unmarshal!T(attribute.value);
 
     return default_;
 }
 
-T expectAttributeValue(T)(in SDLNode* node, string attributeName) {
+T expectAttributeValue(T)(in SDLNode* node, string attributeName)
+{
     if (auto attribute = findAttribute(node, attributeName))
         return unmarshal!T(attribute.value);
 
-    throw new ResourceException(format!"Expected attribute '%s' in '%s'."(attributeName, node
-            .qualifiedName));
+    throw new ResourceException(format!"Expected attribute '%s' in '%s'."(attributeName,
+            node.qualifiedName));
 }
 
 private:
 
-const(SDLAttribute)* findAttribute(in SDLNode* node, string attributeName) nothrow {
-    foreach (ref const SDLAttribute attribute; node.attributes) {
+const(SDLAttribute)* findAttribute(in SDLNode* node, string attributeName) nothrow
+{
+    foreach (ref const SDLAttribute attribute; node.attributes)
+    {
         if (attribute.qualifiedName == attributeName)
             return &attribute;
     }
@@ -95,7 +107,8 @@ const(SDLAttribute)* findAttribute(in SDLNode* node, string attributeName) nothr
     return null;
 }
 
-SDLValue marshal(T)(in T value) {
+SDLValue marshal(T)(in T value)
+{
     import std.conv : to;
 
     static if (isSomeString!T)
@@ -126,16 +139,19 @@ SDLValue marshal(T)(in T value) {
         static assert(false, "Cannot marshal type " ~ T.stringof);
 }
 
-T unmarshal(T)(in SDLValue value) {
-    static if (isSomeString!T || isNumeric!T || isBoolean!T || is(T == SysTime) || is(T == Date)
-        || is(T == Duration))
+T unmarshal(T)(in SDLValue value)
+{
+    static if (isSomeString!T || isNumeric!T || isBoolean!T
+        || is(T == SysTime) || is(T == Date) || is(T == Duration))
         return cast(T) value;
-    else static if (is(T == color)) {
+    else static if (is(T == color))
+    {
         if (value.isText)
             return color(value.textValue);
         else
             return color(unmarshalVector!vec4(value));
-    } else static if (isVector!T)
+    }
+    else static if (isVector!T)
         return unmarshalVector!T(value);
     else static if (isArray!T)
         return unmarshalArray!T(value);
@@ -143,11 +159,13 @@ T unmarshal(T)(in SDLValue value) {
         static assert(false, "Cannot unmarshal type " ~ T.stringof);
 }
 
-SDLValue[] marshalArray(T)(in T value) if (isArray!T) {
+SDLValue[] marshalArray(T)(in T value) if (isArray!T)
+{
     return value.map!((x) => marshal!(ElementType!T)(x)).array;
 }
 
-T unmarshalVector(T)(in SDLValue value) if (isVector!T) {
+T unmarshalVector(T)(in SDLValue value) if (isVector!T)
+{
     enum errorMessage = format!"Expected vector of type %s."(T.stringof);
 
     enforce!ResourceException(value.isArray, errorMessage);
@@ -156,13 +174,15 @@ T unmarshalVector(T)(in SDLValue value) if (isVector!T) {
     return T(values.map!((x) => unmarshal!(T.vt)(x)).array);
 }
 
-T unmarshalArray(T)(in SDLValue value) if (isArray!T) {
+T unmarshalArray(T)(in SDLValue value) if (isArray!T)
+{
     enforce!ResourceException(value.isArray, format!"Expected array of type %s."(T.stringof));
     return value.arrayValue.map!((x) => unmarshal!(ElementType!T)(x)).array;
 }
 
 @("SDLite convenience functions")
-unittest {
+unittest
+{
     import unit_threaded.assertions;
     import std.datetime : SysTime, Date, Duration;
 

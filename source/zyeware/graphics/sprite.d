@@ -9,7 +9,8 @@ import std.datetime : Duration;
 
 import zyeware;
 
-class Sprite2d {
+class Sprite2d
+{
 protected:
     TextureAtlas mTextureAtlas;
     vec2i mSize;
@@ -26,41 +27,45 @@ public:
     int layer = 0;
     size_t frame = 0;
 
-    this(Texture2d texture, vec2 offset = vec2.zero) @safe pure nothrow {
+    this(Texture2d texture, vec2 offset = vec2.zero) @safe pure nothrow
+    {
         mTextureAtlas = TextureAtlas(texture, 1, 1);
         mSize = texture.size;
         mOffset = offset;
     }
 
-    this(TextureAtlas textureAtlas, vec2i size, vec2 offset = vec2.zero) @safe pure nothrow {
+    this(TextureAtlas textureAtlas, vec2i size, vec2 offset = vec2.zero) @safe pure nothrow
+    {
         mTextureAtlas = textureAtlas;
         mSize = size;
         mOffset = offset;
     }
 
-    void draw() const {
+    void draw() const
+    {
         rect region = mTextureAtlas.getRegionForFrame(frame);
 
-        if (hFlip) {
+        if (hFlip)
+        {
             region.x = 1.0 - region.x;
             region.width = -region.width;
         }
 
-        if (vFlip) {
+        if (vFlip)
+        {
             region.y = 1.0 - region.y;
             region.height = -region.height;
         }
 
-        immutable dimensions = rect(
-            -mOffset.x, -mOffset.y,
-            mSize.x, mSize.y
-        );
+        immutable dimensions = rect(-mOffset.x, -mOffset.y, mSize.x, mSize.y);
 
-        Renderer.drawRect2d(dimensions, position, scale, rotation, modulate, mTextureAtlas.texture, layer, material, region);
+        Renderer.drawRect2d(dimensions, position, scale, rotation, modulate,
+            mTextureAtlas.texture, layer, material, region);
     }
 }
 
-class AnimatedSprite2d : Sprite2d {
+class AnimatedSprite2d : Sprite2d
+{
 protected:
     alias Animation = FrameAnimations.Animation;
 
@@ -73,35 +78,45 @@ protected:
 
 public:
     this(FrameAnimations animations, TextureAtlas textureAtlas, vec2i size, vec2 offset = vec2.zero)
-    in (animations, "Animations must not be null.") {
+    in (animations, "Animations must not be null.")
+    {
         super(textureAtlas, size, offset);
         mFrameAnimations = animations;
     }
 
-    void play(string animation) @safe pure nothrow {
+    void play(string animation) @safe pure nothrow
+    {
         currentAnimation = animation;
         isPlaying = true;
     }
 
-    void stop() @safe pure nothrow {
+    void stop() @safe pure nothrow
+    {
         mCurrentAnimation = null;
         mRemainingFrameTime = Duration.zero;
         isPlaying = false;
     }
 
-    void tick() {
-        if (!mIsPlaying || !mCurrentAnimation) {
+    void tick()
+    {
+        if (!mIsPlaying || !mCurrentAnimation)
+        {
             return;
         }
 
         mRemainingFrameTime -= ZyeWare.frameTime.deltaTime;
 
-        while (mRemainingFrameTime <= Duration.zero) {
+        while (mRemainingFrameTime <= Duration.zero)
+        {
             ++mAnimationFrame;
-            if (mAnimationFrame >= mCurrentAnimation.frames.length) {
-                if (mCurrentAnimation.isLooping) {
+            if (mAnimationFrame >= mCurrentAnimation.frames.length)
+            {
+                if (mCurrentAnimation.isLooping)
+                {
                     mAnimationFrame = 0;
-                } else {
+                }
+                else
+                {
                     stop();
                     return;
                 }
@@ -117,10 +132,12 @@ public:
 
     string currentAnimation() const @safe pure nothrow => mCurrentAnimationName;
 
-    string currentAnimation(string value) @safe pure nothrow {
+    string currentAnimation(string value) @safe pure nothrow
+    {
         Animation* animation = mFrameAnimations.getAnimation(value);
 
-        if (animation) {
+        if (animation)
+        {
             mCurrentAnimation = animation;
             mCurrentAnimationName = value;
             mAnimationFrame = 0;

@@ -9,7 +9,8 @@ import zyeware.pal.audio.openal.api;
 
 package(zyeware.pal):
 
-void load(ref AudioDriver driver) nothrow {
+void load(ref AudioDriver driver) nothrow
+{
     driver.initialize = &initialize;
     driver.loadLibraries = &loadLibraries;
     driver.cleanup = &cleanup;

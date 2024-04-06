@@ -12,7 +12,8 @@ import zyeware;
 /// 	worldPoint = The 2D position in world space.
 /// 
 /// Returns: The position in local space.
-vec2 inverseTransformPoint(in mat4 transform, in vec2 worldPoint) pure nothrow {
+vec2 inverseTransformPoint(in mat4 transform, in vec2 worldPoint) pure nothrow
+{
     return (transform.inverse * vec4(worldPoint, 0, 1)).xy;
 }
 
@@ -22,7 +23,8 @@ vec2 inverseTransformPoint(in mat4 transform, in vec2 worldPoint) pure nothrow {
 /// 	localPoint = The 2D position in local space.
 /// 
 /// Returns: The position in world space.
-vec2 transformPoint(in mat4 transform, in vec2 localPoint) pure nothrow {
+vec2 transformPoint(in mat4 transform, in vec2 localPoint) pure nothrow
+{
     return (transform * vec4(localPoint, 0, 1)).xy;
 }
 
@@ -32,7 +34,8 @@ vec2 transformPoint(in mat4 transform, in vec2 localPoint) pure nothrow {
 /// 	worldPoint = The 3D position in world space.
 /// 
 /// Returns: The position in local space.
-vec3 inverseTransformPoint(in mat4 transform, in vec3 worldPoint) pure nothrow {
+vec3 inverseTransformPoint(in mat4 transform, in vec3 worldPoint) pure nothrow
+{
     return (transform.inverse * vec4(worldPoint, 1)).xyz;
 }
 
@@ -42,12 +45,14 @@ vec3 inverseTransformPoint(in mat4 transform, in vec3 worldPoint) pure nothrow {
 /// 	localPoint = The 3D position in local space.
 /// 
 /// Returns: The position in world space.
-vec3 transformPoint(in mat4 transform, in vec3 localPoint) pure nothrow {
+vec3 transformPoint(in mat4 transform, in vec3 localPoint) pure nothrow
+{
     return (transform * vec4(localPoint, 1)).xyz;
 }
 
 @("Matrix vector transforms")
-unittest {
+unittest
+{
     import unit_threaded.assertions;
 
     // Test the 2D transform functions

@@ -22,21 +22,25 @@ package(zyeware.pal.graphics.opengl):
 bool[cast(size_t) RenderFlag.max + 1] pFlagValues;
 uint[UniformLocationKey] pUniformLocationCache;
 
-version (Windows) {
-    extern (Windows)
-    static void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-        stringz message, void* userParam) nothrow {
+version (Windows)
+{
+    extern (Windows) static void errorCallback(GLenum source, GLenum type,
+        GLuint id, GLenum severity, GLsizei length, stringz message, void* userParam) nothrow
+    {
         errorCallbackImpl(source, type, id, severity, length, message, userParam);
     }
-} else {
-    extern (C)
-    static void errorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-        stringz message, void* userParam) nothrow {
+}
+else
+{
+    extern (C) static void errorCallback(GLenum source, GLenum type, GLuint id,
+        GLenum severity, GLsizei length, stringz message, void* userParam) nothrow
+    {
         errorCallbackImpl(source, type, id, severity, length, message, userParam);
     }
 }
 
-uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name) nothrow {
+uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name) nothrow
+{
     immutable uint id = *(cast(uint*) shader);
     glUseProgram(id);
 
@@ -48,15 +52,16 @@ uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string nam
     return *location;
 }
 
-pragma(inline, true)
-static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-    stringz message, void* userParam) nothrow {
+pragma(inline, true) static void errorCallbackImpl(GLenum source, GLenum type,
+    GLuint id, GLenum severity, GLsizei length, stringz message, void* userParam) nothrow
+{
     glGetError();
 
     string typeName;
     LogLevel logLevel;
 
-    switch (type) {
+    switch (type)
+    {
     case GL_DEBUG_TYPE_ERROR:
         typeName = "Error";
         break;
@@ -78,7 +83,8 @@ static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum seve
         return;
     }
 
-    switch (severity) {
+    switch (severity)
+    {
     case GL_DEBUG_SEVERITY_LOW:
         logLevel = LogLevel.info;
         break;
@@ -99,7 +105,8 @@ static void errorCallbackImpl(GLenum source, GLenum type, GLuint id, GLenum seve
     Logger.core.log(logLevel, format!"%s: %s"(typeName, message.fromStringz).assumeWontThrow);
 }
 
-void initialize() {
+void initialize()
+{
     import loader = bindbc.loader.sharedlib;
 
     if (isOpenGLLoaded())
@@ -107,11 +114,13 @@ void initialize() {
 
     immutable glResult = loadOpenGL();
 
-    if (glResult != glSupport) {
+    if (glResult != glSupport)
+    {
         foreach (info; loader.errors)
             Logger.core.warning("OpenGL loader: %s", info.message.fromStringz);
 
-        switch (glResult) {
+        switch (glResult)
+        {
         case GLSupport.noLibrary:
             throw new GraphicsException("Could not find OpenGL shared library.");
 
@@ -168,10 +177,12 @@ void initialize() {
     Logger.core.info("    Extensions: %s", glGetString(GL_EXTENSIONS).fromStringz);
 }
 
-void cleanup() {
+void cleanup()
+{
 }
 
-NativeHandle createMesh(in Vertex3d[] vertices, in uint[] indices) {
+NativeHandle createMesh(in Vertex3d[] vertices, in uint[] indices)
+{
     auto data = new MeshData;
 
     glGenVertexArrays(1, &data.vao);
@@ -189,27 +200,28 @@ NativeHandle createMesh(in Vertex3d[] vertices, in uint[] indices) {
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
-            .position.offsetof);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, Vertex3d.sizeof,
+        cast(void*) Vertex3d.position.offsetof);
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
-            .normal.offsetof);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, Vertex3d.sizeof,
+        cast(void*) Vertex3d.normal.offsetof);
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
-            .uv.offsetof);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, Vertex3d.sizeof,
+        cast(void*) Vertex3d.uv.offsetof);
     // vertex modulate
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3d.sizeof, cast(void*) Vertex3d
-            .modulate.offsetof);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, Vertex3d.sizeof,
+        cast(void*) Vertex3d.modulate.offsetof);
 
     glBindVertexArray(0);
 
     return cast(NativeHandle) data;
 }
 
-NativeHandle createTexture2D(in Image image, in TextureProperties properties) {
+NativeHandle createTexture2D(in Image image, in TextureProperties properties)
+{
     const(ubyte)[] pixels = image.pixels;
 
     assert(pixels.length <= image.size.x * image.size.y * image.channels,
@@ -217,7 +229,8 @@ NativeHandle createTexture2D(in Image image, in TextureProperties properties) {
 
     GLenum internalFormat, srcFormat;
 
-    final switch (image.channels) {
+    final switch (image.channels)
+    {
     case 1:
     case 2:
         internalFormat = GL_ALPHA;
@@ -241,8 +254,8 @@ NativeHandle createTexture2D(in Image image, in TextureProperties properties) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, *id);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y, 0, srcFormat, GL_UNSIGNED_BYTE, pixels
-            .ptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y,
+        0, srcFormat, GL_UNSIGNED_BYTE, pixels.ptr);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, getGLFilter(properties.minFilter));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, getGLFilter(properties.magFilter));
@@ -256,17 +269,20 @@ NativeHandle createTexture2D(in Image image, in TextureProperties properties) {
     return cast(NativeHandle) id;
 }
 
-NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties) {
+NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties properties)
+{
     auto id = new uint;
 
     glGenTextures(1, id);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, *id);
 
-    for (size_t i; i < 6; ++i) {
+    for (size_t i; i < 6; ++i)
+    {
         GLenum internalFormat, srcFormat;
 
-        final switch (images[i].channels) {
+        final switch (images[i].channels)
+        {
         case 1:
         case 2:
             internalFormat = GL_ALPHA;
@@ -284,8 +300,8 @@ NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties prope
             break;
         }
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cast(int) i, 0, internalFormat, images[i].size.x, images[i]
-                .size.y, 0, srcFormat,
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cast(int) i, 0,
+            internalFormat, images[i].size.x, images[i].size.y, 0, srcFormat,
             GL_UNSIGNED_BYTE, images[i].pixels.ptr);
     }
 
@@ -301,29 +317,33 @@ NativeHandle createTextureCubeMap(in Image[6] images, in TextureProperties prope
     return cast(NativeHandle) id;
 }
 
-NativeHandle createFramebuffer(in FramebufferProperties properties) {
+NativeHandle createFramebuffer(in FramebufferProperties properties)
+{
     auto framebuffer = new FramebufferData;
 
     glGenFramebuffers(1, &framebuffer.id);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.id);
 
     // Create the modulate attachment based on the properties.
-    final switch (properties.usageType) with (FramebufferProperties.UsageType) {
+    final switch (properties.usageType) with (FramebufferProperties.UsageType)
+    {
     case swapChainTarget:
         glGenRenderbuffers(1, &framebuffer.colorAttachmentId);
         glBindRenderbuffer(GL_RENDERBUFFER, framebuffer.colorAttachmentId);
 
         glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, properties.size.x, properties.size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, framebuffer
-                .colorAttachmentId);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_RENDERBUFFER, framebuffer.colorAttachmentId);
         break;
 
     case texture:
         glGenTextures(1, &framebuffer.colorAttachmentId);
         glBindTexture(GL_TEXTURE_2D, framebuffer.colorAttachmentId);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, properties.size.x, properties.size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffer.colorAttachmentId, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, properties.size.x,
+            properties.size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D, framebuffer.colorAttachmentId, 0);
         break;
     }
 
@@ -331,28 +351,32 @@ NativeHandle createFramebuffer(in FramebufferProperties properties) {
     glGenRenderbuffers(1, &framebuffer.depthAttachmentId);
     glBindRenderbuffer(GL_RENDERBUFFER, framebuffer.depthAttachmentId);
 
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, properties.size.x, properties
-            .size.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer
-            .depthAttachmentId);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+        properties.size.x, properties.size.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+        GL_RENDERBUFFER, framebuffer.depthAttachmentId);
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
+        "Framebuffer is incomplete.");
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return cast(NativeHandle) framebuffer;
 }
 
-NativeHandle createShader(in ShaderProperties properties) {
+NativeHandle createShader(in ShaderProperties properties)
+{
     auto id = new uint;
     *id = glCreateProgram();
 
-    foreach (ShaderProperties.ShaderType type, string source; properties.sources) {
+    foreach (ShaderProperties.ShaderType type, string source; properties.sources)
+    {
         GLenum shaderType;
 
-        final switch (type) with (ShaderProperties.ShaderType) {
+        final switch (type) with (ShaderProperties.ShaderType)
+        {
         case vertex:
             shaderType = GL_VERTEX_SHADER;
             break;
@@ -380,7 +404,8 @@ NativeHandle createShader(in ShaderProperties properties) {
         int success;
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
 
-        if (!success) {
+        if (!success)
+        {
             char[2048] infoLog;
             GLsizei length;
             glGetShaderInfoLog(shaderID, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
@@ -397,7 +422,8 @@ NativeHandle createShader(in ShaderProperties properties) {
     int success;
     glGetProgramiv(*id, GL_LINK_STATUS, &success);
 
-    if (!success) {
+    if (!success)
+    {
         char[2048] infoLog;
         GLsizei length;
         glGetProgramInfoLog(*id, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
@@ -407,7 +433,8 @@ NativeHandle createShader(in ShaderProperties properties) {
     glValidateProgram(*id);
     glGetProgramiv(*id, GL_VALIDATE_STATUS, &success);
 
-    if (!success) {
+    if (!success)
+    {
         char[2048] infoLog;
         GLsizei length;
         glGetProgramInfoLog(*id, cast(GLsizei) infoLog.length, &length, &infoLog[0]);
@@ -417,7 +444,8 @@ NativeHandle createShader(in ShaderProperties properties) {
     return cast(NativeHandle) id;
 }
 
-void freeMesh(NativeHandle mesh) nothrow {
+void freeMesh(NativeHandle mesh) nothrow
+{
     auto data = cast(MeshData*) mesh;
 
     glDeleteBuffers(1, &data.vbo);
@@ -427,7 +455,8 @@ void freeMesh(NativeHandle mesh) nothrow {
     destroy(data);
 }
 
-void freeTexture2D(NativeHandle texture) nothrow {
+void freeTexture2D(NativeHandle texture) nothrow
+{
     auto id = cast(uint*) texture;
 
     glDeleteTextures(1, id);
@@ -435,11 +464,13 @@ void freeTexture2D(NativeHandle texture) nothrow {
     destroy(id);
 }
 
-void freeTextureCubeMap(NativeHandle texture) nothrow {
+void freeTextureCubeMap(NativeHandle texture) nothrow
+{
     freeTexture2D(texture);
 }
 
-void freeFramebuffer(NativeHandle framebuffer) nothrow {
+void freeFramebuffer(NativeHandle framebuffer) nothrow
+{
     auto data = cast(FramebufferData*) framebuffer;
 
     glDeleteFramebuffers(1, &data.id);
@@ -455,7 +486,8 @@ void freeFramebuffer(NativeHandle framebuffer) nothrow {
     destroy(data);
 }
 
-void freeShader(NativeHandle shader) nothrow {
+void freeShader(NativeHandle shader) nothrow
+{
     auto id = cast(uint*) shader;
 
     glDeleteProgram(*id);
@@ -463,15 +495,18 @@ void freeShader(NativeHandle shader) nothrow {
     destroy(id);
 }
 
-void setViewport(recti region) nothrow {
+void setViewport(recti region) nothrow
+{
     glViewport(region.x, region.y, region.width, region.height);
 }
 
-void setRenderFlag(RenderFlag flag, bool value) nothrow {
+void setRenderFlag(RenderFlag flag, bool value) nothrow
+{
     if (pFlagValues[cast(size_t) flag] == value)
         return;
 
-    final switch (flag) with (RenderFlag) {
+    final switch (flag) with (RenderFlag)
+    {
     case depthTesting:
         if (value)
             glEnable(GL_DEPTH_TEST);
@@ -505,12 +540,15 @@ void setRenderFlag(RenderFlag flag, bool value) nothrow {
     pFlagValues[cast(size_t) flag] = value;
 }
 
-bool getRenderFlag(RenderFlag flag) nothrow {
+bool getRenderFlag(RenderFlag flag) nothrow
+{
     return pFlagValues[cast(size_t) flag];
 }
 
-size_t getCapability(RenderCapability capability) nothrow {
-    final switch (capability) with (RenderCapability) {
+size_t getCapability(RenderCapability capability) nothrow
+{
+    final switch (capability) with (RenderCapability)
+    {
     case maxTextureSlots:
         GLint result;
         glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &result);
@@ -518,25 +556,30 @@ size_t getCapability(RenderCapability capability) nothrow {
     }
 }
 
-void clearScreen(color clearColor) nothrow {
+void clearScreen(color clearColor) nothrow
+{
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void setRenderTarget(in NativeHandle target) nothrow {
+void setRenderTarget(in NativeHandle target) nothrow
+{
     glBindFramebuffer(GL_FRAMEBUFFER, target ? *(cast(uint*) target) : 0);
 }
 
-void presentToScreen(in NativeHandle framebuffer, recti srcRegion, recti dstRegion) nothrow {
+void presentToScreen(in NativeHandle framebuffer, recti srcRegion, recti dstRegion) nothrow
+{
     glBindFramebuffer(GL_READ_FRAMEBUFFER, *(cast(uint*) framebuffer));
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glBlitFramebuffer(srcRegion.x, srcRegion.y, srcRegion.width, srcRegion.height, dstRegion.x, dstRegion.y,
-        dstRegion.width, dstRegion.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(srcRegion.x, srcRegion.y, srcRegion.width, srcRegion.height,
+        dstRegion.x, dstRegion.y, dstRegion.width, dstRegion.height,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
-NativeHandle getTextureFromFramebuffer(in NativeHandle framebuffer) nothrow {
+NativeHandle getTextureFromFramebuffer(in NativeHandle framebuffer) nothrow
+{
     FramebufferData* data = cast(FramebufferData*) framebuffer;
 
     assert(glIsTexture(data.colorAttachmentId), "Framebuffer modulate attachment is not a texture.");
@@ -544,28 +587,34 @@ NativeHandle getTextureFromFramebuffer(in NativeHandle framebuffer) nothrow {
     return cast(NativeHandle)&data.colorAttachmentId;
 }
 
-void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow {
+void setShaderUniform1f(in NativeHandle shader, in string name, in float value) nothrow
+{
     glUniform1f(prepareShaderUniformAssignAndGetLocation(shader, name), value);
 }
 
-void setShaderUniform2f(in NativeHandle shader, in string name, in vec2 value) nothrow {
+void setShaderUniform2f(in NativeHandle shader, in string name, in vec2 value) nothrow
+{
     glUniform2f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y);
 }
 
-void setShaderUniform3f(in NativeHandle shader, in string name, in vec3 value) nothrow {
+void setShaderUniform3f(in NativeHandle shader, in string name, in vec3 value) nothrow
+{
     glUniform3f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z);
 }
 
-void setShaderUniform4f(in NativeHandle shader, in string name, in vec4 value) nothrow {
-    glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name), value.x, value.y, value.z, value
-            .w);
+void setShaderUniform4f(in NativeHandle shader, in string name, in vec4 value) nothrow
+{
+    glUniform4f(prepareShaderUniformAssignAndGetLocation(shader, name),
+        value.x, value.y, value.z, value.w);
 }
 
-void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow {
+void setShaderUniform1i(in NativeHandle shader, in string name, in int value) nothrow
+{
     glUniform1i(prepareShaderUniformAssignAndGetLocation(shader, name), value);
 }
 
-void setShaderUniformMat4f(in NativeHandle shader, in string name, in mat4 value) nothrow {
-    glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name), 1, GL_TRUE, value
-            .ptr);
+void setShaderUniformMat4f(in NativeHandle shader, in string name, in mat4 value) nothrow
+{
+    glUniformMatrix4fv(prepareShaderUniformAssignAndGetLocation(shader, name),
+        1, GL_TRUE, value.ptr);
 }

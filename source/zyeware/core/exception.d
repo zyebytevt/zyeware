@@ -5,39 +5,47 @@
 // Copyright 2021 ZyeByte
 module zyeware.core.exception;
 
-private mixin template GenericExceptionCtor() {
-    this(string message, string file = __FILE__,
-        size_t line = __LINE__, Throwable next = null) pure nothrow {
+private mixin template GenericExceptionCtor()
+{
+    this(string message, string file = __FILE__, size_t line = __LINE__, Throwable next = null) pure nothrow
+    {
         super(message, file, line, next);
     }
 }
 
-class CoreException : Exception {
+class CoreException : Exception
+{
     mixin GenericExceptionCtor;
 }
 
-class VfsException : Exception {
+class VfsException : Exception
+{
     mixin GenericExceptionCtor;
 }
 
-class ResourceException : Exception {
+class ResourceException : Exception
+{
     mixin GenericExceptionCtor;
 }
 
 // ===== PAL Exceptions =====
 
-class DisplayException : Exception {
+class DisplayException : Exception
+{
     mixin GenericExceptionCtor;
 }
 
-class AudioException : Exception {
+class AudioException : Exception
+{
     mixin GenericExceptionCtor;
 }
 
-class GraphicsException : Exception {
+class GraphicsException : Exception
+{
     mixin GenericExceptionCtor;
 }
 
-class RenderException : Exception {
+class RenderException : Exception
+{
     mixin GenericExceptionCtor;
 }

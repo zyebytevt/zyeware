@@ -10,12 +10,14 @@ import zyeware.pal.generic.types.audio;
 
 package:
 
-struct BufferData {
+struct BufferData
+{
     const(ubyte[]) encodedMemory;
     LoopPoint loopPoint;
 }
 
-struct SourceData {
+struct SourceData
+{
     uint id;
     uint[] bufferIds;
     short[] processingBuffer;
@@ -32,7 +34,8 @@ struct SourceData {
     const(BusData)* bus;
 }
 
-struct BusData {
+struct BusData
+{
     string name;
     float volume = 1f;
 }

@@ -14,8 +14,8 @@ import zyeware.ecs;
 /// The `CameraComponent`, when attached, will set the current entity as
 /// a possible viewpoint in 2D or 3D space, depending on the type of
 /// transform component.
-@component
-struct CameraComponent {
+@component struct CameraComponent
+{
 	Camera camera; /// The camera used for rendering.
 	//Environment environment; /// The environment for this camera.
 	Flag!"active" active; /// If this camera is currently the active one.

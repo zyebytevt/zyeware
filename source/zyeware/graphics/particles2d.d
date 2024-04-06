@@ -19,30 +19,36 @@ import zyeware;
 
 alias ParticleRegistrationId = size_t;
 
-class Particles2d {
+class Particles2d
+{
 protected:
     ParticleContainer*[ParticleRegistrationId] mParticles;
     ParticleRegistrationId mNextTypeId = 1;
 
 public:
-    ParticleRegistrationId registerType(in ParticleProperties2d type, size_t maxParticles) {
-        enforce!RenderException(type.typeOnDeath != mNextTypeId, "Cannot spawn same particle type on death.");
+    ParticleRegistrationId registerType(in ParticleProperties2d type, size_t maxParticles)
+    {
+        enforce!RenderException(type.typeOnDeath != mNextTypeId,
+            "Cannot spawn same particle type on death.");
 
         immutable size_t nextId = mNextTypeId++;
         mParticles[nextId] = new ParticleContainer(type, maxParticles);
         return nextId;
     }
 
-    void unregisterType(ParticleRegistrationId id) nothrow {
+    void unregisterType(ParticleRegistrationId id) nothrow
+    {
         mParticles.remove(id);
     }
 
-    void emit(ParticleRegistrationId id, vec2 position, size_t amount) {
+    void emit(ParticleRegistrationId id, vec2 position, size_t amount)
+    {
         ParticleContainer* particles = mParticles.get(id, null);
-        enforce!RenderException(particles, format!"Particle type id %d has not been added to the system."(
-                id));
+        enforce!RenderException(particles,
+            format!"Particle type id %d has not been added to the system."(id));
 
-        for (size_t i; i < amount; ++i) {
+        for (size_t i; i < amount; ++i)
+        {
             if (particles.activeParticlesCount >= particles.positions.length)
                 break;
 
@@ -50,13 +56,17 @@ public:
         }
     }
 
-    void tick() {
+    void tick()
+    {
         immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
 
-        foreach (ParticleContainer* particles; mParticles.values) {
-            for (size_t i; i < particles.activeParticlesCount; ++i) {
+        foreach (ParticleContainer* particles; mParticles.values)
+        {
+            for (size_t i; i < particles.activeParticlesCount; ++i)
+            {
                 particles.lifeTimes[i] -= ZyeWare.frameTime.deltaTime;
-                if (particles.lifeTimes[i] <= Duration.zero) {
+                if (particles.lifeTimes[i] <= Duration.zero)
+                {
                     particles.remove(i);
 
                     if (particles.type.typeOnDeath > ParticleRegistrationId.init)
@@ -72,13 +82,16 @@ public:
         }
     }
 
-    void draw(in FrameTime nextFrameTime) {
+    void draw(in FrameTime nextFrameTime)
+    {
         immutable float delta = nextFrameTime.deltaTime.toFloatSeconds;
 
-        foreach (ParticleContainer* particles; mParticles.values) {
+        foreach (ParticleContainer* particles; mParticles.values)
+        {
             immutable static rect dimensions = rect(-2, -2, 2, 2);
 
-            for (size_t i; i < particles.activeParticlesCount; ++i) {
+            for (size_t i; i < particles.activeParticlesCount; ++i)
+            {
                 immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(
                         float) particles.startLifeTimes[i].total!"hnsecs");
                 immutable vec2 position = particles.positions[i] + particles.velocities[i] * delta;
@@ -89,13 +102,14 @@ public:
                 if (isNaN(modulate.r) || isNaN(modulate.g) || isNaN(modulate.b) || isNaN(modulate.a))
                     modulate = color("white");
 
-                Renderer.drawRect2d(dimensions, position, vec2(particles.sizes[i]), particles.rotations[i],
-                    modulate, particles.type.texture);
+                Renderer.drawRect2d(dimensions, position, vec2(particles.sizes[i]),
+                    particles.rotations[i], modulate, particles.type.texture);
             }
         }
     }
 
-    size_t count() pure nothrow {
+    size_t count() pure nothrow
+    {
         // is "total"; redeemed by TheFrozenKnights
         size_t bigDEnergy;
 
@@ -106,7 +120,8 @@ public:
     }
 }
 
-struct ParticleProperties2d {
+struct ParticleProperties2d
+{
 public:
     Texture2d texture;
     auto size = Range!float(1, 1);
@@ -119,7 +134,8 @@ public:
     ParticleRegistrationId typeOnDeath;
 }
 
-private struct ParticleContainer {
+private struct ParticleContainer
+{
     ParticleProperties2d type;
     vec2[] positions;
     float[] sizes;
@@ -130,7 +146,8 @@ private struct ParticleContainer {
 
     size_t activeParticlesCount;
 
-    this(in ParticleProperties2d type, size_t count) pure nothrow {
+    this(in ParticleProperties2d type, size_t count) pure nothrow
+    {
         this.type = cast(ParticleProperties2d) type;
 
         positions = new vec2[count];
@@ -141,7 +158,8 @@ private struct ParticleContainer {
         startLifeTimes = new Duration[count];
     }
 
-    ~this() {
+    ~this()
+    {
         positions.dispose();
         sizes.dispose();
         rotations.dispose();
@@ -150,13 +168,14 @@ private struct ParticleContainer {
         startLifeTimes.dispose();
     }
 
-    void add(in vec2 position) {
+    void add(in vec2 position)
+    {
         assert(activeParticlesCount < positions.length, "No more free particles.");
 
         positions[activeParticlesCount] = position;
         sizes[activeParticlesCount] = ZyeWare.random.getRange(type.size.min, type.size.max);
-        rotations[activeParticlesCount] = ZyeWare.random.getRange(type.spriteAngle.min, type
-                .spriteAngle.max);
+        rotations[activeParticlesCount] = ZyeWare.random.getRange(type.spriteAngle.min,
+            type.spriteAngle.max);
 
         immutable float speed = ZyeWare.random.getRange(type.speed.min, type.speed.max);
         immutable float direction = ZyeWare.random.getRange(type.direction.min, type.direction.max);
@@ -169,7 +188,8 @@ private struct ParticleContainer {
         ++activeParticlesCount;
     }
 
-    void remove(size_t idx) {
+    void remove(size_t idx)
+    {
         assert(activeParticlesCount > 0, "No active particles to remove.");
 
         positions[idx] = positions[activeParticlesCount - 1];

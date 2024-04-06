@@ -8,21 +8,26 @@ module zyeware.thinker.fsm;
 import zyeware;
 import zyeware.thinker;
 
-abstract class StateThinker : Thinker {
+abstract class StateThinker : Thinker
+{
 private:
     FiniteStateMachine mFsm;
 
 protected:
-    void addState(string name, void delegate() tick, void delegate() enter = null, void delegate() exit = null) {
+    void addState(string name, void delegate() tick, void delegate() enter = null,
+        void delegate() exit = null)
+    {
         mFsm.addState(name, FiniteStateMachine.State(tick, enter, exit));
     }
 
-    void removeState(string name) {
+    void removeState(string name)
+    {
         mFsm.removeState(name);
     }
 
 public:
-    override void tick() {
+    override void tick()
+    {
         mFsm.tick();
     }
 }

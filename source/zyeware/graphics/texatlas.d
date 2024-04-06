@@ -7,42 +7,40 @@ module zyeware.graphics.texatlas;
 
 import zyeware;
 
-struct TextureAtlas {
+struct TextureAtlas
+{
 private:
     Texture2d mTexture;
     size_t mHFrames, mVFrames;
 
 public:
-    this(string path, size_t hFrames, size_t vFrames) {
+    this(string path, size_t hFrames, size_t vFrames)
+    {
         this(AssetManager.load!Texture2d(path), hFrames, vFrames);
     }
 
-    this(Texture2d texture, size_t hFrames, size_t vFrames) @safe pure nothrow {
+    this(Texture2d texture, size_t hFrames, size_t vFrames) @safe pure nothrow
+    {
         mTexture = texture;
         mHFrames = hFrames;
         mVFrames = vFrames;
     }
 
-    rect getRegionForFrame(size_t frame) @safe pure const nothrow {
+    rect getRegionForFrame(size_t frame) @safe pure const nothrow
+    {
         immutable float x1 = cast(float)(frame % mHFrames) / mHFrames;
         immutable float y1 = cast(float)(frame / mHFrames) / mVFrames;
 
-        return rect(
-            x1,
-            y1,
-            1.0f / mHFrames,
-            1.0f / mVFrames
-        );
+        return rect(x1, y1, 1.0f / mHFrames, 1.0f / mVFrames);
     }
 
-    vec2 spriteSize() @safe pure const nothrow {
-        return vec2(
-            mTexture.size.x / mHFrames,
-            mTexture.size.y / mVFrames
-        );
+    vec2 spriteSize() @safe pure const nothrow
+    {
+        return vec2(mTexture.size.x / mHFrames, mTexture.size.y / mVFrames);
     }
 
-    inout(Texture2d) texture() @safe pure inout nothrow {
+    inout(Texture2d) texture() @safe pure inout nothrow
+    {
         return mTexture;
     }
 }

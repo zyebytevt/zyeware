@@ -9,7 +9,8 @@ import zyeware.pal.display.sdl.api;
 
 package(zyeware.pal):
 
-void load(ref DisplayDriver driver) nothrow {
+void load(ref DisplayDriver driver) nothrow
+{
     driver.createDisplay = &createDisplay;
     driver.destroyDisplay = &destroyDisplay;
     driver.update = &update;

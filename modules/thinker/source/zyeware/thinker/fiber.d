@@ -12,7 +12,8 @@ import std.datetime : Duration, dur;
 import zyeware;
 import zyeware.thinker;
 
-abstract class FiberThinker : Thinker {
+abstract class FiberThinker : Thinker
+{
 private:
     Fiber mFiber;
     Duration mWaitTime;
@@ -20,7 +21,8 @@ private:
 
 protected:
     /// Yields control back to the entity manager. This essentially waits for one tick.
-    final void wait() {
+    final void wait()
+    {
         mFiber.yield();
     }
 
@@ -28,8 +30,8 @@ protected:
     ///
     /// Params:
     ///     seconds = The amount of milliseconds to wait.
-    pragma(inline, true)
-    final void wait(long msecs) {
+    pragma(inline, true) final void wait(long msecs)
+    {
         wait(dur!"msecs"(msecs));
     }
 
@@ -37,7 +39,8 @@ protected:
     /// 
     /// Params:
     ///     time = The amount of time to wait.
-    final void wait(in Duration time) {
+    final void wait(in Duration time)
+    {
         mWaitTime = time;
         mFiber.yield();
     }
@@ -46,7 +49,8 @@ protected:
     /// 
     /// Params:
     ///     signal = The signal to wait for.
-    final void wait(ref Signal!() signal) {
+    final void wait(ref Signal!() signal)
+    {
         mIsWaitingForSignal = true;
         signal.connect(() { mIsWaitingForSignal = false; }, Yes.oneShot);
         mFiber.yield();
@@ -57,7 +61,8 @@ protected:
     ///
     /// Params:
     ///     signal = The signal to wait for.
-    T wait(T)(ref Signal!(T) signal) {
+    T wait(T)(ref Signal!(T) signal)
+    {
         T result;
         mIsWaitingForSignal = true;
         signal.connect((T value) { result = value; mIsWaitingForSignal = false; }, Yes.oneShot);
@@ -65,39 +70,43 @@ protected:
         return result;
     }
 
-    this() {
+    this()
+    {
         mFiber = new Fiber(&think);
     }
 
-    ~this() {
+    ~this()
+    {
         destroy(mFiber);
     }
 
     abstract void think();
 
 public:
-    override void tick() {
-        if (mFiber.state == Fiber.State.TERM) {
+    override void tick()
+    {
+        if (mFiber.state == Fiber.State.TERM)
+        {
             free();
             return;
         }
 
-        if (mWaitTime > Duration.zero) {
+        if (mWaitTime > Duration.zero)
+        {
             mWaitTime -= ZyeWare.frameTime.deltaTime;
             return;
         }
 
-        if (mIsWaitingForSignal) {
+        if (mIsWaitingForSignal)
             return;
-        }
 
         mFiber.call!(Fiber.Rethrow.yes);
     }
 
-    override void free() @trusted {
-        if (mFiber.state == Fiber.State.EXEC) {
+    override void free() @trusted
+    {
+        if (mFiber.state == Fiber.State.EXEC)
             mFiber.yield();
-        }
 
         super.free();
     }

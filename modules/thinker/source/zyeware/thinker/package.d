@@ -5,7 +5,8 @@
 // Copyright 2024 ZyeByte
 module zyeware.thinker;
 
-public {
+public
+{
     import zyeware.thinker.manager;
     import zyeware.thinker.thinker;
     import zyeware.thinker.fiber;

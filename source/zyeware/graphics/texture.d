@@ -12,15 +12,18 @@ import std.algorithm : countUntil;
 import zyeware;
 import zyeware.pal.pal;
 
-struct TextureProperties {
-    enum Filter {
+struct TextureProperties
+{
+    enum Filter
+    {
         nearest,
         linear,
         bilinear,
         trilinear
     }
 
-    enum WrapMode {
+    enum WrapMode
+    {
         repeat,
         mirroredRepeat,
         clampToEdge
@@ -31,12 +34,14 @@ struct TextureProperties {
     bool generateMipmaps = true;
 }
 
-interface Texture : NativeObject {
+interface Texture : NativeObject
+{
     const(TextureProperties) properties() pure const nothrow;
 }
 
 @asset(Yes.cache)
-class Texture2d : Texture {
+class Texture2d : Texture
+{
 protected:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
@@ -45,37 +50,44 @@ protected:
 package(zyeware):
     /// Careful: This will take ownership of the given handle.
     this(NativeHandle handle, in vec2i size, in TextureProperties properties = TextureProperties
-            .init) nothrow {
+            .init) nothrow
+    {
         mProperties = properties;
         mSize = size;
         mNativeHandle = handle;
     }
 
 public:
-    this(in Image image, in TextureProperties properties = TextureProperties.init) {
+    this(in Image image, in TextureProperties properties = TextureProperties.init)
+    {
         mProperties = properties;
         mSize = image.size;
         mNativeHandle = Pal.graphics.api.createTexture2D(image, mProperties);
     }
 
-    ~this() {
+    ~this()
+    {
         Pal.graphics.api.freeTexture2D(mNativeHandle);
     }
 
-    const(TextureProperties) properties() @safe pure const nothrow {
+    const(TextureProperties) properties() @safe pure const nothrow
+    {
         return mProperties;
     }
 
-    const(NativeHandle) handle() @safe pure const nothrow {
+    const(NativeHandle) handle() @safe pure const nothrow
+    {
         return mNativeHandle;
     }
 
-    const(vec2i) size() @safe pure const nothrow {
+    const(vec2i) size() @safe pure const nothrow
+    {
         return mSize;
     }
 
     // TODO: Implement ZDL loading of texture properties
-    static Texture2d load(string path) {
+    static Texture2d load(string path)
+    {
         TextureProperties properties;
         Image img = AssetManager.load!Image(path);
 
@@ -87,30 +99,36 @@ public:
 }
 
 @asset(Yes.cache)
-class TextureCubeMap : Texture {
+class TextureCubeMap : Texture
+{
 protected:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
 
 public:
-    this(in Image[6] images, in TextureProperties properties = TextureProperties.init) {
+    this(in Image[6] images, in TextureProperties properties = TextureProperties.init)
+    {
         mProperties = properties;
         mNativeHandle = Pal.graphics.api.createTextureCubeMap(images, properties);
     }
 
-    ~this() {
+    ~this()
+    {
         Pal.graphics.api.freeTextureCubeMap(mNativeHandle);
     }
 
-    const(TextureProperties) properties() pure const nothrow {
+    const(TextureProperties) properties() pure const nothrow
+    {
         return mProperties;
     }
 
-    const(NativeHandle) handle() pure const nothrow {
+    const(NativeHandle) handle() pure const nothrow
+    {
         return mNativeHandle;
     }
 
-    static TextureCubeMap load(string path) {
+    static TextureCubeMap load(string path)
+    {
         TextureProperties properties;
         Image[6] images;
 
@@ -128,24 +146,30 @@ public:
     }
 }
 
-private void parseTextureProperties(string path, out TextureProperties properties) {
-    try {
+private void parseTextureProperties(string path, out TextureProperties properties)
+{
+    try
+    {
         SDLNode* root = loadSdlDocument(path);
 
-        if (SDLNode* filter = root.getChild("filter")) {
+        if (SDLNode* filter = root.getChild("filter"))
+        {
             properties.minFilter = filter.expectAttributeValue!string("min")
                 .to!(TextureProperties.Filter);
             properties.magFilter = filter.expectAttributeValue!string("mag")
                 .to!(TextureProperties.Filter);
         }
 
-        if (SDLNode* wrap = root.getChild("wrap")) {
+        if (SDLNode* wrap = root.getChild("wrap"))
+        {
             properties.wrapS = wrap.expectAttributeValue!string("s")
                 .to!(TextureProperties.WrapMode);
             properties.wrapT = wrap.expectAttributeValue!string("t")
                 .to!(TextureProperties.WrapMode);
         }
-    } catch (Exception ex) {
+    }
+    catch (Exception ex)
+    {
         Logger.core.warning("Failed to parse properties file for '%s': %s", path, ex.message);
     }
 }

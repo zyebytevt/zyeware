@@ -6,29 +6,28 @@ import std.sumtype : SumType, match;
 
 import zyeware;
 
-struct Signal(T1...) {
+struct Signal(T1...)
+{
 private:
     alias delegate_t = void delegate(T1);
     alias delegate_nothrow_t = void delegate(T1) nothrow;
     alias function_t = void function(T1);
     alias function_nothrow_t = void function(T1) nothrow;
 
-    alias callbacks_t = AliasSeq!(
-        delegate_t,
-        delegate_nothrow_t,
-        function_t,
-        function_nothrow_t
-    );
+    alias callbacks_t = AliasSeq!(delegate_t, delegate_nothrow_t, function_t, function_nothrow_t);
 
-    struct Slot {
+    struct Slot
+    {
         SumType!callbacks_t callback;
         bool isOneShot;
     }
 
     Slot[] mSlots;
 
-    ptrdiff_t findSlot(T)(T callback) @trusted pure nothrow {
-        for (size_t i; i < mSlots.length; ++i) {
+    ptrdiff_t findSlot(T)(T callback) @trusted pure nothrow
+    {
+        for (size_t i; i < mSlots.length; ++i)
+        {
             auto c = &mSlots[i];
 
             if (c.callback == SumType!callbacks_t(callback))
@@ -39,7 +38,8 @@ private:
     }
 
 public:
-    void connect(T)(T callback, Flag!"oneShot" oneShot = No.oneShot) @trusted pure {
+    void connect(T)(T callback, Flag!"oneShot" oneShot = No.oneShot) @trusted pure
+    {
         enforce!CoreException(callback, "Delegate cannot be null.");
         enforce!CoreException(findSlot(callback) == -1, "Delegate already connected.");
 
@@ -49,32 +49,35 @@ public:
         mSlots ~= c;
     }
 
-    void disconnect(T)(T callback) @trusted pure nothrow {
+    void disconnect(T)(T callback) @trusted pure nothrow
+    {
         immutable idx = findSlot(callback);
         if (idx >= 0)
             mSlots = mSlots.remove(idx);
     }
 
-    void disconnectAll() @safe pure nothrow {
+    void disconnectAll() @safe pure nothrow
+    {
         mSlots = [];
     }
 
-    void emit(T1 args) {
-        for (size_t i; i < mSlots.length; ++i) {
+    void emit(T1 args)
+    {
+        for (size_t i; i < mSlots.length; ++i)
+        {
             auto c = &mSlots[i];
 
-            c.callback.match!(
-                (function_t fn) => fn(args),
-                (delegate_t dg) => dg(args),
-            );
+            c.callback.match!((function_t fn) => fn(args), (delegate_t dg) => dg(args),);
 
             if (c.isOneShot)
                 mSlots = mSlots.remove(i--);
         }
     }
 
-    pragma(inline, true) {
-        void opOpAssign(string op, T)(T callback) @trusted pure {
+    pragma(inline, true)
+    {
+        void opOpAssign(string op, T)(T callback) @trusted pure
+        {
             // I have specifically chosen += instead of ~= because C# also uses += for events.
             static if (op == "+")
                 connect(callback);
@@ -89,7 +92,8 @@ public:
 }
 
 @("Signals")
-unittest {
+unittest
+{
     import unit_threaded.assertions;
 
     // Create a Signal

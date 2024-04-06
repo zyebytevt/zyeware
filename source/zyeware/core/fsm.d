@@ -10,46 +10,56 @@ import std.string : format;
 
 import zyeware;
 
-struct FiniteStateMachine {
+struct FiniteStateMachine
+{
 private:
     State[string] mStates;
     string mCurrentStateName;
     State* mCurrentState;
 
 public:
-    struct State {
+    struct State
+    {
         void delegate() onTick;
         void delegate() onEnter;
         void delegate() onExit;
     }
 
-    void addState(string name, State state) @safe pure nothrow {
+    void addState(string name, State state) @safe pure nothrow
+    {
         mStates[name] = state;
     }
 
     void removeState(string name) @safe pure nothrow
-    in (mCurrentStateName != name) {
+    in (mCurrentStateName != name)
+    {
         mStates.remove(name);
     }
 
-    void tick() {
-        if (mCurrentState && mCurrentState.onTick) {
+    void tick()
+    {
+        if (mCurrentState && mCurrentState.onTick)
+        {
             mCurrentState.onTick();
         }
     }
 
     string state() @safe pure nothrow => mCurrentStateName;
 
-    string state(string value) {
-        if (mCurrentState && mCurrentState.onExit) {
+    string state(string value)
+    {
+        if (mCurrentState && mCurrentState.onExit)
+        {
             mCurrentState.onExit();
         }
 
         mCurrentStateName = value;
         mCurrentState = mCurrentStateName in mStates;
-        enforce!CoreException(mCurrentState, format!"State '%s' does not exist."(mCurrentStateName));
+        enforce!CoreException(mCurrentState,
+            format!"State '%s' does not exist."(mCurrentStateName));
 
-        if (mCurrentState.onEnter) {
+        if (mCurrentState.onEnter)
+        {
             mCurrentState.onEnter();
         }
 

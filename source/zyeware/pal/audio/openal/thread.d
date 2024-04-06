@@ -9,17 +9,20 @@ version (ZW_PAL_OPENAL)  :  //import core.thread : Thread, Duration, msecs, thre
 import core.thread;
 
 import zyeware;
-import zyeware.pal.audio.openal.api : audioBufferCount, audioBufferSize, updateSourceBuffers, pSources;
+import zyeware.pal.audio.openal.api : audioBufferCount, audioBufferSize,
+    updateSourceBuffers, pSources;
 import zyeware.pal.audio.openal.types;
 
 package:
 
-class AudioThread {
+class AudioThread
+{
 protected:
     ThreadID mThreadID;
     bool mIsRunning;
 
-    void run() nothrow {
+    void run() nothrow
+    {
         // Determine the sleep time between updating the buffers.
         // YukieVT supplied the following formula for this:
         //     (BuffTotalLen / BuffCount) / SampleRate / 2 * 1000
@@ -27,8 +30,10 @@ protected:
 
         immutable Duration waitTime = msecs(audioBufferSize / audioBufferCount / 44_100 / 2 * 1000);
 
-        while (mIsRunning) {
-            foreach (SourceData* sourceData; pSources) {
+        while (mIsRunning)
+        {
+            foreach (SourceData* sourceData; pSources)
+            {
                 updateSourceBuffers(sourceData);
             }
 
@@ -37,13 +42,15 @@ protected:
     }
 
 public:
-    void start() {
+    void start()
+    {
         mIsRunning = true;
         mThreadID = createLowLevelThread(&run);
         enforce!AudioException(mThreadID != ThreadID.init, "Failed to create audio thread.");
     }
 
-    void stop() {
+    void stop()
+    {
         mIsRunning = false;
         joinLowLevelThread(mThreadID);
     }

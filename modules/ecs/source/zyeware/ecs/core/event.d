@@ -30,26 +30,30 @@ enum event;
 
 private alias ReceiverDelegate = void delegate(...);
 
-private template isEvent(E) {
+private template isEvent(E)
+{
     import std.traits : hasUDA;
 
     static if (__traits(compiles, hasUDA!(E, event)))
-        enum bool isEvent = hasUDA!(E, event) &&
-            (is(E == struct) || is(E == union));
+        enum bool isEvent = hasUDA!(E, event) && (is(E == struct) || is(E == union));
     else
         enum bool isEvent = false;
 }
 
 // Used internally by the EventManager.
-private struct BaseEventCounter {
+private struct BaseEventCounter
+{
     static size_t counter = 0;
 }
 
-private struct EventCounter(Derived) {
+private struct EventCounter(Derived)
+{
 public:
-    static size_t getId() {
+    static size_t getId()
+    {
         static size_t counter = -1;
-        if (counter == -1) {
+        if (counter == -1)
+        {
             counter = mBaseEventCounter.counter;
             mBaseEventCounter.counter++;
         }
@@ -61,14 +65,14 @@ private:
     BaseEventCounter mBaseEventCounter;
 }
 
-deprecated("Please, use the name `IReceiver` instead.")
-alias Receiver = IReceiver;
+deprecated("Please, use the name `IReceiver` instead.") alias Receiver = IReceiver;
 
 /**
  * Any receiver class needs to derive from this interface using a specific event
  * type and implement receive.
  */
-interface IReceiver(E) if (isEvent!E) {
+interface IReceiver(E) if (isEvent!E)
+{
     /**
      * Will be called each time an event of type E is emitted.
      */
@@ -76,17 +80,22 @@ interface IReceiver(E) if (isEvent!E) {
 }
 
 ///
-unittest {
-    @event struct MyEvent {
+unittest
+{
+    @event struct MyEvent
+    {
         int data;
     }
 
-    class MySystem : IReceiver!MyEvent {
-        this(EventManager evtManager) {
+    class MySystem : IReceiver!MyEvent
+    {
+        this(EventManager evtManager)
+        {
             evtManager.subscribe!MyEvent(this);
         }
 
-        void receive(MyEvent event) {
+        void receive(MyEvent event)
+        {
             import std.stdio : write;
 
             // do something with event
@@ -98,13 +107,14 @@ unittest {
 /**
  * Manages events and receivers.
  */
-class EventManager {
+class EventManager
+{
 public:
     /**
      * Check whether an event has any subscription at all.
      */
-    bool hasSubscription(E)() @property const
-    if (isEvent!E) {
+    bool hasSubscription(E)() @property const if (isEvent!E)
+    {
         auto eventId = EventCounter!E.getId();
         auto handlerGroup = eventId in mHandlers;
 
@@ -115,7 +125,8 @@ public:
      * Check whether a receiver class is subscribed to an event.
      * Returns: true if it is subscribed, false otherwise.
      */
-    bool isSubscribed(E)(IReceiver!E receiver) if (isEvent!E) {
+    bool isSubscribed(E)(IReceiver!E receiver) if (isEvent!E)
+    {
         auto receive = cast(ReceiverDelegate)&receiver.receive;
         auto eventId = EventCounter!E.getId();
         auto handlerGroup = eventId in mHandlers;
@@ -132,13 +143,15 @@ public:
     /**
      * Subscribe a receiver class instance to an event.
      */
-    void subscribe(E)(IReceiver!E receiver) if (isEvent!E) {
+    void subscribe(E)(IReceiver!E receiver) if (isEvent!E)
+    {
         auto receive = cast(ReceiverDelegate)&receiver.receive;
         auto eventId = EventCounter!E.getId();
         auto handlerGroup = eventId in mHandlers;
 
         // no subscriber for the event family, so create one, and we're done
-        if (handlerGroup is null) {
+        if (handlerGroup is null)
+        {
             mHandlers[eventId] = [];
             mHandlers[eventId] ~= receive;
             return;
@@ -150,7 +163,8 @@ public:
 
         // look for empty spots
         foreach (ref rcv; *handlerGroup)
-            if (rcv is null) {
+            if (rcv is null)
+            {
                 rcv = receive;
                 return;
             }
@@ -162,7 +176,8 @@ public:
     /**
      * Unsubscribe a receiver class instance from an event.
      */
-    void unsubscribe(E)(IReceiver!E receiver) if (isEvent!E) {
+    void unsubscribe(E)(IReceiver!E receiver) if (isEvent!E)
+    {
         auto receive = cast(ReceiverDelegate)&receiver.receive;
         auto eventId = EventCounter!E.getId();
         auto handlerGroup = eventId in mHandlers;
@@ -171,7 +186,8 @@ public:
             return;
 
         foreach (ref rcv; *handlerGroup)
-            if (rcv == receive) {
+            if (rcv == receive)
+            {
                 rcv = null;
                 return; // there should be only one occurence of receive
             }
@@ -182,16 +198,19 @@ public:
      *
      * It will be dispatched to all receivers that subscribed to it.
      */
-    void emit(E)(auto ref E event) if (isEvent!E) {
+    void emit(E)(auto ref E event) if (isEvent!E)
+    {
         auto eventId = EventCounter!E.getId();
         auto handlerGroup = eventId in mHandlers;
 
         if (handlerGroup is null) // no event-receiver registered yet
             return;
 
-        foreach (rcv; *handlerGroup) {
+        foreach (rcv; *handlerGroup)
+        {
             // already subscribed
-            if (rcv !is null) {
+            if (rcv !is null)
+            {
                 auto rcvE = cast(void delegate(in E)) rcv;
                 rcvE(event);
             }
@@ -199,14 +218,17 @@ public:
     }
 
     /** ditto */
-    void emit(E, Args...)(auto ref Args args) if (isEvent!E) {
+    void emit(E, Args...)(auto ref Args args) if (isEvent!E)
+    {
         auto event = E(args);
         emit(event);
     }
 
     ///
-    unittest {
-        @event struct MyEvent {
+    unittest
+    {
+        @event struct MyEvent
+        {
             int data;
         }
 
@@ -228,68 +250,82 @@ private:
 //***** UNIT-TESTS
 //******************************************************************************
 
-version (unittest) {
+version (unittest)
+{
 
     import std.conv;
     import std.stdio;
 
-    @event struct TestEvent {
+    @event struct TestEvent
+    {
         string data;
     }
 
-    @event struct IntEvent {
+    @event struct IntEvent
+    {
         int data;
     }
 
-    class TestReceiver0 : IReceiver!TestEvent {
+    class TestReceiver0 : IReceiver!TestEvent
+    {
         string str;
 
-        this(EventManager evtManager) {
+        this(EventManager evtManager)
+        {
             evtManager.subscribe!TestEvent(this);
         }
 
-        void receive(TestEvent event) {
+        void receive(TestEvent event)
+        {
             str ~= event.data;
         }
     }
 
-    class TestReceiver1 : IReceiver!IntEvent {
+    class TestReceiver1 : IReceiver!IntEvent
+    {
         string str;
 
-        this(EventManager evtManager) {
+        this(EventManager evtManager)
+        {
             evtManager.subscribe!IntEvent(this);
             // do it aagain, it should silently return without subscribing it
             // a second time
             evtManager.subscribe!IntEvent(this);
         }
 
-        void receive(IntEvent event) {
+        void receive(IntEvent event)
+        {
             str ~= to!string(event.data);
         }
     }
 
-    class TestReceiver2 : IReceiver!TestEvent, IReceiver!IntEvent {
+    class TestReceiver2 : IReceiver!TestEvent, IReceiver!IntEvent
+    {
         string str;
 
-        this(EventManager evtManager) {
+        this(EventManager evtManager)
+        {
             evtManager.subscribe!TestEvent(this);
             assert(evtManager.isSubscribed!TestEvent(this));
             assert(!evtManager.isSubscribed!IntEvent(this));
             evtManager.subscribe!IntEvent(this);
         }
 
-        void receive(TestEvent event) {
+        void receive(TestEvent event)
+        {
             str ~= event.data;
         }
 
-        void receive(IntEvent event) {
+        void receive(IntEvent event)
+        {
             str ~= event.data.to!(string)();
         }
     }
 
 } // version(unittest)
 
-unittest {
+unittest
+{
     auto strEvt0 = TestEvent("hello");
     auto strEvt1 = TestEvent("world");
     auto intEvt0 = IntEvent(123);
@@ -349,7 +385,8 @@ unittest {
 }
 
 // validate that sending an event with no registered receivers does not crash
-unittest {
+unittest
+{
     auto evtManager = new EventManager;
 
     // registers a handler for StringEvent, but not IntEvent

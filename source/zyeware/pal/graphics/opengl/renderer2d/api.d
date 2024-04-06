@@ -19,7 +19,8 @@ enum maxTexturesPerBatch = 8;
 enum maxVerticesPerBatch = 20000;
 enum maxIndicesPerBatch = 30000;
 
-struct Batch {
+struct Batch
+{
     Rebindable!(const Material) material;
 
     BatchVertex2d[] vertices;
@@ -30,7 +31,8 @@ struct Batch {
     size_t currentIndexCount = 0;
     size_t currentTextureCount = 1; // because 0 is the white texture
 
-    size_t getIndexForTexture(in Texture2d texture) nothrow {
+    size_t getIndexForTexture(in Texture2d texture) nothrow
+    {
         for (size_t i = 1; i < currentTextureCount; ++i)
             if (texture is textures[i])
                 return i;
@@ -42,16 +44,17 @@ struct Batch {
         return currentTextureCount - 1;
     }
 
-    void flush(in GlBuffer buffer) {
+    void flush(in GlBuffer buffer)
+    {
         glBindVertexArray(buffer.vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, currentVertexCount * BatchVertex2d.sizeof, cast(void*) vertices
-                .ptr);
+        glBufferSubData(GL_ARRAY_BUFFER, 0,
+            currentVertexCount * BatchVertex2d.sizeof, cast(void*) vertices.ptr);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, currentIndexCount * uint.sizeof, cast(void*) indices
-                .ptr);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+            currentIndexCount * uint.sizeof, cast(void*) indices.ptr);
 
         auto shader = material.shader;
 
@@ -60,30 +63,25 @@ struct Batch {
         setShaderUniform1i(shader.handle, "iTextureCount", cast(int) currentTextureCount);
         setShaderUniform1f(shader.handle, "iTime", ZyeWare.upTime.toFloatSeconds);
 
-        foreach (string parameter; material.parameterList) {
+        foreach (string parameter; material.parameterList)
+        {
             import std.sumtype : match;
 
-            material.getParameter(parameter).match!(
-                (const(void[]) value) {},
-                (int value) {
+            material.getParameter(parameter).match!((const(void[]) value) {}, (int value) {
                 setShaderUniform1i(shader.handle, parameter, value);
-            },
-                (float value) {
+            }, (float value) {
                 setShaderUniform1f(shader.handle, parameter, value);
-            },
-                (vec2 value) {
+            }, (vec2 value) {
                 setShaderUniform2f(shader.handle, parameter, value);
-            },
-                (vec3 value) {
+            }, (vec3 value) {
                 setShaderUniform3f(shader.handle, parameter, value);
-            },
-                (vec4 value) {
+            }, (vec4 value) {
                 setShaderUniform4f(shader.handle, parameter, value);
-            }
-            );
+            });
         }
 
-        for (uint i; i < currentTextureCount; ++i) {
+        for (uint i; i < currentTextureCount; ++i)
+        {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, *(cast(uint*) textures[i].handle));
         }
@@ -107,7 +105,8 @@ mat4 pProjectionViewMatrix;
 Texture2d pWhiteTexture;
 Material pDefaultMaterial;
 
-size_t getIndexForMaterial(in Material material) nothrow {
+size_t getIndexForMaterial(in Material material) nothrow
+{
     for (size_t i = 0; i < currentMaterialCount; ++i)
         if (material is pBatches[i].material)
             return i;
@@ -119,26 +118,28 @@ size_t getIndexForMaterial(in Material material) nothrow {
     return currentMaterialCount - 1;
 }
 
-void createBuffer(ref GlBuffer buffer) {
+void createBuffer(ref GlBuffer buffer)
+{
     glGenVertexArrays(1, &buffer.vao);
     glBindVertexArray(buffer.vao);
 
     glGenBuffers(1, &buffer.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
-    glBufferData(GL_ARRAY_BUFFER, maxVerticesPerBatch * BatchVertex2d.sizeof, null, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maxVerticesPerBatch * BatchVertex2d.sizeof,
+        null, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
-            .position.offsetof);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof,
+        cast(void*) BatchVertex2d.position.offsetof);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
-            .uv.offsetof);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof,
+        cast(void*) BatchVertex2d.uv.offsetof);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
-            .modulate.offsetof);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof,
+        cast(void*) BatchVertex2d.modulate.offsetof);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof, cast(void*) BatchVertex2d
-            .textureIndex.offsetof);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, BatchVertex2d.sizeof,
+        cast(void*) BatchVertex2d.textureIndex.offsetof);
 
     glGenBuffers(1, &buffer.ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.ibo);
@@ -146,24 +147,31 @@ void createBuffer(ref GlBuffer buffer) {
 }
 
 // TODO: Font rendering needs to be improved.
-void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material)
-        if (isSomeString!T) {
+void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position,
+    in color modulate, ubyte alignment, in Material material) if (isSomeString!T)
+{
     vec2 cursor = vec2.zero;
 
-    if (alignment & BitmapFont.Alignment.middle || alignment & BitmapFont.Alignment.bottom) {
+    if (alignment & BitmapFont.Alignment.middle || alignment & BitmapFont.Alignment.bottom)
+    {
         immutable int height = font.getTextHeight(text);
         cursor.y -= (alignment & BitmapFont.Alignment.middle) ? height / 2 : height;
     }
 
-    foreach (T line; text.lineSplitter) {
-        if (alignment & BitmapFont.Alignment.center || alignment & BitmapFont.Alignment.right) {
+    foreach (T line; text.lineSplitter)
+    {
+        if (alignment & BitmapFont.Alignment.center || alignment & BitmapFont.Alignment.right)
+        {
             immutable int width = font.getTextWidth(line);
             cursor.x = -((alignment & BitmapFont.Alignment.center) ? width / 2 : width);
-        } else
+        }
+        else
             cursor.x = 0;
 
-        for (size_t i; i < line.length; ++i) {
-            switch (line[i]) {
+        for (size_t i; i < line.length; ++i)
+        {
+            switch (line[i])
+            {
             case '\t':
                 cursor.x += 40;
                 break;
@@ -175,12 +183,14 @@ void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color
 
                 immutable int kerning = i > 0 ? font.getKerning(line[i - 1], line[i]) : 1;
 
-                if (c.size.x > 0 && c.size.y > 0) {
+                if (c.size.x > 0 && c.size.y > 0)
+                {
                     const(Texture2d) pageTexture = font.getPageTexture(c.pageIndex);
 
-                    drawRectangle(rect(0, 0, c.size.x, c.size.y), mat4.translation(
-                            vec3(vec2(position + cursor + vec2(c.offset.x, c.offset.y)), 0)),
-                        modulate, pageTexture, material, rect(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
+                    drawRectangle(rect(0, 0, c.size.x, c.size.y),
+                        mat4.translation(vec3(vec2(position + cursor + vec2(c.offset.x,
+                            c.offset.y)), 0)), modulate, pageTexture, material,
+                        rect(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
                 }
 
                 cursor.x += c.advance.x + kerning;
@@ -191,7 +201,8 @@ void drawStringImpl(T)(in T text, in BitmapFont font, in vec2 position, in color
     }
 }
 
-void initializeBatch(ref Batch batch) {
+void initializeBatch(ref Batch batch)
+{
     batch.vertices = new BatchVertex2d[maxVerticesPerBatch + 2000];
     batch.indices = new uint[maxIndicesPerBatch + 3000];
     batch.textures = new Rebindable!(const Texture2d)[maxTexturesPerBatch];
@@ -200,7 +211,8 @@ void initializeBatch(ref Batch batch) {
 }
 
 /// Initializes the renderer.
-void initialize() {
+void initialize()
+{
     for (size_t i; i < pRenderBuffers.length; ++i)
         createBuffer(pRenderBuffers[i]);
 
@@ -218,38 +230,45 @@ void initialize() {
     pDefaultMaterial = AssetManager.load!Material("core:materials/2d/default.mtl");
 }
 
-void cleanup() {
+void cleanup()
+{
     destroy(pWhiteTexture);
 
-    for (size_t i; i < pBatches.length; ++i) {
+    for (size_t i; i < pBatches.length; ++i)
+    {
         destroy(pBatches[i].vertices);
         destroy(pBatches[i].indices);
         destroy(pBatches[i].textures);
     }
 
-    for (size_t i; i < pRenderBuffers.length; ++i) {
+    for (size_t i; i < pRenderBuffers.length; ++i)
+    {
         glDeleteVertexArrays(1, &pRenderBuffers[i].vao);
         glDeleteBuffers(1, &pRenderBuffers[i].vbo);
         glDeleteBuffers(1, &pRenderBuffers[i].ibo);
     }
 }
 
-void begin(in mat4 projectionMatrix, in mat4 viewMatrix) {
+void begin(in mat4 projectionMatrix, in mat4 viewMatrix)
+{
     pProjectionViewMatrix = projectionMatrix * viewMatrix;
 
     setRenderFlag(RenderFlag.culling, false);
 }
 
-void end() {
+void end()
+{
     flush();
 }
 
-void flush() {
+void flush()
+{
     if (currentMaterialCount == 0)
         return;
 
     size_t currentBufferIndex = 0;
-    for (size_t i; i < currentMaterialCount; ++i) {
+    for (size_t i; i < currentMaterialCount; ++i)
+    {
         if (pBatches[i].currentVertexCount == 0)
             continue;
 
@@ -261,16 +280,21 @@ void flush() {
 }
 
 void drawVertices(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
-    in Texture2d texture = null, in Material material = null) {
+    in Texture2d texture = null, in Material material = null)
+{
     const(Material) mat = material ? material : pDefaultMaterial;
 
     size_t batchIndex = getIndexForMaterial(mat);
-    if (batchIndex == size_t.max) {
-        if (pBatches.length < maxMaterialsPerDrawCall) {
+    if (batchIndex == size_t.max)
+    {
+        if (pBatches.length < maxMaterialsPerDrawCall)
+        {
             pBatches.length += 1;
             initializeBatch(pBatches[pBatches.length - 1]);
             batchIndex = pBatches.length - 1;
-        } else {
+        }
+        else
+        {
             flush();
             batchIndex = 0;
         }
@@ -285,7 +309,8 @@ void drawVertices(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
         batch.material = mat;
 
     float texIdx;
-    if (texture) {
+    if (texture)
+    {
         size_t idx = batch.getIndexForTexture(texture);
         if (idx == size_t.max) // No more room for new textures
         {
@@ -308,7 +333,8 @@ void drawVertices(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
 }
 
 void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = vec4(1),
-    in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1)) {
+    in Texture2d texture = null, in Material material = null, in rect region = rect(0, 0, 1, 1))
+{
     static vec2[4] quadPositions;
     quadPositions[0] = vec2(dimensions.x, dimensions.y);
     quadPositions[1] = vec2(dimensions.x + dimensions.width, dimensions.y);
@@ -337,20 +363,23 @@ void drawRectangle(in rect dimensions, in mat4 transform, in color modulate = ve
     drawVertices(vertices, indices, transform, texture, material);
 }
 
-void drawString(in string text, in BitmapFont font, in vec2 position, in color modulate = color(
-        "white"),
-    ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null) {
+void drawString(in string text, in BitmapFont font, in vec2 position,
+    in color modulate = color("white"), ubyte alignment = BitmapFont.Alignment.left
+    | BitmapFont.Alignment.top, in Material material = null)
+{
     drawStringImpl!string(text, font, position, modulate, alignment, material);
 }
 
-void drawWString(in wstring text, in BitmapFont font, in vec2 position, in color modulate = color(
-        "white"),
-    ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null) {
+void drawWString(in wstring text, in BitmapFont font, in vec2 position,
+    in color modulate = color("white"), ubyte alignment = BitmapFont.Alignment.left
+    | BitmapFont.Alignment.top, in Material material = null)
+{
     drawStringImpl!wstring(text, font, position, modulate, alignment, material);
 }
 
-void drawDString(in dstring text, in BitmapFont font, in vec2 position, in color modulate = color(
-        "white"),
-    ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top, in Material material = null) {
+void drawDString(in dstring text, in BitmapFont font, in vec2 position,
+    in color modulate = color("white"), ubyte alignment = BitmapFont.Alignment.left
+    | BitmapFont.Alignment.top, in Material material = null)
+{
     drawStringImpl!dstring(text, font, position, modulate, alignment, material);
 }

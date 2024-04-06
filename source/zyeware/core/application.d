@@ -12,7 +12,8 @@ import std.typecons : Nullable;
 import zyeware;
 import zyeware.utils.collection;
 
-abstract class Application {
+abstract class Application
+{
 public:
     /// Override this method for application initialization.
     abstract void initialize();
@@ -24,25 +25,29 @@ public:
     abstract void draw();
 
     /// Destroys the application.
-    void cleanup() {
+    void cleanup()
+    {
     }
 }
 
 /// A ZyeWare application that takes care of the game state logic.
 /// Game states can be set, pushed and popped.
-class StateApplication : Application {
+class StateApplication : Application
+{
 protected:
     GrowableStack!AppState mStateStack;
 
 public:
     Signal!() stateChanged;
 
-    override void tick() {
+    override void tick()
+    {
         if (hasState)
             currentState.tick();
     }
 
-    override void draw() {
+    override void draw()
+    {
         if (hasState)
             currentState.draw();
     }
@@ -55,7 +60,8 @@ public:
     ///     state = The game state to switch to.
     /// See_Also: ZyeWare.callDeferred
     void changeState(AppState state)
-    in (state, "Game state cannot be null.") {
+    in (state, "Game state cannot be null.")
+    {
         if (hasState)
             mStateStack.pop().onDetach();
 
@@ -74,7 +80,8 @@ public:
     ///     state = The state to push and switch to.
     /// See_Also: ZyeWare.callDeferred
     void pushState(AppState state)
-    in (state, "Game state cannot be null.") {
+    in (state, "Game state cannot be null.")
+    {
         if (hasState)
             currentState.onDetach();
 
@@ -89,7 +96,8 @@ public:
     /// This method should not be called during event emission. Use a deferred call
     /// for this purpose.
     /// See_Also: ZyeWare.callDeferred
-    void popState() {
+    void popState()
+    {
         if (hasState)
             mStateStack.pop().onDetach();
 
@@ -100,28 +108,30 @@ public:
     }
 
     /// The current game state.
-    pragma(inline, true)
-    AppState currentState() {
+    pragma(inline, true) AppState currentState()
+    {
         return mStateStack.peek;
     }
 
     /// If this application currently has a game state loaded.
-    pragma(inline, true)
-    bool hasState() const nothrow {
+    pragma(inline, true) bool hasState() const nothrow
+    {
         return !mStateStack.empty;
     }
 }
 
 /// An application state is used in conjunction with a `StateApplication` instance
 /// to make managing an application with different states easier.
-abstract class AppState {
+abstract class AppState
+{
 private:
     StateApplication mApplication;
     bool mWasAlreadyAttached;
 
 protected:
     this(StateApplication application) pure nothrow
-    in (application, "Parent application cannot be null.") {
+    in (application, "Parent application cannot be null.")
+    {
         mApplication = application;
     }
 
@@ -139,20 +149,24 @@ public:
     ///
     /// Params:
     ///     firstTime = Whether it gets attached the first time or not.
-    void onAttach(bool firstTime) {
+    void onAttach(bool firstTime)
+    {
     }
 
     /// Called when this game state gets detached from a `StateApplication`.
-    void onDetach() {
+    void onDetach()
+    {
     }
 
     /// The application this game state is registered to.
-    inout(StateApplication) application() pure inout nothrow {
+    inout(StateApplication) application() pure inout nothrow
+    {
         return mApplication;
     }
 
     /// Whether this game state was already attached once or not.
-    bool wasAlreadyAttached() pure const nothrow {
+    bool wasAlreadyAttached() pure const nothrow
+    {
         return mWasAlreadyAttached;
     }
 }

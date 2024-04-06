@@ -7,7 +7,8 @@ module zyeware.utils.codes;
 
 // From SDL_scancode.h
 /// Represents a physical key.
-enum KeyCode : ushort {
+enum KeyCode : ushort
+{
     unknown = 0,
 
     /**
@@ -368,7 +369,8 @@ enum KeyCode : ushort {
 }
 
 /// Represents a mouse button.
-enum MouseCode : ushort {
+enum MouseCode : ushort
+{
     button0 = 0,
     button1 = 1,
     button2 = 2,
@@ -386,7 +388,8 @@ enum MouseCode : ushort {
 alias GamepadIndex = size_t;
 
 /// Represents an abstract Xbox 360 gamepad button.
-enum GamepadButton {
+enum GamepadButton
+{
     a,
     b,
     x,
@@ -409,7 +412,8 @@ enum GamepadButton {
 }
 
 /// Represents a gamepad axis.
-enum GamepadAxis {
+enum GamepadAxis
+{
     leftX,
     leftY,
     rightX,

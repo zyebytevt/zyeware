@@ -8,7 +8,8 @@ import zyeware.core.application;
 
 /// Struct that holds information about the project.
 /// Note that the author name and project name are used to determine the save data directory.
-struct ProjectProperties {
+struct ProjectProperties
+{
     string authorName = "Anonymous"; /// The author of the game. Can be anything, from a person to a company.
     string projectName = "ZyeWare Project"; /// The name of the project.
 

@@ -13,7 +13,8 @@ static import gamut;
 import zyeware;
 
 @asset(Yes.cache)
-class Image {
+class Image
+{
 protected:
     const(ubyte[]) mPixels;
     ubyte mChannels;
@@ -23,16 +24,19 @@ protected:
 public:
     this(in ubyte[] pixels, ubyte channels, ubyte bitsPerChannel, vec2i size) pure nothrow
     in (size.x > 0 && size.y > 0, "Image must be at least 1x1.")
-    in (pixels && pixels.length == size.x * size.y * channels * (bitsPerChannel / 8), "Invalid amount of pixels.")
+    in (pixels && pixels.length == size.x * size.y * channels * (bitsPerChannel / 8),
+        "Invalid amount of pixels.")
     in (channels > 0 && channels <= 4, "Invalid amount of channels.")
-    in (bitsPerChannel >= 8 && bitsPerChannel <= 32, "Invalid amount of bits per channel.") {
+    in (bitsPerChannel >= 8 && bitsPerChannel <= 32, "Invalid amount of bits per channel.")
+    {
         mPixels = pixels;
         mChannels = channels;
         mBitsPerChannel = bitsPerChannel;
         mSize = size;
     }
 
-    color getPixel(vec2i coords) pure const nothrow {
+    color getPixel(vec2i coords) pure const nothrow
+    {
         if (coords.x < 0 || coords.y < 0 || coords.x >= mSize.x || coords.y >= mSize.y)
             return color(1, 0, 1, 1);
 
@@ -40,7 +44,8 @@ public:
         size_t channelStart = (coords.y * mSize.x + coords.x) * mChannels;
 
         // Careful, fallthrough.
-        switch (mChannels) {
+        switch (mChannels)
+        {
         case 4:
             a = pixels[channelStart + 3];
             goto case;
@@ -63,24 +68,29 @@ public:
         return color(r / 255f, g / 255f, b / 255f, a / 255f);
     }
 
-    const(ubyte[]) pixels() pure const nothrow {
+    const(ubyte[]) pixels() pure const nothrow
+    {
         return mPixels;
     }
 
-    ubyte channels() pure const nothrow {
+    ubyte channels() pure const nothrow
+    {
         return mChannels;
     }
 
-    ubyte bitsPerChannel() pure const nothrow {
+    ubyte bitsPerChannel() pure const nothrow
+    {
         return mBitsPerChannel;
     }
 
-    vec2i size() pure const nothrow {
+    vec2i size() pure const nothrow
+    {
         return mSize;
     }
 
     static Image load(string path)
-    in (path, "Path cannot be null.") {
+    in (path, "Path cannot be null.")
+    {
         File file = Files.open(path);
         scope (exit)
             file.close();
@@ -88,24 +98,26 @@ public:
         return load(file.readAll!(ubyte[]));
     }
 
-    static Image load(in ubyte[] data) {
+    static Image load(in ubyte[] data)
+    {
         gamut.Image image;
         image.loadFromMemory(data);
-        enforce!ResourceException(image.isValid, format!"Failed to load image: %s"(
-                image.errorMessage));
+        enforce!ResourceException(image.isValid,
+            format!"Failed to load image: %s"(image.errorMessage));
 
         image.setLayout(gamut.LAYOUT_GAPLESS | gamut.LAYOUT_VERT_STRAIGHT);
 
         immutable int bitsPerChannel = (image.type % 3 + 1) * 8;
         immutable int channels = image.type / 3 + 1;
 
-        return new Image(image.allPixelsAtOnce.dup, cast(ubyte) channels, cast(ubyte) bitsPerChannel,
-            vec2i(image.width, image.height));
+        return new Image(image.allPixelsAtOnce.dup, cast(ubyte) channels,
+            cast(ubyte) bitsPerChannel, vec2i(image.width, image.height));
     }
 }
 
 @("Image")
-unittest {
+unittest
+{
     import unit_threaded.assertions;
 
     // Create an Image

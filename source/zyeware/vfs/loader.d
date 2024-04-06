@@ -9,7 +9,8 @@ import zyeware;
 
 /// Interface for all Files loaders. They are responsible for checking and loading various
 /// types of files or directories into the Files.
-interface PackageLoader {
+interface PackageLoader
+{
 public:
     /// Loads the given entry.
     /// Returns: The loaded directory as Directory.

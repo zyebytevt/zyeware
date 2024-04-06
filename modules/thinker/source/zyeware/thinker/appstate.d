@@ -8,29 +8,35 @@ module zyeware.thinker.appstate;
 import zyeware.core.application;
 import zyeware.thinker;
 
-class ThinkerAppState : AppState {
+class ThinkerAppState : AppState
+{
 private:
     ThinkerManager mThinkerManager;
 
 protected:
-    void addThinker(Thinker thinker) {
+    void addThinker(Thinker thinker)
+    {
         mThinkerManager.add(thinker);
     }
 
-    void removeThinker(Thinker thinker) {
+    void removeThinker(Thinker thinker)
+    {
         mThinkerManager.remove(thinker);
     }
 
 public:
-    this(StateApplication application) {
+    this(StateApplication application)
+    {
         super(application);
     }
 
-    override void tick() {
+    override void tick()
+    {
         mThinkerManager.tick();
     }
 
-    override void draw() const {
+    override void draw() const
+    {
         mThinkerManager.draw();
     }
 }

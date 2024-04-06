@@ -3,14 +3,16 @@ version (ZW_PAL_OPENGL)  : import zyeware;
 
 package(zyeware.pal.graphics.opengl):
 
-struct BatchVertex2d {
+struct BatchVertex2d
+{
     vec4 position;
     vec2 uv;
     color modulate;
     float textureIndex;
 }
 
-struct GlBuffer {
+struct GlBuffer
+{
     uint vao;
     uint vbo;
     uint ibo;

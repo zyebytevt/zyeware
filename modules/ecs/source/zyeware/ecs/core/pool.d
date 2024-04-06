@@ -21,7 +21,8 @@ along with EntitySysD. If not, see $(LINK http://www.gnu.org/licenses/).
 
 module zyeware.ecs.core.pool;
 
-template hasConst(C) {
+template hasConst(C)
+{
     import std.meta : anySatisfy;
     import std.traits : RepresentationTypeTuple;
 
@@ -29,15 +30,19 @@ template hasConst(C) {
     enum bool hasConst = anySatisfy!(isConst, RepresentationTypeTuple!C);
 }
 
-class BasePool {
+class BasePool
+{
 public:
-    this(size_t elementSize, size_t chunkSize) {
+    this(size_t elementSize, size_t chunkSize)
+    {
         mElementSize = elementSize;
         mChunkSize = chunkSize;
     }
 
-    void accomodate(in size_t nbElements) {
-        while (nbElements > mMaxElements) {
+    void accomodate(in size_t nbElements)
+    {
+        while (nbElements > mMaxElements)
+        {
             mNbChunks++;
             mMaxElements = (mNbChunks * mChunkSize) / mElementSize;
         }
@@ -47,15 +52,18 @@ public:
         mNbElements = nbElements;
     }
 
-    size_t nbElements() {
+    size_t nbElements()
+    {
         return mNbElements;
     }
 
-    size_t nbChunks() {
+    size_t nbChunks()
+    {
         return mNbChunks;
     }
 
-    void* getPtr(size_t n) {
+    void* getPtr(size_t n)
+    {
         if (n >= mNbElements)
             return null;
         size_t offset = n * mElementSize;
@@ -71,24 +79,30 @@ private:
     void[] mData;
 }
 
-class Pool(T, size_t ChunkSize = 8192) : BasePool {
-    this(in size_t n) {
+class Pool(T, size_t ChunkSize = 8192) : BasePool
+{
+    this(in size_t n)
+    {
         super(T.sizeof, ChunkSize);
         accomodate(n);
     }
 
-    ref T opIndex(size_t n) {
+    ref T opIndex(size_t n)
+    {
         return *cast(T*) getPtr(n);
     }
 
-    static if (!hasConst!T) {
-        T opIndexAssign(T t, size_t n) {
+    static if (!hasConst!T)
+    {
+        T opIndexAssign(T t, size_t n)
+        {
             *cast(T*) getPtr(n) = t;
             return t;
         }
     }
 
-    void initN(size_t n) {
+    void initN(size_t n)
+    {
         import std.conv : emplace;
 
         emplace(&this[n]);
@@ -98,8 +112,10 @@ class Pool(T, size_t ChunkSize = 8192) : BasePool {
 //******************************************************************************
 //***** UNIT-TESTS
 //******************************************************************************
-unittest {
-    static struct TestComponent {
+unittest
+{
+    static struct TestComponent
+    {
         int i;
         string s;
     }

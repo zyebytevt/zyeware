@@ -5,8 +5,10 @@ import bindbc.opengl;
 
 package(zyeware.pal.graphics.opengl):
 
-GLenum getGLFilter(TextureProperties.Filter filter) {
-    final switch (filter) with (TextureProperties.Filter) {
+GLenum getGLFilter(TextureProperties.Filter filter)
+{
+    final switch (filter) with (TextureProperties.Filter)
+    {
     case nearest:
         return GL_NEAREST;
     case linear:
@@ -18,8 +20,10 @@ GLenum getGLFilter(TextureProperties.Filter filter) {
     }
 }
 
-GLenum getGLWrapMode(TextureProperties.WrapMode wrapMode) {
-    final switch (wrapMode) with (TextureProperties.WrapMode) {
+GLenum getGLWrapMode(TextureProperties.WrapMode wrapMode)
+{
+    final switch (wrapMode) with (TextureProperties.WrapMode)
+    {
     case repeat:
         return GL_REPEAT;
     case mirroredRepeat:

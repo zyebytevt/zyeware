@@ -9,7 +9,8 @@ import zyeware;
 
 package(zyeware):
 
-struct AudioDriver {
+struct AudioDriver
+{
 package(zyeware):
     void function() initialize;
     void function() loadLibraries;
@@ -46,7 +47,8 @@ package(zyeware):
     void function(NativeHandle handle) updateSourceBuffers;
 }
 
-struct DisplayDriver {
+struct DisplayDriver
+{
 package(zyeware):
     NativeHandle function(in DisplayProperties properties, in Display container) createDisplay;
     void function(NativeHandle handle) destroyDisplay;
@@ -109,9 +111,11 @@ package(zyeware):
     string function(in NativeHandle handle) getClipboardString;
 }
 
-struct GraphicsDriver {
+struct GraphicsDriver
+{
 package(zyeware):
-    struct Api {
+    struct Api
+    {
         void function() initialize;
         void function() cleanup;
 
@@ -145,16 +149,22 @@ package(zyeware):
         NativeHandle function(in NativeHandle framebuffer) nothrow getTextureFromFramebuffer;
     }
 
-    struct Renderer2d {
+    struct Renderer2d
+    {
         void function() initialize;
         void function() cleanup;
         void function(in mat4 projectionMatrix, in mat4 viewMatrix) begin;
         void function() end;
-        void function(in Vertex2d[] vertices, in uint[] indices, in mat4 transform, in Texture2d texture, in Material material) drawVertices;
-        void function(in rect dimensions, in mat4 transform, in color modulate, in Texture2d texture, in Material material, in rect region) drawRectangle;
-        void function(in string text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawString;
-        void function(in wstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawWString;
-        void function(in dstring text, in BitmapFont font, in vec2 position, in color modulate, ubyte alignment, in Material material) drawDString;
+        void function(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
+            in Texture2d texture, in Material material) drawVertices;
+        void function(in rect dimensions, in mat4 transform, in color modulate,
+            in Texture2d texture, in Material material, in rect region) drawRectangle;
+        void function(in string text, in BitmapFont font, in vec2 position,
+            in color modulate, ubyte alignment, in Material material) drawString;
+        void function(in wstring text, in BitmapFont font, in vec2 position,
+            in color modulate, ubyte alignment, in Material material) drawWString;
+        void function(in dstring text, in BitmapFont font, in vec2 position,
+            in color modulate, ubyte alignment, in Material material) drawDString;
     }
 
     Api api;

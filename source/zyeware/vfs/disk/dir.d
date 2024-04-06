@@ -10,20 +10,23 @@ import zyeware.vfs.disk.file : DiskFile;
 
 package(zyeware.vfs):
 
-class DiskDirectory : Directory {
+class DiskDirectory : Directory
+{
 protected:
     immutable string mDiskPath;
 
 package(zyeware.vfs):
     this(string path, string diskPath) pure nothrow
-    in (diskPath, "Disk path cannot be null!") {
+    in (diskPath, "Disk path cannot be null!")
+    {
         super(path);
         mDiskPath = diskPath;
     }
 
 public:
     override Directory getDirectory(string name) const
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         enforce!VfsException(!std.path.isRooted(name), "Subdirectory name cannot be rooted.");
 
         immutable string newPath = buildPath(mPath, name);
@@ -33,7 +36,8 @@ public:
     }
 
     override File getFile(string name) const
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         enforce!VfsException(!std.path.isRooted(name), "File name cannot be rooted.");
 
         immutable string newPath = buildPath(mPath, name);
@@ -43,13 +47,15 @@ public:
     }
 
     override bool hasDirectory(string name) const nothrow
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         immutable string path = std.path.buildPath(mDiskPath, name);
         return exists(path) && isDir(path).assumeWontThrow;
     }
 
     override bool hasFile(string name) const nothrow
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         immutable string path = std.path.buildPath(mDiskPath, name);
 
         try
@@ -58,7 +64,8 @@ public:
             return false;
     }
 
-    override immutable(string[]) files() const {
+    override immutable(string[]) files() const
+    {
         string[] result;
         foreach (string path; dirEntries(mDiskPath, SpanMode.shallow))
             if (isFile(path))
@@ -67,7 +74,8 @@ public:
         return result.idup;
     }
 
-    override immutable(string[]) directories() const {
+    override immutable(string[]) directories() const
+    {
         string[] result;
         foreach (string path; dirEntries(mDiskPath, SpanMode.shallow))
             if (isDir(path))

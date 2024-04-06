@@ -13,7 +13,8 @@ alias Interpolatord = Interpolator!(double, lerp!double);
 /// one dimensional line, and interpolating between them.
 /// You can supply a custom type and lerping function for various
 /// different types.
-struct Interpolator(T, alias lerp) {
+struct Interpolator(T, alias lerp)
+{
 protected:
     alias Point = Tuple!(float, "offset", T, "value");
 
@@ -25,19 +26,22 @@ public:
     /// Params:
     ///   offset = The offset of the keypoint.
     ///   value = The value of the keypoint.
-    void addPoint(float offset, const T value) pure nothrow {
+    void addPoint(float offset, const T value) pure nothrow
+    {
         mPoints ~= Point(offset, value);
         mMustSortPoints = true;
     }
 
     /// Removes a keypoint with the given index.
-    void removePoint(size_t idx) pure nothrow {
+    void removePoint(size_t idx) pure nothrow
+    {
         mPoints = mPoints.remove(idx);
         mMustSortPoints = true;
     }
 
     /// Removes all keypoints from this interpolator.
-    void clearPoints() pure nothrow {
+    void clearPoints() pure nothrow
+    {
         mPoints.length = 0;
     }
 
@@ -47,13 +51,15 @@ public:
     /// Params:
     ///   offset = The offset to use.
     /// Returns: The interpolated value.
-    T interpolate(float offset) pure nothrow {
+    T interpolate(float offset) pure nothrow
+    {
         if (mPoints.length == 0)
             return T.init;
         else if (mPoints.length == 1)
             return mPoints[0].value;
 
-        if (mMustSortPoints) {
+        if (mMustSortPoints)
+        {
             sort!((a, b) => a.offset < b.offset)(mPoints);
             mMustSortPoints = false;
         }
@@ -62,7 +68,8 @@ public:
         ptrdiff_t high = cast(ptrdiff_t) mPoints.length - 1;
         ptrdiff_t middle = 0;
 
-        while (low <= high) {
+        while (low <= high)
+        {
             middle = (low + high) / 2;
             const Point* point = &mPoints[middle];
 
@@ -87,22 +94,22 @@ public:
         const Point* pointFirst = &mPoints[first];
         const Point* pointSecond = &mPoints[second];
 
-        return lerp(pointFirst.value, pointSecond.value, (offset - pointFirst.offset) / (
-                pointSecond.offset - pointFirst.offset));
+        return lerp(pointFirst.value, pointSecond.value,
+            (offset - pointFirst.offset) / (pointSecond.offset - pointFirst.offset));
     }
 
-    static auto load(string path) {
+    static auto load(string path)
+    {
         SDLNode* root = loadSdlDocument(path);
 
         Interpolator!(T, lerp) interpolator;
 
-        for (size_t i; i < root.children.length; ++i) {
+        for (size_t i; i < root.children.length; ++i)
+        {
             SDLNode* node = &root.children[i];
             if (node.name == "keypoint")
-                interpolator.addPoint(
-                    node.getAttributeValue!float("offset"),
-                    node.getAttributeValue!T("value")
-                );
+                interpolator.addPoint(node.getAttributeValue!float("offset"),
+                    node.getAttributeValue!T("value"));
         }
 
         return interpolator;
@@ -110,7 +117,8 @@ public:
 }
 
 @("Interpolator")
-unittest {
+unittest
+{
     import unit_threaded.assertions;
 
     // Create an Interpolator

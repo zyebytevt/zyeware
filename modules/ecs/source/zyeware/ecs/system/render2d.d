@@ -14,19 +14,26 @@ import zyeware.ecs;
 /// the screen. It also updates these components if they are set to animate.
 ///
 /// See_Also: SpriteComponent
-class Render2DSystem : System {
+class Render2DSystem : System
+{
 public:
-    override void tick(EntityManager entities, EventManager events, in FrameTime frameTime) {
+    override void tick(EntityManager entities, EventManager events, in FrameTime frameTime)
+    {
         foreach (Entity entity, SpriteComponent* sprite, SpriteAnimationComponent* animation;
-            entities.entitiesWith!(SpriteComponent, SpriteAnimationComponent)) {
-            if (animation.playing) {
+            entities.entitiesWith!(SpriteComponent, SpriteAnimationComponent))
+        {
+            if (animation.playing)
+            {
                 animation.mCurrentFrameLength += frameTime.deltaTime;
 
-                if (animation.mCurrentFrameLength >= animation.mCurrentAnimation.frameInterval) {
-                    if (++animation.mCurrentFrame > animation.mCurrentAnimation.endFrame) {
+                if (animation.mCurrentFrameLength >= animation.mCurrentAnimation.frameInterval)
+                {
+                    if (++animation.mCurrentFrame > animation.mCurrentAnimation.endFrame)
+                    {
                         if (animation.mCurrentAnimation.isLooping)
                             animation.mCurrentFrame = animation.mCurrentAnimation.startFrame;
-                        else {
+                        else
+                        {
                             --animation.mCurrentFrame;
                             animation.playing = false;
                         }
@@ -43,15 +50,18 @@ public:
         }
     }
 
-    override void draw(EntityManager entities, in FrameTime nextFrameTime) const {
+    override void draw(EntityManager entities, in FrameTime nextFrameTime) const
+    {
         // Find camera first
         bool foundCamera;
         mat4 projectionMatrix;
         Transform2DComponent* cameraTransform;
 
         foreach (Entity entity, Transform2DComponent* transform, CameraComponent* camera;
-            entities.entitiesWith!(Transform2DComponent, CameraComponent)) {
-            if (camera.active) {
+            entities.entitiesWith!(Transform2DComponent, CameraComponent))
+        {
+            if (camera.active)
+            {
                 foundCamera = true;
 
                 projectionMatrix = camera.camera.projectionMatrix;
@@ -62,7 +72,8 @@ public:
 
         Renderer2d.clearScreen(color.black);
 
-        if (!foundCamera) {
+        if (!foundCamera)
+        {
             //Render3DSystem.drawNoCameraSprite();
             return;
         }
@@ -70,18 +81,21 @@ public:
         Renderer2d.beginScene(projectionMatrix, cameraTransform.globalMatrix.inverse);
 
         foreach (Entity entity, Transform2DComponent* transform, SpriteComponent* sprite;
-            entities.entitiesWith!(Transform2DComponent, SpriteComponent)) {
+            entities.entitiesWith!(Transform2DComponent, SpriteComponent))
+        {
             float x1 = -sprite.offset.x;
             float y1 = -sprite.offset.y;
             float x2 = sprite.size.x;
             float y2 = sprite.size.y;
 
-            if (sprite.hFlip) {
+            if (sprite.hFlip)
+            {
                 x1 *= -1;
                 x2 *= -1;
             }
 
-            if (sprite.vFlip) {
+            if (sprite.vFlip)
+            {
                 y1 *= -1;
                 y2 *= -1;
             }

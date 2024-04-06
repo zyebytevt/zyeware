@@ -10,7 +10,8 @@ import zyeware;
 
 package(zyeware.vfs):
 
-class ZipFile : File {
+class ZipFile : File
+{
 protected:
     ZipArchive mArchive;
     ArchiveMember mMember;
@@ -19,7 +20,8 @@ protected:
     size_t mFilePointer;
 
 package(zyeware.vfs):
-    this(string path, ZipArchive archive, ArchiveMember member) {
+    this(string path, ZipArchive archive, ArchiveMember member)
+    {
         super(path);
         mArchive = archive;
         mMember = member;
@@ -27,7 +29,8 @@ package(zyeware.vfs):
 
 public:
     override size_t read(void* ptr, size_t size, size_t n) nothrow
-    in (ptr) {
+    in (ptr)
+    {
         if (!isOpened)
             return 0;
 
@@ -40,15 +43,18 @@ public:
     }
 
     override size_t write(const void* ptr, size_t size, size_t n) nothrow
-    in (ptr) {
+    in (ptr)
+    {
         return 0;
     }
 
-    override void seek(long offset, Seek whence) nothrow {
+    override void seek(long offset, Seek whence) nothrow
+    {
         if (!isOpened)
             return;
 
-        final switch (whence) with (Seek) {
+        final switch (whence) with (Seek)
+        {
         case current:
             mFilePointer += offset;
             if (mFilePointer > mData.length)
@@ -65,18 +71,21 @@ public:
         }
     }
 
-    override long tell() nothrow {
+    override long tell() nothrow
+    {
         if (!isOpened)
             return -1;
 
         return cast(long) mFilePointer;
     }
 
-    override bool flush() nothrow {
+    override bool flush() nothrow
+    {
         return false;
     }
 
-    override void open(File.Mode mode) {
+    override void open(File.Mode mode)
+    {
         if (isOpened)
             return;
 
@@ -86,25 +95,29 @@ public:
         mFilePointer = 0;
     }
 
-    override void close() nothrow {
+    override void close() nothrow
+    {
         if (!isOpened)
             return;
 
         mData = null;
     }
 
-    override FileSize size() nothrow {
+    override FileSize size() nothrow
+    {
         if (!isOpened)
             return -1;
 
         return cast(FileSize) mData.length;
     }
 
-    override bool isOpened() pure const nothrow {
+    override bool isOpened() pure const nothrow
+    {
         return mData !is null;
     }
 
-    override bool isEof() pure nothrow {
+    override bool isEof() pure nothrow
+    {
         return !isOpened && mFilePointer >= mData.length;
     }
 }

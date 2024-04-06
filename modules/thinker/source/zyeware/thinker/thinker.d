@@ -5,22 +5,26 @@
 // Copyright 2024 ZyeByte
 module zyeware.thinker.thinker;
 
-interface Drawer {
+interface Drawer
+{
     void draw() const;
 }
 
-abstract class Thinker {
+abstract class Thinker
+{
 package(zyeware.thinker):
     bool mIsFreeQueued;
 
 public:
     abstract void tick();
 
-    void free() @safe nothrow {
+    void free() @safe nothrow
+    {
         mIsFreeQueued = true;
     }
 
-    final bool isFreeQueued() @safe pure nothrow {
+    final bool isFreeQueued() @safe pure nothrow
+    {
         return mIsFreeQueued;
     }
 }

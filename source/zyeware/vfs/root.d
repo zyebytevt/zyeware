@@ -22,7 +22,8 @@ import zyeware.vfs.zip.loader : ZipPackageLoader;
 import zyeware.vfs.zip.dir : ZipDirectory;
 import zyeware.vfs.dir : StackDirectory;
 
-private ubyte[16] md5FromHex(string hexString) {
+private ubyte[16] md5FromHex(string hexString)
+{
     import std.conv : to;
 
     if (hexString.length != 32)
@@ -36,7 +37,8 @@ private ubyte[16] md5FromHex(string hexString) {
     return result;
 }
 
-struct Files {
+struct Files
+{
 private static:
     enum userDirVfsPath = "user://";
     enum userDirPortableName = "ZyeWareData/";
@@ -45,25 +47,26 @@ private static:
     PackageLoader[] sLoaders;
     bool sPortableMode;
 
-    pragma(inline, true)
-    Directory getRootForScheme(string scheme)
-    in (scheme, "Scheme cannot be null.") {
+    pragma(inline, true) Directory getRootForScheme(string scheme)
+    in (scheme, "Scheme cannot be null.")
+    {
         Directory dir = sSchemes.get(scheme, null);
         enforce!VfsException(dir, format!"Unknown Files scheme '%s'."(scheme));
         return dir;
     }
 
-    pragma(inline, true)
-    auto splitPath(string path)
-    in (path, "Path cannot be null") {
+    pragma(inline, true) auto splitPath(string path)
+    in (path, "Path cannot be null")
+    {
         auto splitResult = path.findSplit(":");
-        enforce!VfsException(!splitResult[0].empty && !splitResult[1].empty && !splitResult[2].empty,
-            "Malformed file path.");
+        enforce!VfsException(!splitResult[0].empty && !splitResult[1].empty
+                && !splitResult[2].empty, "Malformed file path.");
         return splitResult;
     }
 
     Directory loadPackage(string path, string scheme)
-    in (path && scheme) {
+    in (path && scheme)
+    {
         foreach (PackageLoader loader; sLoaders)
             if (loader.eligable(path))
                 return loader.load(path, scheme);
@@ -71,34 +74,45 @@ private static:
         throw new VfsException(format!"Failed to find eligable loader for package '%s'."(path));
     }
 
-    Directory createUserDir() {
-        immutable string userDirName = ZyeWare.projectProperties.authorName ~ "/" ~ ZyeWare
-            .projectProperties.projectName;
+    Directory createUserDir()
+    {
+        immutable string userDirName = ZyeWare.projectProperties.authorName
+            ~ "/" ~ ZyeWare.projectProperties.projectName;
 
-        string dataDir = std.path.buildNormalizedPath(std.path.dirName(thisExePath), userDirPortableName, userDirName);
+        string dataDir = std.path.buildNormalizedPath(std.path.dirName(thisExePath),
+            userDirPortableName, userDirName);
 
-        if (!sPortableMode) {
-            version (Posix) {
+        if (!sPortableMode)
+        {
+            version (Posix)
+            {
                 import core.sys.posix.unistd : getuid;
                 import core.sys.posix.pwd : getpwuid;
 
                 stringz homedir;
 
-                synchronized {
+                synchronized
+                {
                     if ((homedir = getenv("HOME")) is null)
                         homedir = getpwuid(getuid()).pw_dir;
                 }
 
                 version (linux)
-                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup, ".local/share/zyeware/", userDirName);
+                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup,
+                        ".local/share/zyeware/", userDirName);
                 else version (OSX)
-                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup, "Library/Application Support/ZyeWare/", userDirName);
+                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup,
+                        "Library/Application Support/ZyeWare/", userDirName);
                 else
-                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup, ".zyeware/", userDirName);
-            } else version (Windows) {
+                    dataDir = std.path.buildNormalizedPath(homedir.fromStringz.idup,
+                        ".zyeware/", userDirName);
+            }
+            else version (Windows)
+            {
                 dataDir = std.path.buildNormalizedPath(getenv("LocalAppData")
                         .fromStringz.idup, "ZyeWare/", userDirName);
-            } else
+            }
+            else
                 sPortableMode = true;
         }
 
@@ -108,8 +122,10 @@ private static:
     }
 
 package(zyeware) static:
-    void initialize() {
-        if (exists(std.path.buildNormalizedPath(std.path.dirName(thisExePath), userDirPortableName, "_sc_")))
+    void initialize()
+    {
+        if (exists(std.path.buildNormalizedPath(std.path.dirName(thisExePath),
+                userDirPortableName, "_sc_")))
             sPortableMode = true;
 
         Files.registerPackageLoader(new DirectoryPackageLoader());
@@ -118,8 +134,11 @@ package(zyeware) static:
         Directory corePackage = loadPackage("core.zpk", "core");
 
         // In release mode, let's check if the core package has been modified.
-        debug {
-        } else {
+        debug
+        {
+        }
+        else
+        {
             ZipDirectory coreZip = cast(ZipDirectory) corePackage;
             enforce!VfsException(coreZip, "Core package must be a zip archive.");
 
@@ -128,8 +147,7 @@ package(zyeware) static:
 
             enum coreMd5 = md5FromHex("9448bc0b4ca2a31ac1b6b71c940d1601");
             enforce!VfsException(md5Of((cast(ZipArchive) coreZip.mArchive)
-                    .data) == coreMd5,
-                "Core package has been modified, cannot continue.");
+                    .data) == coreMd5, "Core package has been modified, cannot continue.");
         }
 
         sSchemes["core"] = corePackage;
@@ -139,7 +157,8 @@ package(zyeware) static:
         Logger.core.info("Virtual File System initialized.");
     }
 
-    void cleanup() nothrow {
+    void cleanup() nothrow
+    {
         sSchemes.clear();
         sLoaders.length = 0;
     }
@@ -150,7 +169,8 @@ public static:
     /// Params:
     ///     loader: The loader to register.
     void registerPackageLoader(PackageLoader loader) nothrow
-    in (loader) {
+    in (loader)
+    {
         sLoaders ~= loader;
     }
 
@@ -159,10 +179,11 @@ public static:
     /// Params:
     ///     path: The real path to the package.
     Directory addPackage(string path)
-    in (path, "Path cannot be null") {
+    in (path, "Path cannot be null")
+    {
         immutable string scheme = std.path.stripExtension(std.path.baseName(path));
-        enforce!CoreException(!sSchemes.keys.canFind(scheme), format!"Scheme '%s' already exists."(
-                scheme));
+        enforce!CoreException(!sSchemes.keys.canFind(scheme),
+            format!"Scheme '%s' already exists."(scheme));
 
         Directory pck = loadPackage(path, scheme);
 
@@ -178,7 +199,8 @@ public static:
     ///   name = The path to the file.
     ///   mode = The mode to open the file in.
     File open(string name, File.Mode mode = File.Mode.read)
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         File file = getFile(name);
         file.open(mode);
         return file;
@@ -189,37 +211,43 @@ public static:
     /// Params:
     ///   name = The name of the file. Can be arbitrary.
     ///   data = The data of the file.
-    File openFromMemory(string name, in ubyte[] data) {
+    File openFromMemory(string name, in ubyte[] data)
+    {
         import zyeware.vfs.memory.file : MemoryFile;
 
         return new MemoryFile(name, data);
     }
 
     File getFile(string name)
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         immutable splitResult = splitPath(name);
         return getRootForScheme(splitResult[0]).getFile(splitResult[2]);
     }
 
     Directory getDirectory(string name)
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         immutable splitResult = splitPath(name);
         return getRootForScheme(splitResult[0]).getDirectory(splitResult[2]);
     }
 
     bool hasFile(string name)
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         immutable splitResult = splitPath(name);
         return getRootForScheme(splitResult[0]).hasFile(splitResult[2]);
     }
 
     bool hasDirectory(string name)
-    in (name, "Name cannot be null.") {
+    in (name, "Name cannot be null.")
+    {
         immutable splitResult = splitPath(name);
         return getRootForScheme(splitResult[0]).hasDirectory(splitResult[2]);
     }
 
-    bool portableMode() nothrow {
+    bool portableMode() nothrow
+    {
         return sPortableMode;
     }
 }
