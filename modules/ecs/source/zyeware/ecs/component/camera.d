@@ -2,7 +2,7 @@
 // and conditions defined in the file 'LICENSE.txt', which is part
 // of this source code package.
 //
-// Copyright 2021 ZyeByte
+// Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.ecs.component.camera;
 
 import inmath.linalg;

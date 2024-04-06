@@ -2,7 +2,7 @@
 // and conditions defined in the file 'LICENSE.txt', which is part
 // of this source code package.
 //
-// Copyright 2021 ZyeByte
+// Copyright © 2021-2024 ZyeByte. All rights reserved.
 
 /// This module is intended to be a end-all-be-all import for all
 /// ZyeWare projects. It contains all necessary modules for 
