@@ -9,7 +9,8 @@ import std.algorithm : remove;
 
 import zyeware.thinker;
 
-struct ThinkerManager {
+struct ThinkerManager
+{
 private:
     Thinker[] mThinkers;
 
@@ -17,54 +18,60 @@ private:
     Thinker[] mQueuedAdditions;
 
 public:
-    void add(Thinker thinker) nothrow {
+    void add(Thinker thinker) nothrow
+    {
         mQueuedAdditions ~= thinker;
     }
 
-    void remove(Thinker thinker) nothrow {
-        for (size_t i; i < mThinkers.length; ++i) {
-            if (mThinkers[i] is thinker) {
+    void remove(Thinker thinker) nothrow
+    {
+        for (size_t i; i < mThinkers.length; ++i)
+        {
+            if (mThinkers[i] is thinker)
+            {
                 mQueuedRemovals ~= i;
                 return;
             }
         }
     }
 
-    void tick() {
-        for (size_t i; i < mThinkers.length; ++i) {
+    void tick()
+    {
+        for (size_t i; i < mThinkers.length; ++i)
+        {
             Thinker thinker = mThinkers[i];
 
             thinker.tick();
 
-            if (thinker.mIsFreeQueued) {
+            if (thinker.mIsFreeQueued)
                 mQueuedRemovals ~= i;
-            }
         }
 
-        if (mQueuedRemovals.length > 0) {
-            foreach (size_t i; mQueuedRemovals) {
+        if (mQueuedRemovals.length > 0)
+        {
+            foreach (size_t i; mQueuedRemovals)
                 mThinkers = mThinkers.remove(i);
-            }
+
             mQueuedRemovals.length = 0;
         }
 
-        if (mQueuedAdditions.length > 0) {
-            foreach (Thinker thinker; mQueuedAdditions) {
+        if (mQueuedAdditions.length > 0)
+        {
+            foreach (Thinker thinker; mQueuedAdditions)
                 mThinkers ~= thinker;
-            }
+
             mQueuedAdditions.length = 0;
         }
     }
 
-    void draw() const {
-        for (size_t i; i < mThinkers.length; i++) {
-            if (auto thinker = cast(Drawer) mThinkers[i]) {
+    void draw() const
+    {
+        for (size_t i; i < mThinkers.length; i++)
+        {
+            if (auto thinker = cast(Drawer) mThinkers[i])
                 thinker.draw();
-            }
         }
     }
 
-    const(Thinker[]) thinkers() const pure nothrow {
-        return mThinkers;
-    }
+    const(Thinker[]) thinkers() pure const nothrow => mThinkers;
 }

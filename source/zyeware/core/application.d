@@ -133,7 +133,7 @@ public:
     abstract void tick();
 
     /// Override this function to perform rendering.
-    abstract void draw();
+    abstract void draw() const;
 
     /// Called when this game state gets attached to a `StateApplication`.
     ///

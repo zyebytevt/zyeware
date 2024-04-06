@@ -3,14 +3,14 @@
 // of this source code package.
 //
 // Copyright 2021 ZyeByte
-module zyeware.ecs.gamestate;
+module zyeware.ecs.appstate;
 
 import zyeware;
 import zyeware.ecs;
 
-/// `ECSGameState` implements the logic for a state that uses the
+/// `EcsAppState` implements the logic for a state that uses the
 /// entity-component-system model.
-class ECSGameState : AppState {
+class EcsAppState : AppState {
 private:
     EntityManager mEntities;
     EventManager mEvents;

@@ -10,4 +10,5 @@ public {
     import zyeware.thinker.thinker;
     import zyeware.thinker.fiber;
     import zyeware.thinker.fsm;
+    import zyeware.thinker.appstate;
 }
