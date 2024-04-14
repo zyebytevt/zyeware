@@ -124,6 +124,7 @@ private static:
             previous = current;
 
             sApplication.tick();
+            InputMap.tick();
 
             if (sMustUpdateFramebufferDimensions)
             {
@@ -145,13 +146,9 @@ private static:
                     entry.callback();
 
                     if (entry.repeating)
-                    {
                         entry.expiresAt = upTime + entry.duration;
-                    }
                     else
-                    {
                         entry.callback = null;
-                    }
                 }
             }
 

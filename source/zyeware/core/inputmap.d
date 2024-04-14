@@ -10,6 +10,7 @@ import std.sumtype : SumType, match;
 import std.algorithm : remove;
 
 import zyeware;
+import core.stdcpp.new_;
 
 alias InputKey = Tuple!(KeyCode, "key", bool, "isPressed");
 alias InputMouse = Tuple!(MouseCode, "button", bool, "isPressed");
@@ -88,7 +89,6 @@ protected:
 
             if (result.isMatch)
             {
-                mOldIsPressed = mCurrentIsPressed;
                 mCurrentIsPressed = result.strength > 0;
                 mCurrentStrength = result.strength;
                 return true;
@@ -200,6 +200,12 @@ package(zyeware.core) static:
         ZyeWare.events.gamepadButtonPressed -= &onGamepadButtonPressed;
         ZyeWare.events.gamepadButtonReleased -= &onGamepadButtonReleased;
         ZyeWare.events.gamepadAxisMoved -= &onGamepadAxisMoved;
+    }
+
+    void tick() @safe nothrow
+    {
+        foreach (Action action; sActions.values)
+            action.mOldIsPressed = action.mCurrentIsPressed;
     }
 
 public static:

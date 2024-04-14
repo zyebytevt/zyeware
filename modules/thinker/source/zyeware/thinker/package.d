@@ -10,6 +10,6 @@ public
     import zyeware.thinker.manager;
     import zyeware.thinker.thinker;
     import zyeware.thinker.fiber;
-    import zyeware.thinker.fsm;
+    import zyeware.thinker.state;
     import zyeware.thinker.appstate;
 }

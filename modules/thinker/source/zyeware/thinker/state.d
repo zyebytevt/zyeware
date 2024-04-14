@@ -3,7 +3,9 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.thinker.fsm;
+module zyeware.thinker.state;
+
+import std.datetime : Duration;
 
 import zyeware;
 import zyeware.thinker;
@@ -12,6 +14,7 @@ abstract class StateThinker : Thinker
 {
 private:
     FiniteStateMachine mFsm;
+    Duration mNextTick;
 
 protected:
     void addState(string name, void delegate() tick, void delegate() enter = null,
@@ -28,6 +31,9 @@ protected:
 public:
     override void tick()
     {
+        if (ZyeWare.upTime < mNextTick)
+            return;
+
         mFsm.tick();
     }
 }

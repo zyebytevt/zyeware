@@ -16,7 +16,7 @@ abstract class FiberThinker : Thinker
 {
 private:
     Fiber mFiber;
-    Duration mWaitTime;
+    Duration mWaitExpires;
     bool mIsWaitingForSignal;
 
 protected:
@@ -41,7 +41,7 @@ protected:
     ///     time = The amount of time to wait.
     final void wait(in Duration time)
     {
-        mWaitTime = time;
+        mWaitExpires = ZyeWare.upTime + time;
         mFiber.yield();
     }
 
@@ -91,13 +91,7 @@ public:
             return;
         }
 
-        if (mWaitTime > Duration.zero)
-        {
-            mWaitTime -= ZyeWare.frameTime.deltaTime;
-            return;
-        }
-
-        if (mIsWaitingForSignal)
+        if (mWaitExpires > ZyeWare.upTime || mIsWaitingForSignal)
             return;
 
         mFiber.call!(Fiber.Rethrow.yes);

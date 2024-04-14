@@ -39,9 +39,7 @@ public:
     void tick()
     {
         if (mCurrentState && mCurrentState.onTick)
-        {
             mCurrentState.onTick();
-        }
     }
 
     string state() @safe pure nothrow => mCurrentStateName;
@@ -49,9 +47,7 @@ public:
     string state(string value)
     {
         if (mCurrentState && mCurrentState.onExit)
-        {
             mCurrentState.onExit();
-        }
 
         mCurrentStateName = value;
         mCurrentState = mCurrentStateName in mStates;
@@ -59,9 +55,7 @@ public:
             format!"State '%s' does not exist."(mCurrentStateName));
 
         if (mCurrentState.onEnter)
-        {
             mCurrentState.onEnter();
-        }
 
         return mCurrentStateName;
     }
