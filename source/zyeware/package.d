@@ -14,9 +14,7 @@ public
     import std.typecons : Flag, Yes, No;
     import std.exception : enforce;
 
-    import zyeware.audio.buffer;
-    import zyeware.audio.bus;
-    import zyeware.audio.source;
+    import zyeware.audio;
 
     import zyeware.core.application;
     import zyeware.core.asset;
@@ -39,7 +37,6 @@ public
     import zyeware.core.math.vector;
 
     import zyeware.pal.generic.types.graphics;
-    import zyeware.pal.generic.types.audio;
 
     import zyeware.physics.shapes.circle2d;
     import zyeware.physics.shapes.polygon2d;

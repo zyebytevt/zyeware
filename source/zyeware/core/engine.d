@@ -253,7 +253,6 @@ package(zyeware.core) static:
 
         Pal.registerDrivers();
 
-        Pal.loadAudioDriver(parsedArgs.audioDriver);
         Pal.loadDisplayDriver(parsedArgs.displayDriver);
         Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);
 
@@ -267,6 +266,7 @@ package(zyeware.core) static:
 
         Pal.initializeDrivers();
 
+        AudioApi.initialize();
         AudioBus.create("master");
 
         createFramebuffer();

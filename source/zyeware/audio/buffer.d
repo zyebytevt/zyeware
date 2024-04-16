@@ -8,43 +8,31 @@ module zyeware.audio.buffer;
 import std.conv : to;
 
 import zyeware;
-import zyeware.pal.pal;
 
 /// Contains an encoded audio segment, plus various information like
 /// loop point etc.
 @asset(Yes.cache)
-class AudioBuffer : NativeObject
+class AudioBuffer
 {
 protected:
-    NativeHandle mNativeHandle;
+    const(ubyte[]) mData;
+    LoopPoint mLoopPoint;
 
 public:
-    this(const(ubyte)[] encodedMemory, AudioProperties properties = AudioProperties.init)
+    this(const(ubyte)[] data, AudioProperties properties = AudioProperties.init)
     {
-        mNativeHandle = Pal.audio.createBuffer(encodedMemory, properties);
-    }
-
-    ~this()
-    {
-        Pal.audio.freeBuffer(mNativeHandle);
+        mData = data;
+        mLoopPoint = properties.loopPoint;
     }
 
     /// The point where this sound should loop, if played through an `AudioSource`.
-    LoopPoint loopPoint() const nothrow
-    {
-        return Pal.audio.getBufferLoopPoint(mNativeHandle);
-    }
+    LoopPoint loopPoint() const nothrow => mLoopPoint;
 
     /// ditto
-    void loopPoint(LoopPoint value)
-    {
-        Pal.audio.setBufferLoopPoint(mNativeHandle, value);
-    }
+    LoopPoint loopPoint(LoopPoint value) => mLoopPoint = value;
 
-    const(NativeHandle) handle() pure const nothrow
-    {
-        return mNativeHandle;
-    }
+    /// The encoded audio data.
+    const(ubyte[]) data() => mData;
 
     /// Loads a sound from a given Files path.
     /// Params:

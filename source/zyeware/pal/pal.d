@@ -18,25 +18,19 @@ struct Pal
 private static:
     GraphicsDriver sGraphics;
     DisplayDriver sDisplay;
-    AudioDriver sAudio;
 
     GraphicsDriverLoader[string] sGraphicsLoaders;
     DisplayDriverLoader[string] sDisplayLoaders;
-    AudioDriverLoader[string] sAudioLoaders;
 
 package(zyeware.pal) static:
     alias GraphicsDriverLoader = void function(ref GraphicsDriver) nothrow;
     alias DisplayDriverLoader = void function(ref DisplayDriver) nothrow;
-    alias AudioDriverLoader = void function(ref AudioDriver) nothrow;
 
 package(zyeware) static:
     void registerDrivers() nothrow
     {
         version (ZW_PAL_OPENGL)
             sGraphicsLoaders["opengl"] = &imported!"zyeware.pal.graphics.opengl.init".load;
-
-        version (ZW_PAL_OPENAL)
-            sAudioLoaders["openal"] = &imported!"zyeware.pal.audio.openal.init".load;
 
         version (ZW_PAL_SDL)
             sDisplayLoaders["sdl"] = &imported!"zyeware.pal.display.sdl.init".load;
@@ -46,14 +40,12 @@ package(zyeware) static:
     {
         sGraphics.api.initialize();
         sGraphics.r2d.initialize();
-        sAudio.initialize();
     }
 
     void cleanupDrivers()
     {
         sGraphics.api.cleanup();
         sGraphics.r2d.cleanup();
-        sAudio.cleanup();
     }
 
     void loadGraphicsDriver(string name) nothrow
@@ -70,13 +62,6 @@ package(zyeware) static:
         Logger.core.info("Set display driver '%s' active.", name);
     }
 
-    void loadAudioDriver(string name) nothrow
-    in (name in sAudioLoaders, "AudioDriver " ~ name ~ " not registered")
-    {
-        sAudioLoaders[name](sAudio);
-        Logger.core.info("Set audio driver '%s' active.", name);
-    }
-
     string[] registeredGraphicsDrivers() nothrow
     {
         return sGraphicsLoaders.keys;
@@ -87,11 +72,6 @@ package(zyeware) static:
         return sDisplayLoaders.keys;
     }
 
-    string[] registeredAudioDrivers() nothrow
-    {
-        return sAudioLoaders.keys;
-    }
-
     pragma(inline, true) ref const(GraphicsDriver) graphics() nothrow
     {
         return sGraphics;
@@ -100,10 +80,5 @@ package(zyeware) static:
     pragma(inline, true) ref const(DisplayDriver) display() nothrow
     {
         return sDisplay;
-    }
-
-    pragma(inline, true) ref const(AudioDriver) audio() nothrow
-    {
-        return sAudio;
     }
 }
