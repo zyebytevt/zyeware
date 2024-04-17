@@ -15,6 +15,7 @@ public
     import std.exception : enforce;
 
     import zyeware.audio;
+    import zyeware.display;
 
     import zyeware.core.application;
     import zyeware.core.asset;
@@ -46,7 +47,6 @@ public
     import zyeware.graphics.camera;
     import zyeware.graphics.color;
     import zyeware.graphics.cursor;
-    import zyeware.graphics.display;
     import zyeware.graphics.environment;
     import zyeware.graphics.frameanim;
     import zyeware.graphics.framebuffer;

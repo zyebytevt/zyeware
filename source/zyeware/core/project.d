@@ -14,7 +14,7 @@ struct ProjectProperties
     string projectName = "ZyeWare Project"; /// The name of the project.
 
     string mainApplication; /// The fully qualified name of the main application.
-    DisplayProperties mainDisplayProperties; /// The properties of the main display.
+    WindowProperties mainWindowProperties; /// The properties of the main display.
     ScaleMode scaleMode = ScaleMode.center; /// How the main framebuffer should be scaled on resizing.
 
     uint targetFrameRate = 60; /// The frame rate the project should target to hold. This is not a guarantee.

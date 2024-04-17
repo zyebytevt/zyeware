@@ -8,7 +8,7 @@ module zyeware.audio.api;
 import core.thread;
 
 import std.algorithm : remove;
-import std.datetime;
+import std.datetime : Duration, msecs;
 import std.functional : toDelegate;
 
 import bindbc.openal;
@@ -57,11 +57,11 @@ package(zyeware.audio) static:
 
     void unregisterSource(AudioSource source) nothrow
     {
-        foreach (ref AudioSource src; sSources)
+        for (size_t i; i < sSources.length; ++i)
         {
-            if (src is source)
+            if (sSources[i] is source)
             {
-                //sSources = sSources.remove(src);
+                sSources = sSources.remove(i);
                 break;
             }
         }

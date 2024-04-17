@@ -58,8 +58,8 @@ struct Events
 
 public:
     Signal!() quitRequested;
-    Signal!(const Display, vec2i) displayResized;
-    Signal!(const Display, vec2i) displayMoved;
+    Signal!(const Window, vec2i) windowResized;
+    Signal!(const Window, vec2i) windowMoved;
     Signal!(KeyCode) keyboardKeyPressed;
     Signal!(KeyCode) keyboardKeyReleased;
     Signal!(MouseCode, size_t) mouseButtonPressed;
@@ -90,7 +90,7 @@ private static:
         bool repeating;
     }
 
-    Display sMainDisplay;
+    Window sMainWindow;
     Application sApplication;
 
     Duration sWaitTime;
@@ -129,7 +129,7 @@ private static:
             if (sMustUpdateFramebufferDimensions)
             {
                 if (sScaleMode == ScaleMode.changeDisplaySize)
-                    framebufferSize = sMainDisplay.size;
+                    framebufferSize = sMainWindow.size;
 
                 recalculateFramebufferArea();
             }
@@ -162,7 +162,7 @@ private static:
     void createFramebuffer()
     {
         FramebufferProperties fbProps;
-        fbProps.size = sMainDisplay.size;
+        fbProps.size = sMainWindow.size;
         sMainFramebuffer = new Framebuffer(fbProps);
 
         recalculateFramebufferArea();
@@ -170,7 +170,7 @@ private static:
 
     void recalculateFramebufferArea() nothrow
     {
-        immutable vec2i winSize = sMainDisplay.size;
+        immutable vec2i winSize = sMainWindow.size;
         immutable vec2i gameSize = sMainFramebuffer.properties.size;
 
         vec2i finalPos, finalSize;
@@ -203,7 +203,7 @@ private static:
 
     void drawFramebuffer()
     {
-        sMainDisplay.update();
+        sMainWindow.update();
 
         // Prepare framebuffer and render application into it.
         Pal.graphics.api.setViewport(recti(0, 0,
@@ -218,7 +218,7 @@ private static:
                 sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y),
             sFramebufferArea);
 
-        sMainDisplay.swapBuffers();
+        sMainWindow.swapBuffers();
     }
 
 package(zyeware.core) static:
@@ -251,18 +251,18 @@ package(zyeware.core) static:
         sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
         enforce!CoreException(sApplication, "Failed to create main application.");
 
-        Pal.registerDrivers();
+        DisplayApi.initialize();
 
-        Pal.loadDisplayDriver(parsedArgs.displayDriver);
+        Pal.registerDrivers();
         Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);
 
         // Creates a new display and render context.
         sRandom = new RandomNumberGenerator();
         targetFrameRate = sProjectProperties.targetFrameRate;
         sScaleMode = sProjectProperties.scaleMode;
-        sMainDisplay = new Display(sProjectProperties.mainDisplayProperties);
+        sMainWindow = new Window(sProjectProperties.mainWindowProperties);
 
-        enforce!CoreException(sMainDisplay, "Main display creation failed.");
+        enforce!CoreException(sMainWindow, "Main display creation failed.");
 
         Pal.initializeDrivers();
 
@@ -271,7 +271,7 @@ package(zyeware.core) static:
 
         createFramebuffer();
 
-        events.displayResized += (const Display display, vec2i size) {
+        events.windowResized += (const Window window, vec2i size) {
             sMustUpdateFramebufferDimensions = true;
         };
 
@@ -280,7 +280,7 @@ package(zyeware.core) static:
 
     void cleanup()
     {
-        sMainDisplay.destroy();
+        sMainWindow.destroy();
         sMainFramebuffer.destroy();
         sApplication.cleanup();
 
@@ -333,8 +333,8 @@ public static:
     void changeDisplaySize(vec2i size)
     in (size.x > 0 && size.y > 0, "Application size cannot be negative.")
     {
-        if (!sMainDisplay.isMaximized && !sMainDisplay.isMinimized)
-            sMainDisplay.size = vec2i(size);
+        if (!sMainWindow.isMaximized && !sMainWindow.isMinimized)
+            sMainWindow.size = vec2i(size);
 
         framebufferSize = vec2i(size);
     }
@@ -424,9 +424,9 @@ public static:
     }
 
     /// The main display of the engine.
-    Display mainDisplay() nothrow
+    Window mainWindow() nothrow
     {
-        return sMainDisplay;
+        return sMainWindow;
     }
 
     /// The size of the main framebuffer.
