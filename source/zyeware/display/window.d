@@ -65,11 +65,13 @@ protected:
 
             size_t gamepadIndex;
             for (; gamepadIndex < mGamepads.length; ++gamepadIndex)
+            {
                 if (!mGamepads[gamepadIndex])
                 {
                     mGamepads[gamepadIndex] = pad;
                     break;
                 }
+            }
 
             if (gamepadIndex == mGamepads.length) // Too many controllers
             {

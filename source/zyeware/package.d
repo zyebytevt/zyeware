@@ -32,10 +32,10 @@ public
 
     import zyeware.core.logger;
 
-    import zyeware.core.math.matrix;
-    import zyeware.core.math.numeric;
-    import zyeware.core.math.rect;
-    import zyeware.core.math.vector;
+    import zyeware.math.matrix;
+    import zyeware.math.numeric;
+    import zyeware.math.rect;
+    import zyeware.math.vector;
 
     import zyeware.pal.generic.types.graphics;
 

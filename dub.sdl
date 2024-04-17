@@ -6,12 +6,13 @@ license "LGPL-3.0"
 
 dependency "gamut" version="~>2.3.0"
 dependency "audio-formats" version="~>3.0.1"
-dependency "inmath" version="~>1.0.5"
 dependency "console-colors" version="~>1.1.1"
 dependency "sdlite" repository="git+https://github.com/zyebytevt/sdlite.git" version="~master"
 dependency "bindbc-openal" version="~>1.1.0"
+dependency "bindbc-sdl" version="~>1.4.3"
 dependency "zyeware:zyfont" version="*"
 dependency "zyeware:crashhandler" version="*"
+dependency "zyeware:math" version="*"
 
 targetPath "out"
 workingDirectory "out"
@@ -21,16 +22,18 @@ subPackage "modules/thinker"
 
 subPackage "libraries/zyfont"
 subPackage "libraries/crashhandler"
+subPackage "libraries/math"
+
+versions "SDL_205"
 
 configuration "sdl-opengl" {
 	platforms "posix" "windows"
 
 	targetType "staticLibrary"
 
-	dependency "bindbc-sdl" version="~>1.4.3"
 	dependency "bindbc-opengl" version="~>1.1.0"
 
-	versions "GL_43" "SDL_205" "ZW_PAL_SDL" "ZW_PAL_OPENGL" "ZW_PAL_OPENAL"
+	versions "GL_43" "ZW_PAL_OPENGL"
 }
 
 configuration "unittest" {

@@ -1,0 +1,7 @@
+name "math"
+description "ZyeWare math libraries."
+authors "ZyeByte"
+copyright "Copyright © 2024, ZyeByte"
+license "LGPL-3.0"
+targetType "sourceLibrary"
+dependency "inmath" version="~>1.0.5"

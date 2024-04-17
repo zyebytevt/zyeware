@@ -95,7 +95,7 @@ public static:
     void initialize()
     {
         if (isSDLLoaded())
-        return;
+            return;
 
         immutable sdlResult = loadSDL();
         if (sdlResult != sdlSupport)
@@ -119,6 +119,10 @@ public static:
 
     void cleanup()
     {
+        foreach (SDL_Cursor* cursor; sCursors.values)
+            SDL_FreeCursor(cursor);
+        sCursors.clear();
+
         SDL_Quit();
     }
 }

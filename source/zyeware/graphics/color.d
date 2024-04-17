@@ -228,7 +228,7 @@ public:
 
     static color lerp(color a, color b, float t) pure nothrow
     {
-        immutable vec4 result = zyeware.core.math.numeric.lerp(a.values, b.values, t);
+        immutable vec4 result = zyeware.math.numeric.lerp(a.values, b.values, t);
         return color(result.r, result.g, result.b, result.a);
     }
 }
