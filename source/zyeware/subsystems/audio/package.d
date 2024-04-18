@@ -10,4 +10,6 @@ public
     import zyeware.subsystems.audio.subsystem;
     import zyeware.subsystems.audio.source;
     import zyeware.subsystems.audio.bus;
+    import zyeware.subsystems.audio.voice;
+    import zyeware.subsystems.audio.filter;
 }

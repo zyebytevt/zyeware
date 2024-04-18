@@ -62,16 +62,16 @@ float angleBetween(T)(T a, T b) nothrow if (isFloatingPoint!T)
     return fmod(delta, PI * 2) - PI;
 }
 
-/// Converts a duration of time to seconds, represented as a float.
+/// Converts a duration of time to seconds.
 /// 
 /// Params:
 ///     dt = The duration to convert.
 /// 
-/// Returns: The seconds as float.
-pragma(inline, true) float toFloatSeconds(Duration dt) pure nothrow
-{
-    return dt.total!"hnsecs" * 0.0000001f;
-}
+/// Returns: The seconds as floating point.
+pragma(inline, true) float toFloatSeconds(Duration dt) pure nothrow => dt.total!"hnsecs" * 0.0000001f;
+
+/// ditto
+pragma(inline, true) double toDoubleSeconds(Duration dt) pure nothrow => dt.total!"hnsecs" * 0.0000001;
 
 @("Numeric helper functions")
 unittest

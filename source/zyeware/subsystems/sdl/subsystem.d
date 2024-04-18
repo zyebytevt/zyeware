@@ -121,6 +121,12 @@ package(zyeware) static:
             format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
 
         SDL_LogSetOutputFunction(&logFunctionCallback, null);
+
+        SDL_version sdlVersion;
+        SDL_VERSION(&sdlVersion);
+
+        Logger.core.info("SDL subsystem initialized, SDL version: %d.%d.%d", sdlVersion.major, sdlVersion.minor,
+            sdlVersion.patch);
     }
 
     void unload()

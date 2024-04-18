@@ -13,11 +13,14 @@ import zyeware.subsystems.audio;
 class AudioBus
 {
 protected:
-    SoloudHandle mBus;
     string mName;
 
 package:
-    this(string name)
+    SoloudHandle mBus;
+    // To keep them from being collected by GC
+    AudioFilter[AudioSubsystem.maxFilters] mFilters;
+
+    this(string name) nothrow
     {
         mBus = Bus_create();
 
@@ -25,20 +28,16 @@ package:
     }
 
 public:
-    ~this()
+    ~this() nothrow
     {
         Bus_destroy(mBus);
     }
 
-    SoundHandle play(AudioSource source, float volume = 1f, float pan = 0f)
+    void setFilter(uint filterId, AudioFilter filter) nothrow
+    in (filterId < AudioSubsystem.maxFilters, "Filter ID out of range.")
     {
-        return SoundHandle(Bus_playEx(mBus, source.mSound, volume, pan, 0));
-    }
-    
-    SoundHandle play3d(AudioSource source, vec3 position, vec3 velocity, float volume = 1f)
-    {
-        return SoundHandle(Bus_play3dEx(mBus, source.mSound, position.x, position.y, position.z,
-            velocity.x, velocity.y, velocity.z, volume, 0));
+        mFilters[filterId] = filter;
+        Bus_setFilter(mBus, filterId, filter.mFilter);
     }
 
     string name() const nothrow => mName;

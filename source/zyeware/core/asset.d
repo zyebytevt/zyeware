@@ -95,11 +95,12 @@ private static:
 package(zyeware.core) static:
     void load()
     {
-        register!Shader((path) => cast(Object) Shader.load(path));
-        register!Texture2d((path) => cast(Object) Texture2d.load(path));
-        register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
+        register!Shader(&Shader.load);
+        register!Texture2d(&Texture2d.load);
+        register!TextureCubeMap(&TextureCubeMap.load);
 
-        //register!AudioBuffer((path) => cast(Object) AudioBuffer.load(path));
+        register!SoundSample(&SoundSample.load);
+        register!SoundStream(&SoundStream.load);
 
         register!Image(&Image.load);
         register!Mesh3d(&Mesh3d.load);
