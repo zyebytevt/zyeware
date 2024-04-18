@@ -36,6 +36,9 @@ struct FrameTime
 {
     Duration deltaTime; /// Time between this frame and the last.
     Duration unscaledDeltaTime; /// Time between this frame and the last, without being multiplied by `ZyeWare.timeScale`.
+
+    double deltaTimeSeconds; /// Time between this frame and the last, in seconds.
+    double unscaledDeltaTimeSeconds; /// Time between this frame and the last, in seconds, without being multiplied by `ZyeWare.timeScale`.
 }
 
 /// Holds information about a SemVer version.
@@ -95,7 +98,6 @@ private static:
 
     Duration sWaitTime;
     MonoTime sStartupTime;
-    FrameTime sFrameTime;
     RandomNumberGenerator sRandom;
 
     Framebuffer sMainFramebuffer;
@@ -119,11 +121,18 @@ private static:
             immutable MonoTime current = MonoTime.currTime;
             immutable Duration elapsed = current - previous;
 
-            sFrameTime = FrameTime(dur!"hnsecs"(cast(long)(elapsed.total!"hnsecs" * sTimeScale)),
-                elapsed);
+            immutable Duration elapsedScaled = dur!"hnsecs"(cast(long)(elapsed.total!"hnsecs" * sTimeScale));
+
+            immutable FrameTime frameTime = FrameTime(
+                elapsedScaled,
+                elapsed,
+                elapsedScaled.toDoubleSeconds,
+                elapsed.toDoubleSeconds
+            );
+            
             previous = current;
 
-            sApplication.tick();
+            sApplication.tick(frameTime);
             InputMap.tick();
 
             if (sMustUpdateFramebufferDimensions)
@@ -407,11 +416,6 @@ public static:
     in (value != float.nan, "Timescale value was nan.")
     {
         sTimeScale = value;
-    }
-
-    FrameTime frameTime() nothrow
-    {
-        return sFrameTime;
     }
 
     RandomNumberGenerator random() nothrow

@@ -11,7 +11,6 @@ public
     import zyeware.rendering.camera;
     import zyeware.rendering.color;
     import zyeware.rendering.cursor;
-    import zyeware.rendering.font;
     import zyeware.rendering.environment;
     import zyeware.rendering.frameanim;
     import zyeware.rendering.framebuffer;
@@ -23,6 +22,7 @@ public
     import zyeware.rendering.shader;
     import zyeware.rendering.sprite;
     import zyeware.rendering.texatlas;
+    import zyeware.rendering.texture;
     import zyeware.rendering.terrain;
     import zyeware.rendering.vertex;
 }

@@ -56,15 +56,13 @@ public:
         }
     }
 
-    void tick()
+    void tick(in FrameTime frameTime)
     {
-        immutable float delta = ZyeWare.frameTime.deltaTime.toFloatSeconds;
-
         foreach (ParticleContainer* particles; mParticles.values)
         {
             for (size_t i; i < particles.activeParticlesCount; ++i)
             {
-                particles.lifeTimes[i] -= ZyeWare.frameTime.deltaTime;
+                particles.lifeTimes[i] -= frameTime.deltaTime;
                 if (particles.lifeTimes[i] <= Duration.zero)
                 {
                     particles.remove(i);
@@ -76,7 +74,7 @@ public:
                     continue;
                 }
 
-                particles.positions[i] += particles.velocities[i] * delta;
+                particles.positions[i] += particles.velocities[i] * frameTime.deltaTimeSeconds;
                 particles.velocities[i] += particles.type.gravity;
             }
         }
@@ -84,8 +82,6 @@ public:
 
     void draw(in FrameTime nextFrameTime)
     {
-        immutable float delta = nextFrameTime.deltaTime.toFloatSeconds;
-
         foreach (ParticleContainer* particles; mParticles.values)
         {
             immutable static rect dimensions = rect(-2, -2, 2, 2);
@@ -94,7 +90,7 @@ public:
             {
                 immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(
                         float) particles.startLifeTimes[i].total!"hnsecs");
-                immutable vec2 position = particles.positions[i] + particles.velocities[i] * delta;
+                immutable vec2 position = particles.positions[i] + particles.velocities[i] * nextFrameTime.deltaTimeSeconds;
 
                 import std.math.traits : isNaN;
 

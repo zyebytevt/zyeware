@@ -7,6 +7,7 @@ module zyeware.thinker.manager;
 
 import std.algorithm : remove;
 
+import zyeware;
 import zyeware.thinker;
 
 struct ThinkerManager
@@ -35,13 +36,13 @@ public:
         }
     }
 
-    void tick()
+    void tick(in FrameTime frameTime)
     {
         for (size_t i; i < mThinkers.length; ++i)
         {
             Thinker thinker = mThinkers[i];
 
-            thinker.tick();
+            thinker.tick(frameTime);
 
             if (thinker.mIsFreeQueued)
                 mQueuedRemovals ~= i;

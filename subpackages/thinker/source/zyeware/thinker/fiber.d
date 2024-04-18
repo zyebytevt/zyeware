@@ -20,6 +20,8 @@ private:
     bool mIsWaitingForSignal;
 
 protected:
+    FrameTime mFrameTime;
+
     /// Yields control back to the entity manager. This essentially waits for one tick.
     final void wait()
     {
@@ -83,7 +85,7 @@ protected:
     abstract void think();
 
 public:
-    override void tick()
+    override void tick(in FrameTime frameTime)
     {
         if (mFiber.state == Fiber.State.TERM)
         {
@@ -94,6 +96,7 @@ public:
         if (mWaitExpires > ZyeWare.upTime || mIsWaitingForSignal)
             return;
 
+        mFrameTime = frameTime;
         mFiber.call!(Fiber.Rethrow.yes);
     }
 

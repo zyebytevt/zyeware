@@ -17,7 +17,7 @@ private:
     Duration mNextTick;
 
 protected:
-    void addState(string name, void delegate() tick, void delegate() enter = null,
+    void addState(string name, void delegate(in FrameTime) tick, void delegate() enter = null,
         void delegate() exit = null)
     {
         mFsm.addState(name, FiniteStateMachine.State(tick, enter, exit));
@@ -29,11 +29,11 @@ protected:
     }
 
 public:
-    override void tick()
+    override void tick(in FrameTime frameTime)
     {
         if (ZyeWare.upTime < mNextTick)
             return;
 
-        mFsm.tick();
+        mFsm.tick(frameTime);
     }
 }

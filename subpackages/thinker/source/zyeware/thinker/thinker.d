@@ -5,6 +5,8 @@
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.thinker.thinker;
 
+import zyeware;
+
 interface Drawer
 {
     void draw() const;
@@ -16,7 +18,7 @@ package(zyeware.thinker):
     bool mIsFreeQueued;
 
 public:
-    abstract void tick();
+    abstract void tick(in FrameTime frameTime);
 
     void free() @safe nothrow
     {

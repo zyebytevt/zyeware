@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.core.fsm;
+module zyeware.utils.fsm;
 
 import std.exception : enforce;
 import std.string : format;
@@ -20,7 +20,7 @@ private:
 public:
     struct State
     {
-        void delegate() onTick;
+        void delegate(in FrameTime) onTick;
         void delegate() onEnter;
         void delegate() onExit;
     }
@@ -36,10 +36,10 @@ public:
         mStates.remove(name);
     }
 
-    void tick()
+    void tick(in FrameTime frameTime)
     {
         if (mCurrentState && mCurrentState.onTick)
-            mCurrentState.onTick();
+            mCurrentState.onTick(frameTime);
     }
 
     string state() @safe pure nothrow => mCurrentStateName;

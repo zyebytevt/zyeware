@@ -7,6 +7,7 @@ module zyeware.thinker.appstate;
 
 import zyeware.core.application;
 import zyeware.thinker;
+import zyeware;
 
 class ThinkerAppState : AppState
 {
@@ -30,9 +31,9 @@ public:
         super(application);
     }
 
-    override void tick()
+    override void tick(in FrameTime frameTime)
     {
-        mThinkerManager.tick();
+        mThinkerManager.tick(frameTime);
     }
 
     override void draw() const

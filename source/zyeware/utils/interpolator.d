@@ -1,4 +1,4 @@
-module zyeware.core.interpolator;
+module zyeware.utils.interpolator;
 
 import std.algorithm : remove, sort, clamp;
 import std.typecons : Tuple;

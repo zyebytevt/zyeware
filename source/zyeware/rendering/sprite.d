@@ -77,7 +77,7 @@ protected:
     bool mIsPlaying;
 
 public:
-    this(FrameAnimations animations, TextureAtlas textureAtlas, vec2i size, vec2 offset = vec2.zero)
+    this(FrameAnimations animations, TextureAtlas textureAtlas, vec2i size, vec2 offset = vec2.zero) @safe pure nothrow
     in (animations, "Animations must not be null.")
     {
         super(textureAtlas, size, offset);
@@ -97,14 +97,12 @@ public:
         isPlaying = false;
     }
 
-    void tick()
+    void tick(in FrameTime frameTime)
     {
         if (!mIsPlaying || !mCurrentAnimation)
-        {
             return;
-        }
 
-        mRemainingFrameTime -= ZyeWare.frameTime.deltaTime;
+        mRemainingFrameTime -= frameTime.deltaTime;
 
         while (mRemainingFrameTime <= Duration.zero)
         {

@@ -19,7 +19,7 @@ public:
     abstract void load();
 
     /// Override this method to perform logic on every frame.
-    abstract void tick();
+    abstract void tick(in FrameTime frameTime);
 
     /// Override this method to perform rendering.
     abstract void draw();
@@ -40,10 +40,10 @@ protected:
 public:
     Signal!() stateChanged;
 
-    override void tick()
+    override void tick(in FrameTime frameTime)
     {
         if (hasState)
-            currentState.tick();
+            currentState.tick(frameTime);
     }
 
     override void draw()
@@ -140,7 +140,7 @@ public:
     ///
     /// Params:
     ///     frameTime = The time between this frame and the last.
-    abstract void tick();
+    abstract void tick(in FrameTime frameTime);
 
     /// Override this function to perform rendering.
     abstract void draw() const;

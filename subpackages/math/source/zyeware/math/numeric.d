@@ -89,4 +89,5 @@ unittest
     angleBetween(2, 0.0).should == -2.0;
 
     toFloatSeconds(5.seconds).should == 5.0;
+    toDoubleSeconds(5.seconds).should == 5.0;
 }
