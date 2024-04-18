@@ -30,15 +30,15 @@ public:
         Bus_destroy(mBus);
     }
 
-    SoundHandle play(float volume = 1f, float pan = 0f)
+    SoundHandle play(AudioSource source, float volume = 1f, float pan = 0f)
     {
-        return SoundHandle(Bus_playEx(mBus, mSound, volume, pan, 0, 0));
+        return SoundHandle(Bus_playEx(mBus, source.mSound, volume, pan, 0));
     }
     
-    SoundHandle play3d(vec3 position, vec3 velocity, float volume = 1f)
+    SoundHandle play3d(AudioSource source, vec3 position, vec3 velocity, float volume = 1f)
     {
-        return SoundHandle(Bus_play3dEx(mBus, mSound, position.x, position.y, position.z,
-            velocity.x, velocity.y, velocity.z, volume, 0, 0));
+        return SoundHandle(Bus_play3dEx(mBus, source.mSound, position.x, position.y, position.z,
+            velocity.x, velocity.y, velocity.z, volume, 0));
     }
 
     string name() const nothrow => mName;
