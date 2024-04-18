@@ -11,8 +11,6 @@ struct CommandLineArguments
     LogLevel clientLogLevel = LogLevel.verbose; /// The log level for the client logger.
 
     string graphicsDriver = "opengl"; /// The graphics driver to use.
-    string audioDriver = "openal"; /// The audio driver to use.
-    string displayDriver = "sdl"; /// The display driver to use.
 
     static CommandLineArguments parse(string[] args)
     {
@@ -25,16 +23,12 @@ struct CommandLineArguments
 
         try
         {
-            auto helpInfo = getopt(args, config.passThrough, "game",
-                "The packages to load.", &parsed.packages, "loglevel-core",
-                "The minimum log level for engine logs to be displayed.",
-                &parsed.coreLogLevel, "loglevel-client",
-                "The minimum log level for game logs to be displayed.",
-                &parsed.clientLogLevel, "graphics-driver",
-                "The graphics driver to use.", &parsed.graphicsDriver, "audio-driver",
-                "The audio driver to use.",
-                &parsed.audioDriver, "display-driver",
-                "The display driver to use.", &parsed.displayDriver,);
+            auto helpInfo = getopt(args, config.passThrough,
+                "game", "The packages to load.", &parsed.packages,
+                "loglevel-core", "The minimum log level for engine logs to be displayed.", &parsed.coreLogLevel,
+                "loglevel-client", "The minimum log level for game logs to be displayed.", &parsed.clientLogLevel,
+                "graphics-driver", "The graphics driver to use.", &parsed.graphicsDriver,
+            );
 
             if (helpInfo.helpWanted)
             {
@@ -47,9 +41,6 @@ struct CommandLineArguments
                 writefln("Available log levels: %(%s, %)", [
                     EnumMembers!LogLevel
                 ]);
-                //writefln("Available graphics drivers: %(%s, %)", Pal.registeredGraphicsDrivers());
-                //writefln("Available audio drivers: %(%s, %)", Pal.registeredAudioDrivers());
-                //writefln("Available display drivers: %(%s, %)", Pal.registeredDisplayDrivers());
                 exit(0);
             }
         }

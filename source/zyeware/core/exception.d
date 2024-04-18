@@ -28,13 +28,6 @@ class ResourceException : Exception
     mixin GenericExceptionCtor;
 }
 
-// ===== PAL Exceptions =====
-
-class DisplayException : Exception
-{
-    mixin GenericExceptionCtor;
-}
-
 class AudioException : Exception
 {
     mixin GenericExceptionCtor;

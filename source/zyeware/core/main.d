@@ -20,10 +20,6 @@ else
     {
         try
         {
-            import zyeware.platform.opengl.loader : loadOpenGl;
-            import zyeware.subsystems.graphics.subsystem : GraphicsSubsystem;
-            GraphicsSubsystem.registerLoader("opengl", &loadOpenGl);
-
             ZyeWare.load(args, getProjectProperties());
             ZyeWare.start();
             ZyeWare.unload();

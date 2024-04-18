@@ -45,6 +45,8 @@ package(zyeware) static:
         (*loader)(sCallbacks, sR2dCallbacks);
         sCallbacks.load();
         sR2dCallbacks.load();
+
+        Logger.core.info("Graphics subsystem loaded, .");
     }
 
     void unload()

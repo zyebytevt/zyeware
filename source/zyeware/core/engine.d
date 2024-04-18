@@ -237,6 +237,9 @@ package(zyeware.core) static:
 
         Logger.core.info("ZyeWare Game Engine v%s", engineVersion.toString());
 
+        // Register available graphics backends
+        GraphicsSubsystem.registerLoader("opengl", &(imported!"zyeware.platform.opengl.loader".loadOpenGl));
+
         // Init VFS
         Files.load();
         Files.addPackage("main.zpk");
@@ -260,7 +263,7 @@ package(zyeware.core) static:
 
         enforce!CoreException(sMainWindow, "Main display creation failed.");
 
-        GraphicsSubsystem.load("opengl");
+        GraphicsSubsystem.load(parsedArgs.graphicsDriver);
         createFramebuffer();
 
         events.windowResized += (const Window window, vec2i size) {
