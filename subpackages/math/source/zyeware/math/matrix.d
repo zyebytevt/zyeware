@@ -11,6 +11,8 @@ public import inmath.linalg : quat, mat2, mat3, mat4;
 
 import zyeware;
 
+pragma(inline, true):
+
 /// Convert a 2D position from world to local space.
 /// 
 /// Params:
@@ -53,6 +55,12 @@ vec3 inverseTransformPoint(in mat4 transform, in vec3 worldPoint) pure nothrow
 vec3 transformPoint(in mat4 transform, in vec3 localPoint) pure nothrow
 {
     return (transform * vec4(localPoint, 1)).xyz;
+}
+
+/// Create a 2D orthographic projection matrix with the given viewport.
+mat4 make2dProjectionMatrix(in rect viewport) pure nothrow
+{
+    return mat4.orthographic(viewport.x, viewport.width, viewport.height, viewport.y, -1, 1);
 }
 
 @("Matrix vector transforms")

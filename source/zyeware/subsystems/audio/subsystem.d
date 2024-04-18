@@ -10,6 +10,7 @@ import core.thread;
 import std.string : fromStringz, format;
 
 import soloud;
+import bindbc.soloud;
 import loader = bindbc.loader.sharedlib;
 
 import zyeware;

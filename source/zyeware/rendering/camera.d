@@ -29,8 +29,8 @@ public:
         this.position = position;
     }
 
-    pragma(inline, true) final mat4 getProjectionMatrix() pure const nothrow => mat4.orthographic(0,
-        mViewportSize.x, mViewportSize.y, 0, -1, 1);
+    pragma(inline, true) final mat4 getProjectionMatrix() pure const nothrow
+        => make2dProjectionMatrix(rect(position.x, position.y, mViewportSize.x, mViewportSize.y));
 
     pragma(inline, true) final mat4 getViewMatrix() pure const nothrow => mat4.translation(
         vec3(-position, 0)) * mat4.zRotation(rotation) * mat4.scaling(zoom, zoom, 1);

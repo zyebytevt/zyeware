@@ -6,6 +6,7 @@
 module zyeware.subsystems.audio.filter;
 
 import soloud;
+import bindbc.soloud;
 
 import zyeware;
 import zyeware.subsystems.audio;
@@ -61,9 +62,9 @@ public:
         BiquadResonantFilter_destroy(mFilter);
     }
 
-    void setParameters(uint type, float sampleRate, float frequency, float resonance)
+    void setParameters(uint type, float frequency, float resonance)
     {
-        immutable result = BiquadResonantFilter_setParams(mFilter, type, sampleRate, frequency, resonance);
+        immutable result = BiquadResonantFilter_setParams(mFilter, type, frequency, resonance);
         enforce!AudioException(result == 0, "Failed to set Biquad Resonant filter parameters.");
     }
 }
@@ -169,10 +170,10 @@ public:
 class WaveShaperFilter : AudioFilter
 {
 public:
-    this(float amount, float wet = 1.0f)
+    this(float amount)
     {
         mFilter = WaveShaperFilter_create();
-        setParameters(amount, wet);
+        setParameters(amount);
     }
 
     ~this() nothrow
@@ -180,9 +181,9 @@ public:
         WaveShaperFilter_destroy(mFilter);
     }
 
-    void setParameters(float amount, float wet = 1.0f)
+    void setParameters(float amount)
     {
-        immutable result = WaveShaperFilter_setParamsEx(mFilter, amount, wet);
+        immutable result = WaveShaperFilter_setParams(mFilter, amount);
         enforce!AudioException(result == 0, "Failed to set Wave Shaper filter parameters.");
     }
 }

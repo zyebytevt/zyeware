@@ -6,6 +6,7 @@
 module zyeware.subsystems.audio.source;
 
 import soloud;
+import bindbc.soloud;
 
 import zyeware;
 import zyeware.subsystems.audio;

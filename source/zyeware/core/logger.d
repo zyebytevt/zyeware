@@ -8,7 +8,6 @@ module zyeware.core.logger;
 import core.stdc.stdio : printf;
 import std.stdio : File, stdout;
 import std.string : format;
-import std.datetime : Duration;
 import std.algorithm : remove, SwapStrategy;
 import std.exception : assumeWontThrow, collectException;
 

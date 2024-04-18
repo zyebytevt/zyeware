@@ -6,8 +6,10 @@
 module zyeware.core.application;
 
 import core.memory : GC;
+
 import std.algorithm : min;
 import std.typecons : Nullable;
+import std.string : format;
 
 import zyeware;
 import zyeware.utils.collection;
@@ -35,21 +37,44 @@ public:
 class StateApplication : Application
 {
 protected:
-    GrowableStack!AppState mStateStack;
+    AppState[string] mStates;
+    GrowableStack!string mStateStack;
+    AppState mCurrentState;
 
 public:
-    Signal!() stateChanged;
+    Signal!(string) stateChanged;
 
     override void tick(in FrameTime frameTime)
     {
-        if (hasState)
-            currentState.tick(frameTime);
+        if (mCurrentState)
+            mCurrentState.tick(frameTime);
     }
 
     override void draw()
     {
-        if (hasState)
-            currentState.draw();
+        if (mCurrentState)
+            mCurrentState.draw();
+    }
+
+    AppState getState(string name) pure
+    {
+        AppState state = mStates.get(name, null);
+        enforce!CoreException(state, format!"State '%s' is not registered."(name));
+        return state;
+    }
+
+    void registerState(string name, AppState state)
+    in (name, "Name cannot be null.")
+    in (state, "State cannot be null.")
+    {
+        enforce!CoreException(name !in mStates, format!"State '%s' is already registered."(name));
+        mStates[name] = state;
+    }
+
+    void unregisterState(string name)
+    in (name, "Name cannot be null.")
+    {
+        mStates.remove(name);
     }
 
     /// Change the current state to the given one.
@@ -59,16 +84,23 @@ public:
     /// Params:
     ///     state = The game state to switch to.
     /// See_Also: ZyeWare.callDeferred
-    void changeState(AppState state)
-    in (state, "Game state cannot be null.")
+    void changeState(string name)
+    in (name, "Name cannot be null.")
     {
-        if (hasState)
-            mStateStack.pop().onDetach();
+        AppState state = getState(name);
 
-        mStateStack.push(state);
-        state.onAttach(!state.mWasAlreadyAttached);
-        state.mWasAlreadyAttached = true;
-        stateChanged();
+        if (mCurrentState)
+        {
+            mCurrentState.onDetach(AppState.StateChangeMethod.change);
+            mStateStack.pop();
+        }
+
+        mCurrentState = state;
+        mStateStack.push(name);
+        state.onAttach(AppState.StateChangeMethod.change);
+        
+        stateChanged(name);
+
         ZyeWare.collect();
     }
 
@@ -79,16 +111,20 @@ public:
     /// Params:
     ///     state = The state to push and switch to.
     /// See_Also: ZyeWare.callDeferred
-    void pushState(AppState state)
-    in (state, "Game state cannot be null.")
+    void pushState(string name)
+    in (name, "Name cannot be null.")
     {
-        if (hasState)
-            currentState.onDetach();
+        AppState state = getState(name);
 
-        mStateStack.push(state);
-        state.onAttach(!state.mWasAlreadyAttached);
-        state.mWasAlreadyAttached = true;
-        stateChanged();
+        if (mCurrentState)
+            mCurrentState.onDetach(AppState.StateChangeMethod.push);
+
+        mCurrentState = state;
+        mStateStack.push(name);
+        state.onAttach(AppState.StateChangeMethod.push);
+        
+        stateChanged(name);
+        
         ZyeWare.collect();
     }
 
@@ -98,26 +134,33 @@ public:
     /// See_Also: ZyeWare.callDeferred
     void popState()
     {
-        if (hasState)
-            mStateStack.pop().onDetach();
+        if (mCurrentState)
+        {
+            mCurrentState.onDetach(AppState.StateChangeMethod.pop);
+            mStateStack.pop();
+        }
 
-        currentState.onAttach(!currentState.mWasAlreadyAttached);
-        currentState.mWasAlreadyAttached = true;
-        stateChanged();
+        string stateName;
+
+        if (!mStateStack.empty)
+        {
+            stateName = mStateStack.peek;
+            mCurrentState = getState(stateName);
+            mCurrentState.onAttach(AppState.StateChangeMethod.pop);
+        }
+
+        stateChanged(stateName);
+
         ZyeWare.collect();
     }
 
     /// The current game state.
-    pragma(inline, true) AppState currentState()
-    {
-        return mStateStack.peek;
-    }
+    pragma(inline, true)
+    AppState currentState() => mCurrentState;
 
     /// If this application currently has a game state loaded.
-    pragma(inline, true) bool hasState() const nothrow
-    {
-        return !mStateStack.empty;
-    }
+    pragma(inline, true)
+    bool hasState() const nothrow => mCurrentState !is null;
 }
 
 /// An application state is used in conjunction with a `StateApplication` instance
@@ -126,7 +169,6 @@ abstract class AppState
 {
 private:
     StateApplication mApplication;
-    bool mWasAlreadyAttached;
 
 protected:
     this(StateApplication application) pure nothrow
@@ -136,6 +178,13 @@ protected:
     }
 
 public:
+    enum StateChangeMethod
+    {
+        push,
+        pop,
+        change,
+    }
+
     /// Override this function to perform logic every frame.
     ///
     /// Params:
@@ -146,15 +195,12 @@ public:
     abstract void draw() const;
 
     /// Called when this game state gets attached to a `StateApplication`.
-    ///
-    /// Params:
-    ///     firstTime = Whether it gets attached the first time or not.
-    void onAttach(bool firstTime)
+    void onAttach(StateChangeMethod method)
     {
     }
 
     /// Called when this game state gets detached from a `StateApplication`.
-    void onDetach()
+    void onDetach(StateChangeMethod method)
     {
     }
 
@@ -162,11 +208,5 @@ public:
     inout(StateApplication) application() pure inout nothrow
     {
         return mApplication;
-    }
-
-    /// Whether this game state was already attached once or not.
-    bool wasAlreadyAttached() pure const nothrow
-    {
-        return mWasAlreadyAttached;
     }
 }

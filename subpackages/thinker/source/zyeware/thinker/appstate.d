@@ -29,6 +29,7 @@ public:
     this(StateApplication application)
     {
         super(application);
+        mThinkerManager = new ThinkerManager();
     }
 
     override void tick(in FrameTime frameTime)

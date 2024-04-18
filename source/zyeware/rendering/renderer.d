@@ -15,6 +15,7 @@ struct Renderer
 {
 private static:
     Rebindable!(const Camera) mActiveCamera;
+    bool mBatchActive;
 
 public static:
     /// Clears the screen.
@@ -31,7 +32,7 @@ public static:
     /// Params:
     ///     camera = The camera to use. If `null`, uses a default projection.
     void begin2d(in Camera camera)
-    in (!mActiveCamera,
+    in (!mBatchActive,
         "A 2D render batch is already active. Call `end2d` before starting a new batch.")
     {
         immutable mat4 projectionMatrix = camera ? camera.getProjectionMatrix() : mat4.orthographic(0,
@@ -39,6 +40,17 @@ public static:
         immutable mat4 viewMatrix = camera ? camera.getViewMatrix() : mat4.identity;
 
         mActiveCamera = camera;
+        begin2d(projectionMatrix, viewMatrix);
+    }
+
+    /// Starts batching render commands. Must be called before any rendering is done.
+    ///
+    /// Params:
+    ///     projectionMatrix = The projection matrix to use.
+    ///     viewMatrix = The view matrix to use.
+    void begin2d(in mat4 projectionMatrix, in mat4 viewMatrix = mat4.identity)
+    {
+        mBatchActive = true;
         GraphicsSubsystem.r2dCallbacks.begin(projectionMatrix, viewMatrix);
     }
 
@@ -47,6 +59,7 @@ public static:
     {
         GraphicsSubsystem.r2dCallbacks.end();
         mActiveCamera = null;
+        mBatchActive = false;
     }
 
     /// Draws a mesh.

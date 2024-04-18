@@ -27,6 +27,11 @@ protected:
     }
 
 public:
+    this(ThinkerManager manager)
+    {
+        super(manager);
+    }
+
     override void tick(in FrameTime frameTime)
     {
         if (ZyeWare.upTime < mNextTick)

@@ -70,8 +70,9 @@ protected:
         return result;
     }
 
-    this()
+    this(ThinkerManager manager)
     {
+        super(manager);
         mFiber = new Fiber(&think);
     }
 

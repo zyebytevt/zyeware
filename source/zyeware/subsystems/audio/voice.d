@@ -6,6 +6,7 @@
 module zyeware.subsystems.audio.voice;
 
 import soloud;
+import bindbc.soloud;
 
 import zyeware;
 
@@ -82,11 +83,9 @@ public:
         Soloud_oscillateFilterParameter(AudioSubsystem.sEngine, mHandle, filterId, attributeId, from, to, time.toDoubleSeconds);
     }
 
-    void setPanAbsolute(float leftVolume, float rightVolume, float leftBottomVolume = 0f, float rightBottomVolume = 0f,
-        float centerVolume = 0f, float surroundVolume = 0f)
+    void setPanAbsolute(float leftVolume, float rightVolume)
     {
-        Soloud_setPanAbsoluteEx(AudioSubsystem.sEngine, mHandle, leftVolume, rightVolume, leftBottomVolume,
-            rightBottomVolume, centerVolume, surroundVolume);
+        Soloud_setPanAbsolute(AudioSubsystem.sEngine, mHandle, leftVolume, rightVolume);
     }
 
     float dopplerFactor(float value) nothrow

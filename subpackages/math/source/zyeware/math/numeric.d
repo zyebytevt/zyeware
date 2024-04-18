@@ -13,6 +13,8 @@ import std.traits : isNumeric, isFloatingPoint;
 public import inmath.math : degrees, radians;
 import inmath.util : isVector;
 
+import zyeware;
+
 /// Represents a range of values, given a `min` and `max`.
 struct Range(T)
 {

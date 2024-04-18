@@ -1,6 +1,5 @@
 module zyeware.rendering.frameanim;
 
-import std.datetime : dur, Duration;
 import std.conv : to;
 import std.exception : enforce;
 import std.algorithm : reduce;
