@@ -8,6 +8,7 @@ module zyeware.subsystems.audio.source;
 import soloud;
 
 import zyeware;
+import zyeware.subsystems.audio;
 
 /// Contains various data for Sound initialisation.
 struct SoundProperties
@@ -16,11 +17,27 @@ struct SoundProperties
     double loopPoint = 0.0; /// The point to loop at. It differentiates between a sample or pattern & row (for modules)
 }
 
-interface AudioSource
+abstract class AudioSource
 {
-    SoundHandle play(float volume, float pan);
-    SoundHandle play3d(vec3 position, vec3 velocity, float volume);
-    void stop();
+package:
+    SoloudHandle mSound;
+
+public:
+    SoundHandle play(float volume = 1f, float pan = 0f)
+    {
+        return SoundHandle(Soloud_playEx(AudioSubsystem.sEngine, mSound, volume, pan, 0, 0));
+    }
+    
+    SoundHandle play3d(vec3 position, vec3 velocity, float volume = 1f)
+    {
+        return SoundHandle(Soloud_play3dEx(AudioSubsystem.sEngine, mSound, position.x, position.y, position.z,
+            velocity.x, velocity.y, velocity.z, volume, 0, 0));
+    }
+
+    abstract void stop();
+
+    abstract double loopPoint() nothrow;
+    abstract double loopPoint(double value) nothrow;
 }
 
 struct SoundHandle
@@ -29,42 +46,36 @@ private:
     uint mHandle;
 
 public:
-    int seek(double seconds) => AudioSubsystem.sEngine.seek(mHandle, seconds);
-    void stop() => AudioSubsystem.sEngine.stop(mHandle);
+    int seek(double seconds) => Soloud_seek(AudioSubsystem.sEngine, mHandle, seconds);
+    void stop() => Soloud_stop(AudioSubsystem.sEngine, mHandle);
 }
 
 @asset(Yes.cache)
 class Sound : AudioSource
 {
-protected:
-    Wav mSound;
-
 public:
     this(ubyte[] data, SoundProperties properties = SoundProperties.init)
     {
-        mSound.loadMem(data.ptr, cast(uint) data.length);
+        mSound = Wav_create();
+        Wav_loadMemEx(mSound, data.ptr, cast(uint) data.length, false, false);
         
-        mSound.setLooping(properties.isLooping);
-        mSound.setLoopPoint(properties.loopPoint);
+        Wav_setLooping(mSound, properties.isLooping);
+        Wav_setLoopPoint(mSound, properties.loopPoint);
     }
 
     ~this()
     {
-        mSound.free();
+        Wav_destroy(mSound);
     }
 
-    SoundHandle play(float volume = 1f, float pan = 0f)
+    override void stop() => Wav_stop(mSound);
+
+    override double loopPoint() nothrow => Wav_getLoopPoint(mSound);
+    override double loopPoint(double value) nothrow
     {
-        return SoundHandle(AudioSubsystem.sEngine.play(mSound, volume, pan));
+        Wav_setLoopPoint(mSound, value);
+        return value;
     }
-
-    SoundHandle play3d(vec3 position, vec3 velocity, float volume = 1f)
-    {
-        return SoundHandle(AudioSubsystem.sEngine.play3d(mSound, position.x, position.y, position.z,
-            velocity.x, velocity.y, velocity.z, volume));
-    }
-
-    void stop() => AudioSubsystem.sEngine.stopAudioSource(mSound);
 
     /// Loads a sound from a given Files path.
     /// Params:

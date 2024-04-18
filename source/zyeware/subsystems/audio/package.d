@@ -9,4 +9,5 @@ public
 {
     import zyeware.subsystems.audio.subsystem;
     import zyeware.subsystems.audio.source;
+    import zyeware.subsystems.audio.bus;
 }

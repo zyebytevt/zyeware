@@ -7,12 +7,14 @@ module zyeware.subsystems.audio.subsystem;
 
 import core.thread;
 
-import std.string : fromStringz;
+import std.string : fromStringz, format;
 
 import soloud;
 import loader = bindbc.loader.sharedlib;
 
 import zyeware;
+
+package alias SoloudHandle = int*;
 
 struct AudioSubsystem
 {
@@ -20,7 +22,8 @@ struct AudioSubsystem
     @disable this(this);
 
 package static:
-    Soloud sEngine;
+    SoloudHandle sEngine;
+    AudioBus[string] sBuses;
 
 package(zyeware) static:
     void load()
@@ -48,12 +51,45 @@ package(zyeware) static:
             }
         }
 
-        sEngine = Soloud.create();
-        sEngine.init(Soloud.CLIP_ROUNDOFF, Soloud.SDL2);
+        sEngine = Soloud_create();
+        Soloud_initEx(sEngine, Soloud.CLIP_ROUNDOFF, Soloud.SDL2, Soloud.AUTO, Soloud.AUTO, Soloud.AUTO);
     }
 
     void unload()
     {
-        sEngine.deinit();
+        foreach (AudioBus bus; sBuses)
+            bus.destroy();
+        sBuses.clear();
+
+        Soloud_deinit(sEngine);
+    }
+
+public:
+    AudioBus createBus(string name)
+    {
+        AudioBus* bus = name in sBuses;
+        enforce!AudioException(!bus, format!"Bus with name '%s' already exists."(name));
+
+        auto newBus = new AudioBus(name);
+        sBuses[name] = newBus;
+
+        return newBus;
+    }
+
+    AudioBus getBus(string name)
+    {
+        AudioBus* bus = name in sBuses;
+        enforce!AudioException(bus, format!"Bus with name '%s' does not exist."(name));
+
+        return *bus;
+    }
+
+    void destroyBus(string name)
+    {
+        AudioBus* bus = name in sBuses;
+        enforce!AudioException(bus, format!"Bus with name '%s' does not exist."(name));
+
+        (*bus).destroy();
+        sBuses.remove(name);
     }
 }
