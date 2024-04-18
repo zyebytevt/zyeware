@@ -20,17 +20,20 @@ else
     {
         try
         {
-            ZyeWare.initialize(args, getProjectProperties());
+            import zyeware.platform.opengl.loader : loadOpenGl;
+            import zyeware.subsystems.graphics.subsystem : GraphicsSubsystem;
+            GraphicsSubsystem.registerLoader("opengl", &loadOpenGl);
+
+            ZyeWare.load(args, getProjectProperties());
             ZyeWare.start();
-            ZyeWare.cleanup();
+            ZyeWare.unload();
 
             return 0;
         }
         catch (Throwable t)
         {
-            import zyeware.crashhandler : showCrashHandler;
-
-            showCrashHandler(t);
+            import std.stdio : writeln;
+            writeln(t);
 
             return 1;
         }

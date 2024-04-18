@@ -17,10 +17,10 @@ import std.datetime : Duration, dur;
 import std.algorithm : min, remove;
 
 import zyeware;
+import zyeware.subsystems;
 import zyeware.core.project;
 import zyeware.core.main;
 import zyeware.core.cmdargs;
-import zyeware.pal.pal;
 
 /// How the main framebuffer should be scaled on resizing.
 enum ScaleMode
@@ -206,15 +206,15 @@ private static:
         sMainWindow.update();
 
         // Prepare framebuffer and render application into it.
-        Pal.graphics.api.setViewport(recti(0, 0,
+        GraphicsSubsystem.callbacks.setViewport(recti(0, 0,
                 sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y));
 
-        Pal.graphics.api.setRenderTarget(sMainFramebuffer.handle);
+        GraphicsSubsystem.callbacks.setRenderTarget(sMainFramebuffer.handle);
         sApplication.draw();
-        Pal.graphics.api.setRenderTarget(null);
+        GraphicsSubsystem.callbacks.setRenderTarget(null);
 
-        Pal.graphics.api.clearScreen(color(0, 0, 0));
-        Pal.graphics.api.presentToScreen(sMainFramebuffer.handle, recti(0, 0,
+        GraphicsSubsystem.callbacks.clearScreen(color(0, 0, 0));
+        GraphicsSubsystem.callbacks.presentToScreen(sMainFramebuffer.handle, recti(0, 0,
                 sMainFramebuffer.properties.size.x, sMainFramebuffer.properties.size.y),
             sFramebufferArea);
 
@@ -222,7 +222,7 @@ private static:
     }
 
 package(zyeware.core) static:
-    void initialize(string[] args, in ProjectProperties projectProperties)
+    void load(string[] args, in ProjectProperties projectProperties)
     {
         sStartupTime = MonoTime.currTime;
 
@@ -232,29 +232,25 @@ package(zyeware.core) static:
         // Initialize profiler and logger before anything else.
         auto sink = new ColorLogSink();
 
-        Logger.initialize(new Logger(sink, parsedArgs.coreLogLevel, "Core"),
+        Logger.load(new Logger(sink, parsedArgs.coreLogLevel, "Core"),
             new Logger(sink, parsedArgs.clientLogLevel, "Client"));
 
         Logger.core.info("ZyeWare Game Engine v%s", engineVersion.toString());
 
-        Files.initialize();
-        AssetManager.initialize();
-        InputMap.initialize();
-
+        // Init VFS
+        Files.load();
         Files.addPackage("main.zpk");
         foreach (string pckPath; parsedArgs.packages)
-        {
             Files.addPackage(pckPath);
-        }
+
+        AssetManager.load();
+        InputMap.load();
+        SdlSubsystem.load();
+        AudioSubsystem.load();
 
         sProjectProperties = projectProperties;
         sApplication = cast(Application) Object.factory(sProjectProperties.mainApplication);
         enforce!CoreException(sApplication, "Failed to create main application.");
-
-        DisplayApi.initialize();
-
-        Pal.registerDrivers();
-        Pal.loadGraphicsDriver(parsedArgs.graphicsDriver);
 
         // Creates a new display and render context.
         sRandom = new RandomNumberGenerator();
@@ -264,30 +260,27 @@ package(zyeware.core) static:
 
         enforce!CoreException(sMainWindow, "Main display creation failed.");
 
-        Pal.initializeDrivers();
-
-        AudioApi.initialize();
-        AudioBus.create("master");
-
+        GraphicsSubsystem.load("opengl");
         createFramebuffer();
 
         events.windowResized += (const Window window, vec2i size) {
             sMustUpdateFramebufferDimensions = true;
         };
 
-        sApplication.initialize();
+        sApplication.load();
     }
 
-    void cleanup()
+    void unload()
     {
         sMainWindow.destroy();
         sMainFramebuffer.destroy();
-        sApplication.cleanup();
+        sApplication.unload();
 
-        Pal.cleanupDrivers();
-
-        InputMap.cleanup();
-        Files.cleanup();
+        AudioSubsystem.unload();
+        GraphicsSubsystem.unload();
+        SdlSubsystem.unload();
+        InputMap.unload();
+        Files.unload();
 
         collect();
     }
@@ -375,10 +368,10 @@ public static:
     {
         setTimeout(Duration.zero, {
             if (sApplication)
-                sApplication.cleanup();
+                sApplication.unload();
 
             sApplication = value;
-            sApplication.initialize();
+            sApplication.load();
 
             recalculateFramebufferArea();
         });

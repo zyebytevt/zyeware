@@ -1,9 +1,0 @@
-.dub
-docs.json
-__dummy.html
-out/
-*.exe
-*.pdb
-*.o
-*.obj
-*.lst

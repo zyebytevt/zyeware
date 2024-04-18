@@ -93,13 +93,13 @@ private static:
     }
 
 package(zyeware.core) static:
-    void initialize()
+    void load()
     {
         register!Shader((path) => cast(Object) Shader.load(path));
         register!Texture2d((path) => cast(Object) Texture2d.load(path));
         register!TextureCubeMap((path) => cast(Object) TextureCubeMap.load(path));
 
-        register!AudioBuffer((path) => cast(Object) AudioBuffer.load(path));
+        //register!AudioBuffer((path) => cast(Object) AudioBuffer.load(path));
 
         register!Image(&Image.load);
         register!Mesh3d(&Mesh3d.load);
@@ -112,7 +112,7 @@ package(zyeware.core) static:
         Logger.core.debug_("Initialized default asset loaders.");
     }
 
-    void cleanup()
+    void unload()
     {
         freeAll();
     }

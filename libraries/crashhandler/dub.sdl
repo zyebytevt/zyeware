@@ -1,7 +1,0 @@
-name "crashhandler"
-description "The crash handler for ZyeWare."
-authors "ZyeByte"
-copyright "Copyright © 2024, ZyeByte"
-license "LGPL-3.0"
-targetType "sourceLibrary"
-targetPath "out"

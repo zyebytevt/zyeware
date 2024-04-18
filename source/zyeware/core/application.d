@@ -16,7 +16,7 @@ abstract class Application
 {
 public:
     /// Override this method for application initialization.
-    abstract void initialize();
+    abstract void load();
 
     /// Override this method to perform logic on every frame.
     abstract void tick();
@@ -25,7 +25,7 @@ public:
     abstract void draw();
 
     /// Destroys the application.
-    void cleanup()
+    void unload()
     {
     }
 }

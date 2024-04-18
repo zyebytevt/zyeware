@@ -180,7 +180,7 @@ private static:
     }
 
 package(zyeware.core) static:
-    void initialize() @safe
+    void load() @safe
     {
         ZyeWare.events.keyboardKeyPressed += &onKeyboardKeyPressed;
         ZyeWare.events.keyboardKeyReleased += &onKeyboardKeyReleased;
@@ -191,7 +191,7 @@ package(zyeware.core) static:
         ZyeWare.events.gamepadAxisMoved += &onGamepadAxisMoved;
     }
 
-    void cleanup() @safe nothrow
+    void unload() @safe nothrow
     {
         ZyeWare.events.keyboardKeyPressed -= &onKeyboardKeyPressed;
         ZyeWare.events.keyboardKeyReleased -= &onKeyboardKeyReleased;

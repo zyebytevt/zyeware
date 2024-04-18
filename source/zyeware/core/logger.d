@@ -53,7 +53,7 @@ private:
     }
 
 package(zyeware):
-    static void initialize(Logger core, Logger client) nothrow
+    static void load(Logger core, Logger client) nothrow
     in (core && client, "Cannot set null as loggers.")
     {
         sCoreLogger = core;

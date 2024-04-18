@@ -122,7 +122,7 @@ private static:
     }
 
 package(zyeware) static:
-    void initialize()
+    void load()
     {
         if (exists(std.path.buildNormalizedPath(std.path.dirName(thisExePath),
                 userDirPortableName, "_sc_")))
@@ -157,7 +157,7 @@ package(zyeware) static:
         Logger.core.info("Virtual File System initialized.");
     }
 
-    void cleanup() nothrow
+    void unload() nothrow
     {
         sSchemes.clear();
         sLoaders.length = 0;

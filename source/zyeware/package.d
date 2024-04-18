@@ -14,8 +14,8 @@ public
     import std.typecons : Flag, Yes, No;
     import std.exception : enforce;
 
-    import zyeware.audio;
-    import zyeware.display;
+    import zyeware.subsystems.audio;
+    import zyeware.subsystems.sdl;
 
     import zyeware.core.application;
     import zyeware.core.asset;
@@ -37,29 +37,27 @@ public
     import zyeware.math.rect;
     import zyeware.math.vector;
 
-    import zyeware.pal.generic.types.graphics;
+    import zyeware.subsystems.physics.shapes.circle2d;
+    import zyeware.subsystems.physics.shapes.polygon2d;
+    import zyeware.subsystems.physics.shapes.shape2d;
 
-    import zyeware.physics.shapes.circle2d;
-    import zyeware.physics.shapes.polygon2d;
-    import zyeware.physics.shapes.shape2d;
-
-    import zyeware.graphics.bitmapfont;
-    import zyeware.graphics.camera;
-    import zyeware.graphics.color;
-    import zyeware.graphics.cursor;
-    import zyeware.graphics.environment;
-    import zyeware.graphics.frameanim;
-    import zyeware.graphics.framebuffer;
-    import zyeware.graphics.image;
-    import zyeware.graphics.material;
-    import zyeware.graphics.mesh;
-    import zyeware.graphics.particles2d;
-    import zyeware.graphics.shader;
-    import zyeware.graphics.texatlas;
-    import zyeware.graphics.texture;
-    import zyeware.graphics.vertex;
-    import zyeware.graphics.renderer;
-    import zyeware.graphics.sprite;
+    import zyeware.rendering.bitmapfont;
+    import zyeware.rendering.camera;
+    import zyeware.rendering.color;
+    import zyeware.rendering.cursor;
+    import zyeware.rendering.environment;
+    import zyeware.rendering.frameanim;
+    import zyeware.rendering.framebuffer;
+    import zyeware.rendering.image;
+    import zyeware.rendering.material;
+    import zyeware.rendering.mesh;
+    import zyeware.rendering.particles2d;
+    import zyeware.rendering.shader;
+    import zyeware.rendering.texatlas;
+    import zyeware.rendering.texture;
+    import zyeware.rendering.vertex;
+    import zyeware.rendering.renderer;
+    import zyeware.rendering.sprite;
 
     import zyeware.utils.codes;
     import zyeware.utils.collection;
