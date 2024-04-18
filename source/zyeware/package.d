@@ -15,17 +15,7 @@ public
     import std.exception : enforce;
     import std.datetime : Duration, dur;
 
-    import zyeware.core.application;
-    import zyeware.core.asset;
-    import zyeware.core.engine;
-    import zyeware.core.exception;
-    import zyeware.core.inputmap;
-    import zyeware.core.locale;
-    import zyeware.core.native;
-    import zyeware.core.random;
-    import zyeware.core.signal;
-    import zyeware.core.project;
-    import zyeware.core.logger;
+    import zyeware.core;
 
     import zyeware.math;
 

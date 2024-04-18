@@ -5,8 +5,6 @@
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.subsystems.audio.voice;
 
-import std.datetime : Duration;
-
 import soloud;
 
 import zyeware;

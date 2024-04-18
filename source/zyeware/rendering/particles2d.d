@@ -7,7 +7,6 @@ module zyeware.rendering.particles2d;
 
 import std.container.slist;
 import std.container.dlist;
-import std.datetime : Duration, hnsecs;
 import std.typecons : Tuple;
 import std.algorithm : canFind, remove;
 import std.math : sin, cos, PI;
@@ -177,7 +176,7 @@ private struct ParticleContainer
         immutable float direction = ZyeWare.random.getRange(type.direction.min, type.direction.max);
         velocities[activeParticlesCount] = vec2(cos(direction) * speed, sin(direction) * speed);
 
-        lifeTimes[activeParticlesCount] = hnsecs(ZyeWare.random.getRange(
+        lifeTimes[activeParticlesCount] = dur!"hnsecs"(ZyeWare.random.getRange(
                 type.lifeTime.min.total!"hnsecs", type.lifeTime.max.total!"hnsecs"));
         startLifeTimes[activeParticlesCount] = lifeTimes[activeParticlesCount];
 

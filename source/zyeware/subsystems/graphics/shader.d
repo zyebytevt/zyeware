@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.rendering.shader;
+module zyeware.subsystems.graphics.shader;
 
 import std.exception : enforce;
 import std.regex : ctRegex, matchAll;

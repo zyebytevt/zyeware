@@ -5,8 +5,6 @@
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.ecs.system.render2d;
 
-import std.datetime : Duration;
-
 import zyeware;
 import zyeware.ecs;
 

@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.rendering.framebuffer;
+module zyeware.subsystems.graphics.framebuffer;
 
 import std.exception : enforce;
 

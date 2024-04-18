@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.rendering.color;
+module zyeware.subsystems.graphics.color;
 
 import std.conv : to;
 import std.exception : enforce;

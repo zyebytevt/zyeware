@@ -7,8 +7,6 @@ module zyeware.thinker.fiber;
 
 import core.thread.fiber;
 
-import std.datetime : Duration, dur;
-
 import zyeware;
 import zyeware.thinker;
 

@@ -7,7 +7,6 @@ module zyeware.subsystems.audio.subsystem;
 
 import core.thread;
 
-import std.datetime : Duration;
 import std.string : fromStringz, format;
 
 import soloud;

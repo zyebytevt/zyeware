@@ -3,7 +3,7 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.rendering.mesh;
+module zyeware.subsystems.graphics.mesh;
 
 import std.string : format;
 import std.path : extension;

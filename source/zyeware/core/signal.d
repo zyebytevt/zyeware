@@ -78,8 +78,7 @@ public:
     {
         void opOpAssign(string op, T)(T callback) @trusted pure
         {
-            // I have specifically chosen += instead of ~= because C# also uses += for events.
-            static if (op == "+")
+            static if (op == "+" || op == "~")
                 connect(callback);
             else static if (op == "-")
                 disconnect(callback);

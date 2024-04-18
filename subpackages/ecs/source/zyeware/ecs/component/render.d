@@ -5,7 +5,6 @@
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.ecs.component.render;
 
-import std.datetime : Duration;
 import std.typecons : Tuple;
 import std.string : format;
 import std.exception : enforce;

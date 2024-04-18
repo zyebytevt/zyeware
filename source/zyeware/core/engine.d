@@ -13,7 +13,6 @@ import core.memory;
 import std.exception : enforce, assumeWontThrow, collectException;
 import std.string : format, fromStringz, toStringz;
 import std.typecons : scoped, Rebindable;
-import std.datetime : Duration, dur;
 import std.algorithm : min, remove;
 
 import zyeware;
@@ -21,6 +20,11 @@ import zyeware.subsystems;
 import zyeware.core.project;
 import zyeware.core.main;
 import zyeware.core.cmdargs;
+
+/// Represents a C-style string.
+alias stringz = const(char)*;
+/// A more readable alias for a native handle (a `void*`).
+alias NativeHandle = void*;
 
 /// How the main framebuffer should be scaled on resizing.
 enum ScaleMode
@@ -76,7 +80,13 @@ public:
     Signal!(GamepadIndex, GamepadAxis, float) gamepadAxisMoved;
 }
 
-alias stringz = const(char)*;
+/// This interface describes an instance that holds a handle (a `void*`) to a native object.
+/// This is used to allow the native object to be passed around without having to worry about
+/// the actual type of the native object.
+interface NativeObject
+{
+    const(NativeHandle) handle() pure const nothrow;
+}
 
 /// Holds the core engine. Responsible for the main loop and generic engine settings.
 struct ZyeWare

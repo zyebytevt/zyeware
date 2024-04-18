@@ -5,8 +5,6 @@
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.rendering.sprite;
 
-import std.datetime : Duration;
-
 import zyeware;
 
 class Sprite2d

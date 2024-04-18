@@ -9,4 +9,9 @@ public
 {
     import zyeware.subsystems.graphics.subsystem;
     import zyeware.subsystems.graphics.callbacks;
+    import zyeware.subsystems.graphics.color;
+    import zyeware.subsystems.graphics.framebuffer;
+    import zyeware.subsystems.graphics.mesh;
+    import zyeware.subsystems.graphics.shader;
+    import zyeware.subsystems.graphics.texture;
 }

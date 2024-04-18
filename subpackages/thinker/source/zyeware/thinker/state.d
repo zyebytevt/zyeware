@@ -5,8 +5,6 @@
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
 module zyeware.thinker.state;
 
-import std.datetime : Duration;
-
 import zyeware;
 import zyeware.thinker;
 

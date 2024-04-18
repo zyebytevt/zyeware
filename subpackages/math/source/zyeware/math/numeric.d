@@ -9,7 +9,6 @@ public import std.math : abs, PI_2, PI;
 public import std.algorithm : clamp;
 
 import std.traits : isNumeric, isFloatingPoint;
-import std.datetime : Duration;
 
 public import inmath.math : degrees, radians;
 import inmath.util : isVector;
