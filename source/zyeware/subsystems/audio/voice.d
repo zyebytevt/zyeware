@@ -80,7 +80,8 @@ public:
     void oscillateFilterParameter(uint filterId, uint attributeId, float from, float to, Duration time) nothrow
     in (filterId < AudioSubsystem.maxFilters, "Filter ID out of range.")
     {
-        Soloud_oscillateFilterParameter(AudioSubsystem.sEngine, mHandle, filterId, attributeId, from, to, time.toDoubleSeconds);
+        Soloud_oscillateFilterParameter(AudioSubsystem.sEngine, mHandle, filterId, attributeId, from, to,
+            time.toDoubleSeconds);
     }
 
     void setPanAbsolute(float leftVolume, float rightVolume)
