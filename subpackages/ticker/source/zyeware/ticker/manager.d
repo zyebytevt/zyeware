@@ -68,9 +68,8 @@ public:
 
     void draw() const
     {
-        foreach (const Ticker ticker; mTickers)
-            if (auto drawer = cast(Drawer) ticker)
-                drawer.draw();
+        foreach (const Drawer drawer; mTickers.map!(ticker => cast(Drawer) ticker).filter!(ticker => ticker))
+            drawer.draw();
     }
 
     pragma(inline, true)

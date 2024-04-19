@@ -10,9 +10,21 @@ import zyeware.ticker;
 
 class Thinker : Ticker
 {
-protected:
-    void delegate() mThink;
+private:
+    ThinkFunction mThink;
     Duration mNextThink;
+    FrameTime mFrameTime;
+
+protected:
+    alias ThinkFunction = ThinkResult delegate();
+
+    struct ThinkResult
+    {
+        Duration nextThinkIn;
+        ThinkFunction think;
+    }
+
+    pragma(inline, true) FrameTime frameTime() @safe pure const nothrow => mFrameTime;
 
 public:
     this(TickerManager manager)
@@ -25,6 +37,12 @@ public:
         if (ZyeWare.upTime < mNextThink)
             return;
 
-        mThink();
+        if (mThink)
+        {
+            mFrameTime = frameTime;
+            immutable ThinkResult result = mThink();
+            mNextThink = ZyeWare.upTime + result.nextThinkIn;
+            mThink = result.think;
+        }
     }
 }

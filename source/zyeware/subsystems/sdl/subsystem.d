@@ -114,10 +114,9 @@ package(zyeware) static:
                 throw new GraphicsException("Provided SDL shared library is corrupted.");
             else
                 Logger.core.warning("Got older SDL version than expected. This might lead to errors.");
-
         }
 
-        enforce!GraphicsException(SDL_Init(SDL_INIT_EVERYTHING) == 0,
+        enforce!GraphicsException(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC) == 0,
             format!"Failed to initialize SDL: %s!"(SDL_GetError().fromStringz));
 
         SDL_LogSetOutputFunction(&logFunctionCallback, null);

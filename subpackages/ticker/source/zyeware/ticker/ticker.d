@@ -41,8 +41,5 @@ public:
         mIsFreeQueued = true;
     }
 
-    final bool isFreeQueued() @safe pure nothrow
-    {
-        return mIsFreeQueued;
-    }
+    final bool isFreeQueued() @safe pure nothrow => mIsFreeQueued;
 }

@@ -46,8 +46,8 @@ package(zyeware) static:
             case SLSupport.noLibrary:
                 throw new AudioException("Could not find Soloud shared library.");
 
-            //case SLSupport.badLibrary:
-            //    throw new AudioException("Provided Soloud shared library is corrupted.");
+            case SLSupport.badLibrary:
+                throw new AudioException("Provided Soloud shared library is corrupted.");
 
             default:
                 Logger.core.warning(
@@ -56,7 +56,7 @@ package(zyeware) static:
         }
 
         sEngine = Soloud_create();
-        Soloud_initEx(sEngine, Soloud.CLIP_ROUNDOFF, Soloud.SDL2, 44_100, Soloud.AUTO, 2);
+        Soloud_initEx(sEngine, Soloud.CLIP_ROUNDOFF, Soloud.AUTO, 44_100, Soloud.AUTO, 2);
 
         immutable uint soloudVersion = Soloud_getVersion(sEngine);
 

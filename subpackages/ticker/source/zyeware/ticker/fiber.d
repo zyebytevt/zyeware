@@ -10,16 +10,15 @@ import core.thread.fiber;
 import zyeware;
 import zyeware.ticker;
 
-abstract class FiberTicker : Ticker
+abstract class FiberThinker : Ticker
 {
 private:
     Fiber mFiber;
     Duration mWaitExpires;
+    FrameTime mFrameTime;
     bool mIsWaitingForSignal;
 
 protected:
-    FrameTime mFrameTime;
-
     /// Yields control back to the entity manager. This essentially waits for one tick.
     final void wait()
     {
@@ -29,7 +28,7 @@ protected:
     /// Waits for the given milliseconds before continuing.
     ///
     /// Params:
-    ///     seconds = The amount of milliseconds to wait.
+    ///     msecs = The amount of milliseconds to wait.
     pragma(inline, true) final void wait(long msecs)
     {
         wait(dur!"msecs"(msecs));
@@ -82,6 +81,8 @@ protected:
     }
 
     abstract void think();
+
+    pragma(inline, true) FrameTime frameTime() @safe pure const nothrow => mFrameTime;
 
 public:
     override void tick(in FrameTime frameTime)
