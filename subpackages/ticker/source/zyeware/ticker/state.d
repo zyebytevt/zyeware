@@ -3,12 +3,12 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.thinker.state;
+module zyeware.ticker.state;
 
 import zyeware;
-import zyeware.thinker;
+import zyeware.ticker;
 
-abstract class StateThinker : Thinker
+abstract class StateTicker : Ticker
 {
 private:
     FiniteStateMachine mFsm;
@@ -27,7 +27,7 @@ protected:
     }
 
 public:
-    this(ThinkerManager manager)
+    this(TickerManager manager)
     {
         super(manager);
     }

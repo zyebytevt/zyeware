@@ -18,7 +18,7 @@ targetPath "out"
 workingDirectory "out"
 
 subPackage "subpackages/ecs"
-subPackage "subpackages/thinker"
+subPackage "subpackages/ticker"
 subPackage "subpackages/zyfont"
 subPackage "subpackages/math"
 

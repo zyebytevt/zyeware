@@ -3,31 +3,34 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.thinker.thinker;
+module zyeware.ticker.ticker;
 
 import zyeware;
-import zyeware.thinker;
+import zyeware.ticker;
 
 interface Drawer
 {
     void draw() const;
 }
 
-abstract class Thinker
+abstract class Ticker
 {
-package(zyeware.thinker):
+package(zyeware.ticker):
     bool mIsFreeQueued;
-    ThinkerManager mManager;
+    TickerManager mManager;
 
 protected:
     pragma(inline, true)
-    ThinkerManager manager() @safe pure nothrow => mManager;
+    TickerManager manager() @safe pure nothrow => mManager;
 
 public:
-    this(ThinkerManager manager)
+    this(TickerManager manager)
     {
         mManager = manager;
     }
+
+    void onAdd() {}
+    void onRemove() {}
 
     void preTick(in FrameTime frameTime) {}
     abstract void tick(in FrameTime frameTime);

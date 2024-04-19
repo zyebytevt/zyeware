@@ -3,14 +3,14 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.thinker.fiber;
+module zyeware.ticker.fiber;
 
 import core.thread.fiber;
 
 import zyeware;
-import zyeware.thinker;
+import zyeware.ticker;
 
-abstract class FiberThinker : Thinker
+abstract class FiberTicker : Ticker
 {
 private:
     Fiber mFiber;
@@ -70,7 +70,7 @@ protected:
         return result;
     }
 
-    this(ThinkerManager manager)
+    this(TickerManager manager)
     {
         super(manager);
         mFiber = new Fiber(&think);
