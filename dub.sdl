@@ -2,7 +2,7 @@ name "zyeware"
 description "Simple, general purpose 2D and 3D game engine."
 authors "ZyeByte"
 copyright "Copyright © 2023, ZyeByte"
-license "LGPL-3.0"
+license "BSD-4-Clause"
 
 dependency "gamut" version="~>2.3.0"
 dependency "audio-formats" version="~>3.0.1"

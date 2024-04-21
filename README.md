@@ -41,4 +41,4 @@ Following these steps should give you a working development setup:
 
 ## Can I create games with it?
 
-If you can stomach it, sure. LGPL even allows you to create closed-source games with it, if your heart so desires.
+If you can stomach it, sure. You have a lot of freedom what you decide to do with the engine, the only requirement I have is that you give my engine a bit of exposure with your game.
