@@ -236,7 +236,7 @@ void loadDataWithProperties(string path, out ubyte[] data, out SoundProperties p
     {
         try
         {
-            SDLNode* root = loadSdlDocument(path);
+            SDLNode* root = loadSdlDocument(propsPath);
 
             if (SDLNode* loopNode = root.getChild("loop"))
             {
