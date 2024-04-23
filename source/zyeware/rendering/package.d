@@ -18,5 +18,4 @@ public
     import zyeware.rendering.renderer;
     import zyeware.rendering.sprite;
     import zyeware.rendering.texatlas;
-    import zyeware.rendering.terrain;
 }

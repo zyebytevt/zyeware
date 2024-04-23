@@ -24,7 +24,7 @@ subPackage "subpackages/math"
 
 versions "SDL_205" "GL_43"
 
-targetType "staticLibrary"
+targetType "dynamicLibrary"
 
 /*configuration "sdl-opengl" {
 	platforms "posix" "windows"

@@ -8,7 +8,7 @@ module zyeware.rendering.particles2d;
 import std.container.slist;
 import std.container.dlist;
 import std.typecons : Tuple;
-import std.algorithm : canFind, remove;
+import std.algorithm : canFind, remove, reduce;
 import std.math : sin, cos, PI;
 import std.exception : enforce;
 import std.range : walkLength;
@@ -16,33 +16,42 @@ import std.string : format;
 
 import zyeware;
 
-alias ParticleRegistrationId = size_t;
+alias ParticleTypeId = size_t;
 
 class Particles2d
 {
 protected:
-    ParticleContainer*[ParticleRegistrationId] mParticles;
-    ParticleRegistrationId mNextTypeId = 1;
+    ParticleContainer*[256] mParticles;
 
 public:
-    ParticleRegistrationId registerType(in ParticleProperties2d type, size_t maxParticles)
+    ParticleTypeId registerType(in ParticleProperties2d type, size_t maxParticles)
     {
-        enforce!RenderException(type.typeOnDeath != mNextTypeId,
-            "Cannot spawn same particle type on death.");
+        for (size_t i; i < mParticles.length; ++i)
+        {
+            if (!mParticles[i])
+            {
+                mParticles[i] = new ParticleContainer(type, maxParticles);
 
-        immutable size_t nextId = mNextTypeId++;
-        mParticles[nextId] = new ParticleContainer(type, maxParticles);
-        return nextId;
+                enforce!RenderException(type.typeOnDeath != i,
+                    "Cannot spawn same particle type on death.");
+
+                return i;
+            }
+        }
+
+        throw new RenderException(format!"Cannot register more than %s particle types."(mParticles.length));
     }
 
-    void unregisterType(ParticleRegistrationId id) nothrow
+    void unregisterType(ParticleTypeId id) nothrow
+    in (id < mParticles.length, "Invalid particle type id.")
     {
-        mParticles.remove(id);
+        mParticles[id] = null;
     }
 
-    void emit(ParticleRegistrationId id, vec2 position, size_t amount)
+    void emit(ParticleTypeId id, vec2 position, size_t amount)
+    in (id < mParticles.length, "Invalid particle type id.")
     {
-        ParticleContainer* particles = mParticles.get(id, null);
+        ParticleContainer* particles = mParticles[id];
         enforce!RenderException(particles,
             format!"Particle type id %d has not been added to the system."(id));
 
@@ -57,8 +66,11 @@ public:
 
     void tick(in FrameTime frameTime)
     {
-        foreach (ParticleContainer* particles; mParticles.values)
+        foreach (ParticleContainer* particles; mParticles)
         {
+            if (!particles)
+                continue;
+            
             for (size_t i; i < particles.activeParticlesCount; ++i)
             {
                 particles.lifeTimes[i] -= frameTime.deltaTime;
@@ -66,7 +78,7 @@ public:
                 {
                     particles.remove(i);
 
-                    if (particles.type.typeOnDeath > ParticleRegistrationId.init)
+                    if (particles.type.typeOnDeath > ParticleTypeId.init)
                         emit(particles.type.typeOnDeath, particles.positions[i], 1);
 
                     --i;
@@ -79,17 +91,20 @@ public:
         }
     }
 
-    void draw(in FrameTime nextFrameTime)
+    void draw()
     {
-        foreach (ParticleContainer* particles; mParticles.values)
+        foreach (ParticleContainer* particles; mParticles)
         {
+            if (!particles)
+                continue;
+            
             immutable static rect dimensions = rect(-2, -2, 2, 2);
 
             for (size_t i; i < particles.activeParticlesCount; ++i)
             {
                 immutable float progression = 1f - (particles.lifeTimes[i].total!"hnsecs" / cast(
                         float) particles.startLifeTimes[i].total!"hnsecs");
-                immutable vec2 position = particles.positions[i] + particles.velocities[i] * nextFrameTime.deltaTimeSeconds;
+                immutable vec2 position = particles.positions[i] + particles.velocities[i];
 
                 import std.math.traits : isNaN;
 
@@ -108,8 +123,8 @@ public:
         // is "total"; redeemed by TheFrozenKnights
         size_t bigDEnergy;
 
-        foreach (ParticleContainer* particles; mParticles.values)
-            bigDEnergy += particles.activeParticlesCount;
+        foreach (ParticleContainer* particles; mParticles)
+            bigDEnergy += particles ? particles.activeParticlesCount : 0;
 
         return bigDEnergy;
     }
@@ -126,7 +141,7 @@ public:
     auto spriteAngle = Range!float(0, 0);
     auto direction = Range!float(0, PI * 2);
     auto speed = Range!float(0, 1);
-    ParticleRegistrationId typeOnDeath;
+    ParticleTypeId typeOnDeath;
 }
 
 private struct ParticleContainer

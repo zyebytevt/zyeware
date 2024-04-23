@@ -322,6 +322,20 @@ public static:
 
     Events events;
 
+    void run(string[] args, in ProjectProperties projectProperties) nothrow
+    {
+        try
+        {
+            load(args, projectProperties);
+            start();
+            unload();
+        }
+        catch (Throwable t)
+        {
+            Logger.core.error("%s", t);
+        }
+    }
+
     /// Stops the main loop and quits the engine.
     void quit() nothrow
     {

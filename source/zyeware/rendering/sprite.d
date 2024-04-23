@@ -25,6 +25,11 @@ public:
     int layer = 0;
     size_t frame = 0;
 
+    this(string path, vec2 offset = vec2.zero)
+    {
+        this(AssetManager.load!Texture2d(path), offset);
+    }
+
     this(Texture2d texture, vec2 offset = vec2.zero) @safe pure nothrow
     {
         mTextureAtlas = TextureAtlas(texture, 1, 1);
