@@ -10,10 +10,11 @@ import zyeware.subsystems.graphics;
 import api = zyeware.platform.opengl.api.api;
 import r2d = zyeware.platform.opengl.renderer2d.api;
 
-void loadOpenGl(ref GraphicsCallbacks callbacks, ref Renderer2dCallbacks r2dCallbacks) nothrow
+void loadOpenGl(ref GraphicsCallbacks callbacks) nothrow
 {
-    callbacks.load = &api.load;
-    callbacks.unload = &api.unload;
+    callbacks.load = &load;
+    callbacks.unload = &unload;
+
     callbacks.createMesh = &api.createMesh;
     callbacks.createTexture2d = &api.createTexture2d;
     callbacks.createTextureCubeMap = &api.createTextureCubeMap;
@@ -31,21 +32,29 @@ void loadOpenGl(ref GraphicsCallbacks callbacks, ref Renderer2dCallbacks r2dCall
     callbacks.setShaderUniform1i = &api.setShaderUniform1i;
     callbacks.setShaderUniformMat4f = &api.setShaderUniformMat4f;
     callbacks.setViewport = &api.setViewport;
-    callbacks.setRenderFlag = &api.setRenderFlag;
-    callbacks.getRenderFlag = &api.getRenderFlag;
+    callbacks.setGraphicsFlag = &api.setGraphicsFlag;
+    callbacks.getGraphicsFlag = &api.getGraphicsFlag;
     callbacks.getCapability = &api.getCapability;
     callbacks.clearScreen = &api.clearScreen;
     callbacks.setRenderTarget = &api.setRenderTarget;
     callbacks.presentToScreen = &api.presentToScreen;
     callbacks.getTextureFromFramebuffer = &api.getTextureFromFramebuffer;
 
-    r2dCallbacks.load = &r2d.load;
-    r2dCallbacks.unload = &r2d.unload;
-    r2dCallbacks.begin = &r2d.begin;
-    r2dCallbacks.end = &r2d.end;
-    r2dCallbacks.drawVertices = &r2d.drawVertices;
-    r2dCallbacks.drawRectangle = &r2d.drawRectangle;
-    r2dCallbacks.drawString = &r2d.drawString;
-    r2dCallbacks.drawWString = &r2d.drawWString;
-    r2dCallbacks.drawDString = &r2d.drawDString;
+    callbacks.r2dBegin = &r2d.begin;
+    callbacks.r2dEnd = &r2d.end;
+    callbacks.r2dDrawVertices = &r2d.drawVertices;
+}
+
+private:
+
+void load()
+{
+    api.load();
+    r2d.load();
+}
+
+void unload()
+{
+    r2d.unload();
+    api.unload();
 }

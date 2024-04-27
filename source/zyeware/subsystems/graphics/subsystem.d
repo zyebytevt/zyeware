@@ -31,27 +31,24 @@ struct GraphicsSubsystem
 
 private static:
     GraphicsCallbacks sCallbacks;
-    Renderer2dCallbacks sR2dCallbacks;
     Loader[string] sLoaders;
 
 package(zyeware) static:
-    alias Loader = void function(ref GraphicsCallbacks, ref Renderer2dCallbacks) nothrow;
+    alias Loader = void function(ref GraphicsCallbacks) nothrow;
 
     void load(string name)
     {
         auto loader = name in sLoaders;
         enforce!GraphicsException(loader, format!"Could not load graphics backend '%s'."(name));
 
-        (*loader)(sCallbacks, sR2dCallbacks);
+        (*loader)(sCallbacks);
         sCallbacks.load();
-        sR2dCallbacks.load();
 
         Logger.core.info("Graphics subsystem loaded, .");
     }
 
     void unload()
     {
-        sR2dCallbacks.unload();
         sCallbacks.unload();
     }
 
@@ -64,7 +61,4 @@ package(zyeware) static:
 
     pragma(inline, true)
     ref const(GraphicsCallbacks) callbacks() nothrow => sCallbacks;
-
-    pragma(inline, true)
-    ref const(Renderer2dCallbacks) r2dCallbacks() nothrow => sR2dCallbacks;
 }

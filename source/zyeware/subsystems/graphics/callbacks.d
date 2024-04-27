@@ -35,31 +35,21 @@ struct GraphicsCallbacks
     void function(in NativeHandle shader, in string name, in mat4 value) nothrow setShaderUniformMat4f;
 
     void function(recti region) nothrow setViewport;
-    void function(GraphicsFlag flag, bool value) nothrow setRenderFlag;
-    bool function(GraphicsFlag flag) nothrow getRenderFlag;
+    void function(GraphicsFlag flag, bool value) nothrow setGraphicsFlag;
+    bool function(GraphicsFlag flag) nothrow getGraphicsFlag;
     size_t function(GraphicsCapability capability) nothrow getCapability;
     void function(color clearColor) nothrow clearScreen;
 
     void function(in NativeHandle target) nothrow setRenderTarget;
     void function(in NativeHandle framebuffer, recti srcRegion, recti dstRegion) nothrow presentToScreen;
     NativeHandle function(in NativeHandle framebuffer) nothrow getTextureFromFramebuffer;
-}
 
-struct Renderer2dCallbacks
-{
-    void function() load;
-    void function() unload;
-
-    void function(in mat4 projectionMatrix, in mat4 viewMatrix) begin;
-    void function() end;
+    void function(in mat4 projectionMatrix, in mat4 viewMatrix) r2dBegin;
+    void function() r2dEnd;
     void function(in Vertex2d[] vertices, in uint[] indices, in mat4 transform,
-        in Texture2d texture, in Material material) drawVertices;
-    void function(in rect dimensions, in mat4 transform, in color modulate,
-        in Texture2d texture, in Material material, in rect region) drawRectangle;
-    void function(in string text, in BitmapFont font, in vec2 position,
-        in color modulate, ubyte alignment, in Material material) drawString;
-    void function(in wstring text, in BitmapFont font, in vec2 position,
-        in color modulate, ubyte alignment, in Material material) drawWString;
-    void function(in dstring text, in BitmapFont font, in vec2 position,
-        in color modulate, ubyte alignment, in Material material) drawDString;
+        in Texture2d texture, in Material material) r2dDrawVertices;
+
+    void function(in mat4 projectionMatrix, in mat4 viewMatrix) r3dBegin;
+    void function() r3dEnd;
+    void function(in Mesh3d mesh, in mat4 transform, in Material material) r3dDrawMesh;
 }

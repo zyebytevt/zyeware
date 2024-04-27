@@ -11,7 +11,7 @@ import std.exception : enforce;
 import std.typecons : Rebindable;
 import std.conv : to;
 import std.string : format;
-import std.algorithm : sort, uniq;
+import std.algorithm : sort, uniq, canFind;
 import std.array : array;
 
 import inmath.linalg;
@@ -29,8 +29,27 @@ protected:
     }
 
     bool mIsRoot;
+    string[] mParameterList;
     Rebindable!(const Texture)[] mTextureSlots;
     Parameter[string] mParameters;
+
+    final void buildParameterList() nothrow
+    {
+        mParameterList.length = 0;
+
+        Material current = cast(Material) this;
+
+        while (true)
+        {
+            mParameterList ~= current.mParameters.keys;
+            if (current.mIsRoot)
+                break;
+
+            current = current.mParent;
+        }
+
+        mParameterList = mParameterList.sort.uniq.array;
+    }
 
 public:
     alias Parameter = SumType!(void[], int, float, vec2, vec3, vec4);
@@ -51,11 +70,14 @@ public:
         mIsRoot = false;
 
         mTextureSlots.length = parent.mTextureSlots.length;
+        buildParameterList();
     }
 
     void setParameter(string name, Parameter value)
     {
         mParameters[name] = value;
+        if (!mParameterList.canFind(name))
+            mParameterList ~= name;
     }
 
     void setParameter(T)(string name, T value)
@@ -114,23 +136,7 @@ public:
         mTextureSlots[idx] = null;
     }
 
-    string[] parameterList() const nothrow
-    {
-        string[] list;
-
-        Material current = cast(Material) this;
-
-        while (true)
-        {
-            list ~= current.mParameters.keys;
-            if (current.mIsRoot)
-                break;
-
-            current = current.mParent;
-        }
-
-        return list.sort.uniq.array;
-    }
+    const(string[]) parameterList() const nothrow => mParameterList;
 
     inout(Material) parent() inout nothrow
     {
@@ -149,10 +155,7 @@ public:
         return cast(inout Material) root;
     }
 
-    inout(Shader) shader() inout nothrow
-    {
-        return root.mShader;
-    }
+    inout(Shader) shader() inout nothrow => root.mShader;
 
     static Material load(string path)
     in (path, "Path cannot be null.")

@@ -23,7 +23,6 @@ struct ShaderProperties
         vertex,
         fragment,
         geometry,
-        compute
     }
 
     string[ShaderType] sources;

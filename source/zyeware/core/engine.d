@@ -18,7 +18,6 @@ import std.algorithm : min, remove;
 import zyeware;
 import zyeware.subsystems;
 import zyeware.core.project;
-import zyeware.core.main;
 import zyeware.core.cmdargs;
 
 /// Represents a C-style string.

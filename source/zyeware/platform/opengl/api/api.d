@@ -184,7 +184,7 @@ void unload()
 
 NativeHandle createMesh(in Vertex3d[] vertices, in uint[] indices)
 {
-    auto data = new MeshData;
+    auto data = new MeshData();
 
     glGenVertexArrays(1, &data.vao);
     glGenBuffers(1, &data.vbo);
@@ -389,10 +389,6 @@ NativeHandle createShader(in ShaderProperties properties)
         case geometry:
             shaderType = GL_GEOMETRY_SHADER;
             break;
-
-        case compute:
-            //    shaderType = GL_COMPUTE_SHADER;
-            break;
         }
 
         uint shaderID = glCreateShader(shaderType);
@@ -501,7 +497,7 @@ void setViewport(recti region) nothrow
     glViewport(region.x, region.y, region.width, region.height);
 }
 
-void setRenderFlag(GraphicsFlag flag, bool value) nothrow
+void setGraphicsFlag(GraphicsFlag flag, bool value) nothrow
 {
     if (pFlagValues[cast(size_t) flag] == value)
         return;
@@ -541,7 +537,7 @@ void setRenderFlag(GraphicsFlag flag, bool value) nothrow
     pFlagValues[cast(size_t) flag] = value;
 }
 
-bool getRenderFlag(GraphicsFlag flag) nothrow
+bool getGraphicsFlag(GraphicsFlag flag) nothrow
 {
     return pFlagValues[cast(size_t) flag];
 }

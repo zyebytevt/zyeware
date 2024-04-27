@@ -51,13 +51,13 @@ public static:
     void begin2d(in mat4 projectionMatrix, in mat4 viewMatrix = mat4.identity)
     {
         mBatchActive = true;
-        GraphicsSubsystem.r2dCallbacks.begin(projectionMatrix, viewMatrix);
+        GraphicsSubsystem.callbacks.r2dBegin(projectionMatrix, viewMatrix);
     }
 
     /// Ends batching render commands. Calling this results in all render commands being flushed to the GPU.
     pragma(inline, true) void end2d()
     {
-        GraphicsSubsystem.r2dCallbacks.end();
+        GraphicsSubsystem.callbacks.r2dEnd();
         mActiveCamera = null;
         mBatchActive = false;
     }
@@ -69,7 +69,7 @@ public static:
     ///     position = 2D transform where to draw the mesh to.
     pragma(inline, true) void drawMesh2d(in Mesh2d mesh, in mat4 transform)
     {
-        GraphicsSubsystem.r2dCallbacks.drawVertices(mesh.vertices, mesh.indices, transform,
+        GraphicsSubsystem.callbacks.r2dDrawVertices(mesh.vertices, mesh.indices, transform,
             mesh.texture, mesh.material);
     }
 
@@ -87,7 +87,7 @@ public static:
         in color modulate = color.white, in Texture2d texture = null, int layer = 0,
         in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
-        GraphicsSubsystem.r2dCallbacks.drawRectangle(dimensions, mat4.translation(vec3(position,
+        drawRect2d(dimensions, mat4.translation(vec3(position,
                 layer / 100f)) * mat4.scaling(scale.x, scale.y, 1), modulate,
             texture, material, region);
     }
@@ -107,7 +107,7 @@ public static:
         float rotation, in color modulate = color.white, in Texture2d texture = null,
         int layer = 0, in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
-        GraphicsSubsystem.r2dCallbacks.drawRectangle(dimensions, mat4.translation(vec3(position,
+        drawRect2d(dimensions, mat4.translation(vec3(position,
                 layer / 100f)) * mat4.rotation(rotation, vec3(0, 0,
                 1)) * mat4.scaling(scale.x, scale.y, 1), modulate, texture, material, region);
     }
@@ -125,7 +125,34 @@ public static:
         in color modulate = color.white, in Texture2d texture = null,
         in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
-        GraphicsSubsystem.r2dCallbacks.drawRectangle(dimensions, transform, modulate, texture, material, region);
+        // TODO: Font rendering needs to be improved.
+
+        static vec2[4] quadPositions;
+        quadPositions[0] = vec2(dimensions.x, dimensions.y);
+        quadPositions[1] = vec2(dimensions.x + dimensions.width, dimensions.y);
+        quadPositions[2] = vec2(dimensions.x + dimensions.width, dimensions.y + dimensions.height);
+        quadPositions[3] = vec2(dimensions.x, dimensions.y + dimensions.height);
+
+        static vec2[4] quadUVs;
+        quadUVs[0] = vec2(region.x, region.y);
+        quadUVs[1] = vec2(region.x + region.width, region.y);
+        quadUVs[2] = vec2(region.x + region.width, region.y + region.height);
+        quadUVs[3] = vec2(region.x, region.y + region.height);
+
+        static Vertex2d[4] vertices;
+        static uint[6] indices;
+
+        for (size_t i; i < 4; ++i)
+            vertices[i] = Vertex2d(quadPositions[i], quadUVs[i], modulate);
+
+        indices[0] = 2;
+        indices[1] = 1;
+        indices[2] = 0;
+        indices[3] = 0;
+        indices[4] = 3;
+        indices[5] = 2;
+
+        GraphicsSubsystem.callbacks.r2dDrawVertices(vertices, indices, transform, texture, material);
     }
 
     /// Draws text to the screen.
@@ -141,16 +168,58 @@ public static:
     pragma(inline, true) void drawString2d(T)(in T text, in BitmapFont font, in vec2 position,
         in color modulate = color.white,
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top,
-        in Material material = null) if (isSomeString!T)
+        in Material material = null)
+        if (isSomeString!T)
     {
-        static if (is(T == string))
-            GraphicsSubsystem.r2dCallbacks.drawString(text, font, position, modulate, alignment, material);
-        else static if (is(T == wstring))
-            GraphicsSubsystem.r2dCallbacks.drawWString(text, font, position, modulate, alignment, material);
-        else static if (is(T == dstring))
-            GraphicsSubsystem.r2dCallbacks.drawDString(text, font, position, modulate, alignment, material);
-        else
-            static assert(false, "Unsupported string type for rendering");
+        vec2 cursor = vec2.zero;
+
+        if (alignment & BitmapFont.Alignment.middle || alignment & BitmapFont.Alignment.bottom)
+        {
+            immutable int height = font.getTextHeight(text);
+            cursor.y -= (alignment & BitmapFont.Alignment.middle) ? height / 2 : height;
+        }
+
+        foreach (T line; text.lineSplitter)
+        {
+            if (alignment & BitmapFont.Alignment.center || alignment & BitmapFont.Alignment.right)
+            {
+                immutable int width = font.getTextWidth(line);
+                cursor.x = -((alignment & BitmapFont.Alignment.center) ? width / 2 : width);
+            }
+            else
+                cursor.x = 0;
+
+            for (size_t i; i < line.length; ++i)
+            {
+                switch (line[i])
+                {
+                case '\t':
+                    cursor.x += 40;
+                    break;
+
+                default:
+                    BitmapFont.Glyph c = font.getGlyph(line[i]);
+                    if (c == BitmapFont.Glyph.init)
+                        break;
+
+                    immutable int kerning = i > 0 ? font.getKerning(line[i - 1], line[i]) : 1;
+
+                    if (c.size.x > 0 && c.size.y > 0)
+                    {
+                        const(Texture2d) pageTexture = font.getPageTexture(c.pageIndex);
+
+                        drawRect2d(rect(0, 0, c.size.x, c.size.y),
+                            mat4.translation(vec3(vec2(position + cursor + vec2(c.offset.x,
+                                c.offset.y)), 0)), modulate, pageTexture, material,
+                            rect(c.uv1.x, c.uv1.y, c.uv2.x, c.uv2.y));
+                    }
+
+                    cursor.x += c.advance.x + kerning;
+                }
+            }
+
+            cursor.y += font.lineHeight;
+        }
     }
 
     static const(Camera) activeCamera() nothrow @nogc => mActiveCamera;
