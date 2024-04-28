@@ -1,0 +1,7 @@
+name "qmap"
+description "Quake MAP file parser."
+authors "ZyeByte"
+copyright "Copyright © 2024, ZyeByte"
+license "BSD-4-Clause"
+targetType "sourceLibrary"
+dependency "zyeware:math" version="*"

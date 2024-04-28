@@ -21,6 +21,7 @@ subPackage "subpackages/ecs"
 subPackage "subpackages/ticker"
 subPackage "subpackages/zyfont"
 subPackage "subpackages/math"
+subPackage "subpackages/qmap"
 
 versions "SDL_205" "GL_43"
 

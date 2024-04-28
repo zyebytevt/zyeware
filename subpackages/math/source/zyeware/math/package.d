@@ -12,4 +12,5 @@ public
     import zyeware.math.rect;
     import zyeware.math.vector;
     import zyeware.math.vertex;
+    import zyeware.math.plane;
 }
