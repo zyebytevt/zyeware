@@ -29,9 +29,9 @@ struct ShaderProperties
 }
 
 @asset(Yes.cache)
-class Shader : NativeObject
+final class Shader : NativeObject
 {
-protected:
+private:
     NativeHandle mNativeHandle;
     ShaderProperties mProperties;
 

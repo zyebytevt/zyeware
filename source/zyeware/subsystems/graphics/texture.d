@@ -40,9 +40,9 @@ interface Texture : NativeObject
 }
 
 @asset(Yes.cache)
-class Texture2d : Texture
+final class Texture2d : Texture
 {
-protected:
+private:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
     vec2i mSize;
@@ -99,9 +99,9 @@ public:
 }
 
 @asset(Yes.cache)
-class TextureCubeMap : Texture
+final class TextureCubeMap : Texture
 {
-protected:
+private:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
 

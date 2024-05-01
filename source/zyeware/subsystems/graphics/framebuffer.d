@@ -30,9 +30,9 @@ struct FramebufferProperties
     UsageType usageType = UsageType.swapChainTarget; /// The usage type of the framebuffer.
 }
 
-class Framebuffer : NativeObject
+final class Framebuffer : NativeObject
 {
-protected:
+private:
     NativeHandle mNativeHandle;
     FramebufferProperties mProperties;
 
