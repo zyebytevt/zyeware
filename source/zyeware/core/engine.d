@@ -413,8 +413,7 @@ public static:
     }
 
     /// The duration the engine is already running.
-    Duration upTime() nothrow
-    {
+    Duration upTime() nothrow @nogc {
         return MonoTime.currTime - sStartupTime;
     }
 

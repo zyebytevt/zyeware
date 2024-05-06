@@ -52,7 +52,8 @@ public:
     ///     ptr = Pointer to a block of memory with a minimum size of size*n.
     ///     size = Size in bytes of each element to be read.
     ///     n = The number of elements to read.
-    abstract size_t read(void* ptr, size_t size, size_t n) nothrow;
+    abstract size_t read(void* ptr, size_t size, size_t n) nothrow
+    in (isOpened, "Tried to read from an unopened file.");
 
     /// Writes data from a block of memory to the file.
     /// Returns: The number of elements successfully written.
@@ -60,25 +61,29 @@ public:
     ///     ptr = Pointer of a block of memory with a minimum size of size*n.
     ///     size = Size in bytes of each element to be written.
     ///     n = The number of elements to write.
-    abstract size_t write(const void* ptr, size_t size, size_t n) nothrow;
+    abstract size_t write(const void* ptr, size_t size, size_t n) nothrow
+    in (isOpened, "Tried to write to an unopened file.");
 
     /// Sets the file position pointer inside the file.
     /// Params:
     ///     offset = The offset to set the file position to.
     ///     whence = How to interpret the given offset.
-    abstract void seek(long offset, Seek whence) nothrow;
+    abstract void seek(long offset, Seek whence) nothrow
+    in (isOpened, "Tried to seek in an unopened file.");
 
     /// Returns the current file position.
     abstract long tell() nothrow;
     /// Flushes all writing operations to disk.
-    abstract bool flush() nothrow;
+    abstract bool flush() nothrow
+    in (isOpened, "Tried to flush an unopened file.");
     /// Opens the file with the given access mode.
     abstract void open(File.Mode mode);
     /// Closes the file. Afterwards, no further operations should be taken on this file.
     abstract void close() nothrow;
 
     /// Returns the total file size in bytes.
-    abstract FileSize size() nothrow;
+    abstract FileSize size() nothrow
+    in (isOpened, "Tried to get size of an unopened file.");
 
     /// Returns `true` if the file is currently open, `false` otherwise.
     abstract bool isOpened() pure const nothrow;
@@ -92,12 +97,17 @@ public:
     /// Params:
     ///     T = The type to return.
     T readAll(T)() nothrow
-    {
+    in (isOpened, "Tried to read from an unopened file.") {
         import std.range : ElementEncodingType;
 
         alias Element = ElementEncodingType!T;
 
-        auto buffer = new Element[cast(size_t) size / Element.sizeof];
+        if (size == -1) {
+            return T.init;
+        }
+
+        auto buffer = new void[size];
+        
         read(cast(void[]) buffer);
         return cast(T) buffer;
     }
@@ -107,8 +117,8 @@ public:
     /// Params:
     ///     buffer = The array to read data into.
     final size_t read(void[] buffer) nothrow
-    in (buffer)
-    {
+    in (isOpened, "Tried to read from an unopened file.")
+    in (buffer, "Tried to read into an unallocated buffer.") {
         return read(buffer.ptr, 1, buffer.length);
     }
 
@@ -156,8 +166,8 @@ public:
     /// Params:
     ///     buffer = The array of elements to be written.
     final size_t write(in void[] buffer) nothrow
-    in (buffer)
-    {
+    in (isOpened, "Tried to write to an unopened file.")
+    in (buffer, "Tried to write from an unallocated buffer.") {
         return write(buffer.ptr, 1, buffer.length);
     }
 

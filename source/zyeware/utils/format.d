@@ -1,6 +1,7 @@
 module zyeware.utils.format;
 
 import std.format : format;
+import std.traits : isSomeChar, isSomeString;
 
 import zyeware;
 
@@ -21,6 +22,24 @@ string bytesToString(size_t byteCount) pure nothrow
         return format!"%.2f %s"(result, suffix[order]);
     catch (Exception ex)
     {
+        return "<format error>";
+    }
+}
+
+immutable(Char)[] nothrowFormat(Char, Args...)(in Char[] fmt, Args args) nothrow
+if (isSomeChar!Char) {
+    try {
+        return format(fmt, args);
+    } catch (Exception ex) {
+        return "<format error>";
+    }
+}
+
+typeof(fmt) nothrowFormat(alias fmt, Args...)(Args args) nothrow
+if (isSomeString!(typeof(fmt))) {
+    try {
+        return format!fmt(args);
+    } catch (Exception ex) {
         return "<format error>";
     }
 }
