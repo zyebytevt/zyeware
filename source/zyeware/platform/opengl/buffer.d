@@ -102,27 +102,23 @@ void freeDataBuffer(NativeHandle buffer) nothrow
     destroy(id);
 }
 
-NativeHandle createBufferGroup()
+NativeHandle createBufferGroup(in NativeHandle dataBuffer, in NativeHandle indexBuffer)
 {
+    immutable uint dataBufferId = *(cast(uint*) dataBuffer);
+    
+    const layout = dataBufferId in pLayouts;
+    if (!layout)
+        return null;
+
     auto id = new uint;
 
     glGenVertexArrays(1, id);
     enforce!GraphicsException(*id != 0, "Could not create buffer group.");
-    glBindVertexArray(0);
+    
+    immutable uint indexBufferId = *(cast(uint*) indexBuffer);
 
-    return cast(NativeHandle) id;
-}
-
-void setBufferGroupDataBuffer(NativeHandle group, in NativeHandle buffer) nothrow
-{
-    glBindVertexArray(*(cast(uint*) group));
-
-    immutable uint bufferId = *(cast(uint*) buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferId);
-
-    auto layout = bufferId in pLayouts;
-    if (!layout)
-        return;
+    glBindBuffer(GL_ARRAY_BUFFER, dataBufferId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
 
     immutable uint stride = reduce!((a, b) => a + b.amount * getTypeSize(b.type))(0, layout.elements);
     uint index;
@@ -144,16 +140,11 @@ void setBufferGroupDataBuffer(NativeHandle group, in NativeHandle buffer) nothro
     }
 
     glBindVertexArray(0);
+
+    return cast(NativeHandle) id;
 }
 
-void setBufferGroupIndexBuffer(NativeHandle group, in NativeHandle buffer) nothrow
-{
-    glBindVertexArray(*(cast(uint*) group));
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *(cast(uint*) buffer));
-    glBindVertexArray(0);
-}
-
-void bindBufferGroup(NativeHandle group) nothrow
+void bindBufferGroup(in NativeHandle group) nothrow
 {
     glBindVertexArray(*(cast(uint*) group));
 }

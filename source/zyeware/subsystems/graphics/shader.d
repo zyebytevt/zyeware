@@ -35,6 +35,32 @@ private:
     NativeHandle mNativeHandle;
     ShaderProperties mProperties;
 
+package(zyeware):
+    pragma(inline, true)
+    void bind() const nothrow
+    {
+        GraphicsSubsystem.callbacks.bindShader(mNativeHandle);
+    }
+
+    pragma(inline, true)
+    void setUniform(T)(string name, in T value) const
+    {
+        static if (is(T == float))
+            GraphicsSubsystem.callbacks.setShaderUniform1f(mNativeHandle, name, value);
+        else static if (is(T == vec2))
+            GraphicsSubsystem.callbacks.setShaderUniform2f(mNativeHandle, name, value);
+        else static if (is(T == vec3))
+            GraphicsSubsystem.callbacks.setShaderUniform3f(mNativeHandle, name, value);
+        else static if (is(T == vec4))
+            GraphicsSubsystem.callbacks.setShaderUniform4f(mNativeHandle, name, value);
+        else static if (is(T == int))
+            GraphicsSubsystem.callbacks.setShaderUniform1i(mNativeHandle, name, value);
+        else static if (is(T == mat4))
+            GraphicsSubsystem.callbacks.setShaderUniformMat4f(mNativeHandle, name, value);
+        else
+            static assert(false, "Unsupported uniform type.");
+    }
+
 public:
     this(ShaderProperties properties)
     {

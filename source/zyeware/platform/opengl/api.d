@@ -156,3 +156,20 @@ void clearScreen(color clearColor) nothrow
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
+
+void drawIndexed(DrawMode mode, size_t count) nothrow
+{
+    glDrawElements(getDrawMode(mode), cast(GLsizei) count, GL_UNSIGNED_INT, null);
+}
+
+private:
+
+static GLenum getDrawMode(DrawMode mode) pure nothrow
+{
+    final switch (mode) with (DrawMode)
+    {
+    case points: return GL_POINTS;
+    case lines: return GL_LINES;
+    case triangles: return GL_TRIANGLES;
+    }
+}

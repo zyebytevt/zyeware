@@ -10,6 +10,13 @@ import zyeware.subsystems.graphics;
 
 package(zyeware):
 
+enum DrawMode
+{
+    points,
+    lines,
+    triangles,
+}
+
 struct GraphicsCallbacks
 {
     void function() load;
@@ -17,9 +24,11 @@ struct GraphicsCallbacks
 
     NativeHandle function(in Image image, in TextureProperties properties) createTexture2d;
     void function(NativeHandle texture) nothrow freeTexture2d;
+    void function(in NativeHandle texture, size_t slot) nothrow bindTexture2d;
 
     NativeHandle function(in Image[6] images, in TextureProperties properties) createTextureCubeMap;
     void function(NativeHandle texture) nothrow freeTextureCubeMap;
+    void function(in NativeHandle texture, size_t slot) nothrow bindTextureCubeMap;
 
     NativeHandle function(in FramebufferProperties properties) createFramebuffer;
     void function(NativeHandle framebuffer) nothrow freeFramebuffer;
@@ -35,6 +44,7 @@ struct GraphicsCallbacks
     void function(in NativeHandle shader, in string name, in vec4 value) nothrow setShaderUniform4f;
     void function(in NativeHandle shader, in string name, in int value) nothrow setShaderUniform1i;
     void function(in NativeHandle shader, in string name, in mat4 value) nothrow setShaderUniformMat4f;
+    void function(in NativeHandle shader) nothrow bindShader;
 
     NativeHandle function(size_t size, bool dynamic) createIndexBuffer;
     void function(NativeHandle buffer) nothrow freeIndexBuffer;
@@ -46,15 +56,14 @@ struct GraphicsCallbacks
     NativeHandle function(in void[] data, in BufferLayout layout, bool dynamic) createDataBufferWithData;
     void function(NativeHandle buffer, in void[] data) updateDataBufferData;
 
-    NativeHandle function() createBufferGroup;
+    NativeHandle function(in NativeHandle dataBuffer, in NativeHandle indexBuffer) createBufferGroup;
     void function(NativeHandle group) nothrow freeBufferGroup;
-    void function(NativeHandle group, in NativeHandle buffer) nothrow setBufferGroupDataBuffer;
-    void function(NativeHandle group, in NativeHandle buffer) nothrow setBufferGroupIndexBuffer;
-    void function(NativeHandle group) nothrow bindBufferGroup;
+    void function(in NativeHandle group) nothrow bindBufferGroup;
 
     void function(recti region) nothrow setViewport;
     void function(GraphicsFlag flag, bool value) nothrow setGraphicsFlag;
     bool function(GraphicsFlag flag) nothrow getGraphicsFlag;
     size_t function(GraphicsCapability capability) nothrow getCapability;
     void function(color clearColor) nothrow clearScreen;
+    void function(DrawMode mode, size_t count) nothrow drawIndexed;
 }

@@ -57,6 +57,11 @@ package(zyeware):
         mNativeHandle = handle;
     }
 
+    void bind(size_t slot = 0) const nothrow
+    {
+        GraphicsSubsystem.callbacks.bindTexture2d(mNativeHandle, slot);
+    }
+
 public:
     this(in Image image, in TextureProperties properties = TextureProperties.init)
     {
@@ -104,6 +109,12 @@ final class TextureCubeMap : Texture
 private:
     NativeHandle mNativeHandle;
     TextureProperties mProperties;
+
+package(zyeware):
+    void bind(size_t slot = 0) const nothrow
+    {
+        GraphicsSubsystem.callbacks.bindTextureCubeMap(mNativeHandle, slot);
+    }
 
 public:
     this(in Image[6] images, in TextureProperties properties = TextureProperties.init)

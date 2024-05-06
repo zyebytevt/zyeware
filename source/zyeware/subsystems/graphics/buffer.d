@@ -84,10 +84,16 @@ private:
     DataBuffer mDataBuffer;
     IndexBuffer mIndexBuffer;
 
-public:
-    this()
+package(zyeware):
+    void bind() const nothrow
     {
-        mNativeHandle = GraphicsSubsystem.callbacks.createBufferGroup();
+        GraphicsSubsystem.callbacks.bindBufferGroup(mNativeHandle);
+    }
+
+public:
+    this(in DataBuffer dataBuffer, in IndexBuffer indexBuffer)
+    {
+        mNativeHandle = GraphicsSubsystem.callbacks.createBufferGroup(dataBuffer.handle, indexBuffer.handle);
     }
 
     ~this() nothrow
@@ -96,32 +102,9 @@ public:
     }
 
     /// The data buffer of this buffer group.
-    DataBuffer dataBuffer(DataBuffer buffer) nothrow
-    in (buffer, "Invalid data buffer.")
-    {
-        mDataBuffer = buffer;
-        GraphicsSubsystem.callbacks.setBufferGroupDataBuffer(mNativeHandle, buffer.handle);
-        return buffer;
-    }
-
-    /// ditto
     inout(DataBuffer) dataBuffer() inout nothrow => mDataBuffer;
 
     /// The index buffer of this buffer group.
-    IndexBuffer indexBuffer(IndexBuffer buffer) nothrow
-    in (buffer, "Invalid index buffer.")
-    {
-        mIndexBuffer = buffer;
-        GraphicsSubsystem.callbacks.setBufferGroupIndexBuffer(mNativeHandle, buffer.handle);
-        return buffer;
-    }
-
-    void bind() nothrow
-    {
-        GraphicsSubsystem.callbacks.bindBufferGroup(mNativeHandle);
-    }
-
-    /// ditto
     inout(IndexBuffer) indexBuffer() inout nothrow => mIndexBuffer;
 }
 
@@ -132,13 +115,13 @@ private:
     const BufferLayout mLayout;
 
 public:
-    this(size_t size, in BufferLayout layout, Flag!"dynamic" dynamic)
+    this(size_t size, in BufferLayout layout, Flag!"dynamic" dynamic = No.dynamic)
     {
         mNativeHandle = GraphicsSubsystem.callbacks.createDataBuffer(size, layout, dynamic);
         mLayout = layout;
     }
 
-    this(in void[] data, in BufferLayout layout, Flag!"dynamic" dynamic)
+    this(in void[] data, in BufferLayout layout, Flag!"dynamic" dynamic = No.dynamic)
     {
         mNativeHandle = GraphicsSubsystem.callbacks.createDataBufferWithData(data, layout, dynamic);
         mLayout = layout;
@@ -149,7 +132,7 @@ public:
         GraphicsSubsystem.callbacks.freeDataBuffer(mNativeHandle);
     }
 
-    void updateData(in void[] data)
+    void update(in void[] data)
     {
         GraphicsSubsystem.callbacks.updateDataBufferData(mNativeHandle, data);
     }
@@ -165,12 +148,12 @@ private:
     NativeHandle mNativeHandle;
 
 public:
-    this(size_t size, Flag!"dynamic" dynamic)
+    this(size_t size, Flag!"dynamic" dynamic = No.dynamic)
     {
         mNativeHandle = GraphicsSubsystem.callbacks.createIndexBuffer(size, dynamic);
     }
 
-    this(in uint[] indices, Flag!"dynamic" dynamic)
+    this(in uint[] indices, Flag!"dynamic" dynamic = No.dynamic)
     {
         mNativeHandle = GraphicsSubsystem.callbacks.createIndexBufferWithData(indices, dynamic);
     }
@@ -180,7 +163,7 @@ public:
         GraphicsSubsystem.callbacks.freeIndexBuffer(mNativeHandle);
     }
 
-    void updateData(in uint[] indices)
+    void update(in uint[] indices)
     {
         GraphicsSubsystem.callbacks.updateIndexBufferData(mNativeHandle, indices);
     }

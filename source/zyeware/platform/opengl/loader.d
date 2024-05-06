@@ -25,9 +25,11 @@ void loadOpenGl(ref GraphicsCallbacks callbacks) nothrow
 
     callbacks.createTexture2d = &createTexture2d;
     callbacks.freeTexture2d = &freeTexture2d;
+    callbacks.bindTexture2d = &bindTexture2d;
 
     callbacks.createTextureCubeMap = &createTextureCubeMap;
     callbacks.freeTextureCubeMap = &freeTextureCubeMap;
+    callbacks.bindTextureCubeMap = &bindTextureCubeMap;
 
     callbacks.createFramebuffer = &createFramebuffer;
     callbacks.freeFramebuffer = &freeFramebuffer;
@@ -43,6 +45,7 @@ void loadOpenGl(ref GraphicsCallbacks callbacks) nothrow
     callbacks.setShaderUniform4f = &setShaderUniform4f;
     callbacks.setShaderUniform1i = &setShaderUniform1i;
     callbacks.setShaderUniformMat4f = &setShaderUniformMat4f;
+    callbacks.bindShader = &bindShader;
 
     callbacks.createIndexBuffer = &createIndexBuffer;
     callbacks.freeIndexBuffer = &freeIndexBuffer;
@@ -56,8 +59,6 @@ void loadOpenGl(ref GraphicsCallbacks callbacks) nothrow
 
     callbacks.createBufferGroup = &createBufferGroup;
     callbacks.freeBufferGroup = &freeBufferGroup;
-    callbacks.setBufferGroupDataBuffer = &setBufferGroupDataBuffer;
-    callbacks.setBufferGroupIndexBuffer = &setBufferGroupIndexBuffer;
     callbacks.bindBufferGroup = &bindBufferGroup;
 
     callbacks.setViewport = &setViewport;
@@ -65,6 +66,7 @@ void loadOpenGl(ref GraphicsCallbacks callbacks) nothrow
     callbacks.getGraphicsFlag = &getGraphicsFlag;
     callbacks.getCapability = &getCapability;
     callbacks.clearScreen = &clearScreen;
+    callbacks.drawIndexed = &drawIndexed;
 }
 
 private:

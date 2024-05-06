@@ -57,12 +57,11 @@ public:
 // =================================================================================================
 
 @asset(Yes.cache)
-class Mesh3d : NativeObject
+class Mesh3d : Renderable3d
 {
 protected:
-    NativeHandle mNativeHandle;
-
-    Rebindable!(const(Material)) mMaterial;
+    BufferGroup mBufferGroup;
+    Material mMaterial;
 
     pragma(inline, true) static vec3 calculateSurfaceNormal(vec3 p1, vec3 p2, vec3 p3) nothrow pure
     {
@@ -99,23 +98,30 @@ protected:
     }
 
 public:
-    this(in Vertex3d[] vertices, in uint[] indices, in Material material)
+    this(in Vertex3d[] vertices, in uint[] indices, Material material)
     in (vertices, "Vertices cannot be null.")
     in (indices, "Indices cannot be null.")
     {
-        mNativeHandle = GraphicsSubsystem.callbacks.createMesh(vertices, indices);
+        mBufferGroup = new BufferGroup(
+            new DataBuffer(vertices, BufferLayout([
+                BufferElement(BufferElement.Type.vec3),
+                BufferElement(BufferElement.Type.vec3),
+                BufferElement(BufferElement.Type.vec2),
+                BufferElement(BufferElement.Type.vec4),
+            ])),
+            new IndexBuffer(indices),
+        );
+
         mMaterial = material;
     }
 
     ~this()
     {
-        GraphicsSubsystem.callbacks.freeMesh(mNativeHandle);
+        destroy(mBufferGroup);
     }
 
-    const(void)* handle() const nothrow pure
-    {
-        return mNativeHandle;
-    }
+    inout(BufferGroup) bufferGroup() @nogc pure inout nothrow => mBufferGroup;
+    inout(Material) material() @nogc pure inout nothrow => mMaterial;
 
     static Mesh3d load(string path)
     in (path, "Path cannot be null.")

@@ -3,19 +3,60 @@
 // of this source code package.
 //
 // Copyright © 2021-2024 ZyeByte. All rights reserved.
-module zyeware.rendering.renderer;
+module zyeware.rendering.renderer2d;
 
 import std.traits : isSomeString;
-import std.typecons : Rebindable;
+import std.typecons : Rebindable, rebindable;
+import std.sumtype : match;
 
 import zyeware;
 import zyeware.subsystems.graphics;
 
-struct Renderer
+struct Renderer2d
 {
 private static:
-    Rebindable!(const Camera) mActiveCamera;
-    bool mBatchActive;
+    Rebindable!(const Camera) sCamera;
+    recti sViewport;
+    bool sBatchActive;
+
+    BufferGroup[2] sRenderBuffers;
+    Batch[] sBatches;
+    Rebindable!(const Material) sDefaultMaterial;
+
+    Texture2d sWhiteTexture;
+
+    BufferGroup createRenderBuffer()
+    {
+        auto dataBuffer = new DataBuffer(BatchVertex.sizeof * Batch.maxVertices, BufferLayout([
+            BufferElement(BufferElement.Type.vec4),
+            BufferElement(BufferElement.Type.vec2),
+            BufferElement(BufferElement.Type.vec4),
+            BufferElement(BufferElement.Type.float_),
+        ]), Yes.dynamic);
+
+        auto IndexBuffer = new IndexBuffer(uint.sizeof * Batch.maxIndices, Yes.dynamic);
+
+        return new BufferGroup(dataBuffer, IndexBuffer);
+    }
+
+package(zyeware) static:
+    void load()
+    {
+        static ubyte[3] pixels = [255, 255, 255];
+        sWhiteTexture = new Texture2d(new Image(pixels, 3, 8, vec2i(1)), TextureProperties.init);
+    
+        for (size_t i; i < sRenderBuffers.length; ++i)
+            sRenderBuffers[i] = createRenderBuffer();
+
+        sBatches ~= Batch(sWhiteTexture);
+
+        sDefaultMaterial = rebindable(AssetManager.load!Material("core:materials/2d/default.mtl"));
+    }
+
+    void unload()
+    {
+
+    }
 
 public static:
     /// Clears the screen.
@@ -31,16 +72,16 @@ public static:
     ///
     /// Params:
     ///     camera = The camera to use. If `null`, uses a default projection.
-    void begin2d(in Camera camera)
-    in (!mBatchActive,
+    void begin(in Camera camera, in recti viewport = recti.identity)
+    in (!sBatchActive,
         "A 2D render batch is already active. Call `end2d` before starting a new batch.")
     {
         immutable mat4 projectionMatrix = camera ? camera.getProjectionMatrix() : mat4.orthographic(0,
             1, 1, 0, -1, 1);
         immutable mat4 viewMatrix = camera ? camera.getViewMatrix() : mat4.identity;
 
-        mActiveCamera = camera;
-        begin2d(projectionMatrix, viewMatrix);
+        sCamera = camera;
+        begin(projectionMatrix, viewMatrix, viewport);
     }
 
     /// Starts batching render commands. Must be called before any rendering is done.
@@ -48,18 +89,19 @@ public static:
     /// Params:
     ///     projectionMatrix = The projection matrix to use.
     ///     viewMatrix = The view matrix to use.
-    void begin2d(in mat4 projectionMatrix, in mat4 viewMatrix = mat4.identity)
+    void begin(in mat4 projectionMatrix, in mat4 viewMatrix = mat4.identity, in recti viewport = recti.identity)
     {
-        mBatchActive = true;
-        GraphicsSubsystem.callbacks.r2dBegin(projectionMatrix, viewMatrix);
+        sViewport = viewport;
+        sBatchActive = true;
+
+        GraphicsSubsystem.callbacks.setViewport(sViewport);
     }
 
     /// Ends batching render commands. Calling this results in all render commands being flushed to the GPU.
-    pragma(inline, true) void end2d()
+    void end()
     {
-        GraphicsSubsystem.callbacks.r2dEnd();
-        mActiveCamera = null;
-        mBatchActive = false;
+        sCamera = null;
+        sBatchActive = false;
     }
 
     /// Draws a mesh.
@@ -67,7 +109,7 @@ public static:
     /// Params:
     ///     mesh = The mesh to draw.
     ///     position = 2D transform where to draw the mesh to.
-    pragma(inline, true) void drawMesh2d(in Mesh2d mesh, in mat4 transform)
+    pragma(inline, true) void drawMesh(in Mesh2d mesh, in mat4 transform)
     {
         GraphicsSubsystem.callbacks.r2dDrawVertices(mesh.vertices, mesh.indices, transform,
             mesh.texture, mesh.material);
@@ -83,7 +125,7 @@ public static:
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-    pragma(inline, true) void drawRect2d(in rect dimensions, in vec2 position, in vec2 scale,
+    pragma(inline, true) void drawRect(in rect dimensions, in vec2 position, in vec2 scale,
         in color modulate = color.white, in Texture2d texture = null, int layer = 0,
         in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
@@ -103,7 +145,7 @@ public static:
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-    pragma(inline, true) void drawRect2d(in rect dimensions, in vec2 position, in vec2 scale,
+    pragma(inline, true) void drawRect(in rect dimensions, in vec2 position, in vec2 scale,
         float rotation, in color modulate = color.white, in Texture2d texture = null,
         int layer = 0, in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
@@ -121,7 +163,7 @@ public static:
     ///     texture = The texture to use. If `null`, draws a blank rectangle.
     ///     material = The material to use. If `null`, uses the default material.
     ///     region = The region of the rectangle to use. Has no effect if no texture is supplied.
-    pragma(inline, true) void drawRect2d(in rect dimensions, in mat4 transform,
+    pragma(inline, true) void drawRect(in rect dimensions, in mat4 transform,
         in color modulate = color.white, in Texture2d texture = null,
         in Material material = null, in rect region = rect(0, 0, 1, 1))
     {
@@ -165,7 +207,7 @@ public static:
     ///     modulate = The modulate of the text.
     ///     alignment = The alignment of the text.
     ///     material = The material to use. If `null`, uses the default material.
-    pragma(inline, true) void drawString2d(T)(in T text, in BitmapFont font, in vec2 position,
+    pragma(inline, true) void drawString(T)(in T text, in BitmapFont font, in vec2 position,
         in color modulate = color.white,
         ubyte alignment = BitmapFont.Alignment.left | BitmapFont.Alignment.top,
         in Material material = null)
@@ -222,5 +264,107 @@ public static:
         }
     }
 
-    static const(Camera) activeCamera() nothrow @nogc => mActiveCamera;
+    static const(Camera) camera() nothrow @nogc => sCamera;
+    static recti viewport() nothrow @nogc => sViewport;
+}
+
+private:
+
+struct BatchVertex
+{
+    vec4 position;
+    color modulate;
+    vec2 uv;
+    float textureIndex;
+}
+
+struct Batch
+{
+    enum maxTextures = 8;
+    enum maxVertices = 20000;
+    enum maxIndices = 30000;
+
+    Signal!() mustFlush;
+
+    Rebindable!(const Material) material;
+    BatchVertex[] vertices;
+    uint[] indices;
+    Rebindable!(const Texture2d)[] textures;
+
+    this(in Texture2d whiteTexture)
+    {
+        textures.reserve(maxTextures);
+        vertices.reserve(maxVertices);
+        indices.reserve(maxIndices);
+
+        textures ~= rebindable(whiteTexture);
+    }
+
+    size_t getIndexForTexture(in Texture2d texture)
+    {
+        for (size_t i = 1; i < textures.length; ++i)
+            if (texture is textures[i])
+                return i;
+
+        if (textures.length >= maxTextures)
+            mustFlush();
+
+        textures ~= rebindable(texture);
+        return textures.length - 1;
+    }
+
+    void addVertices(in BatchVertex[] vertices)
+    {
+        if (vertices.length + this.vertices.length >= maxVertices)
+            mustFlush();
+
+        foreach (const ref vertex; vertices)
+            this.vertices ~= vertex;
+    }
+
+    void addIndices(in uint[] indices)
+    {
+        if (indices.length + this.indices.length >= maxIndices)
+            mustFlush();
+
+        foreach (const ref index; indices)
+            this.indices ~= index;
+    }
+
+    void flush(BufferGroup bufferGroup, in mat4 projectionView)
+    {
+        bufferGroup.bind();
+
+        bufferGroup.dataBuffer.update(vertices);
+        bufferGroup.indexBuffer.update(indices);
+
+        auto shader = material.shader;
+        shader.bind();
+
+        shader.setUniform("iProjectionView", projectionView);
+        shader.setUniform("iTextureCount", cast(int) textures.length);
+        shader.setUniform("iTime", ZyeWare.upTime.toFloatSeconds);
+
+        foreach (string parameter; material.parameterList)
+        {
+             material.getParameter(parameter).match!(
+                (const(void[]) value) {},
+                (int value) { shader.setUniform(parameter, value); },
+                (float value) { shader.setUniform(parameter, value); },
+                (vec2 value) { shader.setUniform(parameter, value); },
+                (vec3 value) { shader.setUniform(parameter, value); },
+                (vec4 value) { shader.setUniform(parameter, value); }
+            );
+        }
+
+        foreach (size_t i, texture; textures)
+            texture.bind(i);
+
+        GraphicsSubsystem.callbacks.drawIndexed(DrawMode.triangles, indices.length);
+
+        material = null;
+        vertices.length = 0;
+        indices.length = 0;
+        textures.length = 1;
+    }
 }

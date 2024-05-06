@@ -122,6 +122,18 @@ void freeTextureCubeMap(NativeHandle texture) nothrow
     freeTexture2d(texture);
 }
 
+void bindTexture2d(in NativeHandle texture, size_t slot) nothrow
+{
+    glActiveTexture(GL_TEXTURE0 + cast(uint) slot);
+    glBindTexture(GL_TEXTURE_2D, *cast(uint*) texture);
+}
+
+void bindTextureCubeMap(in NativeHandle texture, size_t slot) nothrow
+{
+    glActiveTexture(GL_TEXTURE0 + cast(uint) slot);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *cast(uint*) texture);
+}
+
 private:
 
 GLenum getGLFilter(TextureProperties.Filter filter)

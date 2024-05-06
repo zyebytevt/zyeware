@@ -15,4 +15,5 @@ public
     import zyeware.subsystems.graphics.shader;
     import zyeware.subsystems.graphics.texture;
     import zyeware.subsystems.graphics.buffer;
+    import zyeware.subsystems.graphics.renderable;
 }

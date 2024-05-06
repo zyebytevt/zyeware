@@ -136,6 +136,11 @@ void setShaderUniformMat4f(in NativeHandle shader, in string name, in mat4 value
         1, GL_TRUE, value.ptr);
 }
 
+void bindShader(in NativeHandle shader) nothrow
+{
+    glUseProgram(*(cast(uint*) shader));
+}
+
 private:
 
 uint prepareShaderUniformAssignAndGetLocation(in NativeHandle shader, string name) nothrow

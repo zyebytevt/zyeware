@@ -15,7 +15,7 @@ public
     import zyeware.rendering.image;
     import zyeware.rendering.material;
     import zyeware.rendering.particles2d;
-    import zyeware.rendering.renderer;
+    import zyeware.rendering.renderer2d;
     import zyeware.rendering.sprite;
     import zyeware.rendering.texatlas;
 }
